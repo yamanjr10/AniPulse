@@ -5089,32 +5089,147 @@ body.loading {
   touch-action: none;
 }
 
-.notif-item {
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  cursor: pointer;
+/* Navigation Menu Styles */
+.nav-menu {
+    display: flex;
+    gap: 1rem;
+    margin-right: 2rem;
 }
-.notif-item.unread {
-  background: rgba(99,102,241,0.15);
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.3s ease;
 }
-.notif-item img {
-  width: 40px;
-  border-radius: 6px;
+
+.nav-item:hover {
+    background: var(--card-bg);
+    color: var(--primary);
 }
-.anime-toast {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  background: var(--accent);
-  color: #fff;
-  padding: 14px 20px;
-  border-radius: 12px;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: .4s;
+
+.nav-item.active {
+    background: var(--primary);
+    color: white;
 }
-.anime-toast.show {
-  opacity: 1;
-  transform: translateY(0);
+
+.nav-item i {
+    font-size: 1.1rem;
+}
+
+/* Page Active State */
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+/* Make sure all pages have proper spacing */
+.dashboard-section {
+    margin-bottom: 2rem;
+}
+
+/* Adjust top bar for multi-page layout */
+.top-bar {
+    margin-bottom: 2rem;
+}
+
+/* File Upload Styles */
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-input-wrapper input[type=file] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.file-input-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--card-bg);
+    color: var(--text);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-input-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Switch Toggle */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border);
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.switch-label {
+    margin-left: 1rem;
+    vertical-align: super;
+}
+
+/* Settings Hint Text */
+.settings-hint {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
 }
