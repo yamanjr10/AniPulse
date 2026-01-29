@@ -397,263 +397,66 @@ Your landing page featuring:
 
 ---
 
-## 🛠️ Technologies & Architecture
+## 🛠️ Technologies Used
 
-### Frontend Stack
-- **HTML5** - Semantic markup structure
-- **CSS3** - Modern styling with CSS variables
-  - Flexbox layout system
-  - CSS Grid for complex layouts
-  - Custom properties for theming
-  - Media queries for responsiveness
-  - Smooth transitions and animations
-- **Vanilla JavaScript (ES6+)** - No frameworks, pure JavaScript
-  - ES6 features (arrow functions, destructuring, spread operator)
-  - Async/await for API calls
-  - DOM manipulation and event handling
-  - Local storage management
-
-### Data Visualization
-- **Chart.js** - Advanced charting library
-  - Line charts (monthly progress)
-  - Pie charts (genre/type distribution)
-  - Bar charts (genre trends)
-  - Matrix charts (activity heatmap)
-  - Histogram (score distribution)
-- **Chart.js Matrix Plugin** - Heatmap visualization
-- **Custom Canvas Drawing** - Additional visualization support
-
-### APIs & External Services
-- **Jikan API** - MyAnimeList database
-  - Anime search and information
-  - Cover images
-  - Episode counts
-  - Anime metadata
-- **UI Avatars API** - Generate profile avatars dynamically
-- **Google Fonts** - Typography (Inter, Poppins)
-- **Font Awesome 6.4.0** - Icon library
-
-### Icon & Font Libraries
-- **Font Awesome** - 1800+ icons via CDN
-- **Google Fonts** - Professional typography
-  - Inter: Clean, modern font (400-800 weights)
-  - Poppins: Friendly, geometric font (300-700 weights)
-
-### Data Storage
-- **Browser LocalStorage** - Persistent client-side storage
-  - `animeData` - Complete anime collection
-  - `activityLog` - User activity history
-  - `userProfile` - Username and avatar
-  - `theme` - Current theme preference
-  - `animeBackup` - Automatic backup
-  - `streak` - Watching streak counter
-  - `memberSince` - Account creation date
-- **No Backend Required** - All data stored locally
-- **100% Privacy** - No server-side data storage
-- **Automatic Backups** - Every minute to localStorage
-
-### Performance Optimizations
-- **Debounced Search** - 400ms delay to reduce API calls
-- **Lazy Loading** - Images load on demand
-- **Optimized DOM** - Minimal reflows and repaints
-- **Efficient Pagination** - 30 items per page
-- **Chart Instance Destruction** - Prevents memory leaks
-- **Auto-Reload Detection** - HTML checksum comparison
-- **Compressed Assets** - Minified CSS and JS
-
-### Browser Compatibility
-- **Modern Browsers Only**:
-  - Chrome/Chromium (Latest)
-  - Firefox (Latest)
-  - Safari (Latest 3+ versions)
-  - Edge (Latest)
-  - Mobile Browsers (Android Chrome, Safari iOS)
-- **Requirements**:
-  - JavaScript enabled
-  - LocalStorage support
-  - CSS Grid/Flexbox support
-  - Fetch API support
-  - ES6 compatibility
-
-### Responsive Architecture
-- **Mobile First Approach** - Optimized for small screens
-- **Breakpoints**:
-  - Mobile: < 768px
-  - Tablet: 768px - 1024px
-  - Desktop: > 1024px
-  - Large Desktop: > 1920px
-- **Touch-Friendly UI** - Large buttons and tap targets on mobile
-- **Adaptive Navigation** - Sidebar collapses on mobile
-- **Flexible Layouts** - Grid and flex layouts adapt
-- **Responsive Images** - Images scale appropriately
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Charts**: Chart.js with matrix chart support
+- **APIs**: Jikan API (MyAnimeList database)
+- **Icons**: Font Awesome 6.4.0
+- **Fonts**: Inter, Poppins (Google Fonts)
+- **Storage**: LocalStorage (browser-based)
+- **Responsive**: CSS Media Queries
 
 ---
 
-## 📊 Data Management
+## 📊 Data Structure
 
-### Anime Object Structure
-```javascript
-{
-  // Identification
-  id: "unique_id_timestamp",
-  
-  // Basic Information
-  title: "Anime Title",
-  type: "TV",  // TV, Movie, OVA, ONA, Special
-  cover: "image_url",
-  
-  // Episode Information
-  episodes: 12,
-  progress: 6,
-  duration: 20,  // minutes
-  
-  // Ratings & Status
-  rating: 8.5,  // User's personal rating (0-10)
-  score: 7.8,   // MAL Score (0-10)
-  status: "Watching",  // Watching, Completed, Plan to Watch, Dropped
-  userStatus: "Watching",  // Mapped internal status
-  
-  // Content Details
-  genres: ["Action", "Adventure", "School"],
-  
-  // Tracking Dates
-  startDate: "2024-01-01",
-  finishDate: null,  // When completed
-  dateAdded: "2024-01-01",  // When added to collection
-  
-  // User Notes
-  notes: "Great series with amazing characters!"
-}
-```
-
-### LocalStorage Keys
-```javascript
-{
-  animeData: [],          // Array of anime objects
-  activityLog: [],        // Array of activity records
-  userProfile: {          // User customization
-    name: "AnimeFan92",
-    avatar: "image_url"
-  },
-  theme: "dark",          // 'light', 'dark', or 'system'
-  animeBackup: [],        // Backup copy of collection
-  streak: 0,              // Current watching streak days
-  memberSince: "2024-01-01",  // Account creation date
-  lastBackup: "timestamp" // Last export date
-}
-```
-
-### Activity Log Structure
+### Anime Object
 ```javascript
 {
   id: "unique_id",
-  action: "added",        // added, updated, deleted, completed
-  animeTitle: "Title",
-  timestamp: 1704067200000,
-  details: "Additional information about the action"
+  title: "Anime Title",
+  type: "TV/Movie",
+  episodes: 12,
+  progress: 6,
+  rating: 8.5,
+  score: 9,
+  status: "Watching",
+  genres: ["Action", "Adventure"],
+  cover: "image_url",
+  startDate: "2024-01-01",
+  finishDate: "2024-03-15",
+  notes: "Great series!"
 }
 ```
 
-### Achievement Data Structure
-```javascript
-{
-  id: "marathon-watcher-10",
-  category: "Marathon Watcher",
-  title: "Anime Adventurer",
-  description: "Complete 10 anime",
-  requirement: 10,
-  badge: "🏅",
-  unlocked: false,
-  progress: 3
-}
-```
-
-### Data Flow Architecture
-```
-User Input → Form Validation → LocalStorage → DOM Update → UI Render
-   ↑                                  ↓
-   └──────── Real-time Updates ←──────┘
-
-External APIs:
-  ├─ Jikan API: Anime search and metadata
-  └─ UI Avatars API: Dynamic avatar generation
-
-Statistics Calculation:
-  animeData → Process → Generate Charts → Display Visuals
-  
-Notifications:
-  Watched Anime → Check New Episodes → Generate Notification → Display
-```
+### Local Storage Keys
+- `animeData` - Your complete anime collection
+- `activityLog` - Activity history
+- `userProfile` - Username and avatar
+- `theme` - Current theme preference
+- `animeBackup` - Automatic backup
+- `streak` - Current watching streak
 
 ---
 
-## 💾 Backup & Data Management System
+## 💾 Backup & Data Management
 
-### Automatic Backup
-- **Frequency**: Every minute (automatic background process)
-- **Location**: Browser's localStorage
-- **Content**: Complete anime collection + metadata
-- **Recovery**: One-click restoration if data is lost
-- **Backup Key**: `animeBackup` in localStorage
-- **No Cloud Needed**: All stored locally for privacy
+### Auto-Backup
+- Automatic backup runs every minute
+- Data stored securely in localStorage
+- No cloud required - complete privacy
 
-### Manual Backup (Export)
-1. Navigate to **Settings** page
-2. Click **"Export Data"** button
-3. Action flows:
-   - Converts entire collection to JSON
-   - Generates filename: `anime_backup_[date].json`
-   - Downloads to your computer automatically
-   - Success notification appears
-4. **File Contents**:
-   - All anime entries
-   - Complete metadata
-   - User profile info
-   - Settings preferences
-   - Activity log
-5. **Best Practices**:
-   - Export after adding significant anime
-   - Keep backups in cloud storage (Google Drive, Dropbox)
-   - Export before major browser updates
-   - Archive multiple backups over time
+### Manual Backup
+1. Go to **Settings**
+2. Click **"Export Data"**
+3. JSON file downloads automatically
 
-### Data Restoration (Import)
-1. Navigate to **Settings** page
-2. Click **"Import Data"** button
-3. **Import Modal Opens**:
-   - File upload field appears
-   - Select previously exported JSON file
-   - Click "Import Data" button
-4. **Restoration Process**:
-   - Validates JSON file format
-   - Parses anime collection
-   - Overwrites current data (be careful!)
-   - Updates all UI elements
-   - Success notification
-5. **After Import**:
-   - New data immediately visible
-   - All statistics recalculated
-   - Charts update with restored data
-   - Achievements recalculated
-
-### Data Privacy
-- **100% Local Storage** - No data sent to servers
-- **No Accounts** - Start using immediately
-- **No Tracking** - Complete privacy
-- **Browser-Based** - Data stays on your device
-- **No Ads** - Clean, distraction-free interface
-
-### Backup Recovery Scenarios
-- **Browser Crash** - Restore from auto-backup
-- **Device Change** - Export and import on new device
-- **Accidental Deletion** - Restore from manual backup
-- **Data Corruption** - Previous backup copies available
-
-### Storage Limits
-- **LocalStorage Limit**: Typically 5-10MB per domain
-- **Typical Usage**: 50-100 anime ≈ 500KB
-- **Maximum Anime**: ~10,000+ entries possible
-- **Not Limiting** - Unlikely to reach limits with normal use
+### Restore Data
+1. Go to **Settings**
+2. Click **"Import Data"**
+3. Select your backup JSON file
+4. Your data is restored instantly
 
 ---
 
