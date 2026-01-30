@@ -5776,11 +5776,14 @@ console.log("🎬 12-Slide Recap System Loaded");
 
 let animationsStarted = false;
 
+// ==================================================
+// Start animations safely after loader
+// ==================================================
 function startAnimationsAfterLoader() {
   if (animationsStarted) return;
   animationsStarted = true;
 
-  // 🎬 Dashboard updates
+  // 🎬 Run dashboard functions safely
   try { updateStats(); } catch(e) {}
   try { initCharts(); } catch(e) {}
   try { updateTopRatedAnime(); } catch(e) {}
@@ -5791,7 +5794,7 @@ function startAnimationsAfterLoader() {
   try { updateSidebarUserInfo(); } catch(e) {}
   try { updateCurrentDate(); } catch(e) {}
 
-  // 🎬 Overview stats count-up
+  // 🎬 Animate overview stats safely
   setTimeout(() => {
     const completedEl = document.getElementById("completed-count");
     const moviesEl = document.getElementById("movies-count");
@@ -5816,70 +5819,18 @@ function startAnimationsAfterLoader() {
     }, 400);
   }, 200);
 
-  // 🎬 Yearly totals animation
-  setTimeout(() => {
-    const totalHoursEl = document.getElementById("monthly-total-hours");
-    const totalEpisodesEl = document.getElementById("yearly-total-episodes");
-
-    const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
-    const now = new Date();
-    const currentYear = now.getFullYear();
-
-    let totalHours = 0;
-    let totalEpisodes = 0;
-
-    animeData.forEach(anime => {
-      if (anime.userStatus !== "Completed" || !anime.finishDate) return;
-      const finish = new Date(anime.finishDate);
-      if (finish.getFullYear() !== currentYear) return;
-
-      const epCount = Number(anime.episodes) || 0;
-      const duration = Number(anime.duration) || 20;
-      const type = anime.type?.toLowerCase() || "tv";
-
-      let hours = 0;
-      if (type === "movie") hours = duration / 60;
-      else hours = (epCount * duration) / 60;
-
-      totalHours += hours;
-      totalEpisodes += epCount;
-    });
-
-    function animateCounter(el, targetValue, label) {
-      if (!el) return;
-      const duration = 4000;
-      const startValue = 0;
-      const startTime = performance.now();
-
-      function easeOut(t) { return t * (2 - t); }
-
-      function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = easeOut(progress);
-        const current = Math.floor(startValue + targetValue * eased);
-        el.textContent = `${label}: ${current}`;
-        if (progress < 1) requestAnimationFrame(update);
-      }
-
-      requestAnimationFrame(update);
-    }
-
-    animateCounter(totalHoursEl, Math.round(totalHours), "Total Hrs in 2025");
-    animateCounter(totalEpisodesEl, totalEpisodes, "Total Eps in 2025");
-  }, 400);
-
   // 🎬 Heatmap rendering
   setTimeout(() => {
-    try { renderActivityHeatmap(JSON.parse(localStorage.getItem("animeData")) || []); } catch(e) {}
-  }, 500);
+    const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
+    try { renderActivityHeatmap(animeData); } catch(e) {}
+  }, 300);
 
-  // 🎬 Optional searchAnime call
+  // 🎬 Optional: searchAnime safe call
   try { typeof searchAnime === "function" && searchAnime(); } catch(e) {}
 }
 
 // ==================================================
-// Loader fail-safe
+// Loader fail-safe (prevents infinite loader)
 // ==================================================
 setTimeout(() => {
   const loader = document.getElementById("app-loader");
@@ -5898,6 +5849,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const progressBar = document.getElementById("loader-progress");
   const percentText = document.getElementById("loader-percent");
 
+  // ❗ If loader elements missing, skip loader
   if (!loader || !progressBar || !percentText) {
     startAnimationsAfterLoader();
     return;
@@ -5915,6 +5867,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clearInterval(fakeLoader);
 
       loader.style.opacity = "0";
+
       setTimeout(() => {
         loader.style.display = "none";
         document.body.classList.remove("loading");
@@ -5926,6 +5879,123 @@ document.addEventListener("DOMContentLoaded", () => {
     percentText.textContent = Math.floor(progress) + "%";
   }, 200);
 });
+
+  // 🎬 TRIGGER YEARLY TOTALS ANIMATION
+  setTimeout(() => {
+    const totalHoursEl = document.getElementById("monthly-total-hours");
+    const totalEpisodesEl = document.getElementById("yearly-total-episodes");
+
+    function getYearlyTotals() {
+      const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
+      const now = new Date();
+      const currentYear = now.getFullYear();
+
+      let totalHours = 0;
+      let totalEpisodes = 0;
+
+      animeData.forEach(anime => {
+        if (anime.userStatus !== "Completed" || !anime.finishDate) return;
+        const finish = new Date(anime.finishDate);
+        if (finish.getFullYear() !== currentYear) return;
+
+        const epCount = Number(anime.episodes) || 0;
+        const duration = Number(anime.duration) || 20;
+        const type = anime.type?.toLowerCase() || "tv";
+
+        let hours = 0;
+        if (type === "movie") hours = duration / 60;
+        else hours = (epCount * duration) / 60;
+
+        totalHours += hours;
+        totalEpisodes += epCount;
+      });
+
+      return {
+        totalHours: Math.round(totalHours),
+        totalEpisodes
+      };
+    }
+
+    const totals = getYearlyTotals();
+
+    function animateCounter(el, targetValue, label) {
+      if (!el) return;
+      const duration = 4000;
+      const startValue = 0;
+      const startTime = performance.now();
+
+      function easeOut(t) {
+        return t * (2 - t);
+      }
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOut(progress);
+        const current = Math.floor(startValue + targetValue * eased);
+        el.textContent = `${label}: ${current}`;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2025 ");
+    animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2025 ");
+  }, 200);
+
+  // 🎬 TRIGGER DASHBOARD HEATMAP
+  setTimeout(() => {
+    const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+    renderActivityHeatmap(animeData);
+  }, 150);
+// 🔥 HARD FAIL-SAFE (prevents infinite loader on mobile)
+setTimeout(() => {
+  const loader = document.getElementById("app-loader");
+  if (loader) {
+    loader.style.display = "none";
+    document.body.classList.remove("loading");
+    startAnimationsAfterLoader();
+  }
+}, 6000);
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loader = document.getElementById("app-loader");
+  const progressBar = document.getElementById("loader-progress");
+  const percentText = document.getElementById("loader-percent");
+
+  // ✅ CRITICAL SAFETY CHECK
+  if (!loader || !progressBar || !percentText) {
+    console.warn("Loader elements missing — skipping loader");
+    startAnimationsAfterLoader();
+    return;
+  }
+
+  document.body.classList.add("loading");
+
+  let progress = 0;
+
+  const fakeLoader = setInterval(() => {
+    progress += Math.random() * 10 + 5;
+
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(fakeLoader);
+
+      loader.style.opacity = "0";
+
+      setTimeout(() => {
+        loader.style.display = "none";
+        document.body.classList.remove("loading");
+        startAnimationsAfterLoader();
+      }, 400);
+    }
+
+    progressBar.style.width = progress + "%";
+    percentText.textContent = Math.floor(progress) + "%";
+  }, 200);
+});
+
 
 
 // Initialize the app with saved theme (theme loads before loader)
