@@ -5771,349 +5771,161 @@ window.RecapSystem = {
 console.log("🎬 12-Slide Recap System Loaded");
 
 // ==================================================
-// Loader with Animation Trigger System - Mobile Optimized
+// Loader with Animation Trigger System (Mobile Safe)
 // ==================================================
 
-// Flag to track if animations have been started
 let animationsStarted = false;
 
-// Function to trigger all animations after loader completes
 function startAnimationsAfterLoader() {
-  if (animationsStarted) return; // Prevent duplicate execution
+  if (animationsStarted) return;
   animationsStarted = true;
 
-  console.log('Starting animations...');
+  // 🎬 Dashboard updates
+  try { updateStats(); } catch(e) {}
+  try { initCharts(); } catch(e) {}
+  try { updateTopRatedAnime(); } catch(e) {}
+  try { updateCurrentMonthAnime(); } catch(e) {}
+  try { updateRecentActivity(); } catch(e) {}
+  try { updateAnimeDisplay(); } catch(e) {}
+  try { updateTotalAnimeCountAllMonths(); } catch(e) {}
+  try { updateSidebarUserInfo(); } catch(e) {}
+  try { updateCurrentDate(); } catch(e) {}
 
-  // 🎬 RUN MAIN DASHBOARD ANIMATIONS
+  // 🎬 Overview stats count-up
   setTimeout(() => {
-    try {
-      updateStats();
-      initCharts();
-      updateTopRatedAnime();
-      updateCurrentMonthAnime();
-      updateRecentActivity();
-      updateAnimeDisplay();
-      updateTotalAnimeCountAllMonths();
-      updateSidebarUserInfo();
-      updateCurrentDate();
-    } catch (e) {
-      console.error('Error in initial animations:', e);
-    }
-  }, 100);
+    const completedEl = document.getElementById("completed-count");
+    const moviesEl = document.getElementById("movies-count");
+    const episodesEl = document.getElementById("episodes-count");
+    const hoursEl = document.getElementById("total-hours-count");
 
-  // 🎬 TRIGGER STATS COUNT-UP ANIMATIONS
+    const completed = parseInt(completedEl?.textContent) || 0;
+    const movies = parseInt(moviesEl?.textContent) || 0;
+    const episodes = parseInt(episodesEl?.textContent) || 0;
+    const hours = parseInt(hoursEl?.textContent) || 0;
+
+    completedEl && (completedEl.textContent = 0);
+    moviesEl && (moviesEl.textContent = 0);
+    episodesEl && (episodesEl.textContent = 0);
+    hoursEl && (hoursEl.textContent = 0);
+
+    setTimeout(() => {
+      try { completedEl && animateCount(completedEl, completed, 4500); } catch(e) {}
+      try { moviesEl && animateCount(moviesEl, movies, 4500); } catch(e) {}
+      try { episodesEl && animateCount(episodesEl, episodes, 4500); } catch(e) {}
+      try { hoursEl && animateCount(hoursEl, hours, 4500); } catch(e) {}
+    }, 400);
+  }, 200);
+
+  // 🎬 Yearly totals animation
   setTimeout(() => {
-    try {
-      const overviewSection = document.querySelector("#dashboard-page .stats-grid");
-      if (overviewSection) {
-        const completed = parseInt(document.getElementById("completed-count")?.textContent) || 0;
-        const movies = parseInt(document.getElementById("movies-count")?.textContent) || 0;
-        const episodes = parseInt(document.getElementById("episodes-count")?.textContent) || 0;
-        const hours = parseInt(document.getElementById("total-hours-count")?.textContent) || 0;
+    const totalHoursEl = document.getElementById("monthly-total-hours");
+    const totalEpisodesEl = document.getElementById("yearly-total-episodes");
 
-        document.getElementById("completed-count").textContent = "0";
-        document.getElementById("movies-count").textContent = "0";
-        document.getElementById("episodes-count").textContent = "0";
-        document.getElementById("total-hours-count").textContent = "0";
+    const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
+    const now = new Date();
+    const currentYear = now.getFullYear();
 
-        setTimeout(() => {
-          animateCount(document.getElementById("completed-count"), completed, 2000);
-          animateCount(document.getElementById("movies-count"), movies, 2000);
-          animateCount(document.getElementById("episodes-count"), episodes, 2000);
-          animateCount(document.getElementById("total-hours-count"), hours, 2000);
-        }, 400);
+    let totalHours = 0;
+    let totalEpisodes = 0;
+
+    animeData.forEach(anime => {
+      if (anime.userStatus !== "Completed" || !anime.finishDate) return;
+      const finish = new Date(anime.finishDate);
+      if (finish.getFullYear() !== currentYear) return;
+
+      const epCount = Number(anime.episodes) || 0;
+      const duration = Number(anime.duration) || 20;
+      const type = anime.type?.toLowerCase() || "tv";
+
+      let hours = 0;
+      if (type === "movie") hours = duration / 60;
+      else hours = (epCount * duration) / 60;
+
+      totalHours += hours;
+      totalEpisodes += epCount;
+    });
+
+    function animateCounter(el, targetValue, label) {
+      if (!el) return;
+      const duration = 4000;
+      const startValue = 0;
+      const startTime = performance.now();
+
+      function easeOut(t) { return t * (2 - t); }
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOut(progress);
+        const current = Math.floor(startValue + targetValue * eased);
+        el.textContent = `${label}: ${current}`;
+        if (progress < 1) requestAnimationFrame(update);
       }
-    } catch (e) {
-      console.error('Error in stats animations:', e);
-    }
-  }, 300);
 
-  // 🎬 TRIGGER YEARLY TOTALS ANIMATION
+      requestAnimationFrame(update);
+    }
+
+    animateCounter(totalHoursEl, Math.round(totalHours), "Total Hrs in 2025");
+    animateCounter(totalEpisodesEl, totalEpisodes, "Total Eps in 2025");
+  }, 400);
+
+  // 🎬 Heatmap rendering
   setTimeout(() => {
-    try {
-      const totalHoursEl = document.getElementById("monthly-total-hours");
-      const totalEpisodesEl = document.getElementById("yearly-total-episodes");
-
-      if (totalHoursEl || totalEpisodesEl) {
-        function getYearlyTotals() {
-          const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
-          const now = new Date();
-          const currentYear = now.getFullYear();
-
-          let totalHours = 0;
-          let totalEpisodes = 0;
-
-          animeData.forEach(anime => {
-            if (anime.userStatus !== "Completed" || !anime.finishDate) return;
-            const finish = new Date(anime.finishDate);
-            if (finish.getFullYear() !== currentYear) return;
-
-            const epCount = Number(anime.episodes) || 0;
-            const duration = Number(anime.duration) || 20;
-            const type = anime.type?.toLowerCase() || "tv";
-
-            let hours = 0;
-            if (type === "movie") hours = duration / 60;
-            else hours = (epCount * duration) / 60;
-
-            totalHours += hours;
-            totalEpisodes += epCount;
-          });
-
-          return {
-            totalHours: Math.round(totalHours),
-            totalEpisodes
-          };
-        }
-
-        const totals = getYearlyTotals();
-
-        function animateCounter(el, targetValue, label) {
-          if (!el) return;
-          
-          const duration = 3000;
-          const startTime = performance.now();
-          const startValue = 0;
-
-          function update(currentTime) {
-            const elapsed = currentTime - startTime;
-            if (elapsed > duration) {
-              el.textContent = `${label}: ${targetValue}`;
-              return;
-            }
-            
-            const progress = elapsed / duration;
-            const current = Math.floor(startValue + (targetValue * progress));
-            el.textContent = `${label}: ${current}`;
-            
-            requestAnimationFrame(update);
-          }
-
-          requestAnimationFrame(update);
-        }
-
-        if (totalHoursEl) animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2025 ");
-        if (totalEpisodesEl) animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2025 ");
-      }
-    } catch (e) {
-      console.error('Error in yearly totals animation:', e);
-    }
+    try { renderActivityHeatmap(JSON.parse(localStorage.getItem("animeData")) || []); } catch(e) {}
   }, 500);
 
-  // 🎬 TRIGGER DASHBOARD HEATMAP
-  setTimeout(() => {
-    try {
-      const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
-      if (window.renderActivityHeatmap && animeData.length > 0) {
-        renderActivityHeatmap(animeData);
-      }
-    } catch (e) {
-      console.error('Error in heatmap:', e);
-    }
-  }, 700);
+  // 🎬 Optional searchAnime call
+  try { typeof searchAnime === "function" && searchAnime(); } catch(e) {}
 }
 
-// Mobile-optimized loader function
-function initMobileLoader() {
+// ==================================================
+// Loader fail-safe
+// ==================================================
+setTimeout(() => {
   const loader = document.getElementById("app-loader");
-  const progressBar = loader?.querySelector('.progress-bar span');
-  const percentText = loader?.querySelector('.progress-percent');
+  if (loader) {
+    loader.style.display = "none";
+    document.body.classList.remove("loading");
+    startAnimationsAfterLoader();
+  }
+}, 6000);
+
+// ==================================================
+// Loader logic
+// ==================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const loader = document.getElementById("app-loader");
+  const progressBar = document.getElementById("loader-progress");
+  const percentText = document.getElementById("loader-percent");
 
   if (!loader || !progressBar || !percentText) {
-    console.error('Loader elements not found');
-    // If no loader, just start animations
     startAnimationsAfterLoader();
     return;
   }
 
-  console.log('Starting mobile loader...');
-
-  // 🔒 Enhanced scroll lock for mobile
   document.body.classList.add("loading");
-  document.body.style.overflow = 'hidden';
-  document.body.style.position = 'fixed';
-  document.body.style.width = '100%';
-  document.body.style.height = '100%';
 
   let progress = 0;
-  const targetProgress = 100;
-  const totalDuration = 2200; // 2.2 seconds total
-  const intervalDuration = 16; // ~60fps
-  
-  // Use performance.now() for better timing
-  const startTime = performance.now();
-  
-  // Simulate different loading phases
-  const phases = [
-    { duration: 800, increment: 0.8 },   // Fast initial load
-    { duration: 1000, increment: 0.4 },  // Middle slower phase
-    { duration: 400, increment: 1.5 }    // Fast finish
-  ];
-  
-  let currentPhase = 0;
-  let phaseProgress = 0;
-  let lastUpdate = startTime;
 
-  function updateProgress() {
-    const now = performance.now();
-    const elapsedTotal = now - startTime;
-    
-    if (elapsedTotal >= totalDuration || progress >= targetProgress) {
-      // Complete
+  const fakeLoader = setInterval(() => {
+    progress += Math.random() * 10 + 5;
+
+    if (progress >= 100) {
       progress = 100;
-      progressBar.style.width = '100%';
-      percentText.textContent = '100%';
-      
-      // Transition out
+      clearInterval(fakeLoader);
+
+      loader.style.opacity = "0";
       setTimeout(() => {
-        loader.style.opacity = '0';
-        loader.style.transition = 'opacity 0.5s ease';
-        
-        setTimeout(() => {
-          loader.style.display = 'none';
-          
-          // 🔓 Unlock scroll
-          document.body.classList.remove("loading");
-          document.body.style.overflow = '';
-          document.body.style.position = '';
-          document.body.style.width = '';
-          document.body.style.height = '';
-          
-          // 🎬 Start animations
-          startAnimationsAfterLoader();
-        }, 500);
-      }, 300);
-      
-      return;
-    }
-    
-    // Calculate which phase we're in
-    let phaseElapsed = elapsedTotal;
-    for (let i = 0; i < phases.length; i++) {
-      if (phaseElapsed <= phases[i].duration) {
-        currentPhase = i;
-        break;
-      }
-      phaseElapsed -= phases[i].duration;
-    }
-    
-    // Calculate progress based on current phase
-    const phase = phases[currentPhase];
-    const phaseRatio = Math.min(phaseElapsed / phase.duration, 1);
-    const phaseProgressValue = phaseRatio * phase.increment * (phaseElapsed / intervalDuration);
-    
-    progress = Math.min(progress + phaseProgressValue, 100);
-    
-    // Update UI
-    progressBar.style.width = `${progress}%`;
-    percentText.textContent = `${Math.floor(progress)}%`;
-    
-    // Schedule next update
-    requestAnimationFrame(updateProgress);
-  }
-  
-  // Start the animation
-  requestAnimationFrame(updateProgress);
-  
-  // Add touch event prevention during loading
-  loader.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-  }, { passive: false });
-}
-
-// Initialize based on device type
-document.addEventListener("DOMContentLoaded", () => {
-  console.log('DOMContentLoaded - Initializing loader');
-  
-  // Use a small delay to ensure DOM is ready
-  setTimeout(() => {
-    // Check if we're on a mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-      console.log('Mobile device detected, using mobile loader');
-      // Use a slightly longer delay for mobile
-      setTimeout(initMobileLoader, 50);
-    } else {
-      console.log('Desktop device, using standard loader');
-      // For desktop, shorter delay
-      setTimeout(initMobileLoader, 10);
-    }
-  }, 10);
-});
-
-// Critical safety timeout - if loader gets stuck, force completion
-setTimeout(() => {
-  const loader = document.getElementById("app-loader");
-  if (loader && loader.style.display !== 'none' && loader.style.opacity !== '0') {
-    console.warn('Loader safety timeout triggered - forcing completion');
-    
-    // Hide loader
-    loader.style.opacity = '0';
-    loader.style.transition = 'opacity 0.3s ease';
-    
-    setTimeout(() => {
-      loader.style.display = 'none';
-      
-      // Unlock scroll
-      document.body.classList.remove("loading");
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      
-      // Start animations
-      if (!animationsStarted) {
+        loader.style.display = "none";
+        document.body.classList.remove("loading");
         startAnimationsAfterLoader();
-      }
-    }, 300);
-  }
-}, 10000); // 10 second safety timeout
-
-// Helper function for smooth count animations
-function animateCount(element, targetValue, duration = 2000) {
-  if (!element) return;
-  
-  const startValue = parseInt(element.textContent) || 0;
-  const startTime = performance.now();
-  
-  function updateCount(timestamp) {
-    const elapsed = timestamp - startTime;
-    if (elapsed > duration) {
-      element.textContent = targetValue.toLocaleString();
-      return;
+      }, 400);
     }
-    
-    const progress = elapsed / duration;
-    const current = Math.floor(startValue + ((targetValue - startValue) * progress));
-    element.textContent = current.toLocaleString();
-    
-    requestAnimationFrame(updateCount);
-  }
-  
-  requestAnimationFrame(updateCount);
-}
 
-// Ensure the page is usable even if JavaScript has issues
-window.addEventListener('error', (e) => {
-  console.error('Global error:', e);
-  
-  // If there's an error, try to at least show the content
-  const loader = document.getElementById("app-loader");
-  if (loader) {
-    setTimeout(() => {
-      loader.style.display = 'none';
-      document.body.classList.remove("loading");
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-    }, 1000);
-  }
+    progressBar.style.width = progress + "%";
+    percentText.textContent = Math.floor(progress) + "%";
+  }, 200);
 });
-
-
-
 
 
 // Initialize the app with saved theme (theme loads before loader)
