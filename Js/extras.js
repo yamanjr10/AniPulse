@@ -171,8 +171,8 @@ function processNextToast() {
     localStorage.getItem("userName") ||
     "Otaku";
 
-// Anime Quotes Collection
-const quotes = [
+  // Anime Quotes Collection
+  const quotes = [
     "“Whatever you lose, you'll find it again.” — One Piece",
     "“Push through the pain. Giving up hurts more.” — Naruto",
     "“If you don't take risks, you can't create a future.” — Luffy",
@@ -203,7 +203,7 @@ const quotes = [
     "“Life is not a game of luck. If you wanna win, work hard.” — Sora",
     "“You're going to be alright. You just stumbled over a stone in the road. It means nothing.” — Gojo Satoru",
     "“The world isn't perfect. But it's there for us, doing the best it can.” — Hachiman Hikigaya"
-];
+  ];
 
   // --- Streak logic ---
   const today = new Date().toDateString(); // "Mon Jan 10 2026"
@@ -352,6 +352,90 @@ function renderAnimeDNA() {
 document.addEventListener('DOMContentLoaded', renderAnimeDNA);
 
 
+// ============================================= 
+// DASHBOARD FEATURE — ANIME PERSONALITY
+// =============================================
+function renderAnimePersonality() {
+  const card = document.getElementById('animePersonalityCard');
+  if (!card) return;
+
+  const completed = animeData.filter(a => a.userStatus === 'Completed');
+  if (!completed.length) return;
+
+  const genreCount = {};
+  let totalScore = 0;
+
+  completed.forEach(a => {
+    totalScore += a.score || 0;
+    a.genres?.forEach(g => genreCount[g] = (genreCount[g] || 0) + 1);
+  });
+
+  const favGenre = Object.keys(genreCount).sort((a, b) => genreCount[b] - genreCount[a])[0];
+  const avgScore = (totalScore / completed.length).toFixed(1);
+
+  const bingeLevel =
+    completed.some(a => a.episodes >= 100) ? 'Hardcore Binger 🔥' :
+      completed.some(a => a.episodes >= 50) ? 'Season Grinder ⚡' :
+        'Casual Watcher 🌱';
+
+  card.innerHTML = `
+    <div class="personality-box">
+      <h3>${bingeLevel}</h3>
+      <p><strong>Favorite Genre:</strong> ${favGenre}</p>
+      <p><strong>Average Score:</strong> ⭐ ${avgScore}</p>
+      <p><strong>Completed Anime:</strong> ${completed.length}</p>
+    </div>
+  `;
+}
+
+renderAnimePersonality();
+
+// =============================================
+// SETTING FEATURE — DATA HEALTH PANEL
+// =============================================
+function renderDataHealth() {
+  const panel = document.getElementById('dataHealthPanel');
+  if (!panel) return;
+
+  const missingScore = animeData.filter(a => !a.score).length;
+  const missingDate = animeData.filter(a => a.userStatus === 'Completed' && !a.finishDate).length;
+  const progressMismatch = animeData.filter(a => a.progress > a.episodes).length;
+
+  panel.innerHTML = `
+    <ul>
+      <li>❗ Missing scores: ${missingScore}</li>
+      <li>📅 Missing finish dates: ${missingDate}</li>
+      <li>⚠️ Progress errors: ${progressMismatch}</li>
+    </ul>
+  `;
+}
+
+renderDataHealth();
+
+// Data Health Popup
+function showDataHealthPopup() {
+  const popup = document.getElementById('dataHealthPopup');
+  const list = document.getElementById('missingScoreList');
+  if (!popup || !list) return;
+
+  const missingScores = animeData
+    .filter(a => a.userStatus === 'Completed' && !a.score)
+    .slice(0, 3); // show max 3
+
+  if (!missingScores.length) return;
+
+  list.innerHTML = missingScores.map(a => `
+    <li>${a.title} <small>(${a.type})</small></li>
+  `).join('');
+
+  popup.classList.remove('hidden');
+}
+
+function closeHealthPopup() {
+  document.getElementById('dataHealthPopup')?.classList.add('hidden');
+}
+
+showDataHealthPopup();
 
 
 

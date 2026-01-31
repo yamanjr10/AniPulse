@@ -39,7 +39,7 @@ body.loading * {
     --border-radius-lg: 16px;
     --transition: all 0.3s ease-in-out;
     --transition-slow: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    
+
 }
 
 /* Light Theme */
@@ -63,6 +63,7 @@ body.loading * {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -73,6 +74,7 @@ body.loading * {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -84,6 +86,7 @@ body.loading * {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -95,6 +98,7 @@ body.loading * {
         opacity: 0;
         transform: translateX(-30px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -106,6 +110,7 @@ body.loading * {
         opacity: 0;
         transform: translateX(30px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -117,6 +122,7 @@ body.loading * {
         opacity: 0;
         transform: scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -124,36 +130,48 @@ body.loading * {
 }
 
 @keyframes bounce {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-10px);
     }
 }
 
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px);
     }
+
     50% {
         transform: translateY(-8px);
     }
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.7;
     }
 }
 
 @keyframes glow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 5px rgba(99, 102, 241, 0.5), 0 0 10px rgba(99, 102, 241, 0.3);
     }
+
     50% {
         box-shadow: 0 0 15px rgba(99, 102, 241, 0.8), 0 0 25px rgba(99, 102, 241, 0.5);
     }
@@ -163,6 +181,7 @@ body.loading * {
     0% {
         background-position: -1000px 0;
     }
+
     100% {
         background-position: 1000px 0;
     }
@@ -172,24 +191,31 @@ body.loading * {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
 }
 
 @keyframes heartBeat {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     14% {
         transform: scale(1.05);
     }
+
     28% {
         transform: scale(1);
     }
+
     42% {
         transform: scale(1.05);
     }
+
     70% {
         transform: scale(1);
     }
@@ -200,6 +226,7 @@ body.loading * {
         opacity: 0;
         transform: scale(0.8);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -913,12 +940,29 @@ h4,
     animation: slideInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.anime-card:nth-child(1) { animation-delay: 0.05s; }
-.anime-card:nth-child(2) { animation-delay: 0.1s; }
-.anime-card:nth-child(3) { animation-delay: 0.15s; }
-.anime-card:nth-child(4) { animation-delay: 0.2s; }
-.anime-card:nth-child(5) { animation-delay: 0.25s; }
-.anime-card:nth-child(6) { animation-delay: 0.3s; }
+.anime-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.anime-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.anime-card:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.anime-card:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.anime-card:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.anime-card:nth-child(6) {
+    animation-delay: 0.3s;
+}
 
 .anime-card:hover {
     transform: translateY(-8px) scale(1.03);
@@ -1019,13 +1063,13 @@ h4,
 
 /* 🎨 Enhanced Progress Bar for Tables */
 .anime-table .progress-bar {
-    background: linear-gradient(90deg, 
-        var(--primary) 0%, 
-        var(--primary-light) 25%,
-        var(--accent) 75%, 
-        #10b981 100%);
-    box-shadow: 0 0 12px rgba(99, 102, 241, 0.8), 
-                inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    background: linear-gradient(90deg,
+            var(--primary) 0%,
+            var(--primary-light) 25%,
+            var(--accent) 75%,
+            #10b981 100%);
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.8),
+        inset 0 1px 3px rgba(255, 255, 255, 0.3);
     position: relative;
     overflow: hidden;
 }
@@ -1036,10 +1080,10 @@ h4,
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 255, 255, 0.4), 
-        transparent);
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent);
 }
 
 
@@ -3547,6 +3591,7 @@ select option:hover {
     min-width: 200px;
     /* keeps logo safe */
 }
+
 .header-left a {
     display: flex;
     align-items: center;
@@ -4999,96 +5044,846 @@ select option:hover {
 ================================ */
 
 #app-loader {
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at top, #1a1a2e, #0f0f1a);
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Inter', sans-serif;
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top, #1a1a2e, #0f0f1a);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
 }
 
 .loader-container {
-  text-align: center;
-  width: 90%;
-  max-width: 420px;
+    text-align: center;
+    width: 90%;
+    max-width: 420px;
 }
 
 /* Logo */
 .loader-logo {
-  font-size: 2.4rem;
-  font-weight: 800;
-  color: var(--accent, #ff4d6d);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  animation: pulseGlow 2s infinite ease-in-out;
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--accent, #ff4d6d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    animation: pulseGlow 2s infinite ease-in-out;
 }
 
 .loader-logo i {
-  animation: heartbeat 1.5s infinite;
+    animation: heartbeat 1.5s infinite;
 }
 
 /* Subtitle */
 .loader-text {
-  margin-top: 0.75rem;
-  font-size: 0.95rem;
-  opacity: 0.85;
-  color: #cfcfe6;
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    opacity: 0.85;
+    color: #cfcfe6;
 }
 
 /* Progress Bar */
 .progress-wrapper {
-  margin-top: 2rem;
+    margin-top: 2rem;
 }
 
 .progress-bar {
-  height: 10px;
-  width: 100%;
-  background: rgba(255,255,255,0.12);
-  border-radius: 50px;
-  overflow: hidden;
+    height: 10px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 50px;
+    overflow: hidden;
 }
 
 .progress-bar span {
-  display: block;
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(
-    90deg,
-    #ff4d6d,
-    #6a5acd,
-    #00e0ff
-  );
-  border-radius: 50px;
-  transition: width 0.25s ease;
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,
+            #ff4d6d,
+            #6a5acd,
+            #00e0ff);
+    border-radius: 50px;
+    transition: width 0.25s ease;
 }
 
 /* Percentage */
 .progress-percent {
-  margin-top: 0.6rem;
-  font-size: 0.85rem;
-  color: #aaa;
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: #aaa;
 }
 
 /* Animations */
 @keyframes heartbeat {
-  0%, 100% { transform: scale(1); }
-  25% { transform: scale(1.15); }
-  40% { transform: scale(1); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    25% {
+        transform: scale(1.15);
+    }
+
+    40% {
+        transform: scale(1);
+    }
 }
 
 @keyframes pulseGlow {
-  0% { text-shadow: 0 0 10px rgba(255,77,109,0.3); }
-  50% { text-shadow: 0 0 25px rgba(255,77,109,0.7); }
-  100% { text-shadow: 0 0 10px rgba(255,77,109,0.3); }
+    0% {
+        text-shadow: 0 0 10px rgba(255, 77, 109, 0.3);
+    }
+
+    50% {
+        text-shadow: 0 0 25px rgba(255, 77, 109, 0.7);
+    }
+
+    100% {
+        text-shadow: 0 0 10px rgba(255, 77, 109, 0.3);
+    }
 }
 
 body.loading {
-  overflow: hidden;
-  height: 100vh;
-  touch-action: none;
+    overflow: hidden;
+    height: 100vh;
+    touch-action: none;
 }
 
+/* ===== ANIME PERSONALITY CARD ===== */
+.personality-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 4px solid var(--accent);
+    backdrop-filter: blur(10px);
+    animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.personality-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.5s ease;
+}
+
+.personality-card:hover::before {
+    left: 100%;
+}
+
+.personality-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-hover-shadow);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Personality Header */
+.personality-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.personality-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--accent), #9d4edd);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.personality-title {
+    flex: 1;
+}
+
+.personality-title h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.personality-subtitle {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* Personality Stats */
+.personality-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.personality-stat {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--border-radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    transition: var(--transition);
+}
+
+.personality-stat:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Personality Traits */
+.personality-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.trait-badge {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(106, 90, 205, 0.1));
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.trait-badge:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(106, 90, 205, 0.2));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.trait-badge i {
+    font-size: 0.9rem;
+}
+
+/* Personality Description */
+.personality-description {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.02));
+    border-radius: var(--border-radius-md);
+    border-left: 3px solid var(--primary);
+}
+
+.personality-description p {
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.personality-description .quote {
+    font-style: italic;
+    color: var(--primary-light);
+    text-align: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ===== DATA HEALTH PANEL ===== */
+.health-panel {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.health-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.health-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--warning), #fbbf24);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.health-title {
+    flex: 1;
+}
+
+.health-title h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.health-subtitle {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* Health Stats */
+.health-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.health-stat {
+    text-align: center;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--border-radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    transition: var(--transition);
+}
+
+.health-stat:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.health-stat.healthy {
+    border-top: 3px solid var(--success);
+}
+
+.health-stat.warning {
+    border-top: 3px solid var(--warning);
+}
+
+.health-stat.danger {
+    border-top: 3px solid var(--danger);
+}
+
+.health-stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.health-stat.healthy .health-stat-value {
+    color: var(--success);
+}
+
+.health-stat.warning .health-stat-value {
+    color: var(--warning);
+}
+
+.health-stat.danger .health-stat-value {
+    color: var(--danger);
+}
+
+.health-stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+/* Health Issues List */
+.health-issues {
+    margin-top: 1.5rem;
+}
+
+.health-issues-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.health-issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.health-issue {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--border-radius-md);
+    border-left: 3px solid var(--warning);
+    transition: var(--transition);
+}
+
+.health-issue:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(4px);
+}
+
+.health-issue-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.1));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--warning);
+    flex-shrink: 0;
+}
+
+.health-issue-content {
+    flex: 1;
+}
+
+.health-issue-title {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+}
+
+.health-issue-desc {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.4;
+}
+
+.health-issue-action {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--warning), #fbbf24);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.health-issue-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Health Score */
+.health-score {
+    margin-top: 2rem;
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5));
+    border-radius: var(--border-radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.health-score-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.health-score-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--success), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.health-score-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.health-score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
+    border-radius: 4px;
+    transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.health-score-legend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+/* ===== DATA HEALTH POPUP ===== */
+.health-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.health-popup-box {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: var(--card-hover-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 4px solid var(--warning);
+    animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(10px);
+}
+
+.health-popup-box h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--warning);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.health-popup-box p {
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+#missingScoreList {
+    list-style: none;
+    margin-bottom: 2rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+#missingScoreList li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--border-radius-md);
+    margin-bottom: 0.75rem;
+    border-left: 3px solid var(--warning);
+    transition: var(--transition);
+}
+
+#missingScoreList li:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(4px);
+}
+
+#missingScoreList img {
+    width: 50px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: var(--border-radius-sm);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#missingScoreList span {
+    flex: 1;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.health-popup-box button {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.health-popup-box button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+/* ===== RECOMMENDATION GRID ===== */
+#recommendationGrid .anime-card {
+    animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#recommendationGrid .anime-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+#recommendationGrid .anime-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+#recommendationGrid .anime-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+#recommendationGrid .anime-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+/* Recommendation Badge */
+.recommendation-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, var(--success), #10b981);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .personality-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .health-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+
+    .personality-card,
+    .health-panel,
+    .health-popup-box {
+        padding: 1.5rem;
+    }
+
+    .personality-header,
+    .health-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .personality-icon,
+    .health-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .personality-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .health-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .health-issue {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+
+    .health-issue-action {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .personality-card,
+    .health-panel {
+        padding: 1.25rem;
+    }
+
+    .health-popup-box {
+        padding: 1.5rem;
+    }
+
+    .personality-stats,
+    .health-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .personality-traits {
+        justify-content: center;
+    }
+
+    .trait-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .health-score-value {
+        font-size: 2rem;
+    }
+}
+
+/* Empty States */
+.personality-card.empty,
+.health-panel.empty {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.personality-card.empty i,
+.health-panel.empty i {
+    font-size: 3rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.personality-card.empty p,
+.health-panel.empty p {
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+/* Loading States */
+.personality-card.loading,
+.health-panel.loading {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-skeleton {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 25%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+    border-radius: var(--border-radius-md);
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+/* Light Theme Adjustments */
+[data-theme="light"] .personality-card,
+[data-theme="light"] .health-panel,
+[data-theme="light"] .health-popup-box {
+    background: var(--card-bg);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .personality-stat,
+[data-theme="light"] .health-stat,
+[data-theme="light"] .health-issue {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .personality-description,
+[data-theme="light"] .health-score {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .trait-badge {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.2);
+}
+
+/* Scrollbar for missing score list */
+#missingScoreList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#missingScoreList::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+#missingScoreList::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 3px;
+}
+
+#missingScoreList::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.5);
+}
