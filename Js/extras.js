@@ -412,7 +412,9 @@ function renderDataHealth() {
 
 renderDataHealth();
 
-// Data Health Popup
+//============================================
+// SETTING FEATURE — DATA HEALTH POPUP
+//============================================
 function showDataHealthPopup() {
   const popup = document.getElementById('dataHealthPopup');
   const list = document.getElementById('missingScoreList');

@@ -1,8 +1,5 @@
-/* ===============================
-   COMPREHENSIVE MOBILE RESPONSIVE FIXES
-================================ */
 
-/* ===== GREETING BANNER RESPONSIVE FIXES ===== */
+/* ===== GREETING BANNER RESPONSIVE  ===== */
 @media (max-width: 768px) {
     .greeting-banner {
         display: flex;
