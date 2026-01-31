@@ -1,6 +1,6 @@
 # 💖 AniPulse - Anime Tracker & Stats Dashboard
 
-![AniPulse](https://img.shields.io/badge/Version-1.0.3-blueviolet?style=flat-square)
+![AniPulse](https://img.shields.io/badge/Version-2.0.0-blueviolet?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Platform](https://img.shields.io/badge/Platform-Web-orange?style=flat-square)
 
