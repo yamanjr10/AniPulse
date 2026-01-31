@@ -3789,8 +3789,8 @@ function setupYearlyAnimationInteractions() {
         btn.addEventListener("click", () => {
             setTimeout(() => {
                 const totals = getYearlyTotals();
-                animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2025 ");
-                animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2025 ");
+                animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2026 ");
+                animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2026 ");
             }, 400);
         });
     });
@@ -3798,8 +3798,8 @@ function setupYearlyAnimationInteractions() {
     // Recalculate dynamically if data changes
     window.addEventListener("storage", () => {
         const totals = getYearlyTotals();
-        animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2025 ");
-        animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2025 ");
+        animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2026 ");
+        animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2026 ");
     });
 }
 
@@ -4787,91 +4787,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 })();
-
-/* =====================================
-    NOTIFICATIONS
-   ===================================== */
-
-(function () {
-    // Get elements safely (NO searching, NO loops)
-    const notifBtn = document.getElementById('notif-btn');
-    const notifPanel = document.getElementById('notif-panel');
-    const notifList = document.getElementById('notif-list');
-    const notifCount = document.getElementById('notif-count');
-    const clearBtn = document.getElementById('clear-notifs');
-
-    // If notification UI does not exist, exit silently
-    if (!notifBtn || !notifPanel || !notifList) return;
-
-    // Load stored notifications
-    let notifications =
-        JSON.parse(localStorage.getItem('userUpdateNotifications')) || [];
-
-    // Toggle notification panel
-    notifBtn.onclick = function () {
-        notifPanel.classList.toggle('hidden');
-    };
-
-    // Clear notifications
-    if (clearBtn) {
-        clearBtn.onclick = function () {
-            notifications = [];
-            localStorage.removeItem('userUpdateNotifications');
-            renderNotifications();
-        };
-    }
-
-    // Render notifications
-    function renderNotifications() {
-        notifList.innerHTML = '';
-
-        if (notifications.length === 0) {
-            notifList.innerHTML =
-                '<div class="notif-item">No new updates</div>';
-            if (notifCount) notifCount.classList.add('hidden');
-            return;
-        }
-
-        notifications.forEach(n => {
-            const div = document.createElement('div');
-            div.className = 'notif-item';
-            div.innerHTML = `
-                <strong>${n.anime.title}</strong><br>
-                ${n.message}
-            `;
-            notifList.appendChild(div);
-        });
-
-        if (notifCount) {
-            notifCount.textContent = notifications.length;
-            notifCount.classList.remove('hidden');
-        }
-    }
-
-    // 🔥 Hook into your existing update checker
-    const originalCheckForUserUpdates = window.checkForUserUpdates;
-
-    if (typeof originalCheckForUserUpdates === 'function') {
-        window.checkForUserUpdates = async function () {
-            const updates = await originalCheckForUserUpdates();
-
-            if (Array.isArray(updates) && updates.length > 0) {
-                notifications.unshift(...updates);
-                localStorage.setItem(
-                    'userUpdateNotifications',
-                    JSON.stringify(notifications)
-                );
-                renderNotifications();
-            }
-
-            return updates;
-        };
-    }
-
-    // Initial render
-    renderNotifications();
-})();
-
 
 /* =========================================================
     STABLE ANILIST SEARCH 

@@ -5064,16 +5064,16 @@ select option:hover {
 .loader-logo {
     font-size: 2.4rem;
     font-weight: 800;
-    color: var(--accent, #ff4d6d);
+    color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.6rem;
-    animation: pulseGlow 2s infinite ease-in-out;
 }
 
+/* Simple pulse on the heart only */
 .loader-logo i {
-    animation: heartbeat 1.5s infinite;
+    animation: pulse 2s ease-in-out infinite;
 }
 
 /* Subtitle */
@@ -5090,9 +5090,9 @@ select option:hover {
 }
 
 .progress-bar {
-    height: 10px;
+    height: 6px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 50px;
     overflow: hidden;
 }
@@ -5101,10 +5101,7 @@ select option:hover {
     display: block;
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg,
-            #ff4d6d,
-            #6a5acd,
-            #00e0ff);
+    background: var(--accent);
     border-radius: 50px;
     transition: width 0.25s ease;
 }
@@ -5116,34 +5113,13 @@ select option:hover {
     color: #aaa;
 }
 
-/* Animations */
-@keyframes heartbeat {
-
-    0%,
-    100% {
-        transform: scale(1);
+/* Single simple animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
     }
-
-    25% {
-        transform: scale(1.15);
-    }
-
-    40% {
-        transform: scale(1);
-    }
-}
-
-@keyframes pulseGlow {
-    0% {
-        text-shadow: 0 0 10px rgba(255, 77, 109, 0.3);
-    }
-
     50% {
-        text-shadow: 0 0 25px rgba(255, 77, 109, 0.7);
-    }
-
-    100% {
-        text-shadow: 0 0 10px rgba(255, 77, 109, 0.3);
+        opacity: 0.7;
     }
 }
 
@@ -5887,3 +5863,164 @@ body.loading {
 #missingScoreList::-webkit-scrollbar-thumb:hover {
     background: rgba(99, 102, 241, 0.5);
 }
+
+/* ===== ANIMATED LOGO ===== */
+.header-left .app-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-left .app-logo h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--light-text);
+    text-decoration: none;
+    margin: 0;
+    position: relative;
+}
+
+/* Heartbeat Icon Animation */
+.header-left .app-logo i {
+    color: var(--accent);
+    font-size: 1.5rem;
+    position: relative;
+    animation: heartbeat 1.5s ease-in-out infinite;
+    transform-origin: center;
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+/* Text Animation */
+.header-left .app-logo span {
+    position: relative;
+    display: inline-block;
+    animation: textGlow 2s ease-in-out infinite alternate;
+    background: linear-gradient(135deg, var(--text), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+/* Pulsing Border Animation */
+.header-left .app-logo::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    animation: pulseBorder 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Keyframes for heartbeat animation */
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    }
+    5% {
+        transform: scale(1.1);
+        text-shadow: 0 0 15px rgba(139, 92, 246, 0.7);
+    }
+    10% {
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    }
+    15% {
+        transform: scale(1.15);
+        text-shadow: 0 0 20px rgba(139, 92, 246, 0.9);
+    }
+    20% {
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    }
+    100% {
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    }
+}
+
+/* Keyframes for text glow */
+@keyframes textGlow {
+    0% {
+        opacity: 1;
+        filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.3));
+    }
+    100% {
+        opacity: 0.9;
+        filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.6));
+    }
+}
+
+
+/* Hover effect for extra interactivity */
+.header-left .app-logo:hover i {
+    animation: heartbeatFast 0.8s ease-in-out infinite;
+}
+
+.header-left .app-logo:hover span {
+    animation: textGlowFast 1s ease-in-out infinite alternate;
+}
+
+@keyframes heartbeatFast {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* Light theme adjustments */
+[data-theme="light"] .header-left .app-logo i {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+}
+
+[data-theme="light"] .header-left .app-logo span {
+    background: linear-gradient(135deg, var(--text), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .header-left .app-logo h2 {
+        font-size: 1.25rem;
+    }
+    
+    .header-left .app-logo i {
+        font-size: 1.25rem;
+    }
+    
+    /* Disable border pulse on mobile for performance */
+    .header-left .app-logo::before {
+        display: none;
+    }
+}
+
+/* Performance optimization for animations */
+@media (prefers-reduced-motion: reduce) {
+    .header-left .app-logo i,
+    .header-left .app-logo span,
+    .header-left .app-logo::before {
+        animation: none;
+    }
+    
+    .header-left .app-logo i {
+        color: var(--accent);
+    }
+    
+    .header-left .app-logo span {
+        color: var(--text);
+        background: none;
+        -webkit-text-fill-color: unset;
+    }
+}
+
