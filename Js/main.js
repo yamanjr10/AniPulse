@@ -1910,7 +1910,7 @@ function updateStatCardsWithChanges() {
             if (!el) return;
 
             el.className = 'stat-change neutral';
-            el.innerHTML = `<i class="fas fa-minus"></i> <span>No Data</span>`;
+            el.innerHTML = `<i class="fas fa-minus"></i> <span>No Track</span>`;
         });
         return;
     }

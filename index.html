@@ -796,7 +796,7 @@
                 <input type="hidden" id="animeId">
                 <div class="form-group">
                     <label for="animeTitle">Title</label>
-                    <input type="text" placeholder="Search for an anime" id="animeTitle" required>
+                    <input type="text" placeholder="Search for an anime..." id="animeTitle" required>
                     <div class="search-loading" id="searchLoading">Searching...</div>
                     <div class="search-results" id="searchResults"></div>
                 </div>
@@ -839,7 +839,7 @@
 
                 <div class="form-group">
                     <label for="animeScore">Score (0-10)</label>
-                    <input type="number" id="animeScore" min="0" max="10" step="0.1" placeholder="7.5">
+                    <input type="number" id="animeScore" min="0" max="10" step="0.1" placeholder="7.5" required>
                 </div>
 
                 <div class="form-group">
@@ -858,8 +858,8 @@
                 <div class="form-group">
                     <label for="animeMonth">Completion Month</label>
                     <select id="animeMonth">
-                        <option value="01" selected>January</option>
-                        <option value="02">February</option>
+                        <option value="01">January</option>
+                        <option value="02" selected>February</option>
                         <option value="03">March</option>
                         <option value="04">April</option>
                         <option value="05">May</option>
