@@ -107,19 +107,35 @@ window.initStatisticsCharts = function () {
 // --- Episode Progress Increment ---
 function addProgressButtons() {
   document.querySelectorAll('#anime-table-body tr').forEach(tr => {
-    const progressCell = tr.children[2];
+    const progressCell = tr.children[2]; // 3rd cell
+    if (!progressCell) return; // <-- skip rows without a 3rd cell
+
     if (!progressCell.querySelector('.inc-progress')) {
-      const title = tr.children[0].textContent.trim();
-      const anime = animeData.find(a => a.title === title);
-      if (anime && anime.progress < anime.episodes) {
-        anime.progress++;
-        localStorage.setItem('animeData', JSON.stringify(animeData));
-        updateAnimeDisplay();
-        showToast(`Progress updated: ${anime.title} (${anime.progress}/${anime.episodes})`, 'success');
-      }
-    };
+      const button = document.createElement('button');
+      button.textContent = '+';
+      button.className = 'inc-progress';
+      button.style.marginLeft = '5px';
+
+      button.addEventListener('click', () => {
+        const title = tr.children[0]?.textContent.trim(); // optional chaining just in case
+        const anime = animeData.find(a => a.title === title);
+        if (anime) {
+          if (anime.progress < anime.episodes) {
+            anime.progress++;
+            localStorage.setItem('animeData', JSON.stringify(animeData));
+            updateAnimeDisplay();
+            showToast(`Progress updated: ${anime.title} (${anime.progress}/${anime.episodes})`, 'success');
+          } else {
+            showToast(`${anime.title} is already complete!`, 'info');
+          }
+        }
+      });
+
+      progressCell.appendChild(button);
+    }
   });
 }
+
 
 // Re-run after list updates
 const oldUpdateAnimeDisplay = updateAnimeDisplay;

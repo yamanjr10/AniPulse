@@ -1725,7 +1725,8 @@ h4,
 .settings-container {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
+    padding: 1.5rem;
 }
 
 /* Profile Preview */
