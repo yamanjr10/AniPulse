@@ -27,13 +27,13 @@ function initAutoReload() {
     // Check for changes every 1 second
     autoReloadInterval = setInterval(async () => {
         try {
-            const response = await fetch(window.location.href, { 
+            const response = await fetch(window.location.href, {
                 cache: 'no-store',
                 headers: { 'Cache-Control': 'no-cache' }
             });
             const html = await response.text();
             const newChecksum = simpleHash(html).slice(0, 20);
-            
+
             if (lastChecksum === null) {
                 lastChecksum = newChecksum;
             } else if (lastChecksum !== newChecksum) {
@@ -110,7 +110,7 @@ let upcomingFilters, upcomingContent, upcomingLoading, upcomingError;
 document.addEventListener('DOMContentLoaded', function () {
     // 🔒 DO NOT trigger animations here - they will start after loader completes
     // This function only sets up event listeners
-    
+
     // ✅ Start auto-reload system to detect changes
     initAutoReload();
 
@@ -4903,7 +4903,7 @@ window.searchAnime = async function () {
 /* ---------- CONFIG ---------- */
 const RECAP_ACTIVE = true;          // Enable recaps
 const RECAP_WINDOW_DAYS = 7;        // Recaps available first 7 days of each month
-const TEST_MODE = true;           // Set to true to force Jan-only for testing
+const TEST_MODE = false;           // Set to true to force Jan-only for testing
 
 /* ---------- STATE ---------- */
 let recapSlides = [];
@@ -4929,18 +4929,18 @@ function isRecapWindowOpen() {
 
 function getPreviousMonthForRecap() {
     const now = new Date();
-    const currentMonth = now.getMonth(); // 0 = Jan, 1 = Feb, etc.
+    const currentMonth = now.getMonth(); // 0–11
     const currentYear = now.getFullYear();
 
     let targetMonth, targetYear;
 
     if (currentMonth === 0) {
-        // January: show December of previous year
-        targetMonth = 12;
+        // January → December of previous year
+        targetMonth = 11;          // ✅ December
         targetYear = currentYear - 1;
     } else {
-        // Other months: show previous month (1-based for our function)
-        targetMonth = currentMonth; // February (1) shows January (1 in 1-based)
+        // Other months → previous month
+        targetMonth = currentMonth - 1;
         targetYear = currentYear;
     }
 
@@ -5004,6 +5004,15 @@ const RECAP_KEYS = {
     yearlyAutoSeen: y => `recap-yearly-auto-${y}`
 };
 
+// ==============================
+// Global constants
+// ==============================
+const MONTH_NAMES = [
+  'January','February','March','April','May','June',
+  'July','August','September','October','November','December'
+];
+
+
 /* ==================================================
    COMPLETION TIME NORMALIZER
 ================================================== */
@@ -5031,12 +5040,15 @@ function getCompletionTime(anime) {
 
     return null;
 }
+function buildComprehensiveRecap(list, type, periodInfo = {}) {
+    const isYearly = type === 'Yearly';
 
-/* ==================================================
-   ADVANCED STATS BUILDER (12 SLIDES)
-================================================== */
+    // Resolve month name (ONLY for monthly recaps)
+    const monthName =
+        !isYearly && typeof periodInfo.month === 'number'
+            ? MONTH_NAMES[periodInfo.month]   // month is 0–11
+            : null;
 
-function buildComprehensiveRecap(list, type, periodInfo) {
     if (!list.length) {
         return {
             totalAnime: 0,
@@ -5052,25 +5064,36 @@ function buildComprehensiveRecap(list, type, periodInfo) {
             animeByScore: [],
             avgDuration: 0,
             streakDays: 0,
-            monthName: periodInfo.month ? new Date(periodInfo.year, periodInfo.month - 1).toLocaleString('default', { month: 'long' }) : '',
-            year: periodInfo.year
+            monthName,
+            year: periodInfo.year,
+            type
         };
     }
 
+    // =========================
     // Basic stats
+    // =========================
     const totalEpisodes = list.reduce((sum, a) => sum + (a.episodes || 0), 0);
-    const totalMinutes = list.reduce((sum, a) => sum + (a.episodes * (a.duration || 0)), 0);
+    const totalMinutes = list.reduce(
+        (sum, a) => sum + (a.episodes * (a.duration || 0)),
+        0
+    );
     const totalHours = totalMinutes / 60;
 
     // Average score
     const scoredAnime = list.filter(a => a.score && a.score > 0);
-    const avgScore = scoredAnime.length > 0
-        ? (scoredAnime.reduce((sum, a) => sum + a.score, 0) / scoredAnime.length).toFixed(1)
+    const avgScore = scoredAnime.length
+        ? (
+            scoredAnime.reduce((sum, a) => sum + a.score, 0) /
+            scoredAnime.length
+          ).toFixed(1)
         : 0;
 
     // Genre analysis
     const genres = {};
-    list.forEach(a => (a.genres || []).forEach(g => (genres[g] = (genres[g] || 0) + 1)));
+    list.forEach(a =>
+        (a.genres || []).forEach(g => (genres[g] = (genres[g] || 0) + 1))
+    );
     const topGenres = Object.entries(genres).sort((a, b) => b[1] - a[1]);
 
     // Top anime (by score)
@@ -5078,42 +5101,44 @@ function buildComprehensiveRecap(list, type, periodInfo) {
         .filter(a => a.score && a.score > 0)
         .sort((a, b) => (b.score || 0) - (a.score || 0));
 
-    // Average episodes per day calculation
-    const daysInPeriod = type === 'Yearly' ? 365 :
-        periodInfo.month ? new Date(periodInfo.year, periodInfo.month, 0).getDate() : 30;
+    // Average episodes per day
+    const daysInPeriod = isYearly
+        ? 365
+        : new Date(periodInfo.year, periodInfo.month + 1, 0).getDate();
+
     const avgEpisodesPerDay = (totalEpisodes / daysInPeriod).toFixed(1);
 
-    // Average duration per episode
-    const avgDuration = (list.reduce((sum, a) => sum + (a.duration || 0), 0) / list.length).toFixed(0);
+    // Average duration
+    const avgDuration = (
+        list.reduce((sum, a) => sum + (a.duration || 0), 0) / list.length
+    ).toFixed(0);
 
-    // Find busiest month (for yearly recaps)
+    // Busiest month (yearly only)
     let completionMonth = null;
-    if (type === 'Yearly') {
+    if (isYearly) {
         const months = {};
         list.forEach(a => {
             const time = getCompletionTime(a);
             if (time) {
-                const month = new Date(time).getMonth();
-                months[month] = (months[month] || 0) + 1;
+                const m = new Date(time).getMonth();
+                months[m] = (months[m] || 0) + 1;
             }
         });
+
         const busiest = Object.entries(months).sort((a, b) => b[1] - a[1])[0];
         if (busiest) {
-            completionMonth = new Date(periodInfo.year, parseInt(busiest[0]), 1)
-                .toLocaleString('default', { month: 'long' });
+            completionMonth = MONTH_NAMES[parseInt(busiest[0])];
         }
     }
 
-    // Estimate streak (simplified - days with at least one episode completed)
+    // Streak calculation
     const completionDays = new Set();
     list.forEach(a => {
         const time = getCompletionTime(a);
         if (time) {
-            const date = new Date(time).toISOString().split('T')[0];
-            completionDays.add(date);
+            completionDays.add(new Date(time).toISOString().split('T')[0]);
         }
     });
-    const streakDays = completionDays.size;
 
     return {
         totalAnime: list.length,
@@ -5130,10 +5155,10 @@ function buildComprehensiveRecap(list, type, periodInfo) {
         completionMonth,
         animeByScore: animeByScore.slice(0, 3),
         avgDuration,
-        streakDays,
-        monthName: periodInfo.month ? new Date(periodInfo.year, periodInfo.month - 1).toLocaleString('default', { month: 'long' }) : '',
+        streakDays: completionDays.size,
+        monthName,
         year: periodInfo.year,
-        type: type
+        type
     };
 }
 
@@ -5142,8 +5167,9 @@ function buildComprehensiveRecap(list, type, periodInfo) {
 ================================================== */
 
 function getMonthlyRecap(year, month) {
-    const start = new Date(year, month - 1, 1).getTime();
-    const end = new Date(year, month, 0, 23, 59, 59).getTime();
+    // month is 0–11 (JS standard)
+    const start = new Date(year, month, 1).getTime();
+    const end = new Date(year, month + 1, 0, 23, 59, 59).getTime();
 
     const completed = getAnimeData().filter(a => {
         if (a.userStatus !== "Completed") return false;
@@ -5268,11 +5294,15 @@ function generateTwelveSlides(data, type, periodInfo) {
 
     return [
         // Slide 1: Welcome & Period
-        `<div class="slide-icon"><i class="fas fa-calendar-alt"></i></div>
-     <h1>${isYearly ? data.year : data.monthName + ' ' + data.year}</h1>
-     <p class="subtitle">${type} Anime Recap</p>
-     <p class="hint">Let's look back at your journey</p>
-     <div class="slide-counter">1/12</div>`,
+        `<div class="slide-icon"><i class="fas fa-calendar-alt"></i></div> <h1>
+            ${isYearly
+            ? data.year
+            : `${data.monthName} ${data.year}`} </h1> <p class="subtitle">
+            ${isYearly
+            ? `${data.year} Anime Recap`
+            : `${data.monthName} Anime Recap`} 
+            </p> <p class="hint">Let's look back at your journey</p>
+<div class="slide-counter">1/12</div>`,
 
         // Slide 2: Total Anime Completed
         `<div class="slide-icon"><i class="fas fa-tv"></i></div>
@@ -5431,46 +5461,38 @@ function updateProgressIndicator() {
 /* ==================================================
    MANUAL RECAP ACCESS (FROM SETTINGS)
 ================================================== */
-
 function openRecapManually() {
     if (!isRecapWindowOpen()) {
-        const today = new Date();
-        createToast(`<i class="fas fa-calendar"></i> Recaps available 1-${RECAP_WINDOW_DAYS} of each month`, {
-            type: "info"
-        });
+        createToast(
+            `<i class="fas fa-calendar"></i> Recaps available 1-${RECAP_WINDOW_DAYS} of each month`,
+            { type: "info" }
+        );
         return;
     }
 
-    // Always try 2025 yearly recap first
-    const yearlyYear = 2025;
-    const yearlyData = getYearlyRecap(yearlyYear);
-
-    if (yearlyData.totalAnime > 0) {
-        openRecap("Yearly", yearlyData, { year: yearlyYear });
-        return;
-    }
-
-    // If no 2025 yearly, try current year-1
-    const prevYear = getPreviousYearForRecap();
-    if (prevYear !== 2025) {
-        const prevYearData = getYearlyRecap(prevYear);
-        if (prevYearData.totalAnime > 0) {
-            openRecap("Yearly", prevYearData, { year: prevYear });
-            return;
-        }
-    }
-
-    // Fallback to monthly recap
+    // 1️⃣ FIRST: Monthly recap (previous month)
     const { month, year } = getPreviousMonthForRecap();
     const monthlyData = getMonthlyRecap(year, month);
 
     if (monthlyData.totalAnime > 0) {
         openRecap("Monthly", monthlyData, { month, year });
-    } else {
-        createToast('<i class="fas fa-info-circle"></i> No completed anime found for recap periods', {
-            type: "info"
-        });
+        return;
     }
+
+    // 2️⃣ Fallback: Previous year recap
+    const prevYear = getPreviousYearForRecap();
+    const yearlyData = getYearlyRecap(prevYear);
+
+    if (yearlyData.totalAnime > 0) {
+        openRecap("Yearly", yearlyData, { year: prevYear });
+        return;
+    }
+
+    // 3️⃣ Nothing found
+    createToast(
+        '<i class="fas fa-info-circle"></i> No completed anime found for recap periods',
+        { type: "info" }
+    );
 }
 
 /* ==================================================
@@ -5542,7 +5564,7 @@ function setupAutoPopups() {
             setTimeout(() => {
                 const monthName = new Date(mYear, prevMonth - 1).toLocaleString('default', { month: 'long' });
                 createToast(`<i class="fas fa-chart-bar"></i> Your ${monthName} Recap is ready!`, {
-                    actionText: '<i class="fas fa-eye"></i> View 12-Slide Recap',
+                    actionText: '<i class="fas fa-eye"></i> View Recap',
                     persist: true,
                     type: 'info',
                     onAction: () => {
@@ -5686,7 +5708,7 @@ window.RecapSystem = {
 console.log("🎬 12-Slide Recap System Loaded");
 
 // ==================================================
-// Loader with Animation Trigger System (Mobile Safe)
+// Loader with Animation Trigger System 
 // ==================================================
 
 let animationsStarted = false;
@@ -5695,220 +5717,220 @@ let animationsStarted = false;
 // Start animations safely after loader
 // ==================================================
 function startAnimationsAfterLoader() {
-  if (animationsStarted) return;
-  animationsStarted = true;
+    if (animationsStarted) return;
+    animationsStarted = true;
 
-  // 🎬 Run dashboard functions safely
-  try { updateStats(); } catch(e) {}
-  try { initCharts(); } catch(e) {}
-  try { updateTopRatedAnime(); } catch(e) {}
-  try { updateCurrentMonthAnime(); } catch(e) {}
-  try { updateRecentActivity(); } catch(e) {}
-  try { updateAnimeDisplay(); } catch(e) {}
-  try { updateTotalAnimeCountAllMonths(); } catch(e) {}
-  try { updateSidebarUserInfo(); } catch(e) {}
-  try { updateCurrentDate(); } catch(e) {}
+    // 🎬 Run dashboard functions safely
+    try { updateStats(); } catch (e) { }
+    try { initCharts(); } catch (e) { }
+    try { updateTopRatedAnime(); } catch (e) { }
+    try { updateCurrentMonthAnime(); } catch (e) { }
+    try { updateRecentActivity(); } catch (e) { }
+    try { updateAnimeDisplay(); } catch (e) { }
+    try { updateTotalAnimeCountAllMonths(); } catch (e) { }
+    try { updateSidebarUserInfo(); } catch (e) { }
+    try { updateCurrentDate(); } catch (e) { }
 
-  // 🎬 Animate overview stats safely
-  setTimeout(() => {
-    const completedEl = document.getElementById("completed-count");
-    const moviesEl = document.getElementById("movies-count");
-    const episodesEl = document.getElementById("episodes-count");
-    const hoursEl = document.getElementById("total-hours-count");
-
-    const completed = parseInt(completedEl?.textContent) || 0;
-    const movies = parseInt(moviesEl?.textContent) || 0;
-    const episodes = parseInt(episodesEl?.textContent) || 0;
-    const hours = parseInt(hoursEl?.textContent) || 0;
-
-    completedEl && (completedEl.textContent = 0);
-    moviesEl && (moviesEl.textContent = 0);
-    episodesEl && (episodesEl.textContent = 0);
-    hoursEl && (hoursEl.textContent = 0);
-
+    // 🎬 Animate overview stats safely
     setTimeout(() => {
-      try { completedEl && animateCount(completedEl, completed, 4500); } catch(e) {}
-      try { moviesEl && animateCount(moviesEl, movies, 4500); } catch(e) {}
-      try { episodesEl && animateCount(episodesEl, episodes, 4500); } catch(e) {}
-      try { hoursEl && animateCount(hoursEl, hours, 4500); } catch(e) {}
-    }, 400);
-  }, 200);
+        const completedEl = document.getElementById("completed-count");
+        const moviesEl = document.getElementById("movies-count");
+        const episodesEl = document.getElementById("episodes-count");
+        const hoursEl = document.getElementById("total-hours-count");
 
-  // 🎬 Heatmap rendering
-  setTimeout(() => {
-    const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
-    try { renderActivityHeatmap(animeData); } catch(e) {}
-  }, 300);
+        const completed = parseInt(completedEl?.textContent) || 0;
+        const movies = parseInt(moviesEl?.textContent) || 0;
+        const episodes = parseInt(episodesEl?.textContent) || 0;
+        const hours = parseInt(hoursEl?.textContent) || 0;
 
-  // 🎬 Optional: searchAnime safe call
-  try { typeof searchAnime === "function" && searchAnime(); } catch(e) {}
+        completedEl && (completedEl.textContent = 0);
+        moviesEl && (moviesEl.textContent = 0);
+        episodesEl && (episodesEl.textContent = 0);
+        hoursEl && (hoursEl.textContent = 0);
+
+        setTimeout(() => {
+            try { completedEl && animateCount(completedEl, completed, 4500); } catch (e) { }
+            try { moviesEl && animateCount(moviesEl, movies, 4500); } catch (e) { }
+            try { episodesEl && animateCount(episodesEl, episodes, 4500); } catch (e) { }
+            try { hoursEl && animateCount(hoursEl, hours, 4500); } catch (e) { }
+        }, 400);
+    }, 200);
+
+    // 🎬 Heatmap rendering
+    setTimeout(() => {
+        const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
+        try { renderActivityHeatmap(animeData); } catch (e) { }
+    }, 300);
+
+    // 🎬 Optional: searchAnime safe call
+    try { typeof searchAnime === "function" && searchAnime(); } catch (e) { }
 }
 
 // ==================================================
 // Loader fail-safe (prevents infinite loader)
 // ==================================================
 setTimeout(() => {
-  const loader = document.getElementById("app-loader");
-  if (loader) {
-    loader.style.display = "none";
-    document.body.classList.remove("loading");
-    startAnimationsAfterLoader();
-  }
+    const loader = document.getElementById("app-loader");
+    if (loader) {
+        loader.style.display = "none";
+        document.body.classList.remove("loading");
+        startAnimationsAfterLoader();
+    }
 }, 6000);
 
 // ==================================================
 // Loader logic
 // ==================================================
 document.addEventListener("DOMContentLoaded", () => {
-  const loader = document.getElementById("app-loader");
-  const progressBar = document.getElementById("loader-progress");
-  const percentText = document.getElementById("loader-percent");
+    const loader = document.getElementById("app-loader");
+    const progressBar = document.getElementById("loader-progress");
+    const percentText = document.getElementById("loader-percent");
 
-  // ❗ If loader elements missing, skip loader
-  if (!loader || !progressBar || !percentText) {
-    startAnimationsAfterLoader();
-    return;
-  }
-
-  document.body.classList.add("loading");
-
-  let progress = 0;
-
-  const fakeLoader = setInterval(() => {
-    progress += Math.random() * 10 + 5;
-
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(fakeLoader);
-
-      loader.style.opacity = "0";
-
-      setTimeout(() => {
-        loader.style.display = "none";
-        document.body.classList.remove("loading");
+    // ❗ If loader elements missing, skip loader
+    if (!loader || !progressBar || !percentText) {
         startAnimationsAfterLoader();
-      }, 400);
+        return;
     }
 
-    progressBar.style.width = progress + "%";
-    percentText.textContent = Math.floor(progress) + "%";
-  }, 200);
+    document.body.classList.add("loading");
+
+    let progress = 0;
+
+    const fakeLoader = setInterval(() => {
+        progress += Math.random() * 10 + 5;
+
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(fakeLoader);
+
+            loader.style.opacity = "0";
+
+            setTimeout(() => {
+                loader.style.display = "none";
+                document.body.classList.remove("loading");
+                startAnimationsAfterLoader();
+            }, 400);
+        }
+
+        progressBar.style.width = progress + "%";
+        percentText.textContent = Math.floor(progress) + "%";
+    }, 200);
 });
 
-  // 🎬 TRIGGER YEARLY TOTALS ANIMATION
-  setTimeout(() => {
+// 🎬 TRIGGER YEARLY TOTALS ANIMATION
+setTimeout(() => {
     const totalHoursEl = document.getElementById("monthly-total-hours");
     const totalEpisodesEl = document.getElementById("yearly-total-episodes");
 
     function getYearlyTotals() {
-      const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
-      const now = new Date();
-      const currentYear = now.getFullYear();
+        const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
+        const now = new Date();
+        const currentYear = now.getFullYear();
 
-      let totalHours = 0;
-      let totalEpisodes = 0;
+        let totalHours = 0;
+        let totalEpisodes = 0;
 
-      animeData.forEach(anime => {
-        if (anime.userStatus !== "Completed" || !anime.finishDate) return;
-        const finish = new Date(anime.finishDate);
-        if (finish.getFullYear() !== currentYear) return;
+        animeData.forEach(anime => {
+            if (anime.userStatus !== "Completed" || !anime.finishDate) return;
+            const finish = new Date(anime.finishDate);
+            if (finish.getFullYear() !== currentYear) return;
 
-        const epCount = Number(anime.episodes) || 0;
-        const duration = Number(anime.duration) || 20;
-        const type = anime.type?.toLowerCase() || "tv";
+            const epCount = Number(anime.episodes) || 0;
+            const duration = Number(anime.duration) || 20;
+            const type = anime.type?.toLowerCase() || "tv";
 
-        let hours = 0;
-        if (type === "movie") hours = duration / 60;
-        else hours = (epCount * duration) / 60;
+            let hours = 0;
+            if (type === "movie") hours = duration / 60;
+            else hours = (epCount * duration) / 60;
 
-        totalHours += hours;
-        totalEpisodes += epCount;
-      });
+            totalHours += hours;
+            totalEpisodes += epCount;
+        });
 
-      return {
-        totalHours: Math.round(totalHours),
-        totalEpisodes
-      };
+        return {
+            totalHours: Math.round(totalHours),
+            totalEpisodes
+        };
     }
 
     const totals = getYearlyTotals();
 
     function animateCounter(el, targetValue, label) {
-      if (!el) return;
-      const duration = 4000;
-      const startValue = 0;
-      const startTime = performance.now();
+        if (!el) return;
+        const duration = 4000;
+        const startValue = 0;
+        const startTime = performance.now();
 
-      function easeOut(t) {
-        return t * (2 - t);
-      }
+        function easeOut(t) {
+            return t * (2 - t);
+        }
 
-      function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = easeOut(progress);
-        const current = Math.floor(startValue + targetValue * eased);
-        el.textContent = `${label}: ${current}`;
-        if (progress < 1) requestAnimationFrame(update);
-      }
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = easeOut(progress);
+            const current = Math.floor(startValue + targetValue * eased);
+            el.textContent = `${label}: ${current}`;
+            if (progress < 1) requestAnimationFrame(update);
+        }
 
-      requestAnimationFrame(update);
+        requestAnimationFrame(update);
     }
 
     animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2025 ");
     animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2025 ");
-  }, 200);
+}, 200);
 
-  // 🎬 TRIGGER DASHBOARD HEATMAP
-  setTimeout(() => {
+// 🎬 TRIGGER DASHBOARD HEATMAP
+setTimeout(() => {
     const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
     renderActivityHeatmap(animeData);
-  }, 150);
+}, 150);
 // 🔥 HARD FAIL-SAFE (prevents infinite loader on mobile)
 setTimeout(() => {
-  const loader = document.getElementById("app-loader");
-  if (loader) {
-    loader.style.display = "none";
-    document.body.classList.remove("loading");
-    startAnimationsAfterLoader();
-  }
-}, 6000);
-
-document.addEventListener("DOMContentLoaded", () => {
-  const loader = document.getElementById("app-loader");
-  const progressBar = document.getElementById("loader-progress");
-  const percentText = document.getElementById("loader-percent");
-
-  // ✅ CRITICAL SAFETY CHECK
-  if (!loader || !progressBar || !percentText) {
-    console.warn("Loader elements missing — skipping loader");
-    startAnimationsAfterLoader();
-    return;
-  }
-
-  document.body.classList.add("loading");
-
-  let progress = 0;
-
-  const fakeLoader = setInterval(() => {
-    progress += Math.random() * 10 + 5;
-
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(fakeLoader);
-
-      loader.style.opacity = "0";
-
-      setTimeout(() => {
+    const loader = document.getElementById("app-loader");
+    if (loader) {
         loader.style.display = "none";
         document.body.classList.remove("loading");
         startAnimationsAfterLoader();
-      }, 400);
+    }
+}, 6000);
+
+document.addEventListener("DOMContentLoaded", () => {
+    const loader = document.getElementById("app-loader");
+    const progressBar = document.getElementById("loader-progress");
+    const percentText = document.getElementById("loader-percent");
+
+    // ✅ CRITICAL SAFETY CHECK
+    if (!loader || !progressBar || !percentText) {
+        console.warn("Loader elements missing — skipping loader");
+        startAnimationsAfterLoader();
+        return;
     }
 
-    progressBar.style.width = progress + "%";
-    percentText.textContent = Math.floor(progress) + "%";
-  }, 200);
+    document.body.classList.add("loading");
+
+    let progress = 0;
+
+    const fakeLoader = setInterval(() => {
+        progress += Math.random() * 10 + 5;
+
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(fakeLoader);
+
+            loader.style.opacity = "0";
+
+            setTimeout(() => {
+                loader.style.display = "none";
+                document.body.classList.remove("loading");
+                startAnimationsAfterLoader();
+            }, 400);
+        }
+
+        progressBar.style.width = progress + "%";
+        percentText.textContent = Math.floor(progress) + "%";
+    }, 200);
 });
 
 

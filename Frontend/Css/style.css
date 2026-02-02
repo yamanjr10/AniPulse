@@ -1684,86 +1684,41 @@ h4,
     letter-spacing: 0.5px;
 }
 
-/* ===== UPCOMING PAGE ===== */
-.upcoming-filters {
+/* ===== COMMUNITY PAGE ===== */
+.coming-soon-container {
+    min-height: 60vh;
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-}
-
-.upcoming-filters .filter-btn {
-    padding: 0.5rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: var(--card-bg);
-    color: var(--text);
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 600;
-    font-size: 0.875rem;
-}
-
-.upcoming-filters .filter-btn.active {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-    border-color: transparent;
-}
-
-.upcoming-filters .filter-btn:hover:not(.active) {
-    background: rgba(99, 102, 241, 0.1);
-}
-
-/* Loading and Error States */
-.loading-state,
-.error-state {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 3rem;
-    color: var(--text-light);
-    background: var(--card-bg);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--card-shadow);
+    gap: 1rem;
+    color: var(--text-primary);
 }
 
-.loading-state i,
-.error-state i {
+.coming-icon {
+    font-size: 4rem;
+    color: var(--accent);
+}
+
+.coming-soon-container h2 {
     font-size: 2rem;
-    margin-bottom: 1rem;
-    display: block;
-    color: var(--primary);
+    font-weight: 700;
 }
 
-.error-state button {
-    margin-top: 1rem;
+.coming-soon-container p {
+    opacity: 0.75;
+    max-width: 420px;
 }
 
-/* Update Badge */
-.anime-update-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.7rem;
+.coming-badge {
+    margin-top: 0.5rem;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.85rem;
     font-weight: 600;
-    z-index: 2;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.05);
-    }
-
-    100% {
-        transform: scale(1);
-    }
 }
 
 /* ===== SETTINGS PAGE ===== */

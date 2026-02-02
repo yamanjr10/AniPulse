@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -128,8 +129,8 @@
                             <div class="menu-item" data-page="achievements">
                                 <i class="fas fa-trophy"></i><span>Achievements</span>
                             </div>
-                            <div class="menu-item" data-page="upcoming">
-                                <i class="fas fa-calendar-plus"></i><span>Upcoming</span>
+                            <div class="menu-item" data-page="community">
+                                <i class="fas fa-users"></i><span>Community</span>
                             </div>
                             <div class="menu-item" data-page="settings">
                                 <i class="fas fa-cog"></i><span>Settings</span>
@@ -624,45 +625,14 @@
             </div>
         </div>
 
-        <!-- Upcoming Page -->
-        <div id="upcoming-page" class="page">
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-calendar-plus"></i> Upcoming & Trending Anime</h2>
-
-                <!-- Filter Tabs -->
-                <div class="upcoming-filters">
-                    <button class="filter-btn active" data-type="upcoming">Upcoming</button>
-                    <button class="filter-btn" data-type="trending">Trending</button>
-                    <button class="filter-btn" data-type="seasonal">Seasonal</button>
-                    <button class="filter-btn" data-type="my-updates">My Updates</button>
-                </div>
-
-                <!-- Loading State -->
-                <div id="upcoming-loading" class="loading-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <span>Loading anime data...</span>
-                </div>
-
-                <!-- Content Sections -->
-                <div id="upcoming-content" style="display: none;">
-                    <!-- Upcoming Anime Grid -->
-                    <div id="upcoming-anime-grid" class="top-anime-grid"></div>
-
-                    <!-- My Updates Section -->
-                    <div id="my-updates-section" class="dashboard-section" style="display: none;">
-                        <h3 class="section-subtitle"><i class="fas fa-bell"></i> Updates for Your Watchlist</h3>
-                        <div id="my-updates-grid" class="top-anime-grid"></div>
-                    </div>
-                </div>
-
-                <!-- Error State -->
-                <div id="upcoming-error" class="error-state" style="display: none;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Failed to load anime data. Please try again later.</span>
-                    <button id="retry-upcoming" class="btn btn-primary">Retry</button>
-                </div>
+        <!-- Community Page -->
+        <div id="community-page" class="page">
+            <div class="coming-soon-container">
+                <i class="fas fa-users coming-icon"></i>
+                <h2>Community</h2>
+                <p>Community chat & discussions are under construction.</p>
+                <span class="coming-badge">Coming Soon</span>
             </div>
-
         </div>
 
         <!-- Settings Page -->
