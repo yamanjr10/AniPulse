@@ -5914,3 +5914,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();
+

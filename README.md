@@ -510,15 +510,18 @@ None currently reported. Please report any bugs on GitHub!
 
 ```
 AniPulse/
-├── index.html          # Main HTML structure
-├── Js/                 # JavaScript source files
-│   ├── main.js         # Core application logic
-│   └── extras.js       # Additional features & utilities
-├── Css/                # Styling files
-│   ├── style.css       # Main styling
-│   └── responsive.css  # Mobile responsive styles
-├── autopush.ps1        # Git automation script
-└── README.md           # This file
+├── index.html # Main HTML structure
+│
+├── Js/ # JavaScript source files
+│ ├── main.js # Core application logic
+│ └── extras.js # Additional features & utilities
+│
+├── Css/ # Styling files
+│ ├── style.css # Main styling
+│ └── responsive.css # Mobile responsive styles
+│
+├── autopush.ps1 # Git automation script
+└── README.md # Project documentation
 ```
 
 ---
