@@ -5563,7 +5563,7 @@ function setupAutoPopups() {
         if (data.totalAnime > 0) {
             setTimeout(() => {
                 const monthName = new Date(mYear, prevMonth - 1).toLocaleString('default', { month: 'long' });
-                createToast(`<i class="fas fa-chart-bar"></i> Your ${monthName} Recap is ready!`, {
+                createToast(`<i class="fas fa-chart-bar"></i> Your ${data.monthName} Recap is ready!`, {
                     actionText: '<i class="fas fa-eye"></i> View Recap',
                     persist: true,
                     type: 'info',
