@@ -4936,7 +4936,7 @@ function getPreviousMonthForRecap() {
 
     if (currentMonth === 0) {
         // January → December of previous year
-        targetMonth = 11;          // ✅ December
+        targetMonth = 11;         
         targetYear = currentYear - 1;
     } else {
         // Other months → previous month
