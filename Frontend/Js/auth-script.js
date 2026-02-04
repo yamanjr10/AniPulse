@@ -90,7 +90,7 @@ if (loginForm) {
                 
                 // Redirect after a short delay
                 setTimeout(() => {
-                    window.location.href = "index.html";
+                    window.location.href = "dashboard.html";
                 }, 1500);
             } else {
                 showMessage(data.message || 'Login failed');
