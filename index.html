@@ -135,6 +135,9 @@
                             <div class="menu-item" data-page="settings">
                                 <i class="fas fa-cog"></i><span>Settings</span>
                             </div>
+                            <div class="menu-item" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                                </div>
 
 
                         </div>
@@ -932,6 +935,14 @@
 
     <script defer src="Frontend/Js/main.js"></script>
     <script defer src="Frontend/Js/extras.js"></script>
+
+    <script>
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+  });
+</script>
 </body>
 
 </html>

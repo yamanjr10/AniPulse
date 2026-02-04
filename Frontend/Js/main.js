@@ -2,6 +2,11 @@
 //UPDATE 1.0.0
 // =============================================
 
+const token = localStorage.getItem("token");
+if (!token) {
+  window.location.href = "login.html";
+}
+
 // ✅ AUTO-RELOAD SYSTEM - Detects changes and refreshes page automatically
 let lastChecksum = null;
 let autoReloadInterval = null;
