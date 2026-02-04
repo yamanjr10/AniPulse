@@ -1,947 +1,456 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="AniPulse is a modern anime tracker to manage watchlists, track progress, view monthly stats, and analyze your anime journey in one clean dashboard.">
-    <meta name="keywords"
-        content="AniPulse, anime tracker, anime watchlist, anime stats, anime dashboard, track anime, anime analytics, otaku">
-    <title>AniPulse | Anime Tracker & Stats Dashboard</title>
-    <link rel="shortcut icon" href="https://www.pngall.com/wp-content/uploads/13/Anime-Logo-PNG-Cutout.png"
+    <meta name="description" content="AniPulse - The ultimate anime tracking and analytics dashboard. Track your watchlist, analyze viewing habits, and connect with the anime community.">
+    <meta name="keywords" content="anime tracker, anime dashboard, watchlist, anime stats, anime analytics, anime community, anime statistics">
+    <title>AniPulse | Ultimate Anime Tracker & Analytics Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Frontend/Css/landingpage.css">
+      <link rel="shortcut icon" href="https://www.pngall.com/wp-content/uploads/13/Anime-Logo-PNG-Cutout.png"
         type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        crossorigin="anonymous">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Poppins:wght@300;500;700&display=swap"
-        rel="stylesheet" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"
-        crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="Frontend/Css/style.css">
-    <link rel="stylesheet" href="Frontend/Css/responsive.css">
 </head>
+<body>
 
-<body data-theme="dark">
-
-    <!-- Loading Screen -->
-    <div id="app-loader">
-        <div class="loader-container">
-
-            <!-- Logo -->
-            <div class="loader-logo">
-                <i class="fas fa-heartbeat"></i>
-                <span>AniPulse</span>
-            </div>
-
-            <!-- Subtitle -->
-            <p class="loader-text">Syncing your anime universe…</p>
-
-            <!-- Progress Bar -->
-            <div class="progress-wrapper">
-                <div class="progress-bar">
-                    <span id="loader-progress"></span>
+    <!-- Header -->
+    <header class="landing-header">
+        <div class="container header-content">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-heartbeat"></i>
                 </div>
-                <div class="progress-percent">
-                    <span id="loader-percent">0%</span>
-                </div>
-            </div>
-
+                <span class="logo-text">AniPulse</span>
+                <span class="logo-beta">BETA</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#stats" class="nav-link">Stats</a>
+                <a href="#showcase" class="nav-link">Showcase</a>
+                <a href="#community" class="nav-link">Community</a>
+                <a href="login.html" class="cta-button">Launch App</a>
+            </nav>
         </div>
-    </div>
+    </header>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Top Bar -->
-        <div class="top-bar">
-
-
-            <div class="header-left">
-                <a href="index.html">
-                    <div class="app-logo">
-                        <h2><i class="fas fa-heartbeat" style="color: var(--accent);"></i> <span>AniPulse</span></h2>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background"></div>
+        <div class="container hero-content">
+            <div class="hero-text">
+                <div class="hero-tag">
+                    <i class="fas fa-rocket"></i> VERSION 2.0.0 LAUNCHED
+                </div>
+                
+                <h1 class="hero-title">
+                    Your Anime Journey,<br>
+                    <span style="color: var(--primary)">Visualized & Analyzed</span>
+                </h1>
+                
+                <p class="hero-subtitle">
+                    AniPulse is more than an anime tracker—it's your personal anime analytics dashboard. 
+                    Track every episode, analyze your watching habits, discover patterns, and connect with 
+                    a community that shares your passion. Transform how you experience anime.
+                </p>
+                
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle feature-check"></i>
+                        <span>Real-time Progress Tracking</span>
                     </div>
-                </a>
-            </div>
-
-            <!-- User Action -->
-            <div class="user-actions">
-
-
-                <!-- Search -->
-                <div class="search-trigger" id="searchToggle">
-                    <i class="fas fa-search"></i>
-
-                    <div class="search-dropdown">
-                        <div class="search-input-wrapper">
-                            <input type="text" id="dashboardSearch" placeholder="Search anime..." />
-                        </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle feature-check"></i>
+                        <span>Advanced Analytics Dashboard</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle feature-check"></i>
+                        <span>AI-Powered Recommendations</span>
                     </div>
                 </div>
-
-                <!-- Theme Toggle -->
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="fas fa-sun"></i>
-                </button>
-
-                <!-- User Profile -->
-                <div class="user-profile" id="profileMenuToggle">
-                    <img loading="lazy" src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
-                        alt="User Avatar" class="user-avatar">
-
-                    <!-- Profile Dropdown -->
-                    <div class="profile-dropdown">
-
-                        <!--  sidebar user profile -->
-                        <div class="sidebar-user">
-                            <div class="user-avatar-container">
-                                <img loading="lazy"
-                                    src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
-                                    alt="User" class="sidebar-avatar">
-                                <div class="online-status"></div>
-                            </div>
-                            <div class="sidebar-user-info">
-                                <div class="sidebar-username">Loading...</div>
-                                <div class="sidebar-user-stats">
-                                    <div class="stat-item">
-                                        <span class="stat-number" id="statNumber">0</span>
-                                        <span class="stat-label" id="statLabel">Anime</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sidebar Menu -->
-                        <div class="sidebar-menu">
-                            <div class="menu-item active" data-page="dashboard">
-                                <i class="fas fa-home"></i><span>Dashboard</span>
-                            </div>
-                            <div class="menu-item" data-page="anime-list">
-                                <i class="fas fa-film"></i><span>My Anime</span>
-                            </div>
-                            <div class="menu-item" data-page="watchlist">
-                                <i class="fas fa-heart"></i><span>Watch List</span>
-                            </div>
-                            <div class="menu-item" data-page="statistics">
-                                <i class="fas fa-chart-line"></i><span>My Stats</span>
-                            </div>
-                            <div class="menu-item" data-page="achievements">
-                                <i class="fas fa-trophy"></i><span>Achievements</span>
-                            </div>
-                            <div class="menu-item" data-page="community">
-                                <i class="fas fa-users"></i><span>Community</span>
-                            </div>
-                            <div class="menu-item" data-page="settings">
-                                <i class="fas fa-cog"></i><span>Settings</span>
-                            </div>
-                            <div class="menu-item" id="logoutBtn">
-                                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
-                                </div>
-
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Dashboard Page -->
-        <div id="dashboard-page" class="page active">
-            <!-- Stats Section -->
-            <div class="dashboard-section">
-
-                <div id="greetingBanner" class="greeting-banner" role="region" aria-label="Daily greeting">
-
-                    <div class="greeting-left">
-
-                        <!-- Main greeting line + emoji -->
-                        <div class="greeting-main">
-                            <span id="greetingLine" class="greeting-line"></span>
-                            <span id="greetingEmoji" class="greeting-emoji" aria-hidden="true"></span>
-                        </div>
-
-                        <!-- Subline text -->
-                        <div id="greetingSubline" class="greeting-subline"></div>
-
-                        <!-- Meta info: clock, focus, streak, date -->
-                        <div class="greeting-meta">
-                            <span id="liveClock" class="greeting-meta-item"></span>
-                            <span id="streakInfo" class="greeting-meta-item"></span>
-
-                            <!-- Current date reuses same style -->
-                            <span id="currentDate" class="greeting-meta-item"></span>
-                        </div>
-
-                        <!-- Daily quote -->
-                        <div id="dailyQuote" class="greeting-quote"></div>
-
-                    </div>
-                </div>
-
-                <h2 class="section-title"><i class="fas fa-tachometer-alt"></i> Overview (<span
-                        id="current-month">October</span>)</h2>
-                <div class="stats-grid">
-                    <div class="stat-card fade-in">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-value" id="completed-count">0</div>
-                                <div class="stat-label">Total Completed</div>
-                                <div class="stat-change" id="completed-change"></div>
-                            </div>
-                            <div class="stat-icon success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card fade-in">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-value" id="movies-count">0</div>
-                                <div class="stat-label">Total Movies</div>
-                                <div class="stat-change" id="movies-change"></div>
-                            </div>
-                            <div class="stat-icon info">
-                                <i class="fas fa-video"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card fade-in">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-value" id="episodes-count">0</div>
-                                <div class="stat-label">Total Episodes</div>
-                                <div class="stat-change" id="episodes-change"></div>
-                            </div>
-                            <div class="stat-icon warning">
-                                <i class="fas fa-play-circle"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card fade-in">
-                        <div class="stat-header">
-                            <div>
-                                <div class="stat-value" id="total-hours-count">0</div>
-                                <div class="stat-label">Total Hours</div>
-                                <div class="stat-change" id="hours-change"></div>
-                            </div>
-                            <div class="stat-icon primary">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Anime DNA Section -->
-            <div class="dashboard-section" id="anime-dna-section">
-                <h2 class="section-title">
-                    <i class="fas fa-dna"></i> Your Anime DNA
-                </h2>
-
-                <div class="dna-grid">
-                    <div class="dna-card">
-                        <span class="dna-label">Favorite Genre</span>
-                        <span class="dna-value" id="dna-genre">—</span>
-                    </div>
-
-                    <div class="dna-card">
-                        <span class="dna-label">Average Score Given</span>
-                        <span class="dna-value" id="dna-score">—</span>
-                    </div>
-
-                    <div class="dna-card">
-                        <span class="dna-label">Preferred Format</span>
-                        <span class="dna-value" id="dna-format">—</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
-                <div class="quick-actions">
-                    <button class="action-btn" id="addAnimeBtn">
-                        <div class="action-icon primary">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                        <div class="action-text">Add Anime</div>
+                
+                <div class="hero-buttons">
+                    <button onclick="window.location.href='signup.html'" class="btn-primary">
+                        <i class="fas fa-play-circle"></i> Start Free Trial
                     </button>
-                    <button class="action-btn" id="importBtn">
-                        <div class="action-icon success">
-                            <i class="fas fa-file-import"></i>
-                        </div>
-                        <div class="action-text">Import Data</div>
-                    </button>
-                    <button class="action-btn" id="exportBtn">
-                        <div class="action-icon warning">
-                            <i class="fas fa-file-export"></i>
-                        </div>
-                        <div class="action-text">Export Data</div>
-                    </button>
-                    <button class="action-btn" id="statsBtn">
-                        <div class="action-icon info">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
-                        <div class="action-text">View Stats</div>
+                    <button onclick="window.location.href='#features'" class="btn-secondary">
+                        <i class="fas fa-chart-line"></i> Explore Features
                     </button>
                 </div>
             </div>
-
-            <!-- Dashboard Grid -->
-            <div class="dashboard-grid">
-                <!-- Monthly Progress Chart -->
-                <div class="chart-card fade-in">
-                    <div class="chart-header">
-                        <div class="chart-title">Monthly Progress</div>
-                        <div class="anime-counter">
-                            <span id="monthly-total-anime">Total Anime: 0</span>
+            
+            <div class="hero-visual">
+                <div class="dashboard-preview floating">
+                    <div class="preview-header">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: var(--gradient); border-radius: 8px;"></div>
+                            <span style="font-weight: 600; color: white;">AniPulse</span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: rgba(255, 255, 255, 0.1); border-radius: 8px;"></div>
+                            <div style="width: 30px; height: 30px; background: rgba(255, 255, 255, 0.1); border-radius: 8px;"></div>
                         </div>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="monthlyProgressChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Genre Distribution Chart -->
-                <div class="chart-card fade-in">
-                    <div class="chart-header">
-                        <div class="chart-title">Genre Distribution</div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="genreDistributionChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Activity Heatmap Section -->
-            <div class="chart-card fade-in">
-                <div class="chart-header">
-                    <div class="chart-title"><i class="fas fa-calendar-day"></i> Activity Heatmap</div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="activityHeatmapChart" height="140"></canvas>
-                </div>
-            </div>
-
-            <!-- Currently Watching Section -->
-            <div class="dashboard-section" id="currently-watching-section">
-                <h2 class="section-title"><i class="fas fa-eye"></i> Currently Watching</h2>
-                <div class="top-anime-grid" id="currently-watching-grid">
-                </div>
-            </div>
-
-            <!-- Top Rated Section -->
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-star"></i> Top Rated Anime</h2>
-                <div class="top-anime-grid" id="top-rated-anime">
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-history"></i> Recent Activity</h2>
-                <div class="activity-card fade-in">
-                    <div class="activity-header">
-                        <div class="activity-title">Latest Updates</div>
-                    </div>
-                    <div class="activity-list" id="recent-activity">
+                    
+                    <div class="preview-stats">
+                        <div class="stats-grid">
+                            <div class="stat-preview">
+                                <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 5px;">Completed</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: white;">42</div>
+                            </div>
+                            <div class="stat-preview">
+                                <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 5px;">Hours</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: white;">328</div>
+                            </div>
+                            <div class="stat-preview">
+                                <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 5px;">Episodes</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: white;">1,240</div>
+                            </div>
+                            <div class="stat-preview">
+                                <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 5px;">Score Avg</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: white;">8.2</div>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-chart">
+                            <div class="chart-bar" style="height: 80%;"></div>
+                            <div class="chart-bar" style="height: 60%;"></div>
+                            <div class="chart-bar" style="height: 90%;"></div>
+                            <div class="chart-bar" style="height: 40%;"></div>
+                            <div class="chart-bar" style="height: 70%;"></div>
+                            <div class="chart-bar" style="height: 85%;"></div>
+                            <div class="chart-bar" style="height: 55%;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- My Anime Page -->
-
-        <div id="anime-list-page" class="page">
-            <div class="anime-list-container">
-                <div class="anime-list-header">
-                    <div class="anime-list-title">
-                        <h2
-                            style="font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; ">
-                            <i class="fa fa-list-ul"></i>Anime List
-                        </h2>
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">POWERFUL FEATURES</span>
+                <h2 class="section-title">Everything You Need in One Dashboard</h2>
+                <p class="section-subtitle">
+                    AniPulse combines tracking, analytics, and community features into a seamless experience 
+                    designed specifically for anime enthusiasts.
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="anime-filters">
-                        <select id="statusFilter">
-                            <option value="all" selected>All</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Watching">Watching</option>
-                            <option value="Plan to Watch">Plan to Watch</option>
-                            <option value="Dropped">Dropped</option>
-                        </select>
-                        <select id="monthFilter">
-                            <option value="all">All Months</option>
-                            <option value="01">January</option>
-                            <option value="02" selected>February</option>
-                            <option value="03">March</option>
-                            <option value="04">April</option>
-                            <option value="05">May</option>
-                            <option value="06">June</option>
-                            <option value="07">July</option>
-                            <option value="08">August</option>
-                            <option value="09">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
-                        </select>
-                        <select id="yearFilter">
-                            <option value="all">All Years</option>
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026" selected>2026</option>
-                            <option value="2027">2027</option>
-                            <option value="2028">2028</option>
-                        </select>
-                        <div class="anime-counter">
-                            <span id="anime-count">Total Anime: 0</span>
-                        </div>
-
-                    </div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">
+                        Dive deep into your watching habits with comprehensive analytics. Track your progress, 
+                        analyze genre preferences, and visualize your anime journey with interactive charts.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Monthly progress tracking</li>
+                        <li><i class="fas fa-check"></i> Genre distribution analysis</li>
+                        <li><i class="fas fa-check"></i> Watch time statistics</li>
+                        <li><i class="fas fa-check"></i> Score distribution charts</li>
+                    </ul>
                 </div>
-
-                <!-- Table View (Default) -->
-                <div id="anime-table-view">
-
-                    <div class="table-container">
-                        <table class="anime-table">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Type</th>
-                                    <th>Progress</th>
-                                    <th>Status</th>
-                                    <th>Score</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody id="anime-table-body">
-                            </tbody>
-                        </table>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart-circle-check"></i>
                     </div>
+                    <h3 class="feature-title">Smart Watchlist</h3>
+                    <p class="feature-description">
+                        Organize your anime collection with our intelligent watchlist system. Sort by status, 
+                        priority, or custom tags. Never forget what's next on your list.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Custom status categories</li>
+                        <li><i class="fas fa-check"></i> Priority-based sorting</li>
+                        <li><i class="fas fa-check"></i> Episode progress tracking</li>
+                        <li><i class="fas fa-check"></i> Seasonal planning tools</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3 class="feature-title">Achievements & Milestones</h3>
+                    <p class="feature-description">
+                        Earn badges and achievements as you watch more anime. Celebrate milestones and 
+                        share your progress with the community.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> 50+ unlockable badges</li>
+                        <li><i class="fas fa-check"></i> Progress milestones</li>
+                        <li><i class="fas fa-check"></i> Seasonal challenges</li>
+                        <li><i class="fas fa-check"></i> Achievement showcase</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <h3 class="feature-title">Activity Heatmaps</h3>
+                    <p class="feature-description">
+                        Visualize your anime activity throughout the year with interactive heatmaps. 
+                        Identify your most active periods and viewing patterns.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Yearly activity visualization</li>
+                        <li><i class="fas fa-check"></i> Daily watching patterns</li>
+                        <li><i class="fas fa-check"></i> Seasonal trend analysis</li>
+                        <li><i class="fas fa-check"></i> Custom date ranges</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="feature-title">AI Recommendations</h3>
+                    <p class="feature-description">
+                        Get personalized anime recommendations based on your watching history, 
+                        ratings, and preferences. Discover hidden gems you'll love.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Personalized suggestions</li>
+                        <li><i class="fas fa-check"></i> Genre-based matching</li>
+                        <li><i class="fas fa-check"></i> Similar users recommendations</li>
+                        <li><i class="fas fa-check"></i> Seasonal picks</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users coming-icon"></i>
+                    </div>
+                    <h3 class="feature-title">Community Features</h3>
+                    <p class="feature-description">
+                        Connect with fellow anime fans. Share your progress, discuss episodes, 
+                        and join community challenges.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> User profiles & follows</li>
+                        <li><i class="fas fa-check"></i> Discussion forums</li>
+                        <li><i class="fas fa-check"></i> Community challenges</li>
+                        <li><i class="fas fa-check"></i> Shared watchlists</li>
+                    </ul>
                 </div>
             </div>
         </div>
+    </section>
 
-
-
-        <!-- Watchlist Page -->
-        <div id="watchlist-page" class="page">
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-heart"></i> Watch List</h2>
-
-                <!-- Filter Buttons -->
-                <div class="watchlist-filters">
-                    <button class="filter-btn active" data-status="all">All</button>
-                    <button class="filter-btn" data-status="Watching">Watching</button>
-                    <button class="filter-btn" data-status="On-Hold">On-Hold</button>
-                    <button class="filter-btn" data-status="Plan to Watch">Plan to Watch</button>
-                    <button class="filter-btn" data-status="Dropped">Dropped</button>
-                    <button class="filter-btn" data-status="Completed">Completed</button>
+    <!-- Stats Section -->
+    <section id="stats" class="stats-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">BY THE NUMBERS</span>
+                <h2 class="section-title">Trusted by Anime Enthusiasts Worldwide</h2>
+                <p class="section-subtitle">
+                    Join thousands of users who have transformed their anime tracking experience with AniPulse.
+                </p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">25K+</div>
+                    <div class="stat-label">Active Users</div>
                 </div>
-
-                <!-- Watchlist Grid -->
-                <div class="top-anime-grid" id="watchlist-container">
-                    <!-- Anime cards will load here dynamically -->
+                <div class="stat-card">
+                    <div class="stat-number">2.1M+</div>
+                    <div class="stat-label">Anime Entries</div>
                 </div>
-
-                <!-- Pagination -->
-                <div class="pagination-container">
-                    <div id="pagination"></div>
+                <div class="stat-card">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">User Satisfaction</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4.9</div>
+                    <div class="stat-label">Average Rating</div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Statistics page -->
-        <div id="statistics-page" class="page">
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Detailed Statistics</h2>
-                <div class="statistics-grid">
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Watch Time by Month</div>
-                            <div class="anime-counter">
-                                <span id="monthly-total-hours">Total Hrs: 0</span>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="watchTimeByMonthChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Anime Completion Over Time</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="completionChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Episodes By Month</div>
-                            <div class="anime-counter">
-                                <span id="yearly-total-episodes">Total Eps: 0</span>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="episodesOverTimeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Status Distribution</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="statusDistributionChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Type Distribution</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="typeDistributionChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Top Genres</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="genreStatsChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Score Distribution</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="scoreDistributionChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Average Score per Genre</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="avgScoreByGenreChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Favorite Genres Over Time</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="favoriteGenresChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Watch Time by Day of Week</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="watchByWeekdayChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Longest Anime -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Top 5 Longest Anime</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="longestAnimeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Shortest Anime -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Top 5 Shortest Anime</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="shortestAnimeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Seasonal Preference -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Favorite Seasons</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="seasonalPreferenceChart"></canvas>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Achievements Page -->
-        <div id="achievements-page" class="page">
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-trophy"></i> Achievements</h2>
-
-                <!-- Achievements Summary -->
-                <div class="achievements-summary">
-                    <div class="summary-card">
-                        <span class="summary-label">Total</span>
-                        <span class="summary-value" id="totalAchievements">0</span>
-                    </div>
-                    <div class="summary-card completed">
-                        <span class="summary-label">Completed</span>
-                        <span class="summary-value" id="completedAchievements">0</span>
-                    </div>
-                    <div class="summary-card progress">
-                        <span class="summary-label">In Progress</span>
-                        <span class="summary-value" id="inProgressAchievements">0</span>
-                    </div>
-                </div>
-
-                <!-- Achievements Grid -->
-                <div class="achievements-grid" id="achievementsGrid"></div>
-            </div>
-        </div>
-
-        <!-- Community Page -->
-        <div id="community-page" class="page">
-            <div class="coming-soon-container">
-                <i class="fas fa-users coming-icon"></i>
-                <h2>Community</h2>
-                <p>Community chat & discussions are under construction.</p>
-                <span class="coming-badge">Coming Soon</span>
-            </div>
-        </div>
-
-        <!-- Settings Page -->
-        <div id="settings-page" class="page">
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-cog"></i> Settings</h2>
-
-                <div class="settings-container">
-                    <!-- Profile Preview - Full Width -->
-                    <div class="profile-preview">
-                        <img loading="lazy"
-                            src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
-                            alt="User Avatar" class="profile-preview-avatar" id="profilePreviewAvatar">
-                        <div class="profile-preview-info">
-                            <div class="profile-preview-name" id="profilePreviewName">Yaman Jr</div>
-                            <div class="profile-preview-join-date">
-                                <i class="fas fa-calendar-plus"></i>
-                                <span id="memberSinceText">Member since ...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Settings Groups Container -->
-                <div class="settings-groups-container">
-                    <!-- Profile Settings -->
-                    <div class="settings-group">
-                        <h3><i class="fas fa-user"></i> Profile Settings</h3>
-                        <div class="settings-item">
-                            <label for="usernameInput">Display Name</label>
-                            <input type="text" id="usernameInput" placeholder="Enter your display name">
-                        </div>
-
-                        <div class="settings-item">
-                            <label for="avatarInput">Profile Photo</label>
-                            <div class="file-input-wrapper">
-                                <input type="file" id="avatarInput" accept="image/*">
-                                <div class="file-input-btn" style="background-color: var(--primary)">
-                                    <i class="fas fa-upload"></i> Choose Image
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="settings-item">
-                            <button id="resetAvatar" class="btn-reset">
-                                <i class="fas fa-undo"></i> Reset to Default Avatar
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 🎨 Appearance Settings -->
-                    <div class="settings-group modern-appearance" id="appearance-settings">
-                        <h3><i class="fas fa-palette"></i> Appearance</h3>
-
-                        <div class="settings-item">
-                            <label class="section-label">Theme</label>
-                            <div class="theme-selection">
-                                <div class="theme-card" data-theme="light">
-                                    <div class="theme-sample light"></div>
-                                    <span class="theme-label">Light</span>
-                                </div>
-                                <div class="theme-card active" data-theme="dark">
-                                    <div class="theme-sample dark"></div>
-                                    <span class="theme-label">Dark</span>
-                                </div>
-                                <div class="theme-card" data-theme="system">
-                                    <div class="theme-sample system"></div>
-                                    <span class="theme-label">System</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Backup & Restore Section - Full Width -->
-                    <div class="form-group">
-                        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">
-                            Auto Backup
-                        </h3>
-                        <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem;">
-                            Automatically export and update your anime data JSON file whenever you make changes.
-                        </p>
-                        <button id="enableBackupBtn" class="action-btn" style="max-width: 250px; padding: 0.75rem;">
-                            <div class="action-icon info" style="width: 40px; height: 40px;">
-                                <i class="fas fa-save"></i>
-                            </div>
-                            <div class="action-text">Enable Auto Backup</div>
-                        </button>
-                        <small id="backupStatus"
-                            style="display:block; margin-top:0.5rem; color:var(--text-light);"></small>
-                    </div>
-
-                    <!-- Danger Zone - Full Width -->
-                    <div class="danger-zone">
-                        <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
-                        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
-                            These actions are irreversible. Please proceed with caution.
-                        </p>
-                        <div class="danger-actions">
-                            <button class="btn btn-danger" id="clearDataBtn" disabled>
-                                <i class="fas fa-trash"></i> Clear All Data
-                            </button>
-                            <button class="btn btn-success" id="exportDataBtn">
-                                <i class="fas fa-file-export"></i> Export Data as JSON
-                            </button>
-                        </div>
-                    </div>
-
-                    <button class="settings-btn" id="openRecapFromSettings">
-                        <i class="fas fa-chart-line"></i> View Recap
+    <!-- CTA Section -->
+    <section id="cta" class="cta-section">
+        <div class="container">
+            <div class="cta-card">
+                <h2 class="cta-title">Ready to Transform Your Anime Experience?</h2>
+                <p class="cta-subtitle">
+                    Join AniPulse today and start tracking, analyzing, and celebrating your anime journey 
+                    with the most comprehensive dashboard available.
+                </p>
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="window.location.href='signup.html'" class="btn-primary" style="background: white; color: var(--primary);">
+                        <i class="fas fa-user-plus"></i> Create Free Account
                     </button>
-
+                    <button onclick="window.location.href='login.html'" class="btn-secondary" style="background: rgba(255, 255, 255, 0.2); color: white;">
+                        <i class="fas fa-sign-in-alt"></i> Sign In to Dashboard
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Add Anime Modal -->
-    <div id="addAnimeModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Add New Anime</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form id="addAnimeForm">
-                <input type="hidden" id="animeId">
-                <div class="form-group">
-                    <label for="animeTitle">Title</label>
-                    <input type="text" placeholder="Search for an anime..." id="animeTitle" required>
-                    <div class="search-loading" id="searchLoading">Searching...</div>
-                    <div class="search-results" id="searchResults"></div>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeType">Type</label>
-                    <select id="animeType" required>
-                        <option value="TV">TV Series</option>
-                        <option value="Movie">Movie</option>
-                        <option value="OVA">OVA</option>
-                        <option value="ONA">ONA</option>
-                        <option value="Special">Special</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeEpisodes">Total Episodes</label>
-                    <input type="number" id="animeEpisodes" value="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeDuration">Duration (minutes)</label>
-                    <input type="number" id="animeDuration" value="20" min="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeStatus">Status</label>
-                    <select id="animeStatus" required>
-                        <option value="Completed">Completed</option>
-                        <option value="Watching">Watching</option>
-                        <option value="Plan to Watch">Plan to Watch</option>
-                        <option value="Dropped">Dropped</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeProgress">Episode Progress</label>
-                    <input type="number" id="animeProgress" min="0" value="0" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeScore">Score (0-10)</label>
-                    <input type="number" id="animeScore" min="0" max="10" step="0.1" placeholder="7.5" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeYear">Completion Year</label>
-                    <select id="animeYear">
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                        <option value="2026" selected>2026</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                        <option value="2029">2029</option>
-                        <option value="2030">2030</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeMonth">Completion Month</label>
-                    <select id="animeMonth">
-                        <option value="01">January</option>
-                        <option value="02" selected>February</option>
-                        <option value="03">March</option>
-                        <option value="04">April</option>
-                        <option value="05">May</option>
-                        <option value="06">June</option>
-                        <option value="07">July</option>
-                        <option value="08">August</option>
-                        <option value="09">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeCover">Cover Image URL</label>
-                    <input type="text" id="animeCover" placeholder="Will be auto-filled from search" disabled>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeGenres">Genres</label>
-                    <input type="text" id="animeGenres" placeholder="Will be auto-filled from search" disabled>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">Add Anime</button>
-                    <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;">Delete</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Import Modal -->
-    <div id="importModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Import Anime Data</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="form-group">
-                <label for="importFile">Select JSON file</label>
-                <div class="file-input-wrapper">
-                    <input type="file" id="importFile" accept=".json">
-                    <div class="file-input-btn">
-                        <i class="fas fa-file-import"></i> Choose File
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>AniPulse</h3>
+                    <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 20px;">
+                        The ultimate anime tracking and analytics platform for enthusiasts worldwide.
+                    </p>
+                    <div style="display: flex; gap: 15px;">
+                        <a href="#" style="color: rgba(255, 255, 255, 0.6); font-size: 1.2rem;">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" style="color: rgba(255, 255, 255, 0.6); font-size: 1.2rem;">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                        <a href="https://github.com/yamanjr10/AniPulse" style="color: rgba(255, 255, 255, 0.6); font-size: 1.2rem;">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" style="color: rgba(255, 255, 255, 0.6); font-size: 1.2rem;">
+                            <i class="fab fa-reddit"></i>
+                        </a>
                     </div>
                 </div>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="importDataBtn">Import Data</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Name Entry Modal -->
-    <div id="nameEntryModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Welcome to AnimeTracker Pro!</h2>
-            </div>
-            <form id="nameEntryForm">
-                <div class="form-group">
-                    <label for="userNameInput">Enter your name to get started</label>
-                    <input type="text" id="userNameInput" placeholder="Your name" required maxlength="20">
+                
+                <div class="footer-column">
+                    <h3>Features</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Anime Tracking</a></li>
+                        <li><a href="#">Analytics Dashboard</a></li>
+                        <li><a href="#">Watchlist Management</a></li>
+                        <li><a href="#">Achievements System</a></li>
+                        <li><a href="#">Community Features</a></li>
+                    </ul>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Save & Continue</button>
+                
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Access</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Blog & Updates</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- All Activity Modal -->
-    <div id="allActivityModal" class="modal">
-        <div class="modal-content large-modal">
-            <div class="modal-header">
-                <h2 class="modal-title">All Activity</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="activity-list-full" id="all-activity-list">
-                    <!-- All activities will be populated here -->
+                
+                <div class="footer-column">
+                    <h3>Community</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Discord Server</a></li>
+                        <li><a href="#">User Forums</a></li>
+                        <li><a href="#">Seasonal Challenges</a></li>
+                        <li><a href="#">Top Users</a></li>
+                        <li><a href="#">Contribute</a></li>
+                    </ul>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- FULLSCREEN RECAP MODAL -->
-    <div id="recap-modal" class="recap-modal hidden">
-        <div class="recap-container">
-            <button class="recap-close">&times;</button>
-
-            <div class="recap-slide active" id="slide-1"></div>
-            <div class="recap-slide" id="slide-2"></div>
-            <div class="recap-slide" id="slide-3"></div>
-            <div class="recap-slide" id="slide-4"></div>
-            <div class="recap-slide" id="slide-5"></div>
-            <div class="recap-slide" id="slide-6"></div>
-            <div class="recap-slide" id="slide-7"></div>
-            <div class="recap-slide" id="slide-8"></div>
-            <div class="recap-slide" id="slide-9"></div>
-            <div class="recap-slide" id="slide-10"></div>
-            <div class="recap-slide" id="slide-11"></div>
-            <div class="recap-slide" id="slide-12"></div>
-
-            <div class="recap-controls">
-                <button id="prev-slide">←</button>
-                <button id="next-slide">→</button>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 AniPulse. All rights reserved.</p>
+                <p style="margin-top: 10px; font-size: 0.8rem; color: rgba(255, 255, 255, 0.4);">
+                    Anime data provided by Jikan API • This is a fan-made project, not affiliated with any anime studio.
+                </p>
             </div>
         </div>
-    </div>
-
-
-    <script defer src="Frontend/Js/main.js"></script>
-    <script defer src="Frontend/Js/extras.js"></script>
+    </footer>
 
     <script>
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "login.html";
-  });
-</script>
-</body>
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.landing-header');
+            if (window.scrollY > 50) {
+                header.style.padding = '15px 0';
+                header.style.background = 'rgba(13, 17, 25, 0.98)';
+                header.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.2)';
+            } else {
+                header.style.padding = '25px 0';
+                header.style.background = 'rgba(13, 17, 25, 0.95)';
+                header.style.boxShadow = 'none';
+            }
+        });
 
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Observe stat cards
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(card);
+        });
+
+        // Initialize animations for elements already in view
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.feature-card, .stat-card').forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight - 100) {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        // Demo functionality for CTA buttons
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (this.getAttribute('onclick')) return; 
+                
+                e.preventDefault();
+                const target = this.textContent.includes('Account') ? 'signup.html' : 'login.html';
+                window.location.href = target;
+            });
+        });
+    </script>
+</body>
 </html>
