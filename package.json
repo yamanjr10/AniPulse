@@ -1,11 +1,4 @@
 {
-  "name": "anipulse",
-  "version": "1.0.0",
-  "description": "AniPulse Backend",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -14,9 +7,22 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5"
   },
+  "name": "anipulse",
+  "version": "1.0.0",
+  "description": "![AniPulse](https://img.shields.io/badge/Version-2.0.0-blueviolet?style=flat-square)\r ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)\r ![Platform](https://img.shields.io/badge/Platform-Web-orange?style=flat-square)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yamanjr10/AniPulse.git"
   },
-  "license": "ISC"
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yamanjr10/AniPulse/issues"
+  },
+  "homepage": "https://github.com/yamanjr10/AniPulse#readme"
 }
