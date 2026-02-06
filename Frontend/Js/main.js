@@ -27,15 +27,22 @@ function calculatePageChecksum() {
     return simpleHash(document.documentElement.innerHTML).slice(0, 20);
 }
 
-// Initialize auto-reload system
+// Initialize auto-reload system (DEV ONLY)
 function initAutoReload() {
-    // Check for changes every 1 second
+
+    // ❌ Disable in production (Railway / Online)
+    if (location.hostname !== "localhost") {
+        console.log("🚫 Auto-reload disabled in production");
+        return;
+    }
+
     autoReloadInterval = setInterval(async () => {
         try {
             const response = await fetch(window.location.href, {
                 cache: 'no-store',
                 headers: { 'Cache-Control': 'no-cache' }
             });
+
             const html = await response.text();
             const newChecksum = simpleHash(html).slice(0, 20);
 
@@ -43,17 +50,16 @@ function initAutoReload() {
                 lastChecksum = newChecksum;
             } else if (lastChecksum !== newChecksum) {
                 console.log('🔄 Changes detected! Reloading page...');
-                // Show notification before reload
-                showToast('Changes detected! Refreshing...', 'info');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 500);
+                window.location.reload();
             }
+
         } catch (error) {
             console.error('Auto-reload check failed:', error);
         }
-    }, 1000); // Check every 1 second
+
+    }, 1000);
 }
+
 
 // Stop auto-reload
 function stopAutoReload() {
