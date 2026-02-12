@@ -154,30 +154,20 @@ function processNextToast() {
     "“If you don't take risks, you can't create a future.” — Luffy",
     "“No matter how deep the night, it always turns to day.” — Brook",
     "“People's lives don't end when they die. It ends when they lose faith.” — Itachi Uchiha",
-    "“Sometimes I do feel like I'm a failure. Like there's no hope for me. But I don't think you're a failure.” — Izuku Midoriya",
-    "“Knowing you're different is only the beginning. If you accept these differences you'll be able to get past them and grow.” — Shoto Todoroki",
     "“Reality is cruel, but you can't run from it forever. Face the facts.” — Akame",
     "“The world isn't perfect. But it's there for us, doing the best it can.” — Roy Mustang",
-    "“We are all like fireworks. We climb, shine, and always go our separate ways and become further apart.” — Katsura Kotarou",
     "“A lesson without pain is meaningless. That's because getting hurt teaches us to grow.” — Tomoe",
     "“If you don't like your destiny, don't accept it. Instead, have the courage to change it.” — Naruto Uzumaki",
-    "“It's not the face that makes someone a monster; it's the choices they make with their lives.” — Naruto Uzumaki",
     "“Hard work is worthless for those that don't believe in themselves.” — Naruto Uzumaki",
     "“If you don't share someone's pain, you can never understand them.” — Nagato",
     "“You can die anytime, but living takes true courage.” — Kenshin Himura",
-    "“A person grows up when he's able to overcome hardships. Protection is important, but there are some things that a person must learn on his own.” — Jiraiya",
     "“We're not retreating, we're advancing in a different direction.” — Edward Elric",
-    "“Fear is not evil. It tells you what your weakness is. And once you know your weakness, you can become stronger as well as kinder.” — Gildarts Clive",
     "“The moment you think of giving up, think of the reason why you held on so long.” — Natsu Dragneel",
     "“Never trust anyone too much; remember, the devil was once an angel.” — Kaneki Ken",
     "“You can't win a fight with your eyes closed.” — Killua Zoldyck",
-    "“It's not the strength of the body that counts, but the strength of the spirit.” — J.R.R. Tolkien",
-    "“If you really want to be strong... Stop caring about what your surrounding thinks of you!” — Saitama",
     "“A true hero is one who overcomes life's misfortunes.” — Mumen Rider",
-    "“It's fine to celebrate success but it is more important to heed the lessons of failure.” — Bill Gates",
     "“The world is cruel, but also very beautiful.” — Mikasa Ackerman",
     "“Life is not a game of luck. If you wanna win, work hard.” — Sora",
-    "“You're going to be alright. You just stumbled over a stone in the road. It means nothing.” — Gojo Satoru",
     "“The world isn't perfect. But it's there for us, doing the best it can.” — Hachiman Hikigaya"
   ];
 
@@ -345,6 +335,67 @@ clearBtn.addEventListener("click", function () {
     }
 });
 
+// =============================================
+// No Background scroll
+// =============================================
 
+// Prevent background scroll when modal is open
+function preventBodyScroll(prevent) {
+  if (prevent) {
+    // Get scrollbar width to prevent layout shift
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.documentElement.style.setProperty('--scrollbar-width', scrollbarWidth + 'px');
+    
+    document.body.classList.add('modal-open');
+    document.body.style.paddingRight = scrollbarWidth + 'px';
+  } else {
+    document.body.classList.remove('modal-open');
+    document.body.style.paddingRight = '';
+    document.documentElement.style.removeProperty('--scrollbar-width');
+  }
+}
 
+// Attach to add anime modal
+document.getElementById('addAnimeBtn')?.addEventListener('click', function() {
+  document.getElementById('addAnimeModal').style.display = 'block';
+  preventBodyScroll(true);
+});
+
+// Attach to import button
+document.getElementById('importBtn')?.addEventListener('click', function() {
+  document.getElementById('importModal').style.display = 'block';
+  preventBodyScroll(true);
+});
+
+// Close modal handlers
+document.querySelectorAll('.close-modal, .modal .btn-secondary').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const modal = this.closest('.modal');
+    if (modal) {
+      modal.style.display = 'none';
+      preventBodyScroll(false);
+    }
+  });
+});
+
+// Close modal when clicking outside
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.style.display = 'none';
+      preventBodyScroll(false);
+    }
+  });
+});
+
+// Handle escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const openModal = document.querySelector('.modal[style*="display: block"], .modal[style*="display:block"], .modal.show');
+    if (openModal) {
+      openModal.style.display = 'none';
+      preventBodyScroll(false);
+    }
+  }
+});
 

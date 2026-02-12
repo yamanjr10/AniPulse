@@ -802,6 +802,15 @@ function updateStats() {
 
 // Initialize charts
 function initCharts() {
+    // Get current theme
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    
+    // Define colors based on theme
+    const textColor = isDark ? '#ffffff' : '#64748b';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : '#e2e8f0';
+    const tooltipBg = isDark ? '#1a1f2e' : '#ffffff';
+    const tooltipText = isDark ? '#ffffff' : '#0f172a';
+    
     // Monthly Progress Chart
     const monthlyProgressCtx = document.getElementById('monthlyProgressChart').getContext('2d');
     monthlyProgressChart = new Chart(monthlyProgressCtx, {
@@ -825,15 +834,28 @@ function initCharts() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-light')
+                        color: textColor,
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        }
                     },
                     grid: {
-                        color: getComputedStyle(document.body).getPropertyValue('--gray')
+                        color: gridColor,
+                        drawBorder: false,
+                        lineWidth: 1
+                    },
+                    title: {
+                        display: false
                     }
                 },
                 x: {
                     ticks: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-light')
+                        color: textColor,
+                        font: {
+                            size: 11,
+                            weight: '500'
+                        }
                     },
                     grid: {
                         display: false
@@ -843,6 +865,28 @@ function initCharts() {
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    backgroundColor: tooltipBg,
+                    titleColor: tooltipText,
+                    bodyColor: tooltipText,
+                    borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1,
+                    padding: 10,
+                    cornerRadius: 8,
+                    titleFont: {
+                        size: 12,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 11
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10
                 }
             }
         }
@@ -1043,7 +1087,7 @@ function updateTopRatedAnime() {
     const topRatedAnime = animeData
         .filter(anime => anime.score && anime.score >= 8)
         .sort((a, b) => b.score - a.score)
-        .slice(0, 6);
+        .slice(0, 9);
 
     if (topRatedAnime.length === 0) {
         topRatedContainer.innerHTML = '<div class="no-anime">No highly rated anime yet. Rate some anime to see them here!</div>';
@@ -4908,7 +4952,7 @@ window.searchAnime = async function () {
 /* ---------- CONFIG ---------- */
 const RECAP_ACTIVE = true;          // Enable recaps
 const RECAP_WINDOW_DAYS = 7;        // Recaps available first 7 days of each month
-const TEST_MODE = false;           // Set to true to force Jan-only for testing
+const TEST_MODE = true;           // Set to true to force Jan-only for testing
 
 /* ---------- STATE ---------- */
 let recapSlides = [];
