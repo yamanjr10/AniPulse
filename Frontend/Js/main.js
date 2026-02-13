@@ -4952,7 +4952,7 @@ window.searchAnime = async function () {
 /* ---------- CONFIG ---------- */
 const RECAP_ACTIVE = true;          // Enable recaps
 const RECAP_WINDOW_DAYS = 7;        // Recaps available first 7 days of each month
-const TEST_MODE = true;           // Set to true to force Jan-only for testing
+const TEST_MODE = false;           // Set to true to force Jan-only for testing
 
 /* ---------- STATE ---------- */
 let recapSlides = [];
