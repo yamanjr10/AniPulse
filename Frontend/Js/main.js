@@ -2395,6 +2395,7 @@ function initStatisticsCharts() {
     // Initialize new charts
     initNewCharts();
 }
+
 // Initialize new charts
 function initNewCharts(selectedYear = new Date().getFullYear()) {
     // === EPISODES WATCHED OVER TIME CHART ===

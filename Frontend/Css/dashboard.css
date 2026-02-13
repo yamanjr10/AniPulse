@@ -1,6 +1,4 @@
-﻿/* ------------------------------------
-   DESIGN TOKENS & CSS VARIABLES
-   ------------------------------------ */
+﻿
 :root {
   /* 🎨 Color Palette - BLUE/PURPLE ONLY (NO PINK) */
   --clr-primary-400: #6366F1;   /* Indigo - primary */
@@ -2743,6 +2741,8 @@ h1, h2, h3, h4, h5, h6 {
 .anime-table .anime-score i {
   font-size: var(--font-size-xs);
 }
+
+
 /* ------------------------------------
    ACTIVITY CARD - EXACT FIX FOR YOUR HTML STRUCTURE
    ------------------------------------ */
