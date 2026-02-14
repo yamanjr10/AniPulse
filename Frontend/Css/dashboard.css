@@ -296,11 +296,13 @@ h1, h2, h3, h4, h5, h6 {
   transition: background-color var(--transition-base);
 }
 
-/* Header Left - Logo */
+/* ------------------------------------
+   HEADER LOGO - CLEAN & MODERN
+   ------------------------------------ */
+
 .header-left {
   display: flex;
   align-items: center;
-  min-width: auto;
 }
 
 .header-left a {
@@ -309,33 +311,87 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
 }
 
-/* Animated Logo - ALWAYS VISIBLE */
 .app-logo h2 {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-extrabold);
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: 700;
   margin: 0;
   color: var(--color-text-primary);
-  white-space: nowrap;
 }
 
 .app-logo i {
-  color: var(--clr-accent-400);
-  font-size: var(--font-size-2xl);
+  color: #8B5CF6;
+  font-size: 1.8rem;
   animation: heartbeat 2s ease-in-out infinite;
 }
 
 .app-logo span {
-  display: inline-block;
-  background: linear-gradient(135deg, 
-    var(--color-text-primary), 
-    var(--color-accent-tertiary)
-  );
+  background: linear-gradient(135deg, var(--color-text-primary), #8B5CF6);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.1); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .app-logo h2 {
+    font-size: 1.3rem;
+    gap: 8px;
+  }
+  
+  .app-logo i {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-logo h2 {
+    font-size: 1.2rem;
+  }
+  
+  .app-logo i {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .app-logo span {
+    font-size: 1rem;
+  }
+  
+  .app-logo i {
+    font-size: 1.3rem;
+  }
+}
+
+/* Dark mode */
+[data-theme="dark"] .app-logo span {
+  background: linear-gradient(135deg, #FFFFFF, #8B5CF6);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Light mode */
+[data-theme="light"] .app-logo span {
+  background: linear-gradient(135deg, #0F172A, #8B5CF6);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .app-logo i {
+    animation: none;
+  }
 }
 
 /* User Actions - Right side */
@@ -1209,7 +1265,6 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Gradient border effect */
 .dna-card::before {
-  content: '';
   position: absolute;
   inset: -1px;
   background: var(--gradient-primary);
@@ -1229,8 +1284,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* DNA helix decoration */
-.dna-card::after {
-  content: '🧬';
+.dna-card::after{
   position: absolute;
   bottom: -10px;
   right: -10px;
@@ -1284,7 +1338,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dna-label::after {
-  content: '';
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -1350,24 +1403,11 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(145deg, #F59E0B, #FBBF24);
 }
 
-/* Floating animation */
-.dna-card {
-  animation: float 6s ease-in-out infinite;
-  animation-delay: calc(var(--i, 0) * 0.2s);
-}
-
 .dna-card:nth-child(1) { --i: 1; }
 .dna-card:nth-child(2) { --i: 2; }
 .dna-card:nth-child(3) { --i: 3; }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
+
 
 /* Glow effect on hover */
 .dna-card:hover {
@@ -6287,76 +6327,131 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);
   margin-top: var(--space-2);
 }
-
 /* ------------------------------------
-   LOADING SCREEN
+   LOADING SCREEN - CLEAN & MODERN
    ------------------------------------ */
+
 #app-loader {
   position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at center, 
-    var(--color-bg-secondary), 
-    var(--color-bg-primary)
-  );
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #0B1120, #1A1F2E);
   z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.4s ease;
+}
+
+#app-loader.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .loader-container {
   text-align: center;
   max-width: 400px;
   width: 90%;
+  padding: 32px 24px;
 }
 
+/* Logo */
 .loader-logo {
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-extrabold);
-  color: var(--color-accent-primary);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
+  gap: 12px;
+  color: white;
 }
 
 .loader-logo i {
-  animation: heartbeat 1.5s ease-in-out infinite;
+  color: #8B5CF6;
+  font-size: 3rem;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
+.loader-logo span {
+  background: linear-gradient(135deg, #FFFFFF, #8B5CF6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.9; }
+}
+
+/* Subtitle */
 .loader-text {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-6);
+  font-size: 1rem;
+  color: #94A3B8;
+  margin-bottom: 24px;
+  font-weight: 400;
 }
 
-.progress-wrapper {
-  width: 100%;
-  margin-top: var(--space-4);
-}
-
-.progress-bar {
+/* Progress Bar Container */
+#app-loader .progress-bar {
   width: 100%;
   height: 6px;
-  background-color: var(--color-border);
-  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
   overflow: hidden;
+  margin-bottom: 8px;
 }
 
+/* Progress Fill */
 #loader-progress {
   display: block;
   height: 100%;
   width: 0%;
-  background: var(--gradient-primary);
-  border-radius: var(--radius-full);
-  transition: width var(--transition-base);
+  background: linear-gradient(90deg, #6366F1, #8B5CF6);
+  border-radius: 50px;
+  transition: width 0.2s ease;
 }
 
+/* Progress Percentage */
 .progress-percent {
-  margin-top: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
+  font-size: 0.9rem;
+  color: #94A3B8;
+}
+
+#loader-percent {
+  color: #8B5CF6;
+  font-weight: 600;
+}
+
+/* Light mode */
+[data-theme="light"] #app-loader {
+  background: linear-gradient(135deg, #F8FAFC, #FFFFFF);
+}
+
+[data-theme="light"] .loader-text {
+  color: #64748B;
+}
+
+[data-theme="light"] .progress-percent {
+  color: #64748B;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .loader-logo {
+    font-size: 2rem;
+  }
+  
+  .loader-logo i {
+    font-size: 2.5rem;
+  }
+  
+  .loader-container {
+    padding: 24px 16px;
+  }
 }
 
 /* ------------------------------------
