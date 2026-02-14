@@ -2,11 +2,6 @@
 //UPDATE 1.0.0
 // =============================================
 
-const token = localStorage.getItem("token");
-if (!token) {
-  window.location.href = "login.html";
-}
-
 // ✅ AUTO-RELOAD SYSTEM - Detects changes and refreshes page automatically
 let lastChecksum = null;
 let autoReloadInterval = null;
@@ -5816,172 +5811,156 @@ function startAnimationsAfterLoader() {
     try { typeof searchAnime === "function" && searchAnime(); } catch (e) { }
 }
 
-// ==================================================
-// Loader fail-safe (prevents infinite loader)
-// ==================================================
-setTimeout(() => {
+/* =====================================================
+   ✅ SINGLE APP LOADER SYSTEM (NO CONFLICTS)
+===================================================== */
+
+let loaderFinished = false;
+let loaderStartTime = 0;
+
+const MIN_LOADER_TIME = 1800; // 1.8s
+const MAX_LOADER_TIME = 8000; // safety
+
+function hideLoader() {
+  if (loaderFinished) return;
+
+  const elapsed = Date.now() - loaderStartTime;
+  const wait = Math.max(0, MIN_LOADER_TIME - elapsed);
+
+  setTimeout(() => {
+    loaderFinished = true;
+
     const loader = document.getElementById("app-loader");
+
     if (loader) {
-        loader.style.display = "none";
-        document.body.classList.remove("loading");
-        startAnimationsAfterLoader();
-    }
-}, 6000);
+      loader.style.transition = "opacity 0.35s ease";
+      loader.style.opacity = "0";
+      loader.style.pointerEvents = "none";
 
-// ==================================================
-// Loader logic
-// ==================================================
+      setTimeout(() => loader.remove(), 350);
+    }
+
+    document.body.classList.remove("loading");
+
+    if (typeof startAnimationsAfterLoader === "function") {
+      startAnimationsAfterLoader();
+    }
+
+  }, wait);
+}
+
+
+// Progress animation
+function runFakeProgress() {
+  const bar = document.getElementById("loader-progress");
+  const percent = document.getElementById("loader-percent");
+
+  if (!bar || !percent) return;
+
+  let progress = 0;
+
+  const timer = setInterval(() => {
+    if (loaderFinished) {
+      clearInterval(timer);
+      return;
+    }
+
+    if (progress < 80) progress += 5;
+    else if (progress < 92) progress += 2;
+    else progress += 0.3;
+
+    progress = Math.min(progress, 95);
+
+    bar.style.width = progress + "%";
+    percent.textContent = Math.floor(progress) + "%";
+
+  }, 120);
+}
+
+
+// Start loader
 document.addEventListener("DOMContentLoaded", () => {
-    const loader = document.getElementById("app-loader");
-    const progressBar = document.getElementById("loader-progress");
-    const percentText = document.getElementById("loader-percent");
 
-    // ❗ If loader elements missing, skip loader
-    if (!loader || !progressBar || !percentText) {
-        startAnimationsAfterLoader();
-        return;
-    }
+  loaderStartTime = Date.now();
 
-    document.body.classList.add("loading");
+  document.body.classList.add("loading");
 
-    let progress = 0;
+  runFakeProgress();
 
-    const fakeLoader = setInterval(() => {
-        progress += Math.random() * 10 + 5;
-
-        if (progress >= 100) {
-            progress = 100;
-            clearInterval(fakeLoader);
-
-            loader.style.opacity = "0";
-
-            setTimeout(() => {
-                loader.style.display = "none";
-                document.body.classList.remove("loading");
-                startAnimationsAfterLoader();
-            }, 400);
-        }
-
-        progressBar.style.width = progress + "%";
-        percentText.textContent = Math.floor(progress) + "%";
-    }, 200);
 });
 
-// 🎬 TRIGGER YEARLY TOTALS ANIMATION
+
+// Finish loader
+window.addEventListener("load", hideLoader);
+
+
+// Emergency safety
+setTimeout(hideLoader, MAX_LOADER_TIME);
+
+
+// Dev reload
+if (
+  location.hostname === "localhost" ||
+  location.hostname === "127.0.0.1"
+) {
+  if (typeof initAutoReload === "function") {
+    initAutoReload();
+  }
+}
+// ================= AFTER LOADER ANIMATIONS =================
+
+// Yearly totals animation
 setTimeout(() => {
-    const totalHoursEl = document.getElementById("monthly-total-hours");
-    const totalEpisodesEl = document.getElementById("yearly-total-episodes");
 
-    function getYearlyTotals() {
-        const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
-        const now = new Date();
-        const currentYear = now.getFullYear();
+  const totalHoursEl = document.getElementById("monthly-total-hours");
+  const totalEpisodesEl = document.getElementById("yearly-total-episodes");
 
-        let totalHours = 0;
-        let totalEpisodes = 0;
+  if (!totalHoursEl || !totalEpisodesEl) return;
 
-        animeData.forEach(anime => {
-            if (anime.userStatus !== "Completed" || !anime.finishDate) return;
-            const finish = new Date(anime.finishDate);
-            if (finish.getFullYear() !== currentYear) return;
+  const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
+  const now = new Date();
+  const currentYear = now.getFullYear();
 
-            const epCount = Number(anime.episodes) || 0;
-            const duration = Number(anime.duration) || 20;
-            const type = anime.type?.toLowerCase() || "tv";
+  let totalHours = 0;
+  let totalEpisodes = 0;
 
-            let hours = 0;
-            if (type === "movie") hours = duration / 60;
-            else hours = (epCount * duration) / 60;
+  animeData.forEach(anime => {
+    if (anime.userStatus !== "Completed" || !anime.finishDate) return;
 
-            totalHours += hours;
-            totalEpisodes += epCount;
-        });
+    const finish = new Date(anime.finishDate);
+    if (finish.getFullYear() !== currentYear) return;
 
-        return {
-            totalHours: Math.round(totalHours),
-            totalEpisodes
-        };
-    }
+    const epCount = Number(anime.episodes) || 0;
+    const duration = Number(anime.duration) || 20;
+    const type = anime.type?.toLowerCase() || "tv";
 
-    const totals = getYearlyTotals();
+    let hours = 0;
 
-    function animateCounter(el, targetValue, label) {
-        if (!el) return;
-        const duration = 4000;
-        const startValue = 0;
-        const startTime = performance.now();
+    if (type === "movie") hours = duration / 60;
+    else hours = (epCount * duration) / 60;
 
-        function easeOut(t) {
-            return t * (2 - t);
-        }
+    totalHours += hours;
+    totalEpisodes += epCount;
+  });
 
-        function update(currentTime) {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = easeOut(progress);
-            const current = Math.floor(startValue + targetValue * eased);
-            el.textContent = `${label}: ${current}`;
-            if (progress < 1) requestAnimationFrame(update);
-        }
+  animateCounter(totalHoursEl, Math.round(totalHours), "Total Hrs in 2025 ");
+  animateCounter(totalEpisodesEl, totalEpisodes, "Total Eps in 2025 ");
 
-        requestAnimationFrame(update);
-    }
-
-    animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2025 ");
-    animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2025 ");
 }, 200);
 
-// 🎬 TRIGGER DASHBOARD HEATMAP
+
+// Heatmap
 setTimeout(() => {
-    const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+
+  const animeData = JSON.parse(localStorage.getItem("animeData")) || [];
+
+  if (typeof renderActivityHeatmap === "function") {
     renderActivityHeatmap(animeData);
-}, 150);
-// 🔥 HARD FAIL-SAFE (prevents infinite loader on mobile)
-setTimeout(() => {
-    const loader = document.getElementById("app-loader");
-    if (loader) {
-        loader.style.display = "none";
-        document.body.classList.remove("loading");
-        startAnimationsAfterLoader();
-    }
-}, 6000);
+  }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const loader = document.getElementById("app-loader");
-    const progressBar = document.getElementById("loader-progress");
-    const percentText = document.getElementById("loader-percent");
+}, 350);
 
-    // ✅ CRITICAL SAFETY CHECK
-    if (!loader || !progressBar || !percentText) {
-        console.warn("Loader elements missing — skipping loader");
-        startAnimationsAfterLoader();
-        return;
-    }
 
-    document.body.classList.add("loading");
-
-    let progress = 0;
-
-    const fakeLoader = setInterval(() => {
-        progress += Math.random() * 10 + 5;
-
-        if (progress >= 100) {
-            progress = 100;
-            clearInterval(fakeLoader);
-
-            loader.style.opacity = "0";
-
-            setTimeout(() => {
-                loader.style.display = "none";
-                document.body.classList.remove("loading");
-                startAnimationsAfterLoader();
-            }, 400);
-        }
-
-        progressBar.style.width = progress + "%";
-        percentText.textContent = Math.floor(progress) + "%";
-    }, 200);
-});
 
 
 // Initialize the app with saved theme (theme loads before loader)
