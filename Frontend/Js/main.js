@@ -5907,7 +5907,38 @@ if (
     initAutoReload();
   }
 }
+
 // ================= AFTER LOADER ANIMATIONS =================
+
+// Add this function definition
+function animateCounter(element, targetValue, prefix = '') {
+    if (!element) return;
+    
+    const duration = 2000; // 2 seconds
+    const startValue = 0;
+    const startTime = performance.now();
+    
+    function easeOutQuad(t) {
+        return t * (2 - t);
+    }
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutQuad(progress);
+        const current = Math.floor(startValue + targetValue * eased);
+        
+        element.textContent = prefix + current;
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            element.textContent = prefix + targetValue; // Ensure final value
+        }
+    }
+    
+    requestAnimationFrame(update);
+}
 
 // Yearly totals animation
 setTimeout(() => {
@@ -5947,7 +5978,6 @@ setTimeout(() => {
   animateCounter(totalEpisodesEl, totalEpisodes, "Total Eps in 2025 ");
 
 }, 200);
-
 
 // Heatmap
 setTimeout(() => {
