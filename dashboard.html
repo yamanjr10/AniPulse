@@ -26,7 +26,7 @@
 <body data-theme="dark">
 
     <!-- Loading Screen -->
-    <div id="app-loader">       
+    <div id="app-loader">
         <div class="loader-container">
 
             <!-- Logo -->
@@ -136,7 +136,7 @@
                             </div>
                             <div class="menu-item" id="logoutBtn">
                                 <i class="fas fa-sign-out-alt"></i><span>Logout</span>
-                                </div>
+                            </div>
 
                         </div>
 
@@ -309,9 +309,29 @@
                 <div class="chart-card fade-in">
                     <div class="chart-header">
                         <div class="chart-title">Genre Distribution</div>
+                        <!-- Add filter buttons here -->
+                        <div class="genre-filter-buttons">
+                            <button class="genre-filter-btn active" data-filter="month">
+                                This Month
+                            </button>
+                            <button class="genre-filter-btn" data-filter="lastMonth">
+                                Last Month
+                            </button>
+                            <button class="genre-filter-btn" data-filter="year">
+                                This Year
+                            </button>
+                            <button class="genre-filter-btn" data-filter="all">
+                                All Time
+                            </button>
+                        </div>
                     </div>
                     <div class="chart-container">
                         <canvas id="genreDistributionChart"></canvas>
+                    </div>
+                    <!-- No data message (hidden by default) -->
+                    <div id="genreNoDataMessage" class="no-data-message" style="display: none;">
+                        <i class="fas fa-chart-pie"></i>
+                        <p>No completed anime found for this period.</p>
                     </div>
                 </div>
             </div>
@@ -459,11 +479,15 @@
             <div class="dashboard-section">
                 <h2 class="section-title"><i class="fas fa-chart-bar"></i> Detailed Statistics</h2>
                 <div class="statistics-grid">
+                    <!-- Watch Time by Month Chart -->
                     <div class="chart-card fade-in">
                         <div class="chart-header">
                             <div class="chart-title">Watch Time by Month</div>
                             <div class="anime-counter">
-                                <span id="monthly-total-hours">Total Hrs: 0</span>
+                                <div class="stat-with-filter">
+                                    <span id="monthly-total-hours">Total Hrs: 0</span>
+                                    <select id="watchTimeYearSelect" class="year-dropdown"></select>
+                                </div>
                             </div>
                         </div>
                         <div class="chart-container">
@@ -480,11 +504,15 @@
                         </div>
                     </div>
 
+                    <!-- Episodes By Month Chart -->
                     <div class="chart-card fade-in">
                         <div class="chart-header">
                             <div class="chart-title">Episodes By Month</div>
                             <div class="anime-counter">
-                                <span id="yearly-total-episodes">Total Eps: 0</span>
+                                <div class="stat-with-filter">
+                                    <span id="yearly-total-episodes">Total Eps: 0</span>
+                                    <select id="episodesYearSelect" class="year-dropdown"></select>
+                                </div>
                             </div>
                         </div>
                         <div class="chart-container">
@@ -935,12 +963,12 @@
     <script defer src="Frontend/Js/extras.js"></script>
 
     <script>
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "login.html";
-  });
-</script>
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        });
+    </script>
 </body>
 
 </html>

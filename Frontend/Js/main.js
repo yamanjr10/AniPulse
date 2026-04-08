@@ -887,41 +887,315 @@ function initCharts() {
         }
     });
 
-    // Genre Distribution Chart (Current Month Only)
-    const genreDistributionCtx = document.getElementById('genreDistributionChart').getContext('2d');
-    genreDistributionChart = new Chart(genreDistributionCtx, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(calculateGenreDistribution()),
-            datasets: [{
-                data: Object.values(calculateGenreDistribution()),
-                backgroundColor: [
-                    '#ef4444', '#3b82f6', '#facc15', '#a855f7', '#10b981',
-                    '#ec4899', '#f97316', '#6366f1', '#6489e0ff', '#84cc16',
-                    '#14b8a6', '#c026d3', '#06b6d4', '#e11d48', '#78350f',
-                    '#22c55e', '#f59e0b', '#9333ea', '#64748b', '#f9e616'
-                ],
-                borderWidth: 3,
-                hoverOffset: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '60%',
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        color: 'gray',
-                        padding: 20,
-                        usePointStyle: true,
-                        pointStyle: 'circle'
+     // =============================================
+// ENHANCED GENRE DISTRIBUTION CHART WITH TIME FILTERS
+// =============================================
+
+// Global variables for genre filter
+let currentGenreFilter = 'month'; // month, lastMonth, year, all
+let genreDistributionChart = null; // Will hold the chart instance
+
+// ========== HELPER FUNCTIONS ==========
+
+/**
+ * Get completion timestamp from anime
+ */
+function getAnimeCompletionTime(anime) {
+    // Try finishDate first
+    if (anime.finishDate) {
+        const date = new Date(anime.finishDate);
+        if (!isNaN(date.getTime())) return date;
+    }
+    // Try completedTimestamp
+    if (anime.completedTimestamp) {
+        return new Date(anime.completedTimestamp);
+    }
+    // Try updatedAt
+    if (anime.updatedAt) {
+        const date = new Date(anime.updatedAt);
+        if (!isNaN(date.getTime())) return date;
+    }
+    return null;
+}
+
+/**
+ * Get filtered anime based on time period
+ */
+function getFilteredAnimeByTime(filterType) {
+    // Only get completed anime
+    const completedAnime = animeData.filter(anime => anime.userStatus === 'Completed');
+    
+    if (filterType === 'all') {
+        return completedAnime;
+    }
+    
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    
+    return completedAnime.filter(anime => {
+        const completionDate = getAnimeCompletionTime(anime);
+        if (!completionDate) return false;
+        
+        switch (filterType) {
+            case 'month':
+                // Same month and year
+                return completionDate.getMonth() === currentMonth && 
+                       completionDate.getFullYear() === currentYear;
+            
+            case 'lastMonth':
+                // Previous month
+                const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+                const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                return completionDate.getMonth() === lastMonth && 
+                       completionDate.getFullYear() === lastMonthYear;
+            
+            case 'year':
+                // Same year
+                return completionDate.getFullYear() === currentYear;
+            
+            default:
+                return true;
+        }
+    });
+}
+
+/**
+ * Calculate genre distribution from filtered anime
+ */
+function calculateGenreDistributionWithFilter(filteredAnime) {
+    const genreCount = {};
+    
+    filteredAnime.forEach(anime => {
+        if (anime.genres && Array.isArray(anime.genres) && anime.genres.length > 0) {
+            anime.genres.forEach(genre => {
+                const cleanGenre = genre.trim();
+                if (cleanGenre) {
+                    genreCount[cleanGenre] = (genreCount[cleanGenre] || 0) + 1;
+                }
+            });
+        }
+    });
+    
+    return genreCount;
+}
+
+/**
+ * Get human-readable label for current filter
+ */
+function getGenreFilterLabel(filterType) {
+    const labels = {
+        month: 'This Month',
+        lastMonth: 'Last Month',
+        year: 'This Year',
+        all: 'All Time'
+    };
+    return labels[filterType] || 'This Month';
+}
+
+/**
+ * Update genre chart based on current filter
+ */
+function updateGenreChartWithFilter() {
+    if (!genreDistributionChart) {
+        console.warn('Genre chart not initialized yet');
+        return;
+    }
+    
+    // Get filtered anime based on selected time period
+    const filteredAnime = getFilteredAnimeByTime(currentGenreFilter);
+    
+    // Calculate genre distribution for filtered anime
+    const genreDistribution = calculateGenreDistributionWithFilter(filteredAnime);
+    
+    // Get labels and data
+    const labels = Object.keys(genreDistribution);
+    const data = Object.values(genreDistribution);
+    
+    // Handle no data case
+    const noDataMessage = document.getElementById('genreNoDataMessage');
+    const chartCanvas = document.getElementById('genreDistributionChart');
+    
+    if (labels.length === 0) {
+        // Show no data message
+        if (noDataMessage) noDataMessage.style.display = 'block';
+        if (chartCanvas) chartCanvas.style.opacity = '0.5';
+        
+        // Update chart with placeholder
+        genreDistributionChart.data.labels = ['No Data'];
+        genreDistributionChart.data.datasets[0].data = [1];
+        genreDistributionChart.data.datasets[0].backgroundColor = ['rgba(100, 100, 100, 0.3)'];
+        genreDistributionChart.update();
+        return;
+    }
+    
+    // Hide no data message
+    if (noDataMessage) noDataMessage.style.display = 'none';
+    if (chartCanvas) chartCanvas.style.opacity = '1';
+    
+    // Color palette for genres (preserving your existing colors)
+    const colorPalette = [
+        '#ef4444', '#3b82f6', '#facc15', '#a855f7', '#10b981',
+        '#ec4899', '#f97316', '#6366f1', '#6489e0ff', '#84cc16',
+        '#14b8a6', '#c026d3', '#06b6d4', '#e11d48', '#78350f',
+        '#22c55e', '#f59e0b', '#9333ea', '#64748b', '#f9e616'
+    ];
+    
+    // Generate colors for each genre
+    const backgroundColors = labels.map((_, index) => 
+        colorPalette[index % colorPalette.length]
+    );
+    
+    // Update chart data
+    genreDistributionChart.data.labels = labels;
+    genreDistributionChart.data.datasets[0].data = data;
+    genreDistributionChart.data.datasets[0].backgroundColor = backgroundColors;
+    
+    // Smooth update
+    genreDistributionChart.update({
+        duration: 400,
+        easing: 'easeInOutQuart'
+    });
+}
+
+/**
+ * Initialize genre filter buttons
+ */
+function initGenreFilters() {
+    const filterButtons = document.querySelectorAll('.genre-filter-btn');
+    
+    if (filterButtons.length === 0) {
+        console.warn('Genre filter buttons not found');
+        return;
+    }
+    
+    // Load saved filter from localStorage
+    const savedFilter = localStorage.getItem('genreFilterType');
+    if (savedFilter && ['month', 'lastMonth', 'year', 'all'].includes(savedFilter)) {
+        currentGenreFilter = savedFilter;
+    }
+    
+    // Set active button and add click handlers
+    filterButtons.forEach(btn => {
+        const filterValue = btn.getAttribute('data-filter');
+        if (filterValue === currentGenreFilter) {
+            btn.classList.add('active');
+        }
+        
+        btn.addEventListener('click', (e) => {
+            const newFilter = btn.getAttribute('data-filter');
+            if (!newFilter || newFilter === currentGenreFilter) return;
+            
+            // Update active state
+            filterButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Update filter
+            currentGenreFilter = newFilter;
+            
+            // Save to localStorage
+            localStorage.setItem('genreFilterType', currentGenreFilter);
+            
+            // Update chart
+            updateGenreChartWithFilter();
+        });
+    });
+    
+    // Initial chart update
+    updateGenreChartWithFilter();
+}
+
+// ========== MODIFIED ORIGINAL CHART INITIALIZATION ==========
+// Replace your existing genreDistributionChart initialization with this:
+
+const genreDistributionCtx = document.getElementById('genreDistributionChart').getContext('2d');
+genreDistributionChart = new Chart(genreDistributionCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [], // Start empty, will be populated by filter
+        datasets: [{
+            data: [], // Start empty, will be populated by filter
+            backgroundColor: [
+                '#ef4444', '#3b82f6', '#facc15', '#a855f7', '#10b981',
+                '#ec4899', '#f97316', '#6366f1', '#6489e0ff', '#84cc16',
+                '#14b8a6', '#c026d3', '#06b6d4', '#e11d48', '#78350f',
+                '#22c55e', '#f59e0b', '#9333ea', '#64748b', '#f9e616'
+            ],
+            borderWidth: 3,
+            hoverOffset: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '60%',
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    color: 'gray',
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.raw || 0;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        return `${label}: ${value} (${percentage}%)`;
                     }
                 }
             }
         }
-    });
+    }
+});
+
+// Initialize filters after chart is created
+initGenreFilters();
+
+// ========== INTEGRATION WITH EXISTING FUNCTIONS ==========
+
+// Hook into existing updateCharts function if it exists
+const originalUpdateCharts = window.updateCharts || function() {};
+window.updateCharts = function() {
+    originalUpdateCharts();
+    // Refresh genre chart when other charts update
+    if (genreDistributionChart) {
+        updateGenreChartWithFilter();
+    }
+};
+
+// Hook into data changes
+const originalUpdateAllComponents = window.updateAllComponents || function() {};
+window.updateAllComponents = function() {
+    originalUpdateAllComponents();
+    // Refresh genre chart when data changes
+    setTimeout(() => {
+        if (genreDistributionChart) {
+            updateGenreChartWithFilter();
+        }
+    }, 100);
+};
+
+// Also update when statistics page becomes active
+document.addEventListener('DOMContentLoaded', () => {
+    const statsMenuItem = document.querySelector('.menu-item[data-page="statistics"]');
+    if (statsMenuItem) {
+        statsMenuItem.addEventListener('click', () => {
+            setTimeout(() => {
+                if (genreDistributionChart) {
+                    updateGenreChartWithFilter();
+                }
+            }, 200);
+        });
+    }
+});
+
+console.log('✅ Enhanced Genre Distribution Chart with Time Filters Loaded');
 
     // Initialize other charts for statistics page
     initStatisticsCharts();
@@ -3834,8 +4108,8 @@ function setupYearlyAnimationInteractions() {
         btn.addEventListener("click", () => {
             setTimeout(() => {
                 const totals = getYearlyTotals();
-                animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2026 ");
-                animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2026 ");
+                animateCounter(totalHoursEl, totals.totalHours, "Total Hrs ");
+                animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps ");
             }, 400);
         });
     });
@@ -3843,8 +4117,8 @@ function setupYearlyAnimationInteractions() {
     // Recalculate dynamically if data changes
     window.addEventListener("storage", () => {
         const totals = getYearlyTotals();
-        animateCounter(totalHoursEl, totals.totalHours, "Total Hrs in 2026 ");
-        animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps in 2026 ");
+        animateCounter(totalHoursEl, totals.totalHours, "Total Hrs ");
+        animateCounter(totalEpisodesEl, totals.totalEpisodes, "Total Eps ");
     });
 }
 
@@ -5990,7 +6264,372 @@ setTimeout(() => {
 
 }, 350);
 
+// =============================================
+// FIXED YEAR SELECTOR FOR CHARTS
+// =============================================
 
+// Global variables
+let currentEpisodesYear = null;
+let currentWatchTimeYear = null;
+
+/**
+ * Format numbers to K/M/B for compact display
+ */
+function formatCompactNumber(num) {
+    if (num === 0) return '0';
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    }
+    return num.toString();
+}
+
+/**
+ * Get all available years from anime data
+ */
+function getAvailableYears() {
+    const years = new Set();
+    
+    animeData.forEach(anime => {
+        if (anime.userStatus === 'Completed' && anime.finishDate) {
+            const year = new Date(anime.finishDate).getFullYear();
+            if (!isNaN(year)) {
+                years.add(year);
+            }
+        }
+    });
+    
+    const sortedYears = Array.from(years).sort((a, b) => b - a);
+    
+    if (sortedYears.length === 0) {
+        sortedYears.push(new Date().getFullYear());
+    }
+    
+    return sortedYears;
+}
+
+/**
+ * Calculate episodes per month for a specific year
+ */
+function calculateEpisodesPerMonth(year) {
+    const monthlyEpisodes = Array(12).fill(0);
+    const seen = new Set();
+    
+    animeData.forEach(anime => {
+        if (anime.userStatus !== 'Completed') return;
+        
+        let completionDate = null;
+        if (anime.finishDate) {
+            completionDate = new Date(anime.finishDate);
+        } else if (anime.completedTimestamp) {
+            completionDate = new Date(anime.completedTimestamp);
+        }
+        
+        if (!completionDate || isNaN(completionDate.getTime())) return;
+        
+        const animeYear = completionDate.getFullYear();
+        if (animeYear !== year) return;
+        
+        const monthIndex = completionDate.getMonth();
+        if (monthIndex < 0 || monthIndex > 11) return;
+        
+        const key = `${anime.id || anime.title}-${animeYear}-${monthIndex}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        
+        const episodes = anime.type === 'Movie' ? 1 : (anime.episodes || 0);
+        monthlyEpisodes[monthIndex] += episodes;
+    });
+    
+    return monthlyEpisodes;
+}
+
+/**
+ * Calculate total episodes for a year
+ */
+function calculateTotalEpisodesForYear(year) {
+    let total = 0;
+    const seen = new Set();
+    
+    animeData.forEach(anime => {
+        if (anime.userStatus !== 'Completed') return;
+        
+        let completionDate = null;
+        if (anime.finishDate) {
+            completionDate = new Date(anime.finishDate);
+        } else if (anime.completedTimestamp) {
+            completionDate = new Date(anime.completedTimestamp);
+        }
+        
+        if (!completionDate || isNaN(completionDate.getTime())) return;
+        
+        const animeYear = completionDate.getFullYear();
+        if (animeYear !== year) return;
+        
+        const key = `${anime.id || anime.title}-${animeYear}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        
+        const episodes = anime.type === 'Movie' ? 1 : (anime.episodes || 0);
+        total += episodes;
+    });
+    
+    return total;
+}
+
+/**
+ * Update episodes chart with proper Y-axis limits
+ */
+function updateEpisodesChart(year) {
+    if (!episodesOverTimeChart) {
+        console.warn('Episodes chart not initialized');
+        return;
+    }
+    
+    const monthlyData = calculateEpisodesPerMonth(year);
+    const totalEpisodes = calculateTotalEpisodesForYear(year);
+    const formattedTotal = formatCompactNumber(totalEpisodes);
+    
+    // Find max value for Y-axis
+    const maxValue = Math.max(...monthlyData, 1);
+    // Calculate nice Y-axis max (round up to nearest nice number)
+    const yAxisMax = Math.ceil(maxValue * 1.1); // Add 10% padding
+    
+    // Update total display
+    const totalEpisodesSpan = document.getElementById('yearly-total-episodes');
+    if (totalEpisodesSpan) {
+        totalEpisodesSpan.innerHTML = `Total Eps: ${formattedTotal}`;
+        totalEpisodesSpan.title = `${totalEpisodes.toLocaleString()} episodes`;
+    }
+    
+    // Update chart data
+    episodesOverTimeChart.data.datasets[0].data = monthlyData;
+    episodesOverTimeChart.data.datasets[0].label = `Episodes Watched (${year})`;
+    
+    // Update Y-axis max to prevent huge scale
+    if (episodesOverTimeChart.options.scales?.y) {
+        episodesOverTimeChart.options.scales.y.max = yAxisMax;
+        episodesOverTimeChart.options.scales.y.suggestedMax = yAxisMax;
+    }
+    
+    episodesOverTimeChart.update();
+}
+
+/**
+ * Calculate watch time per month for a specific year
+ */
+function calculateWatchTimePerMonth(year) {
+    const monthlyHours = Array(12).fill(0);
+    const seen = new Set();
+    
+    animeData.forEach(anime => {
+        if (anime.userStatus !== 'Completed') return;
+        
+        let completionDate = null;
+        if (anime.finishDate) {
+            completionDate = new Date(anime.finishDate);
+        } else if (anime.completedTimestamp) {
+            completionDate = new Date(anime.completedTimestamp);
+        }
+        
+        if (!completionDate || isNaN(completionDate.getTime())) return;
+        
+        const animeYear = completionDate.getFullYear();
+        if (animeYear !== year) return;
+        
+        const monthIndex = completionDate.getMonth();
+        if (monthIndex < 0 || monthIndex > 11) return;
+        
+        const key = `${anime.id || anime.title}-${animeYear}-${monthIndex}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        
+        let hours = 0;
+        if (anime.type === 'Movie') {
+            hours = (anime.duration || 120) / 60;
+        } else {
+            const episodeDuration = anime.duration || 20;
+            hours = ((anime.episodes || 0) * episodeDuration) / 60;
+        }
+        
+        monthlyHours[monthIndex] += hours;
+    });
+    
+    return monthlyHours.map(h => Math.round(h * 10) / 10);
+}
+
+/**
+ * Calculate total hours for a year
+ */
+function calculateTotalHoursForYear(year) {
+    let total = 0;
+    const seen = new Set();
+    
+    animeData.forEach(anime => {
+        if (anime.userStatus !== 'Completed') return;
+        
+        let completionDate = null;
+        if (anime.finishDate) {
+            completionDate = new Date(anime.finishDate);
+        } else if (anime.completedTimestamp) {
+            completionDate = new Date(anime.completedTimestamp);
+        }
+        
+        if (!completionDate || isNaN(completionDate.getTime())) return;
+        
+        const animeYear = completionDate.getFullYear();
+        if (animeYear !== year) return;
+        
+        const key = `${anime.id || anime.title}-${animeYear}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        
+        let hours = 0;
+        if (anime.type === 'Movie') {
+            hours = (anime.duration || 120) / 60;
+        } else {
+            const episodeDuration = anime.duration || 20;
+            hours = ((anime.episodes || 0) * episodeDuration) / 60;
+        }
+        
+        total += hours;
+    });
+    
+    return Math.round(total * 10) / 10;
+}
+
+/**
+ * Update watch time chart with proper Y-axis limits
+ */
+function updateWatchTimeChart(year) {
+    if (!watchTimeByMonthChart) {
+        console.warn('Watch time chart not initialized');
+        return;
+    }
+    
+    const monthlyData = calculateWatchTimePerMonth(year);
+    const totalHours = calculateTotalHoursForYear(year);
+    const formattedHours = formatCompactNumber(totalHours);
+    
+    // Find max value for Y-axis
+    const maxValue = Math.max(...monthlyData, 1);
+    const yAxisMax = Math.ceil(maxValue * 1.1);
+    
+    // Update total display
+    const totalHoursSpan = document.getElementById('monthly-total-hours');
+    if (totalHoursSpan) {
+        totalHoursSpan.innerHTML = `Total Hrs: ${formattedHours}`;
+        totalHoursSpan.title = `${totalHours.toLocaleString()} hours`;
+    }
+    
+    // Update chart data
+    watchTimeByMonthChart.data.datasets[0].data = monthlyData;
+    
+    // Update Y-axis max
+    if (watchTimeByMonthChart.options.scales?.y) {
+        watchTimeByMonthChart.options.scales.y.max = yAxisMax;
+        watchTimeByMonthChart.options.scales.y.suggestedMax = yAxisMax;
+    }
+    
+    watchTimeByMonthChart.update();
+}
+
+/**
+ * Populate year dropdowns
+ */
+function populateYearDropdowns() {
+    const years = getAvailableYears();
+    const currentYear = new Date().getFullYear();
+    
+    // Populate Episodes Year Selector
+    const episodesSelect = document.getElementById('episodesYearSelect');
+    if (episodesSelect) {
+        episodesSelect.innerHTML = '';
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            episodesSelect.appendChild(option);
+        });
+        
+        if (!currentEpisodesYear) {
+            currentEpisodesYear = years.includes(currentYear) ? currentYear : years[0];
+        }
+        episodesSelect.value = currentEpisodesYear;
+        
+        episodesSelect.removeEventListener('change', handleEpisodesYearChange);
+        episodesSelect.addEventListener('change', handleEpisodesYearChange);
+    }
+    
+    // Populate Watch Time Year Selector
+    const watchTimeSelect = document.getElementById('watchTimeYearSelect');
+    if (watchTimeSelect) {
+        watchTimeSelect.innerHTML = '';
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            watchTimeSelect.appendChild(option);
+        });
+        
+        if (!currentWatchTimeYear) {
+            currentWatchTimeYear = years.includes(currentYear) ? currentYear : years[0];
+        }
+        watchTimeSelect.value = currentWatchTimeYear;
+        
+        watchTimeSelect.removeEventListener('change', handleWatchTimeYearChange);
+        watchTimeSelect.addEventListener('change', handleWatchTimeYearChange);
+    }
+}
+
+/**
+ * Handle episodes year change
+ */
+function handleEpisodesYearChange(event) {
+    const selectedYear = parseInt(event.target.value);
+    currentEpisodesYear = selectedYear;
+    updateEpisodesChart(selectedYear);
+}
+
+/**
+ * Handle watch time year change
+ */
+function handleWatchTimeYearChange(event) {
+    const selectedYear = parseInt(event.target.value);
+    currentWatchTimeYear = selectedYear;
+    updateWatchTimeChart(selectedYear);
+}
+
+/**
+ * Initialize year selectors
+ */
+function initYearSelectors() {
+    populateYearDropdowns();
+}
+
+// Hook into existing updateAllComponents
+const originalUpdateAllComponents = window.updateAllComponents;
+if (typeof originalUpdateAllComponents === 'function') {
+    window.updateAllComponents = function() {
+        originalUpdateAllComponents();
+        setTimeout(() => {
+            populateYearDropdowns();
+            if (currentEpisodesYear) updateEpisodesChart(currentEpisodesYear);
+            if (currentWatchTimeYear) updateWatchTimeChart(currentWatchTimeYear);
+        }, 100);
+    };
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        initYearSelectors();
+    }, 500);
+});
+
+console.log('✅ Year Selectors with Fixed Y-axis Limits Loaded');
 
 
 // Initialize the app with saved theme (theme loads before loader)
