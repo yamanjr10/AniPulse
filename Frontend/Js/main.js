@@ -1356,7 +1356,7 @@ function updateTopRatedAnime() {
     const topRatedAnime = animeData
         .filter(anime => anime.score && anime.score >= 8)
         .sort((a, b) => b.score - a.score)
-        .slice(0, 9);
+        .slice(0, 8);
 
     if (topRatedAnime.length === 0) {
         topRatedContainer.innerHTML = '<div class="no-anime">No highly rated anime yet. Rate some anime to see them here!</div>';
@@ -4172,10 +4172,16 @@ function updateSidebarUserInfo() {
     const totalAnime = animeData.length;
     totalHours = Math.round(totalHours);
 
-    // 🔢 Short format helper
+    // 🔢 Short format helper (NO ROUNDING UP → 3.1K instead of 3.2K)
     const formatShort = num => {
-        if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-        if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+        if (num >= 1_000_000) {
+            let val = Math.floor(num / 100_000) / 10;
+            return val % 1 === 0 ? val.toFixed(0) + 'M' : val + 'M';
+        }
+        if (num >= 1_000) {
+            let val = Math.floor(num / 100) / 10;
+            return val % 1 === 0 ? val.toFixed(0) + 'K' : val + 'K';
+        }
         return num.toString();
     };
 
@@ -4209,9 +4215,8 @@ function updateSidebarUserInfo() {
 
         let showingHours = true;
 
-        // 🔁 Fade-up switch every 60 s
+        // 🔁 Fade-up switch every 15s
         setInterval(() => {
-            // trigger fade-up class
             toggleNumberEl.classList.add('fade-up-out');
             toggleLabelEl.classList.add('fade-up-out');
 
@@ -4226,13 +4231,11 @@ function updateSidebarUserInfo() {
                     toggleNumberEl.title = totalHours.toLocaleString() + ' Hours';
                 }
 
-                // reset position to bottom then fade-up in
                 toggleNumberEl.classList.remove('fade-up-out');
                 toggleLabelEl.classList.remove('fade-up-out');
                 toggleNumberEl.classList.add('fade-up-in');
                 toggleLabelEl.classList.add('fade-up-in');
 
-                // remove class after animation
                 setTimeout(() => {
                     toggleNumberEl.classList.remove('fade-up-in');
                     toggleLabelEl.classList.remove('fade-up-in');
@@ -4244,9 +4247,6 @@ function updateSidebarUserInfo() {
     }
 }
 
-
-/* === 🚀 Auto-update sidebar when page loads === */
-// This is called from startAnimationsAfterLoader, no need to listen here
 
 /* === 🔁 Reanimate when data changes === */
 window.addEventListener('storage', () => {
@@ -6628,8 +6628,6 @@ document.addEventListener('DOMContentLoaded', () => {
         initYearSelectors();
     }, 500);
 });
-
-console.log('✅ Year Selectors with Fixed Y-axis Limits Loaded');
 
 
 // Initialize the app with saved theme (theme loads before loader)

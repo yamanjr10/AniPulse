@@ -1,154 +1,920 @@
+/* ==================================================
+   ANIPULSE RESPONSIVE CSS v2.0
+   Mobile-first modern design with smooth transitions
+================================================== */
 
-/* ===== GREETING BANNER RESPONSIVE  ===== */
-@media (max-width: 768px) {
-    .greeting-banner {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-        padding: 1rem;
-        margin: 0 auto 1.5rem auto;
-        border-radius: 18px;
-        width: calc(100% - 2rem);
-        max-width: 100%;
-        box-sizing: border-box;
-        overflow: hidden;
-        word-break: break-word;
-        overflow-wrap: break-word;
-    }
+/* ==================================================
+   TABLET: 641px - 1024px
+================================================== */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .main-content {
+    padding: calc(var(--header-height) + var(--space-6)) var(--space-4) var(--space-6);
+  }
 
-    .greeting-left {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        width: 100%;
-        box-sizing: border-box;
-        min-width: 0;
-    }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-    .greeting-main {
-        display: flex;
-        gap: 0.4rem;
-        flex-wrap: wrap;
-        align-items: center;
-        width: 100%;
-        min-width: 0;
-        box-sizing: border-box;
-    }
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .greeting-line {
-        font-size: 1.25rem;
-        font-weight: 800;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        word-break: break-word;
-        max-width: calc(100% - 1.5rem);
-        flex: 1;
-        min-width: 0;
-    }
+  .top-anime-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--space-4);
+  }
 
-    .greeting-emoji {
-        font-size: 1.25rem;
-        flex-shrink: 0;
-        white-space: nowrap;
-    }
+  .greeting-banner {
+    padding: var(--space-6);
+  }
 
-    .greeting-subline {
-        font-size: 0.9rem;
-        opacity: 0.92;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        max-width: 100%;
-        width: 100%;
-        box-sizing: border-box;
-        line-height: 1.4;
-    }
+  .greeting-main {
+    font-size: var(--font-size-2xl);
+  }
 
-    .greeting-meta {
-        display: flex;
-        gap: 0.4rem;
-        font-size: 0.75rem;
-        flex-wrap: wrap;
-        width: 100%;
-        box-sizing: border-box;
-        min-width: 0;
-    }
+  .greeting-emoji {
+    font-size: var(--font-size-3xl);
+  }
 
-    .greeting-meta-item {
-        padding: 0.3rem 0.55rem;
-        font-size: 0.75rem;
-        white-space: normal;
-        word-break: break-word;
-        max-width: 100%;
-        flex-shrink: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .greeting-quote {
-        font-size: 0.8rem;
-        margin-top: 0.5rem;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        max-width: 100%;
-        width: 100%;
-        box-sizing: border-box;
-        line-height: 1.4;
-    }
-
-    .greeting-dismiss {
-        align-self: flex-start;
-        margin-top: 0.25rem;
-        font-size: 1rem;
-        padding: 0.5rem;
-    }
+  .section-title {
+    font-size: var(--font-size-xl);
+  }
 }
 
+/* ==================================================
+   MOBILE: 320px - 640px (Portrait Phones)
+================================================== */
+@media (max-width: 640px) {
+  :root {
+    --font-size-2xl: 1.25rem;
+    --font-size-3xl: 1.5rem;
+    --space-6: 1.25rem;
+    --space-8: 1.75rem;
+  }
+
+  .main-content {
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-3) var(--space-4);
+  }
+
+  /* ==================== HEADER MOBILE ==================== */
+  .top-bar {
+    padding: 0 var(--space-3);
+    height: 4rem;
+  }
+
+  .app-logo h2 {
+    font-size: 1.125rem;
+    gap: var(--space-1);
+  }
+
+  .app-logo i {
+    font-size: 1.5rem;
+  }
+
+  .app-logo span {
+    display: none;
+  }
+
+  /* ==================== USER ACTIONS MOBILE ==================== */
+  .user-actions {
+    gap: var(--space-2);
+  }
+
+  .search-trigger,
+  .theme-toggle {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-base);
+  }
+
+  /* ==================== GREETING BANNER MOBILE ==================== */
+  .greeting-banner {
+    padding: var(--space-4) var(--space-4);
+    margin-bottom: var(--space-6);
+    border-radius: var(--radius-xl);
+  }
+
+  .greeting-banner::before {
+    display: none;
+  }
+
+  .greeting-main {
+    font-size: var(--font-size-2xl);
+    gap: var(--space-1);
+  }
+
+  .greeting-emoji {
+    font-size: var(--font-size-3xl);
+  }
+
+  .greeting-subline {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-2);
+  }
+
+  .greeting-meta {
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  .greeting-meta-item {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-xs);
+    flex: 1;
+    justify-content: center;
+  }
+
+  .greeting-quote {
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-2);
+  }
+
+  /* ==================== GRIDS MOBILE ==================== */
+  .stats-grid,
+  .dna-grid,
+  .quick-actions,
+  .achievements-grid,
+  .achievements-summary {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-4) !important;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-4);
+  }
+
+  /* ==================== CARDS MOBILE ==================== */
+  .stat-card,
+  .dna-card,
+  .action-btn,
+  .chart-card,
+  .activity-card {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    margin-bottom: 0;
+  }
+
+  .stat-card {
+    animation: none;
+  }
+
+  .stat-header {
+    gap: var(--space-2);
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-lg);
+  }
+
+  .stat-value {
+    font-size: var(--font-size-2xl);
+  }
+
+  .stat-info h3 {
+    font-size: var(--font-size-xs);
+  }
+
+  /* ==================== DNA MOBILE ==================== */
+  .dna-label {
+    font-size: var(--font-size-xs);
+  }
+
+  .dna-value {
+    font-size: var(--font-size-xl);
+  }
+
+  /* ==================== ACTION BUTTONS MOBILE ==================== */
+  .action-btn {
+    padding: var(--space-4) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .action-icon {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-lg);
+  }
+
+  .action-text {
+    font-size: var(--font-size-xs);
+  }
+
+  /* ==================== ANIME GRID MOBILE ==================== */
+  .top-anime-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: var(--space-3) !important;
+  }
+
+  .anime-cover {
+    height: 180px;
+  }
+
+  .anime-title {
+    font-size: var(--font-size-xs);
+  }
+
+  .anime-rating {
+    font-size: var(--font-size-xs);
+  }
+
+  /* ==================== SECTION TITLES MOBILE ==================== */
+  .section-title {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-4);
+  }
+
+  .section-title i {
+    font-size: var(--font-size-lg);
+  }
+
+  /* ==================== MODALS MOBILE ==================== */
+  .modal-content {
+    width: 95% !important;
+    padding: var(--space-6) !important;
+    border-radius: var(--radius-xl);
+  }
+
+  .modal-content.large-modal {
+    max-width: 98% !important;
+    max-height: 92vh !important;
+  }
+
+  .modal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .modal-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .close-modal {
+    align-self: flex-end;
+    width: 36px;
+    height: 36px;
+  }
+
+  /* ==================== FORMS MOBILE ==================== */
+  .form-group {
+    margin-bottom: var(--space-4);
+  }
+
+  .form-group label {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-1);
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+  }
+
+  .form-actions {
+    gap: var(--space-2);
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* ==================== BUTTONS MOBILE ==================== */
+  .btn {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-xs);
+  }
+
+  /* ==================== FILTER BUTTONS MOBILE ==================== */
+  .filter-btn {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  .anime-filters,
+  .watchlist-filters {
+    gap: var(--space-2);
+  }
+
+  /* ==================== CHART CARDS MOBILE ==================== */
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .chart-title {
+    font-size: var(--font-size-base);
+  }
+
+  .anime-counter {
+    font-size: var(--font-size-xs);
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .chart-container {
+    min-height: 250px;
+    padding: var(--space-2);
+  }
+
+  /* ==================== ACTIVITY MOBILE ==================== */
+  .activity-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .activity-title {
+    font-size: var(--font-size-base);
+  }
+
+  .activity-item {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .activity-icon {
+    width: 36px;
+    height: 36px;
+    font-size: var(--font-size-base);
+  }
+
+  .activity-description {
+    font-size: var(--font-size-xs);
+  }
+
+  .activity-time {
+    font-size: var(--font-size-xs);
+  }
+
+  /* ==================== TABLE MOBILE ==================== */
+  .table-container {
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+  }
+
+  .anime-table {
+    font-size: var(--font-size-sm);
+  }
+
+  .anime-table th,
+  .anime-table td {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  /* ==================== SETTINGS MOBILE ==================== */
+  .settings-container {
+    padding: var(--space-4);
+  }
+
+  .profile-preview {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-4);
+  }
+
+  .profile-preview-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .settings-group {
+    padding: var(--space-4);
+  }
+
+  .settings-group h3 {
+    font-size: var(--font-size-base);
+  }
+
+  .settings-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .danger-zone {
+    padding: var(--space-4);
+  }
+
+  .danger-zone h3 {
+    font-size: var(--font-size-base);
+  }
+
+  /* ==================== DROPDOWN MOBILE ==================== */
+  .search-dropdown {
+    width: 100vw;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(-10px) scale(0.95);
+    max-width: 340px;
+  }
+
+  .search-dropdown.open {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+
+  .profile-dropdown {
+    width: 100vw;
+    max-width: 260px;
+    left: auto;
+    right: var(--space-3);
+  }
+
+  /* ==================== PAGINATION MOBILE ==================== */
+  .pagination-container {
+    margin-top: var(--space-6);
+  }
+
+  #pagination {
+    gap: var(--space-1);
+  }
+
+  .page-link {
+    width: 36px;
+    height: 36px;
+    font-size: var(--font-size-xs);
+  }
+
+  /* ==================== TOAST MOBILE ==================== */
+  .toast-container {
+    bottom: var(--space-4);
+    right: var(--space-4);
+    left: var(--space-4);
+  }
+
+  .toast {
+    min-width: auto;
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-sm);
+  }
+
+  .toast i {
+    font-size: var(--font-size-base);
+    flex-shrink: 0;
+  }
+
+  /* ==================== RECAP MODAL MOBILE ==================== */
+  .recap-container {
+    width: 95%;
+    max-width: 95vw;
+    height: 95vh;
+  }
+
+  .recap-slide {
+    padding: var(--space-6);
+  }
+
+  .recap-controls {
+    bottom: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .recap-controls button {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-base);
+  }
+
+  /* ==================== ANIME LIST MOBILE ==================== */
+  .anime-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .anime-list-title h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .anime-list-filters {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .anime-list-filters select {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  /* ==================== PROFILE PREVIEW MOBILE ==================== */
+  .summary-card {
+    padding: var(--space-4);
+  }
+
+  .summary-label {
+    font-size: var(--font-size-xs);
+  }
+
+  .summary-value {
+    font-size: var(--font-size-xl);
+  }
+
+  /* ==================== ACHIEVEMENT CARDS MOBILE ==================== */
+  .achievement-card {
+    padding: var(--space-4);
+  }
+
+  .achievement-icon {
+    font-size: 2rem;
+  }
+
+  .achievement-name {
+    font-size: var(--font-size-xs);
+  }
+
+  .achievement-description {
+    font-size: var(--font-size-xs);
+  }
+
+  /* ==================== COMING SOON MOBILE ==================== */
+  .coming-soon-container {
+    padding: var(--space-8);
+  }
+
+  .coming-icon {
+    font-size: 3rem;
+  }
+
+  .coming-soon-container h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .coming-soon-container p {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ==================================================
+   SMALL PHONES: 320px - 480px
+================================================== */
 @media (max-width: 480px) {
-    .greeting-banner {
-        padding: 0.75rem;
-        margin: 0 auto 1.25rem auto;
-        gap: 0.5rem;
-        width: calc(100% - 1.5rem);
-    }
+  :root {
+    --font-size-lg: 1rem;
+    --font-size-2xl: 1.125rem;
+    --space-4: 0.75rem;
+  }
 
-    .greeting-main {
-        gap: 0.3rem;
-    }
+  .app-logo h2 {
+    font-size: 1rem;
+  }
 
-    .greeting-line {
-        font-size: 1.1rem;
-        max-width: calc(100% - 1.2rem);
-    }
+  .app-logo i {
+    font-size: 1.25rem;
+  }
 
-    .greeting-emoji {
-        font-size: 1.1rem;
-    }
+  .greeting-main {
+    font-size: var(--font-size-xl);
+  }
 
-    .greeting-subline {
-        font-size: 0.85rem;
-        line-height: 1.3;
-    }
+  .greeting-emoji {
+    font-size: var(--font-size-2xl);
+  }
 
-    .greeting-meta {
-        gap: 0.3rem;
-        font-size: 0.7rem;
-    }
+  .section-title {
+    font-size: var(--font-size-base);
+    gap: var(--space-1);
+  }
 
-    .greeting-meta-item {
-        padding: 0.25rem 0.45rem;
-        font-size: 0.7rem;
-    }
+  .stat-value {
+    font-size: var(--font-size-xl);
+  }
 
-    .greeting-quote {
-        font-size: 0.75rem;
-        line-height: 1.3;
-    }
+  .dna-value {
+    font-size: var(--font-size-lg);
+  }
 
-    .greeting-dismiss {
-        font-size: 0.95rem;
-        padding: 0.4rem;
-    }
+  .top-anime-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--space-2) !important;
+  }
+
+  .anime-cover {
+    height: 150px !important;
+  }
+
+  .anime-info {
+    padding: var(--space-2);
+  }
+
+  .modal-content {
+    padding: var(--space-4) !important;
+  }
+
+  .form-group {
+    margin-bottom: var(--space-3);
+  }
+
+  .stats-grid {
+    gap: var(--space-3) !important;
+  }
+
+  .quick-actions {
+    gap: var(--space-3) !important;
+  }
+
+  .action-btn {
+    padding: var(--space-3);
+  }
+
+  .chart-container {
+    min-height: 200px;
+  }
+}
+
+/* ==================================================
+   LANDSCAPE MODE
+================================================== */
+@media (orientation: landscape) and (max-height: 600px) {
+  .greeting-banner {
+    padding: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .greeting-main {
+    font-size: var(--font-size-lg);
+  }
+
+  .greeting-emoji {
+    font-size: var(--font-size-xl);
+  }
+
+  .greeting-meta {
+    gap: var(--space-2);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .stat-card {
+    padding: var(--space-3);
+  }
+
+  .main-content {
+    padding-top: calc(var(--header-height) + var(--space-2));
+  }
+}
+
+/* ==================================================
+   LARGE SCREENS: 1025px+
+================================================== */
+@media (min-width: 1025px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .top-anime-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+/* ==================================================
+   EXTRA LARGE SCREENS: 1440px+
+================================================== */
+@media (min-width: 1440px) {
+  :root {
+    --space-6: 1.75rem;
+    --space-8: 2.5rem;
+  }
+
+  .main-content {
+    padding: calc(var(--header-height) + var(--space-10)) var(--space-8) var(--space-10);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-8);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-8);
+  }
+
+  .stat-card {
+    padding: var(--space-8);
+  }
+
+  .top-anime-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-8);
+  }
+}
+
+/* ==================================================
+   TOUCH DEVICES
+================================================== */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  .btn,
+  .filter-btn,
+  .page-link {
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .anime-card,
+  .stat-card,
+  .dna-card {
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* ==================================================
+   PRINT STYLES
+================================================== */
+@media print {
+  .top-bar,
+  .search-dropdown,
+  .profile-dropdown,
+  .toast-container,
+  .modal,
+  .recap-modal {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .main-content {
+    padding: 0;
+  }
+
+  .page {
+    display: block !important;
+  }
+}
+/* =====================================================
+   ANIPULSE RESPONSIVE CSS v2.0
+   Mobile-first enhancements for glassmorphism redesign
+===================================================== */
+
+/* =====================================================
+   MOBILE: 320px - 640px (Portrait Phones)
+===================================================== */
+@media (max-width: 640px) {
+  :root {
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.25rem;
+    --space-xl: 1.5rem;
+  }
+
+  .main-content {
+    padding: calc(4rem + 1rem) 1rem 1rem !important;
+  }
+
+  /* Header - Compact */
+  .top-bar {
+    padding: 0 0.75rem;
+    height: 4rem;
+  }
+
+  .app-logo h2 {
+    font-size: 1.125rem !important;
+  }
+
+  .app-logo i {
+    font-size: 1.25rem !important;
+  }
+
+  /* User actions - Smaller icons */
+  .user-actions {
+    gap: 0.5rem;
+  }
+
+  .search-trigger, .theme-toggle {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    font-size: 0.875rem;
+  }
+
+  /* Greeting - Stacked */
+  .greeting-banner {
+    padding: 1.5rem !important;
+    border-radius: 1.75rem !important;
+  }
+
+  .greeting-line {
+    font-size: 1.75rem !important;
+  }
+
+  .greeting-emoji {
+    font-size: 2rem !important;
+  }
+
+  .greeting-meta {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem;
+  }
+
+  .greeting-meta-item {
+    justify-content: center !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Grids - Single column */
+  .stats-grid,
+  .dna-grid,
+  .quick-actions,
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  /* Cards - Full width */
+  .stat-card,
+  .dna-card,
+  .action-btn,
+  .chart-card {
+    padding: 1.75rem 1.25rem !important;
+    border-radius: 1.5rem !important;
+  }
+
+  .anime-grid,
+  .top-anime-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+    gap: 1rem !important;
+  }
+
+  .anime-cover {
+    height: 200px !important;
+  }
+
+  .anime-info {
+    padding: 1rem !important;
+  }
+
+  .anime-title {
+    font-size: 1rem !important;
+    line-clamp: 1 !important;
+  }
+
+  /* Tables - Horizontal scroll */
+  .anime-list-container {
+    overflow-x: auto;
+  }
+
+  .table-container {
+    min-width: 700px;
+  }
+
+  .anime-table th,
+  .anime-table td {
+    padding: 1rem 0.75rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Modals - Full screen */
+  .modal {
+    padding: 1rem !important;
+  }
+
+  .modal-content {
+    padding: 1.5rem !important;
+    margin: 0 !important;
+    border-radius: 1.5rem !important;
+    max-height: 95vh !important;
+  }
+
+  /* Forms - Stacked */
+  #addAnimeForm {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-actions {
+    flex-direction: column !important;
+  }
+
+  .btn {
+    width: 100% !important;
+    padding: 1rem !important;
+  }
+
+  /* Toasts - Full width */
 }
 
 @media (max-width: 360px) {
