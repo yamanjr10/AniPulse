@@ -2761,7 +2761,7 @@ function initNewCharts(selectedYear = new Date().getFullYear()) {
             ],
             datasets: [
                 {
-                    label: `Episodes Watched (${selectedYear})`,
+                    label: `Episodes Watched `,
                     data: calculateEpisodesOverTime(),
                     backgroundColor: "rgba(99, 102, 241, 0.1)",
                     borderColor: "rgba(99, 102, 241, 1)",
@@ -2883,6 +2883,7 @@ if (watchTimeByMonthCanvas && typeof Chart !== 'undefined') {
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 datasets: [{
+                    label: `Hours Watched `,
                     data: calculateWatchTimeByMonth(),
                     borderColor: 'rgba(99, 241, 217, 1)',
                     backgroundColor: 'rgba(32, 229, 206, 0.25)',
@@ -5238,7 +5239,7 @@ function isRecapWindowOpen() {
     // TEST MODE: Only January 1-21
     if (TEST_MODE) {
         const d = new Date();
-        return d.getMonth() === 0 && d.getDate() <= 21;
+        return d.getMonth() === 3 && d.getDate() <= 21;
     }
 
     // PRODUCTION: First 7 days of ANY month
