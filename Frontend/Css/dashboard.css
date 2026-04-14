@@ -2440,6 +2440,433 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ------------------------------------
+   ACTIVITY HEATMAP & CURRENTLY WATCHING
+   Fixed Spacing & Layout
+   ------------------------------------ */
+
+/* Activity Heatmap Section - Fix spacing */
+.chart-card:has(#activityHeatmapChart) {
+  margin-bottom: 32px;
+}
+
+/* Dashboard Section spacing fix */
+.dashboard-section {
+  margin-bottom: 48px;
+  width: 100%;
+  clear: both;
+}
+
+/* Currently Watching Section - Proper spacing */
+#currently-watching-section {
+  margin-top: 16px;
+  margin-bottom: 48px;
+  clear: both;
+}
+
+/* Ensure proper separation between heatmap and currently watching */
+.chart-card + .dashboard-section,
+.chart-card + #currently-watching-section {
+  margin-top: 32px;
+}
+
+/* ============================================
+   CURRENTLY WATCHING & TOP RATED SECTIONS
+   Premium Redesign - Modern Card Layout
+   ============================================ */
+
+/* Section Title Styling */
+.dashboard-section .section-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-primary);
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.dashboard-section .section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+  border-radius: 3px;
+}
+
+.dashboard-section .section-title i {
+  color: #8b5cf6;
+  font-size: 1.4rem;
+}
+
+/* Currently Watching Grid */
+#currently-watching-grid,
+.top-anime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+/* Anime Card - Modern Design */
+.anime-card {
+  background: linear-gradient(135deg, #1a1f2e, #0f1420);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  position: relative;
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Top accent line */
+.anime-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa, #c4b5fd);
+  z-index: 2;
+  border-radius: 20px 20px 0 0;
+}
+
+/* Hover effect */
+.anime-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.4);
+}
+
+/* Cover Image */
+.anime-card .anime-cover {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.anime-card:hover .anime-cover {
+  transform: scale(1.05);
+}
+
+/* Info Section */
+.anime-card .anime-info {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: linear-gradient(135deg, #1a1f2e, #0f1420);
+}
+
+/* Title */
+.anime-card .anime-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  min-height: 2.8em;
+}
+
+/* Meta Info Row */
+.anime-card .anime-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+}
+
+/* Type Badge */
+.anime-card .anime-type {
+  background: rgba(139, 92, 246, 0.15);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+/* Score */
+.anime-card .anime-score {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fbbf24;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.anime-card .anime-score i {
+  font-size: 0.7rem;
+}
+
+/* Progress Container */
+.anime-card .progress-container {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 8px 0 4px;
+}
+
+.anime-card .progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer effect */
+.anime-card .progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Progress Text */
+.anime-card .progress-text {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+  display: block;
+}
+
+/* Rating Badge (Top Right) */
+.anime-card .rating-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 30px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Status Badge (Top Left) */
+.anime-card .anime-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 4px 12px;
+  border-radius: 30px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Continue Button */
+.anime-card .continue-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-top: 8px;
+}
+
+.anime-card .continue-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+
+
+/* ============================================
+   LIGHT MODE
+   ============================================ */
+
+[data-theme="light"] .anime-card {
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .anime-card .anime-info {
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+}
+
+[data-theme="light"] .anime-card .anime-title {
+  color: #1e293b;
+}
+
+[data-theme="light"] .anime-card .anime-meta {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .anime-card .anime-type {
+  background: rgba(99, 102, 241, 0.08);
+  color: #6366f1;
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+[data-theme="light"] .anime-card .anime-badge {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .anime-card .anime-score {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .dashboard-section .section-title {
+  color: #1e293b;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 900px) {
+  #currently-watching-grid,
+  .top-anime-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .anime-card .anime-cover {
+    height: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-section {
+    margin-bottom: 32px;
+  }
+  
+  .chart-card + .dashboard-section,
+  .chart-card + #currently-watching-section {
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-section .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+  }
+  
+  #currently-watching-grid,
+  .top-anime-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .anime-card .anime-cover {
+    height: 200px;
+  }
+  
+  .anime-card .anime-info {
+    padding: 12px;
+  }
+  
+  .anime-card .anime-title {
+    font-size: 0.9rem;
+  }
+  
+  .anime-card .rating-badge,
+  .anime-card .anime-badge {
+    font-size: 0.6rem;
+    padding: 3px 8px;
+  }
+  
+  .anime-card .anime-score {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .anime-card .anime-cover {
+    height: 180px;
+  }
+  
+  .anime-card .anime-info {
+    padding: 10px;
+  }
+  
+  .anime-card .anime-title {
+    font-size: 0.85rem;
+  }
+  
+  .anime-card .anime-type {
+    font-size: 0.6rem;
+    padding: 3px 8px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .anime-card,
+  .anime-card .anime-cover,
+  .anime-card .progress-bar::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .anime-card:hover {
+    transform: translateY(-4px);
+  }
+  
+  .anime-card:hover .anime-cover {
+    transform: none;
+  }
+}
+
+/* ------------------------------------
    TOP RATED ANIME
    ------------------------------------ */
 
@@ -3286,6 +3713,452 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ------------------------------------
+   ACTIVITY HEATMAP - PREMIUM REDESIGN
+   Modern, Clean, Attractive
+   ------------------------------------ */
+
+/* Heatmap Card Container */
+.chart-card:has(#activityHeatmapChart) {
+    background: linear-gradient(145deg, #1e293b, #0f172a) !important;
+    border-radius: 32px !important;
+    padding: 28px !important;
+    margin-bottom: 32px;
+    border: none !important;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(139, 92, 246, 0.1) inset !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated gradient border */
+.chart-card:has(#activityHeatmapChart)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa, #8b5cf6, #6366f1);
+    background-size: 200% 100%;
+    animation: borderFlow 3s ease infinite;
+}
+
+@keyframes borderFlow {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+/* Heatmap Header */
+.heatmap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.heatmap-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #fff, #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.heatmap-title i {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.3rem;
+}
+
+.total-contributions {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.1));
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #c4b5fd;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    backdrop-filter: blur(8px);
+    letter-spacing: 0.3px;
+}
+
+/* Year Filter - Modern Toggle */
+.heatmap-years {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px;
+    border-radius: 50px;
+    width: fit-content;
+    backdrop-filter: blur(8px);
+}
+
+.year-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 8px 28px;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+}
+
+.year-btn:hover {
+    color: #c4b5fd;
+}
+
+.year-btn.active {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+/* Heatmap Wrapper */
+.heatmap-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin: 20px 0;
+    padding-bottom: 10px;
+}
+
+.heatmap-container {
+    min-width: 750px;
+}
+
+/* Month Labels */
+.heatmap-months {
+    display: flex;
+    margin-left: 50px;
+    margin-bottom: 15px;
+    position: relative;
+    height: 28px;
+}
+
+.month-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    position: absolute;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Weekday Labels */
+.heatmap-weekdays {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-right: 15px;
+    float: left;
+}
+
+.weekday-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Heatmap Grid */
+.heatmap-grid {
+    display: flex;
+    gap: 4px;
+    margin-left: 50px;
+    flex: 1;
+}
+
+.heatmap-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+/* Heatmap Cells - Premium Design */
+.heatmap-cell {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    min-width: 20px;
+    max-width: 32px;
+    border-radius: 6px;
+    transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+    cursor: pointer;
+    position: relative;
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.15) translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+/* Color Levels - Vibrant GitHub Style */
+.heatmap-cell.level-0 { 
+    background: rgba(51, 65, 85, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.heatmap-cell.level-1 { 
+    background: #9be9a8;
+    box-shadow: 0 0 4px rgba(155, 233, 168, 0.3);
+}
+.heatmap-cell.level-2 { 
+    background: #40c463;
+    box-shadow: 0 0 6px rgba(64, 196, 99, 0.4);
+}
+.heatmap-cell.level-3 { 
+    background: #30a14e;
+    box-shadow: 0 0 8px rgba(48, 161, 78, 0.5);
+}
+.heatmap-cell.level-4 { 
+    background: #216e39;
+    box-shadow: 0 0 10px rgba(33, 110, 57, 0.6);
+}
+
+/* Pulse animation for cells with activity */
+.heatmap-cell.level-1, .heatmap-cell.level-2, 
+.heatmap-cell.level-3, .heatmap-cell.level-4 {
+    animation: softPulse 2s ease-in-out infinite;
+}
+
+@keyframes softPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.05); }
+}
+
+/* Legend */
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 20px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    flex-wrap: wrap;
+}
+
+.legend-text {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.3px;
+}
+
+.legend-colors {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.legend-color {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.legend-color:hover {
+    transform: scale(1.1);
+}
+
+.legend-color.less { 
+    background: rgba(51, 65, 85, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.legend-color.more { 
+    background: #216e39;
+}
+
+/* Tooltip - Premium */
+.heatmap-tooltip {
+    position: fixed;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    backdrop-filter: blur(12px);
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.4);
+    white-space: nowrap;
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.3px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (min-width: 1400px) {
+    .heatmap-cell {
+        min-width: 26px;
+        max-width: 36px;
+    }
+    .weekday-label {
+        min-height: 36px;
+        font-size: 0.8rem;
+    }
+    .month-label {
+        font-size: 0.8rem;
+    }
+}
+
+@media (min-width: 1800px) {
+    .heatmap-cell {
+        min-width: 32px;
+        max-width: 42px;
+    }
+    .weekday-label {
+        min-height: 42px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .heatmap-cell {
+        min-width: 16px;
+        max-width: 22px;
+    }
+    .weekday-label {
+        min-height: 22px;
+        font-size: 0.65rem;
+    }
+    .month-label {
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .chart-card:has(#activityHeatmapChart) {
+        padding: 20px !important;
+    }
+    .heatmap-cell {
+        min-width: 14px;
+        max-width: 18px;
+    }
+    .weekday-label {
+        min-height: 18px;
+        font-size: 0.6rem;
+    }
+    .heatmap-grid {
+        gap: 3px;
+        margin-left: 42px;
+    }
+    .heatmap-col {
+        gap: 3px;
+    }
+    .heatmap-months {
+        margin-left: 44px;
+    }
+}
+
+@media (max-width: 480px) {
+    .heatmap-cell {
+        min-width: 11px;
+        max-width: 14px;
+        border-radius: 4px;
+    }
+    .weekday-label {
+        min-height: 14px;
+        font-size: 0.55rem;
+    }
+    .heatmap-grid {
+        gap: 2px;
+        margin-left: 36px;
+    }
+    .heatmap-col {
+        gap: 2px;
+    }
+    .heatmap-months {
+        margin-left: 38px;
+    }
+    .year-btn {
+        padding: 6px 18px;
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================
+   LIGHT MODE
+   ============================================ */
+
+[data-theme="light"] .chart-card:has(#activityHeatmapChart) {
+    background: linear-gradient(145deg, #ffffff, #f1f5f9) !important;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(139, 92, 246, 0.15) inset !important;
+}
+
+[data-theme="light"] .heatmap-title {
+    background: linear-gradient(135deg, #1e293b, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+[data-theme="light"] .heatmap-cell.level-0 {
+    background: #e2e8f0;
+}
+
+[data-theme="light"] .weekday-label,
+[data-theme="light"] .month-label,
+[data-theme="light"] .legend-text {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .total-contributions {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+}
+
+[data-theme="light"] .heatmap-years {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .year-btn {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .year-btn.active {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: white;
+}
+
+[data-theme="light"] .heatmap-tooltip {
+    background: linear-gradient(135deg, #ffffff, #f1f5f9);
+    color: #1e293b;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .heatmap-cell,
+    .heatmap-cell:hover,
+    .chart-card:has(#activityHeatmapChart)::before {
+        animation: none;
+        transition: none;
+        transform: none;
+    }
+}
+
+/* ------------------------------------
    WATCHLIST PAGE
    ------------------------------------ */
 
@@ -3362,7 +4235,6 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Active button shine effect */
 .filter-btn.active::after {
-  content: '';
   position: absolute;
   top: -50%;
   left: -50%;
@@ -3404,33 +4276,61 @@ h1, h2, h3, h4, h5, h6 {
 /* ===== WATCHLIST GRID ===== */
 #watchlist-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(6, 1fr); 
+  grid-template-rows: repeat(5, auto);  
   gap: var(--space-6);
   margin-bottom: var(--space-8);
   min-height: 400px;
   position: relative;
 }
 
-/* Empty state */
-#watchlist-container:empty {
+
+.no-anime {
+  grid-column: 1 / -1; /* full width of grid */
+  
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
+  
+  padding: var(--space-12);
+  margin-top: var(--space-4);
+  
   background: linear-gradient(145deg, 
     var(--color-bg-secondary), 
     var(--color-bg-tertiary)
   );
+  
   border-radius: var(--radius-2xl);
-  border: 2px dashed var(--color-border);
+  border: 1px dashed var(--color-border);
+  
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  
+  text-align: center;
+  opacity: 0.9;
+  
+  animation: fadeEmpty 0.4s ease;
 }
 
-#watchlist-container:empty::after {
-  content: 'No anime in this category';
-  font-size: var(--font-size-lg);
-  color: var(--color-text-tertiary);
-  font-style: italic;
-  opacity: 0.7;
+/* 🎬 icon + spacing */
+.no-anime::before {
+  font-size: 2rem;
+  margin-bottom: var(--space-3);
+  opacity: 0.6;
+}
+
+/* smooth entry */
+@keyframes fadeEmpty {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
 }
 
 /* Anime Cards in Watchlist */
@@ -3454,7 +4354,6 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Gradient border effect */
 #watchlist-container .anime-card::before {
-  content: '';
   position: absolute;
   inset: -1px;
   background: var(--gradient-primary);
@@ -4217,20 +5116,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1) !important;
 }
 
-/* Top accent line */
-.settings-group::before {
-  content: '' !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 3px !important;
-  background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA) !important;
-}
-
 /* Shine effect on hover */
 .settings-group::after {
-  content: '' !important;
   position: absolute !important;
   top: -50% !important;
   left: -50% !important;
@@ -8656,4 +9543,42 @@ body:not(.modal-open) {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/* Monthly Progress Line Tooltip - Attractive Styling */
+.monthly-progress-line-tooltip {
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    animation: tooltipGlow 0.2s ease;
+}
+
+@keyframes tooltipGlow {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Light mode */
+[data-theme="light"] .monthly-progress-line-tooltip {
+    background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+    color: #1e293b !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+    .monthly-progress-line-tooltip {
+        font-size: 0.7rem !important;
+        padding: 6px 12px !important;
+        white-space: normal !important;
+        max-width: 200px;
+        text-align: center;
+    }
 }

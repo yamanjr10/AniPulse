@@ -806,88 +806,495 @@ function initCharts() {
     const tooltipBg = isDark ? '#1a1f2e' : '#ffffff';
     const tooltipText = isDark ? '#ffffff' : '#0f172a';
     
-    // Monthly Progress Chart
-    const monthlyProgressCtx = document.getElementById('monthlyProgressChart').getContext('2d');
-    monthlyProgressChart = new Chart(monthlyProgressCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            datasets: [{
-                label: 'Anime Completed',
-                data: calculateMonthlyProgress(),
-                backgroundColor: 'rgba(99, 102, 241, 0.8)',
-                borderColor: 'rgba(99, 102, 241, 1)',
-                borderWidth: 2,
-                borderRadius: 6,
-                borderSkipped: false,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: textColor,
-                        font: {
-                            size: 11,
-                            weight: '500'
-                        }
-                    },
-                    grid: {
-                        color: gridColor,
-                        drawBorder: false,
-                        lineWidth: 1
-                    },
-                    title: {
-                        display: false
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: textColor,
-                        font: {
-                            size: 11,
-                            weight: '500'
-                        }
-                    },
-                    grid: {
-                        display: false
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: tooltipBg,
-                    titleColor: tooltipText,
-                    bodyColor: tooltipText,
-                    borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                    borderWidth: 1,
-                    padding: 10,
-                    cornerRadius: 8,
-                    titleFont: {
-                        size: 12,
-                        weight: '600'
-                    },
-                    bodyFont: {
-                        size: 11
-                    }
-                }
-            },
-            layout: {
-                padding: {
-                    top: 10,
-                    bottom: 10
+// Monthly Progress Chart with Trend Line - Styled Version
+// Reusing existing variables from initCharts() function
+
+const monthlyProgressCtx = document.getElementById('monthlyProgressChart').getContext('2d');
+
+// Calculate monthly progress data (only up to current month)
+function calculateMonthlyProgressData() {
+    const monthlyData = Array(12).fill(0);
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const animeData = window.animeData || JSON.parse(localStorage.getItem('animeData')) || [];
+
+    animeData.forEach(anime => {
+        if (anime.userStatus === 'Completed' && anime.finishDate) {
+            const [yearStr, monthStr] = anime.finishDate.split('-');
+            const year = parseInt(yearStr, 10);
+            const monthIndex = parseInt(monthStr, 10) - 1;
+
+            if (!isNaN(year) && !isNaN(monthIndex) && monthIndex >= 0 && monthIndex <= 11) {
+                if (year === currentYear && monthIndex <= currentMonth) {
+                    monthlyData[monthIndex]++;
                 }
             }
         }
     });
 
-     // =============================================
+    return monthlyData;
+}
+
+// Calculate percentage changes between months
+function calculatePercentageChanges(data, currentMonth) {
+    const changes = [];
+    for (let i = 0; i < data.length; i++) {
+        if (i === 0) {
+            changes.push(null);
+        } else if (i > currentMonth) {
+            changes.push(null);
+        } else {
+            const prevValue = data[i - 1];
+            const currentValue = data[i];
+            if (prevValue === 0 && currentValue === 0) {
+                changes.push(0);
+            } else if (prevValue === 0) {
+                changes.push(100);
+            } else {
+                changes.push(((currentValue - prevValue) / prevValue) * 100);
+            }
+        }
+    }
+    return changes;
+}
+
+// Get segment color based on value change
+function getSegmentColor(p0, p1, dataIndex, currentMonth) {
+    if (dataIndex > currentMonth) return 'transparent';
+    if (p0 === undefined || p1 === undefined) return '#94A3B8';
+    if (p1 > p0) return '#10B981';
+    if (p1 < p0) return '#EF4444';
+    return '#94A3B8';
+}
+
+// Get point color based on index and changes
+function getPointColor(index, data, changes, currentMonth) {
+    if (index > currentMonth) return 'transparent';
+    if (index === 0) return '#94A3B8';
+    const change = changes[index];
+    if (change === null) return '#94A3B8';
+    if (change > 0) return '#10B981';
+    if (change < 0) return '#EF4444';
+    return '#94A3B8';
+}
+
+// Destroy existing chart if it exists
+if (window.monthlyProgressChart && typeof window.monthlyProgressChart.destroy === 'function') {
+    window.monthlyProgressChart.destroy();
+}
+
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentMonth = now.getMonth();
+const monthlyBarData = calculateMonthlyProgressData();
+const totalCompleted = monthlyBarData.reduce((a, b) => a + b, 0);
+const percentageChanges = calculatePercentageChanges(monthlyBarData, currentMonth);
+
+// Update total anime display
+const totalAnimeSpan = document.getElementById('monthly-total-anime');
+if (totalAnimeSpan) {
+    totalAnimeSpan.textContent = `Total Completed: ${totalCompleted}`;
+}
+
+// Create the chart with enhanced styling
+window.monthlyProgressChart = new Chart(monthlyProgressCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [
+            {
+                label: 'Anime Completed',
+                data: monthlyBarData,
+                backgroundColor: 'rgba(99, 102, 241, 0.75)',
+                borderColor: 'rgba(99, 102, 241, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+                yAxisID: 'y',
+                barPercentage: 0.65,
+                categoryPercentage: 0.8,
+                hoverBackgroundColor: 'rgba(99, 102, 241, 0.9)',
+                hoverBorderColor: 'rgba(99, 102, 241, 1)',
+            },
+            {
+                label: 'Trend Line',
+                data: monthlyBarData,
+                type: 'line',
+                backgroundColor: 'transparent',
+                borderWidth: 3,
+                tension: 0.3,
+                pointRadius: (context) => {
+                    const index = context.dataIndex;
+                    return index > currentMonth ? 0 : 5;
+                },
+                pointHoverRadius: (context) => {
+                    const index = context.dataIndex;
+                    return index > currentMonth ? 0 : 8;
+                },
+                pointBackgroundColor: (context) => {
+                    const index = context.dataIndex;
+                    return getPointColor(index, monthlyBarData, percentageChanges, currentMonth);
+                },
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointHoverBorderWidth: 3,
+                pointShadowBlur: 8,
+                pointShadowColor: 'rgba(0, 0, 0, 0.2)',
+                fill: false,
+                yAxisID: 'y',
+                segment: {
+                    borderColor: (ctx) => {
+                        const p0 = ctx.p0.parsed.y;
+                        const p1 = ctx.p1.parsed.y;
+                        const dataIndex = ctx.p1DataIndex || ctx.p0DataIndex;
+                        return getSegmentColor(p0, p1, dataIndex, currentMonth);
+                    },
+                    borderWidth: (ctx) => {
+                        const dataIndex = ctx.p1DataIndex || ctx.p0DataIndex;
+                        return dataIndex > currentMonth ? 0 : 3;
+                    },
+                    borderDash: (ctx) => {
+                        const dataIndex = ctx.p1DataIndex || ctx.p0DataIndex;
+                        return dataIndex > currentMonth ? [5, 5] : [];
+                    },
+                }
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                align: 'center',
+                labels: {
+                    color: textColor,
+                    usePointStyle: true,
+                    boxWidth: 12,
+                    boxHeight: 12,
+                    padding: 15,
+                    font: {
+                        size: 12,
+                        weight: '500',
+                        family: "'Inter', sans-serif"
+                    },
+                    filter: (legendItem) => {
+                        return legendItem.text !== 'Trend Line';
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: tooltipBg,
+                titleColor: tooltipText,
+                bodyColor: tooltipText,
+                footerColor: '#A78BFA',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 12,
+                titleFont: {
+                    size: 13,
+                    weight: '600',
+                    family: "'Inter', sans-serif"
+                },
+                bodyFont: {
+                    size: 12,
+                    family: "'Inter', sans-serif"
+                },
+                footerFont: {
+                    size: 11,
+                    weight: '500',
+                    family: "'Inter', sans-serif"
+                },
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                        const dataIndex = tooltipItems[0].dataIndex;
+                        if (dataIndex > currentMonth) {
+                            return `${months[dataIndex]} (Upcoming)`;
+                        }
+                        return months[dataIndex];
+                    },
+                    label: function(context) {
+                        const label = context.dataset.label || '';
+                        const value = context.raw;
+                        const dataIndex = context.dataIndex;
+                        
+                        if (context.datasetIndex === 1 && dataIndex > currentMonth) {
+                            return null;
+                        }
+                        
+                        if (label === 'Anime Completed') {
+                            if (dataIndex > currentMonth) {
+                                return `Completed: ${value} anime`;
+                            }
+                            
+                            const percentChange = percentageChanges[dataIndex];
+                            if (percentChange !== null && dataIndex > 0 && dataIndex <= currentMonth) {
+                                const isPositive = percentChange > 0;
+                                const arrow = isPositive ? '▲' : (percentChange < 0 ? '▼' : '●');
+                                const changeText = percentChange > 0 
+                                    ? `${arrow} ${percentChange.toFixed(1)}% increase`
+                                    : percentChange < 0 
+                                        ? `${arrow} ${Math.abs(percentChange).toFixed(1)}% decrease`
+                                        : `● No change`;
+                                return [
+                                    `Completed: ${value} anime`,
+                                    `Trend: ${changeText}`
+                                ];
+                            }
+                            return `Completed: ${value} anime`;
+                        }
+                        return null;
+                    },
+                    footer: function(tooltipItems) {
+                        const dataIndex = tooltipItems[0].dataIndex;
+                        const currentValue = monthlyBarData[dataIndex];
+                        const prevValue = dataIndex > 0 ? monthlyBarData[dataIndex - 1] : null;
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        
+                        if (dataIndex > currentMonth) {
+                            return `Coming in ${months[dataIndex]}`;
+                        }
+                        
+                        if (dataIndex > 0 && prevValue !== null && dataIndex <= currentMonth) {
+                            const diff = currentValue - prevValue;
+                            if (diff > 0) {
+                                return `+${diff} compared to ${months[dataIndex - 1]}`;
+                            } else if (diff < 0) {
+                                return `${diff} compared to ${months[dataIndex - 1]}`;
+                            }
+                            return `Same as ${months[dataIndex - 1]}`;
+                        }
+                        return `First month of ${currentYear}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: gridColor,
+                    drawBorder: false,
+                    lineWidth: 1,
+                    tickLength: 0,
+                },
+                ticks: {
+                    color: textColor,
+                    font: {
+                        size: 11,
+                        weight: '500',
+                        family: "'Inter', sans-serif"
+                    },
+                    stepSize: 1,
+                    precision: 0,
+                    padding: 8,
+                },
+                title: {
+                    display: true,
+                    text: 'Anime Completed',
+                    color: textColor,
+                    font: {
+                        size: 11,
+                        weight: '500',
+                        family: "'Inter', sans-serif"
+                    },
+                    padding: { bottom: 10 }
+                }
+            },
+            x: {
+                grid: {
+                    display: false,
+                    drawBorder: false,
+                },
+                ticks: {
+                    color: (context) => {
+                        const index = context.index;
+                        return index > currentMonth ? 'rgba(100, 116, 139, 0.5)' : textColor;
+                    },
+                    font: {
+                        size: 11,
+                        weight: '500',
+                        family: "'Inter', sans-serif"
+                    },
+                    padding: 8,
+                },
+                title: {
+                    display: true,
+                    text: 'Month',
+                    color: textColor,
+                    font: {
+                        size: 11,
+                        weight: '500',
+                        family: "'Inter', sans-serif"
+                    },
+                    padding: { top: 10 }
+                }
+            }
+        },
+        layout: {
+            padding: {
+                top: 20,
+                bottom: 15,
+                left: 10,
+                right: 10
+            }
+        },
+        elements: {
+            bar: {
+                borderRadius: 8,
+            },
+            line: {
+                borderJoin: 'round',
+                borderCap: 'round'
+            },
+            point: {
+                hoverRadius: 8,
+                hoverBorderWidth: 3
+            }
+        }
+    }
+});
+
+// Custom hover effect for line points
+const canvasElement = document.getElementById('monthlyProgressChart');
+
+// Create custom tooltip for line points
+let lineTooltip = document.querySelector('.monthly-progress-line-tooltip');
+if (!lineTooltip) {
+    lineTooltip = document.createElement('div');
+    lineTooltip.className = 'monthly-progress-line-tooltip';
+    lineTooltip.style.cssText = `
+        position: fixed;
+        background: linear-gradient(135deg, #1a1f2e, #0f1420);
+        color: white;
+        padding: 10px 18px;
+        border-radius: 14px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid rgba(139, 92, 246, 0.4);
+        backdrop-filter: blur(12px);
+        pointer-events: none;
+        z-index: 1000;
+        white-space: nowrap;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        font-family: 'Inter', monospace;
+        letter-spacing: 0.3px;
+    `;
+    document.body.appendChild(lineTooltip);
+}
+
+// Update tooltip style based on theme
+if (!isDark) {
+    lineTooltip.style.background = 'linear-gradient(135deg, #ffffff, #f8fafc)';
+    lineTooltip.style.color = '#1e293b';
+    lineTooltip.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+    lineTooltip.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.1)';
+}
+
+const showLineTooltip = (e) => {
+    if (!window.monthlyProgressChart) return;
+    
+    const activeElements = window.monthlyProgressChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, false);
+    
+    if (activeElements && activeElements.length > 0) {
+        const element = activeElements[0];
+        const datasetIndex = element.datasetIndex;
+        const dataIndex = element.index;
+        
+        if (dataIndex > currentMonth) {
+            lineTooltip.style.opacity = '0';
+            return;
+        }
+        
+        if (datasetIndex === 1) {
+            const value = monthlyBarData[dataIndex];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const month = months[dataIndex];
+            const percentChange = percentageChanges[dataIndex];
+            
+            let tooltipText = '';
+            let tooltipColor = '';
+            
+            if (dataIndex === 0) {
+                tooltipText = `Starting Point: ${value} anime in ${month}`;
+                tooltipColor = '#94A3B8';
+            } else if (percentChange !== null && dataIndex <= currentMonth) {
+                const isIncrease = percentChange > 0;
+                const trendIcon = isIncrease ? '▲' : (percentChange < 0 ? '▼' : '●');
+                const changeValue = Math.abs(percentChange).toFixed(1);
+                const changeWord = percentChange > 0 ? 'increase' : (percentChange < 0 ? 'decrease' : 'no change');
+                tooltipColor = isIncrease ? '#10B981' : (percentChange < 0 ? '#EF4444' : '#94A3B8');
+                tooltipText = `${trendIcon} ${percentChange > 0 ? '+' : ''}${changeValue}% ${changeWord} from ${months[dataIndex - 1]}`;
+            }
+            
+            lineTooltip.innerHTML = tooltipText;
+            lineTooltip.style.borderColor = tooltipColor + '40';
+            lineTooltip.style.opacity = '1';
+            lineTooltip.style.left = (e.clientX + 15) + 'px';
+            lineTooltip.style.top = (e.clientY - 40) + 'px';
+            canvasElement.style.cursor = 'pointer';
+        } else {
+            lineTooltip.style.opacity = '0';
+            canvasElement.style.cursor = 'default';
+        }
+    } else {
+        lineTooltip.style.opacity = '0';
+        canvasElement.style.cursor = 'default';
+    }
+};
+
+if (canvasElement) {
+    canvasElement.addEventListener('mousemove', showLineTooltip);
+    canvasElement.addEventListener('mouseleave', () => {
+        lineTooltip.style.opacity = '0';
+        canvasElement.style.cursor = 'default';
+    });
+}
+
+// Function to update chart when data changes
+function updateMonthlyProgressChart() {
+    const newData = calculateMonthlyProgressData();
+    const newTotal = newData.reduce((a, b) => a + b, 0);
+    const newChanges = calculatePercentageChanges(newData, currentMonth);
+    
+    if (window.monthlyProgressChart) {
+        window.monthlyProgressChart.data.datasets[0].data = newData;
+        window.monthlyProgressChart.data.datasets[1].data = newData;
+        
+        window.monthlyProgressChart.data.datasets[1].pointBackgroundColor = (context) => {
+            const index = context.dataIndex;
+            return getPointColor(index, newData, newChanges, currentMonth);
+        };
+        
+        window.monthlyProgressChart.update();
+        
+        const totalSpan = document.getElementById('monthly-total-anime');
+        if (totalSpan) {
+            totalSpan.textContent = `Total Completed: ${newTotal}`;
+        }
+        
+        percentageChanges.length = 0;
+        newChanges.forEach(c => percentageChanges.push(c));
+        monthlyBarData.length = 0;
+        newData.forEach(d => monthlyBarData.push(d));
+    }
+}
+
+// Make update function globally available
+window.updateMonthlyProgressChart = updateMonthlyProgressChart;
+
+// =============================================
 // ENHANCED GENRE DISTRIBUTION CHART WITH TIME FILTERS
 // =============================================
 
@@ -1377,7 +1784,158 @@ function updateTopRatedAnime() {
             `).join('');
 }
 
-// Log activity
+// Add this variable to track the update interval
+let activityUpdateInterval = null;
+
+// Modified updateRecentActivity function with proper time formatting
+function updateRecentActivity() {
+    const activityContainer = document.getElementById('recent-activity');
+
+    if (!activityContainer) return;
+
+    if (activityLog.length === 0) {
+        activityContainer.innerHTML = '<div class="no-activity">No recent activity. Add or update anime to see activity here.</div>';
+        return;
+    }
+
+    activityContainer.innerHTML = activityLog.slice(0, 6).map(activity => {
+        let activityText = '';
+        let iconClass = '';
+        let iconName = '';
+
+        switch (activity.action) {
+            case 'added':
+                activityText = `Added ${activity.animeTitle} to your list`;
+                iconClass = 'added';
+                iconName = 'plus';
+                break;
+            case 'completed':
+                activityText = `Completed ${activity.animeTitle}`;
+                iconClass = 'completed';
+                iconName = 'check';
+                break;
+            case 'watching':
+                activityText = `Started watching ${activity.animeTitle}`;
+                iconClass = 'watching';
+                iconName = 'play';
+                break;
+            case 'edited':
+                activityText = `Updated ${activity.animeTitle}`;
+                iconClass = 'edited';
+                iconName = 'edit';
+                break;
+            case 'deleted':
+                activityText = `Removed ${activity.animeTitle} from your list`;
+                iconClass = 'deleted';
+                iconName = 'trash';
+                break;
+            default:
+                activityText = `Updated ${activity.animeTitle}`;
+                iconClass = 'edited';
+                iconName = 'edit';
+        }
+
+        return `
+            <div class="activity-item" data-timestamp="${activity.timestamp}">
+                <div class="activity-icon ${iconClass}">
+                    <i class="fas fa-${iconName}"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-anime">${escapeHtml(activity.animeTitle)}</div>
+                    <div class="activity-desc">${activityText}</div>
+                </div>
+                <div class="activity-time" data-time="${activity.timestamp}">
+                    ${formatTimeAgo(activity.timestamp)}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Helper function to escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Improved formatTimeAgo with more accurate time calculation
+function formatTimeAgo(dateString) {
+    if (!dateString) return 'Unknown';
+
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    
+    // Handle invalid dates
+    if (isNaN(date.getTime())) return 'Unknown';
+    
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffDays / 365);
+
+    if (diffSeconds < 5) return 'Just now';
+    if (diffSeconds < 60) return `${diffSeconds} seconds ago`;
+    if (diffMins < 2) return '1 minute ago';
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 2) return '1 hour ago';
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays < 2) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffWeeks < 2) return '1 week ago';
+    if (diffWeeks < 4) return `${diffWeeks} weeks ago`;
+    if (diffMonths < 2) return '1 month ago';
+    if (diffMonths < 12) return `${diffMonths} months ago`;
+    if (diffYears < 2) return '1 year ago';
+    
+    return `${diffYears} years ago`;
+}
+
+// Function to update all activity times without re-rendering the whole list
+function updateActivityTimes() {
+    const timeElements = document.querySelectorAll('#recent-activity .activity-time');
+    
+    timeElements.forEach(el => {
+        const timestamp = el.getAttribute('data-time');
+        if (timestamp) {
+            const newTimeText = formatTimeAgo(timestamp);
+            if (el.textContent !== newTimeText) {
+                el.textContent = newTimeText;
+            }
+        }
+    });
+}
+
+// Start automatic time updates for activities
+function startActivityTimeUpdates() {
+    // Clear existing interval if any
+    if (activityUpdateInterval) {
+        clearInterval(activityUpdateInterval);
+    }
+    
+    // Update times every 60 seconds
+    activityUpdateInterval = setInterval(() => {
+        // Only update if the activities are visible on screen
+        const recentActivityElement = document.getElementById('recent-activity');
+        if (recentActivityElement && recentActivityElement.offsetParent !== null) {
+            updateActivityTimes();
+        }
+    }, 60000); // Update every minute
+}
+
+// Stop activity time updates (call this if needed)
+function stopActivityTimeUpdates() {
+    if (activityUpdateInterval) {
+        clearInterval(activityUpdateInterval);
+        activityUpdateInterval = null;
+    }
+}
+
+// Modified logActivity function with better timestamp handling
 function logActivity(action, animeTitle, timestamp) {
     const activity = {
         id: Date.now(),
@@ -1395,61 +1953,31 @@ function logActivity(action, animeTitle, timestamp) {
 
     localStorage.setItem('activityLog', JSON.stringify(activityLog));
     updateRecentActivity();
+    
+    // Dispatch custom event for any other components that might need to know
+    window.dispatchEvent(new CustomEvent('activityLogged', { detail: activity }));
 }
 
-// Update recent activity
-function updateRecentActivity() {
-    const activityContainer = document.getElementById('recent-activity');
-
-    if (activityLog.length === 0) {
-        activityContainer.innerHTML = '<div class="no-activity">No recent activity. Add or update anime to see activity here.</div>';
-        return;
+// Optional: Add visibility change detection to update times when tab becomes active
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        // Tab became visible, update times immediately
+        updateActivityTimes();
     }
+});
 
-    activityContainer.innerHTML = activityLog.slice(0, 6).map(activity => {
-        let activityText = '';
-        let iconClass = '';
-
-        switch (activity.action) {
-            case 'added':
-                activityText = `Added ${activity.animeTitle} to your list`;
-                iconClass = 'added';
-                break;
-            case 'completed':
-                activityText = `Completed ${activity.animeTitle}`;
-                iconClass = 'completed';
-                break;
-            case 'watching':
-                activityText = `Started watching ${activity.animeTitle}`;
-                iconClass = 'watching';
-                break;
-            case 'edited':
-                activityText = `Updated ${activity.animeTitle}`;
-                iconClass = 'edited';
-                break;
-            case 'deleted':
-                activityText = `Removed ${activity.animeTitle} from your list`;
-                iconClass = 'deleted';
-                break;
-            default:
-                activityText = `Updated ${activity.animeTitle}`;
-                iconClass = 'edited';
-        }
-
-        return `
-                    <div class="activity-item">
-                        <div class="activity-icon ${iconClass}">
-                            <i class="fas fa-${iconClass === 'added' ? 'plus' : iconClass === 'completed' ? 'check' : iconClass === 'watching' ? 'play' : iconClass === 'edited' ? 'edit' : 'trash'}"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-anime">${activity.animeTitle}</div>
-                            <div class="activity-desc">${activityText}</div>
-                        </div>
-                        <div class="activity-time">${formatTimeAgo(activity.timestamp)}</div>
-                    </div>
-                `;
-    }).join('');
-}
+// Initialize activity time updates when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    startActivityTimeUpdates();
+    
+    // Also update times when returning to dashboard page
+    const dashboardMenuItem = document.querySelector('.menu-item[data-page="dashboard"]');
+    if (dashboardMenuItem) {
+        dashboardMenuItem.addEventListener('click', () => {
+            setTimeout(updateActivityTimes, 100);
+        });
+    }
+});
 
 // Update anime display
 function updateAnimeDisplay() {
@@ -4650,119 +5178,477 @@ window.updateAnimeDisplay = function () {
     });
 })();
 
-
 // =============================================
-// GITHUB-STYLE ACTIVITY HEATMAP 
+// COMPLETE ACTIVITY HEATMAP - WORKING WITH YOUR HTML
+// GitHub-style heatmap with all features
 // =============================================
-function renderActivityHeatmap(animeData) {
-    const ctx = document.getElementById("activityHeatmapChart")?.getContext("2d");
-    if (!ctx) return;
 
-    // Destroy old chart before drawing new one
-    if (window.activityByDayChartInstance) window.activityByDayChartInstance.destroy();
-
-    // 🗓 Prepare last 56 days (8 weeks)
-    const today = new Date();
-    const start = new Date(today);
-    start.setDate(start.getDate() - 55);
-
-    const allDays = [];
-    for (let i = 0; i < 56; i++) {
-        const d = new Date(start);
-        d.setDate(start.getDate() + i);
-        allDays.push(d);
+class ActivityHeatmap {
+    constructor() {
+        this.currentYear = new Date().getFullYear();
+        this.currentDay = new Date();
+        this.contributions = this.loadContributions();
+        this.tooltip = null;
+        this.init();
     }
 
-    //  Count updates per date
-    const dayCounts = {};
-    animeData.forEach(a => {
-        if (!a.updatedAt) return;
-        const dateStr = new Date(a.updatedAt).toISOString().split("T")[0];
-        dayCounts[dateStr] = (dayCounts[dateStr] || 0) + 1;
-    });
+    init() {
+        this.createTooltip();
+        this.render();
+        this.attachEventListeners();
+        this.startAutoRefresh();
+    }
 
-    //  heatmap
-    const data = allDays.map((d, i) => ({
-        x: Math.floor(i / 7), // week index
-        y: d.getDay(),        // weekday index
-        v: dayCounts[d.toISOString().split("T")[0]] || 0,
-        date: d.toISOString().split("T")[0]
-    }));
+    createTooltip() {
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'heatmap-tooltip';
+        this.tooltip.style.position = 'fixed';
+        this.tooltip.style.background = '#1a1f2e';
+        this.tooltip.style.color = 'white';
+        this.tooltip.style.padding = '8px 14px';
+        this.tooltip.style.borderRadius = '12px';
+        this.tooltip.style.fontSize = '0.75rem';
+        this.tooltip.style.fontWeight = '500';
+        this.tooltip.style.border = '1px solid rgba(139, 92, 246, 0.4)';
+        this.tooltip.style.backdropFilter = 'blur(8px)';
+        this.tooltip.style.pointerEvents = 'none';
+        this.tooltip.style.zIndex = '1000';
+        this.tooltip.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+        this.tooltip.style.whiteSpace = 'nowrap';
+        this.tooltip.style.display = 'none';
+        document.body.appendChild(this.tooltip);
+    }
 
-    //  GitHub color scale
-    const colorScale = (v) => {
-        if (v === 0) return "rgba(40,44,52,0.4)";
-        if (v < 2) return "#9be9a8";
-        if (v < 4) return "#40c463";
-        if (v < 6) return "#30a14e";
-        return "#216e39";
-    };
+    loadContributions() {
+        const saved = localStorage.getItem('animeContributions');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+        return this.generateSampleData();
+    }
 
-    //  Drawing heatmap
-    window.activityByDayChartInstance = new Chart(ctx, {
-        type: "matrix",
-        data: {
-            datasets: [{
-                label: "Anime Activity",
-                data,
-                backgroundColor: c => colorScale(c.raw.v),
-                borderColor: "rgba(255,255,255,0.05)",
-                borderWidth: 1,
-                width: ctx => {
-                    const ca = ctx.chart.chartArea;
-                    return ca ? (ca.width / 8) - 4 : 20;
-                },
-                height: ctx => {
-                    const ca = ctx.chart.chartArea;
-                    return ca ? (ca.height / 7) - 4 : 20;
-                }
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    offset: true,
-                    grid: { display: false },
-                    ticks: { display: false }
-                },
-                y: {
-                    reverse: true,
-                    ticks: {
-                        callback: (val) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][val],
-                        color: "#ccc",
-                        font: { size: 11 }
-                    },
-                    grid: { display: false }
-                }
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        title: c => c[0].raw.date,
-                        label: c => `${c.raw.v} update${c.raw.v !== 1 ? "s" : ""}`
-                    }
-                }
+    generateSampleData() {
+        const sample = {};
+        const today = new Date();
+        
+        // Generate realistic sample data for demo
+        for (let i = 0; i < 180; i++) {
+            const date = new Date();
+            date.setDate(today.getDate() - i);
+            const key = this.formatDateKey(date);
+            
+            // Create realistic activity pattern (more on weekdays, less on weekends)
+            const dayOfWeek = date.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            
+            if (Math.random() > 0.6) {
+                let baseAmount = isWeekend ? 1 : 3;
+                sample[key] = Math.floor(Math.random() * baseAmount) + 1;
             }
         }
-    });
+        
+        return sample;
+    }
 
-    //  Most active day text
-    const maxDay = Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0];
-    const text = document.getElementById("mostActiveDayText");
-    if (text) {
-        if (maxDay) text.innerHTML = `<strong>🔥 Most Active:</strong> ${maxDay[0]} (${maxDay[1]} updates)`;
-        else text.innerHTML = `<em>No activity yet.</em>`;
+    saveContributions() {
+        localStorage.setItem('animeContributions', JSON.stringify(this.contributions));
+    }
+
+    formatDateKey(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    // Calculate contribution based on anime episode count
+    calculateContributionCount(anime, updateCount = 1) {
+        const totalEpisodes = parseInt(anime.totalEpisodes) || 12;
+        
+        let maxUpdatesPerDay;
+        let maxContributionsPerDay;
+        
+        if (totalEpisodes <= 32) {
+            maxUpdatesPerDay = 6;
+            maxContributionsPerDay = 3;
+        } else {
+            maxUpdatesPerDay = 18;
+            maxContributionsPerDay = 9;
+        }
+        
+        // Check today's updates for this anime
+        const today = this.formatDateKey(this.currentDay);
+        const animeKey = `${anime.id || anime.title}_${today}`;
+        const todayUpdates = JSON.parse(localStorage.getItem('animeDailyUpdates') || '{}');
+        const currentUpdates = todayUpdates[animeKey] || 0;
+        
+        if (currentUpdates >= maxUpdatesPerDay) {
+            return 0;
+        }
+        
+        // Calculate contribution (every 2 updates = 1 contribution)
+        let contribution = Math.floor((currentUpdates + updateCount) / 2) + 1;
+        contribution = Math.min(contribution, maxContributionsPerDay);
+        
+        // Update daily tracking
+        todayUpdates[animeKey] = currentUpdates + updateCount;
+        localStorage.setItem('animeDailyUpdates', JSON.stringify(todayUpdates));
+        
+        return contribution;
+    }
+
+    // Add contribution for anime activity
+    addContribution(amount = 1, anime = null) {
+        const today = this.formatDateKey(this.currentDay);
+        
+        let finalAmount = amount;
+        
+        // If anime is provided, calculate based on episode count
+        if (anime) {
+            finalAmount = this.calculateContributionCount(anime, amount);
+        }
+        
+        if (finalAmount > 0) {
+            this.contributions[today] = (this.contributions[today] || 0) + finalAmount;
+            this.saveContributions();
+            this.render();
+            this.showToast(`+${finalAmount} contribution${finalAmount !== 1 ? 's' : ''} added!`);
+        }
+        
+        return finalAmount;
+    }
+
+    showToast(message) {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.right = '20px';
+        toast.style.background = 'linear-gradient(135deg, #8b5cf6, #6366f1)';
+        toast.style.color = 'white';
+        toast.style.padding = '10px 20px';
+        toast.style.borderRadius = '30px';
+        toast.style.fontSize = '0.8rem';
+        toast.style.fontWeight = '500';
+        toast.style.zIndex = '9999';
+        toast.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+        toast.style.animation = 'fadeInOut 2s ease';
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 2000);
+    }
+
+    getContribution(date) {
+        const key = this.formatDateKey(date);
+        return this.contributions[key] || 0;
+    }
+
+    getTotalForYear(year) {
+        let total = 0;
+        for (const [date, count] of Object.entries(this.contributions)) {
+            if (date.startsWith(year)) {
+                total += count;
+            }
+        }
+        return total;
+    }
+
+    getColorLevel(count) {
+        if (count === 0) return 0;
+        if (count <= 2) return 1;
+        if (count <= 5) return 2;
+        if (count <= 9) return 3;
+        return 4;
+    }
+
+    getWeeksData(year) {
+        const weeks = [];
+        const today = new Date();
+        const maxDate = (year === this.currentYear) ? today : new Date(year, 11, 31);
+        
+        // Find first Sunday of the year
+        const firstDay = new Date(year, 0, 1);
+        let firstSunday = new Date(firstDay);
+        const dayOfWeek = firstDay.getDay();
+        firstSunday.setDate(firstDay.getDate() - dayOfWeek);
+        
+        // Generate weeks
+        for (let week = 0; week < 53; week++) {
+            const weekStart = new Date(firstSunday);
+            weekStart.setDate(firstSunday.getDate() + (week * 7));
+            
+            if (weekStart > maxDate) break;
+            
+            const days = [];
+            for (let day = 0; day < 7; day++) {
+                const currentDate = new Date(weekStart);
+                currentDate.setDate(weekStart.getDate() + day);
+                
+                if (currentDate <= maxDate && currentDate >= new Date(year, 0, 1)) {
+                    const count = this.getContribution(currentDate);
+                    days.push({
+                        date: new Date(currentDate),
+                        count: count,
+                        dateStr: this.formatDateKey(currentDate)
+                    });
+                } else {
+                    days.push(null);
+                }
+            }
+            
+            if (days.some(d => d !== null)) {
+                weeks.push(days);
+            }
+        }
+        
+        return weeks;
+    }
+
+    renderMonthLabels(weeks) {
+        const container = document.getElementById('heatmapMonths');
+        if (!container) return;
+        
+        const monthPositions = {};
+        let currentMonth = -1;
+        
+        weeks.forEach((week, weekIndex) => {
+            week.forEach((day, dayIndex) => {
+                if (day && day.date.getDate() <= 7 && day.date.getMonth() !== currentMonth) {
+                    currentMonth = day.date.getMonth();
+                    const position = weekIndex * 15 + 10;
+                    monthPositions[currentMonth] = {
+                        name: day.date.toLocaleString('default', { month: 'short' }),
+                        position: position
+                    };
+                }
+            });
+        });
+        
+        const sortedMonths = Object.entries(monthPositions)
+            .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+            .map(([_, data]) => data);
+        
+        container.innerHTML = sortedMonths.map(month => `
+            <span class="month-label" style="left: ${month.position}px;">${month.name}</span>
+        `).join('');
+    }
+
+    renderHeatmap() {
+        const container = document.getElementById('heatmapGrid');
+        if (!container) return;
+        
+        const weeks = this.getWeeksData(this.currentYear);
+        container.innerHTML = '';
+        
+        weeks.forEach(week => {
+            const col = document.createElement('div');
+            col.className = 'heatmap-col';
+            col.style.display = 'flex';
+            col.style.flexDirection = 'column';
+            col.style.gap = '3px';
+            
+            week.forEach(day => {
+                if (day === null) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.style.width = '12px';
+                    emptyCell.style.height = '12px';
+                    emptyCell.style.visibility = 'hidden';
+                    col.appendChild(emptyCell);
+                } else {
+                    const cell = document.createElement('div');
+                    const level = this.getColorLevel(day.count);
+                    cell.className = `heatmap-cell level-${level}`;
+                    cell.setAttribute('data-date', day.dateStr);
+                    cell.setAttribute('data-count', day.count);
+                    cell.style.width = '12px';
+                    cell.style.height = '12px';
+                    cell.style.borderRadius = '3px';
+                    cell.style.cursor = 'pointer';
+                    cell.style.transition = 'all 0.15s ease';
+                    
+                    cell.addEventListener('mouseenter', (e) => this.showTooltip(e, day));
+                    cell.addEventListener('mouseleave', () => this.hideTooltip());
+                    
+                    col.appendChild(cell);
+                }
+            });
+            
+            container.appendChild(col);
+        });
+        
+        this.renderMonthLabels(weeks);
+    }
+
+    renderYearButtons() {
+        const currentYear = new Date().getFullYear();
+        const years = [currentYear - 2, currentYear - 1, currentYear];
+        const container = document.getElementById('heatmapYears');
+        if (!container) return;
+        
+        container.innerHTML = years.map(year => `
+            <button class="year-btn ${year === this.currentYear ? 'active' : ''}" data-year="${year}">
+                ${year}
+            </button>
+        `).join('');
+        
+        container.querySelectorAll('.year-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.currentYear = parseInt(btn.dataset.year);
+                this.renderYearButtons();
+                this.renderHeatmap();
+                this.updateTotalDisplay();
+            });
+        });
+    }
+
+    updateTotalDisplay() {
+        const total = this.getTotalForYear(this.currentYear);
+        const totalSpan = document.getElementById('totalCount');
+        const yearSpan = document.getElementById('currentYearDisplay');
+        if (totalSpan) totalSpan.textContent = total;
+        if (yearSpan) yearSpan.textContent = this.currentYear;
+    }
+
+    showTooltip(event, day) {
+        if (!day) return;
+        
+        const count = day.count;
+        const date = day.date;
+        const formattedDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        const contributionText = count === 1 ? 'contribution' : 'contributions';
+        
+        this.tooltip.innerHTML = `${count} ${contributionText} on ${formattedDate}`;
+        this.tooltip.style.display = 'block';
+        
+        let left = event.clientX + 15;
+        let top = event.clientY - 30;
+        
+        if (left + 200 > window.innerWidth) {
+            left = event.clientX - 200;
+        }
+        if (top < 0) {
+            top = event.clientY + 20;
+        }
+        
+        this.tooltip.style.left = left + 'px';
+        this.tooltip.style.top = top + 'px';
+    }
+
+    hideTooltip() {
+        this.tooltip.style.display = 'none';
+    }
+
+    attachEventListeners() {
+        // Listen for anime updates
+        window.addEventListener('animeUpdate', (event) => {
+            const amount = event.detail?.count || 1;
+            const anime = event.detail?.anime || null;
+            this.addContribution(amount, anime);
+        });
+        
+        // Sync across tabs
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'animeContributions') {
+                this.contributions = JSON.parse(e.newValue) || {};
+                this.render();
+            }
+        });
+    }
+
+    startAutoRefresh() {
+        setInterval(() => {
+            const newDay = new Date();
+            if (newDay.getDate() !== this.currentDay.getDate()) {
+                this.currentDay = newDay;
+                this.render();
+            }
+        }, 60000);
+    }
+
+    render() {
+        this.renderYearButtons();
+        this.renderHeatmap();
+        this.updateTotalDisplay();
     }
 }
 
-// Initialize on DOM load
-document.addEventListener("DOMContentLoaded", () => {
-    if (typeof animeData !== "undefined" && Array.isArray(animeData)) {
-        renderActivityHeatmap(animeData);
+// =============================================
+// INTEGRATION FUNCTIONS
+// =============================================
+
+// Track anime actions (call these from your existing functions)
+function onAnimeAdded(anime) {
+    if (window.heatmap) {
+        window.heatmap.addContribution(1, anime);
     }
+}
+
+function onAnimeUpdated(anime, changes) {
+    if (window.heatmap) {
+        let contribution = 1;
+        if (changes?.status === 'Completed') {
+            contribution = 2;
+        }
+        window.heatmap.addContribution(contribution, anime);
+    }
+}
+
+function onAnimeProgressUpdated(anime, newProgress, oldProgress) {
+    if (window.heatmap && newProgress > oldProgress) {
+        const episodesWatched = newProgress - oldProgress;
+        const contribution = Math.min(episodesWatched, 3);
+        window.heatmap.addContribution(contribution, anime);
+    }
+}
+
+function onAnimeDeleted(anime) {
+    // Optional: No contribution for deletion
+    console.log('Anime deleted, no contribution added');
+}
+
+// =============================================
+// INITIALIZATION
+// =============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize heatmap
+    window.heatmap = new ActivityHeatmap();
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(20px); }
+            15% { opacity: 1; transform: translateX(0); }
+            85% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(20px); }
+        }
+        
+        .heatmap-cell:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+        }
+        
+        .heatmap-col {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Expose functions globally
+    window.trackAnimeActivity = function(anime, action) {
+        if (window.heatmap) {
+            let contribution = 1;
+            if (action === 'complete') contribution = 2;
+            if (action === 'add') contribution = 1;
+            if (action === 'update') contribution = 1;
+            window.heatmap.addContribution(contribution, anime);
+        }
+    };
+    
+    console.log('Activity Heatmap initialized successfully!');
 });
 
 // =============================================

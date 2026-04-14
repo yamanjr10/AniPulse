@@ -338,11 +338,44 @@
 
             <!-- Activity Heatmap Section -->
             <div class="chart-card fade-in">
-                <div class="chart-header">
-                    <div class="chart-title"><i class="fas fa-calendar-day"></i> Activity Heatmap</div>
+                <div class="heatmap-header">
+                    <div class="heatmap-title">
+                        <i class="fas fa-calendar-day"></i> Activity Heatmap
+                    </div>
+                    <div class="total-contributions" id="totalContributionsDisplay">
+                        <i class="fas fa-fire"></i> <span id="totalCount">0</span> contributions
+                    </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="activityHeatmapChart" height="140"></canvas>
+
+                <!-- Year Filter -->
+                <div class="heatmap-years" id="heatmapYears">
+                    <button class="year-btn" data-year="2024">2024</button>
+                    <button class="year-btn" data-year="2025">2025</button>
+                    <button class="year-btn active" data-year="2026">2026</button>
+                </div>
+
+                <!-- Heatmap Grid -->
+                <div class="heatmap-wrapper">
+                    <div class="heatmap-container">
+                        <!-- Month Labels -->
+                        <div class="heatmap-months" id="heatmapMonths"></div>
+
+                        <!-- Heatmap Grid -->
+                        <div class="heatmap-grid" id="heatmapGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="heatmap-legend">
+                    <span class="legend-text">Less</span>
+                    <div class="legend-colors">
+                        <div class="legend-color less"></div>
+                        <div class="legend-color" style="background: #9be9a8;"></div>
+                        <div class="legend-color" style="background: #40c463;"></div>
+                        <div class="legend-color" style="background: #30a14e;"></div>
+                        <div class="legend-color more" style="background: #216e39;"></div>
+                    </div>
+                    <span class="legend-text">More</span>
                 </div>
             </div>
 
@@ -520,6 +553,7 @@
                         </div>
                     </div>
 
+                    <!-- Status Distribution Chart -->
                     <div class="chart-card fade-in">
                         <div class="chart-header">
                             <div class="chart-title">Status Distribution</div>
@@ -529,6 +563,7 @@
                         </div>
                     </div>
 
+                    <!-- Type Distribution Chart -->
                     <div class="chart-card fade-in">
                         <div class="chart-header">
                             <div class="chart-title">Type Distribution</div>
@@ -538,6 +573,7 @@
                         </div>
                     </div>
 
+                    <!-- Genre Stats Chart -->
                     <div class="chart-card fade-in">
                         <div class="chart-header">
                             <div class="chart-title">Top Genres</div>
@@ -547,6 +583,7 @@
                         </div>
                     </div>
 
+                    <!-- Score Distribution Chart -->
                     <div class="chart-card fade-in">
                         <div class="chart-header">
                             <div class="chart-title">Score Distribution</div>
@@ -556,6 +593,7 @@
                         </div>
                     </div>
 
+                    <!-- Average Score by Genre Chart -->
                     <div class="chart-card fade-in">
                         <div class="chart-header">
                             <div class="chart-title">Average Score per Genre</div>
@@ -565,15 +603,7 @@
                         </div>
                     </div>
 
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Favorite Genres Over Time</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="favoriteGenresChart"></canvas>
-                        </div>
-                    </div>
-
+                    <!-- Watch Time by Day of Week Chart -->
                     <div class="chart-card fade-in">
                         <div class="chart-header">
                             <div class="chart-title">Watch Time by Day of Week</div>
@@ -613,6 +643,8 @@
                         </div>
                     </div>
 
+
+
                 </div>
             </div>
         </div>
@@ -641,6 +673,8 @@
                 <!-- Achievements Grid -->
                 <div class="achievements-grid" id="achievementsGrid"></div>
             </div>
+
+
         </div>
 
         <!-- Community Page -->

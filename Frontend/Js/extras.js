@@ -44,66 +44,6 @@ function calculateUserGenreTrends() {
   };
 }
 
-function initFavoriteGenresChart() {
-  const ctx = document.getElementById('favoriteGenresChart')?.getContext('2d');
-  if (!ctx) return;
-
-  const { years, data } = calculateUserGenreTrends();
-  const genreTotals = Object.entries(data)
-    .map(([genre, yearly]) => ({
-      genre,
-      total: Object.values(yearly).reduce((a, b) => a + b, 0)
-    }))
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 4);
-
-  const datasets = genreTotals.map(({ genre }, index) => ({
-    label: genre,
-    data: years.map(y => data[genre][y] || 0),
-    borderWidth: 2,
-    tension: 0.3,
-    fill: true,
-    borderColor: [
-      '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'
-    ][index % 5],
-    pointRadius: 4,
-  }));
-
-  if (window.favoriteGenresChartInstance) {
-    window.favoriteGenresChartInstance.destroy();
-  }
-
-  window.favoriteGenresChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: years, datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-light') } },
-      },
-      scales: {
-        x: {
-          ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-light') },
-          grid: { display: false }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-light') },
-          grid: { color: getComputedStyle(document.body).getPropertyValue('--gray') }
-        }
-      }
-    }
-  });
-}
-
-// Extend initStatisticsCharts safely
-const prevInitStats = window.initStatisticsCharts;
-window.initStatisticsCharts = function () {
-  prevInitStats();
-  setTimeout(initFavoriteGenresChart, 500);
-};
-
 // --- Toast Queue ---
 let toastQueue = [];
 let showingToast = false;
