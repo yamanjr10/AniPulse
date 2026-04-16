@@ -936,19 +936,31 @@
 
     <!-- Name Entry Modal -->
     <div id="nameEntryModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 450px;">
             <div class="modal-header">
-                <h2 class="modal-title">Welcome to AnimeTracker Pro!</h2>
+                <div class="modal-title">
+                    <i class="fas fa-user-astronaut"></i>
+                    Welcome to AnimeTracker Pro!
+                </div>
+                <button class="close-modal" onclick="hideNameEntryModal()">&times;</button>
             </div>
-            <form id="nameEntryForm">
-                <div class="form-group">
-                    <label for="userNameInput">Enter your name to get started</label>
-                    <input type="text" id="userNameInput" placeholder="Your name" required maxlength="20">
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Save & Continue</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <p style="margin-bottom: 20px; color: var(--color-text-secondary);">
+                    Let's personalize your experience. What should we call you?
+                </p>
+                <form id="nameEntryForm">
+                    <div class="form-group">
+                        <label for="userNameInput">Your Name</label>
+                        <input type="text" id="userNameInput" placeholder="Enter your name..." autocomplete="off"
+                            maxlength="30" style="font-size: 1.1rem; padding: 12px;">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-check"></i> Save & Continue
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
