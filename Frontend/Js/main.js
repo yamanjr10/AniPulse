@@ -1980,58 +1980,140 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Update anime display
-function updateAnimeDisplay() {
-    const statusFilter = document.getElementById('statusFilter')?.value || 'all';
-    const sortFilter = document.getElementById('sortFilter')?.value || 'id';
-    const monthFilter = document.getElementById('monthFilter')?.value || 'all';
-    const yearFilter = document.getElementById('yearFilter')?.value || 'all';
+// =============================================
+// MAKE EDIT ANIME GLOBALLY AVAILABLE
+// =============================================
 
-    let filteredAnime = [...animeData];
+// Edit anime - Shows existing dates properly
+function editAnime(id) {
+    const anime = animeData.find(a => a.id == id);
+    if (!anime) return;
 
-    // ✅ Month/year filtering logic (handles "All Status" properly)
-    if (monthFilter !== 'all' || yearFilter !== 'all') {
-        filteredAnime = filteredAnime.filter(anime => {
-            const dateToCheck = anime.finishDate || anime.updatedAt || anime.createdAt;
-            if (!dateToCheck) return false;
+    isEditing = true;
+    currentEditId = id;
 
-            const [year, month] = dateToCheck.split('-');
+    // Populate form with anime data
+    const animeIdInput = document.getElementById('animeId');
+    const animeTitle = document.getElementById('animeTitle');
+    const animeType = document.getElementById('animeType');
+    const animeEpisodes = document.getElementById('animeEpisodes');
+    const animeDuration = document.getElementById('animeDuration');
+    const animeStatus = document.getElementById('animeStatus');
+    const animeProgress = document.getElementById('animeProgress');
+    const animeScore = document.getElementById('animeScore');
+    const animeCover = document.getElementById('animeCover');
+    const animeGenres = document.getElementById('animeGenres');
+    const animeYear = document.getElementById('animeYear');
+    const animeMonth = document.getElementById('animeMonth');
+    const durationInput = document.getElementById('animeDuration');
+    const submitButton = document.getElementById('submitBtn');
+    const deleteButton = document.getElementById('deleteBtn');
+    const addModal = document.getElementById('addAnimeModal');
+    const searchResultsDiv = document.getElementById('searchResults');
 
-            if (monthFilter !== 'all' && month !== monthFilter) return false;
-            if (yearFilter !== 'all' && year !== yearFilter) return false;
+    if (animeIdInput) animeIdInput.value = anime.id;
+    if (animeTitle) animeTitle.value = anime.title;
+    if (animeType) animeType.value = anime.type;
+    if (animeEpisodes) animeEpisodes.value = anime.episodes;
+    if (animeDuration) animeDuration.value = anime.duration || (anime.type === 'Movie' ? 120 : 20);
+    if (animeStatus) animeStatus.value = anime.userStatus;
+    if (animeProgress) animeProgress.value = anime.progress;
+    if (animeScore) animeScore.value = anime.score || '';
+    if (animeCover) animeCover.value = anime.cover || '';
+    if (animeGenres) animeGenres.value = anime.genres ? anime.genres.join(', ') : '';
 
-            if (statusFilter === 'all') return true;
-            return anime.userStatus === statusFilter;
-        });
-    } else {
-        // ✅ Apply only status filter if no month/year filter
-        if (statusFilter !== 'all') {
-            filteredAnime = filteredAnime.filter(a => a.userStatus === statusFilter);
+    // Set finish date if exists - extract year and month for display
+    if (anime.finishDate && animeYear && animeMonth) {
+        const [year, month] = anime.finishDate.split('-');
+        animeYear.value = year;
+        animeMonth.value = month;
+    } else if (animeYear && animeMonth) {
+        // Set current date as default
+        const now = new Date();
+        animeYear.value = now.getFullYear().toString();
+        animeMonth.value = (now.getMonth() + 1).toString().padStart(2, '0');
+    }
+
+    // Set duration input readonly based on type
+    if (durationInput) {
+        if (anime.type === 'Movie') {
+            durationInput.readOnly = false;
+        } else {
+            durationInput.readOnly = true;
         }
     }
 
-    // ✅ Sorting logic
-    if (sortFilter === 'title') {
-        filteredAnime.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortFilter === 'rating') {
-        filteredAnime.sort((a, b) => (b.score || 0) - (a.score || 0));
-    } else if (sortFilter === 'episodes') {
-        filteredAnime.sort((a, b) => (b.episodes || 0) - (a.episodes || 0));
-    } else if (sortFilter === 'updated') {
-        filteredAnime.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+    // Update button text and show delete button
+    if (submitButton) submitButton.textContent = 'Update Anime';
+    if (deleteButton) deleteButton.style.display = 'inline-block';
+
+    // Show modal
+    if (addModal) addModal.style.display = 'flex';
+
+    // Close search results if open
+    if (searchResultsDiv) searchResultsDiv.style.display = 'none';
+}
+
+// Make editAnime available globally for click handlers
+window.editAnime = editAnime;
+
+// =============================================
+// DELETE ANIME FUNCTION
+// =============================================
+
+// Delete anime - Fixed version
+function deleteAnime() {
+    if (!currentEditId) return;
+
+    if (!confirm('Are you sure you want to delete this anime?')) return;
+
+    const anime = animeData.find(a => a.id == currentEditId);
+    if (anime) {
+        logActivity("deleted", anime.title);
     }
 
-    // ✅ Update the anime counter after rendering
-    const countEl = document.getElementById('anime-count');
-    if (countEl) {
-        countEl.textContent = `Total Anime: ${filteredAnime.length}`;
+    animeData = animeData.filter(a => a.id != currentEditId);
+    saveData();
+
+    const addModal = document.getElementById('addAnimeModal');
+    const animeFormElement = document.getElementById('addAnimeForm');
+    const searchResultsDiv = document.getElementById('searchResults');
+    const submitButton = document.getElementById('submitBtn');
+    const deleteButton = document.getElementById('deleteBtn');
+    const statusFilter = document.getElementById('statusFilter');
+
+    if (addModal) addModal.style.display = 'none';
+    if (animeFormElement) animeFormElement.reset();
+    if (searchResultsDiv) {
+        searchResultsDiv.style.display = 'none';
+        searchResultsDiv.innerHTML = '';
     }
-    // ✅ Update the anime table
-    updateAnimeTableView(filteredAnime);
+
+    isEditing = false;
+    currentEditId = null;
+    if (submitButton) submitButton.textContent = 'Add Anime';
+    if (deleteButton) deleteButton.style.display = 'none';
+
+    // Reset filters to show all statuses
+    if (statusFilter) statusFilter.value = 'all';
+
+    // Refresh everything
+    updateAllComponents();
+
+    showToast('Anime deleted successfully!', 'success');
 }
+
+// Make deleteAnime available globally
+window.deleteAnime = deleteAnime;
+
+// =============================================
+// UPDATE ANIME TABLE VIEW WITH WORKING CLICKS
+// =============================================
+
 // Update anime table view - Shows Month Year only, full date on hover
 function updateAnimeTableView(animeList) {
     const tableBody = document.getElementById('anime-table-body');
+    if (!tableBody) return;
 
     if (animeList.length === 0) {
         tableBody.innerHTML = `
@@ -2058,18 +2140,26 @@ function updateAnimeTableView(animeList) {
         let completionDate = '-';
         let completionTooltip = '';
         if (anime.finishDate) {
-            const [year, month, day] = anime.finishDate.split('-');
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            completionDate = `${monthNames[parseInt(month) - 1]} ${year}`;
-            completionTooltip = `Completed on: ${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
+            const parts = anime.finishDate.split('-');
+            if (parts.length >= 2) {
+                const [year, month, day] = parts;
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                completionDate = `${monthNames[parseInt(month) - 1]} ${year}`;
+                if (day) {
+                    completionTooltip = `Completed on: ${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
+                }
+            }
         }
 
         // Format creation date for tooltip
         let creationTooltip = '';
         if (anime.createdAt) {
-            const [year, month, day] = anime.createdAt.split('-');
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            creationTooltip = `Added on: ${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
+            const parts = anime.createdAt.split('-');
+            if (parts.length >= 2) {
+                const [year, month, day] = parts;
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                creationTooltip = `Added on: ${monthNames[parseInt(month) - 1]} ${parseInt(day || '1')}, ${year}`;
+            }
         }
 
         const progress = anime.progress || 0;
@@ -2090,234 +2180,198 @@ function updateAnimeTableView(animeList) {
             : '-';
 
         const safeTitle = anime.title.length > 35 ? anime.title.slice(0, 35) + '...' : anime.title;
+        const escapedTitle = safeTitle.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
         // Combine tooltips
         const combinedTooltip = [creationTooltip, completionTooltip].filter(Boolean).join(' | ');
 
         const titleWithCover = `
-            <div class="anime-title-cell" title="${combinedTooltip}">
+            <div class="anime-title-cell" title="${combinedTooltip.replace(/"/g, '&quot;')}">
                 <img src="${anime.cover || 'https://via.placeholder.com/50x70/6a5acd/ffffff?text=No+Image'}"
-                     alt="${anime.title}" class="anime-cover">
+                     alt="${escapedTitle}" class="anime-cover"
+                     onerror="this.src='https://via.placeholder.com/50x70/6a5acd/ffffff?text=No+Image'">
                 <div class="anime-info">
-                    <div class="anime-title" title="${anime.title}">${safeTitle}</div>
+                    <div class="anime-title" title="${escapedTitle}">${safeTitle}</div>
                     ${anime.genres && anime.genres.length > 0
-                ? `<div class="anime-genres">${anime.genres.slice(0, 3).join(', ')}</div>`
+                ? `<div class="anime-genres">${anime.genres.slice(0, 3).join(', ').replace(/"/g, '&quot;')}</div>`
                 : ''}
                 </div>
             </div>
         `;
 
         return `
-            <tr data-id="${anime.id}" onclick="event.stopPropagation(); editAnime('${anime.id}')">
+            <tr data-id="${anime.id}" class="clickable-row" style="cursor: pointer;">
                 <td>${titleWithCover}</td>
                 <td>${anime.type || 'TV'}</td>
                 <td>${progressBar}</td>
                 <td><span class="badge ${statusClass}">${statusText}</span></td>
                 <td>${scoreDisplay}</td>
-                <td><span title="${completionTooltip}">${completionDate}</span></td>
+                <td><span title="${completionTooltip.replace(/"/g, '&quot;')}">${completionDate}</span></td>
             </tr>
         `;
     }).join('');
+
+    // Remove any existing click handler to avoid duplicates
+    if (tableBody._clickHandler) {
+        tableBody.removeEventListener('click', tableBody._clickHandler);
+    }
+
+    // Add click event listener using event delegation
+    const clickHandler = function (e) {
+        // Find the closest row with data-id attribute
+        const row = e.target.closest('tr[data-id]');
+        if (!row) return;
+
+        // Don't trigger if clicking on interactive elements
+        if (e.target.closest('.progress-wrapper') ||
+            e.target.closest('.badge') ||
+            e.target.closest('a') ||
+            e.target.closest('button')) {
+            return;
+        }
+
+        const animeId = row.getAttribute('data-id');
+        if (animeId && typeof window.editAnime === 'function') {
+            window.editAnime(animeId);
+        }
+    };
+
+    tableBody.addEventListener('click', clickHandler);
+    tableBody._clickHandler = clickHandler;
 }
 
-// Edit anime - Shows existing dates properly
-function editAnime(id) {
-    const anime = animeData.find(a => a.id == id);
-    if (!anime) return;
+// =============================================
+// UPDATE ANIME DISPLAY (Calls the table update)
+// =============================================
 
-    isEditing = true;
-    currentEditId = id;
+// Update anime display with filters
+function updateAnimeDisplay() {
+    const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+    const sortFilter = document.getElementById('sortFilter')?.value || 'id';
+    const monthFilter = document.getElementById('monthFilter')?.value || 'all';
+    const yearFilter = document.getElementById('yearFilter')?.value || 'all';
 
-    // Populate form with anime data
-    document.getElementById('animeId').value = anime.id;
-    document.getElementById('animeTitle').value = anime.title;
-    document.getElementById('animeType').value = anime.type;
-    document.getElementById('animeEpisodes').value = anime.episodes;
-    document.getElementById('animeDuration').value = anime.duration || (anime.type === 'Movie' ? 120 : 20);
-    document.getElementById('animeStatus').value = anime.userStatus;
-    document.getElementById('animeProgress').value = anime.progress;
-    document.getElementById('animeScore').value = anime.score || '';
-    document.getElementById('animeCover').value = anime.cover || '';
-    document.getElementById('animeGenres').value = anime.genres ? anime.genres.join(', ') : '';
+    let filteredAnime = [...animeData];
 
-    // Set finish date if exists - extract year and month for display
-    if (anime.finishDate) {
-        const [year, month] = anime.finishDate.split('-');
-        document.getElementById('animeYear').value = year;
-        document.getElementById('animeMonth').value = month;
+    // Month/year filtering logic
+    if (monthFilter !== 'all' || yearFilter !== 'all') {
+        filteredAnime = filteredAnime.filter(anime => {
+            const dateToCheck = anime.finishDate || anime.updatedAt || anime.createdAt;
+            if (!dateToCheck) return false;
+
+            const parts = dateToCheck.split('-');
+            if (parts.length < 2) return false;
+
+            const [year, month] = parts;
+
+            if (monthFilter !== 'all' && month !== monthFilter) return false;
+            if (yearFilter !== 'all' && year !== yearFilter) return false;
+
+            if (statusFilter === 'all') return true;
+            return anime.userStatus === statusFilter;
+        });
     } else {
-        // Set current date as default
-        const now = new Date();
-        document.getElementById('animeYear').value = now.getFullYear().toString();
-        document.getElementById('animeMonth').value = (now.getMonth() + 1).toString().padStart(2, '0');
+        // Apply only status filter if no month/year filter
+        if (statusFilter !== 'all') {
+            filteredAnime = filteredAnime.filter(a => a.userStatus === statusFilter);
+        }
     }
 
-    // Set duration input readonly based on type
-    const durationInput = document.getElementById('animeDuration');
-    if (anime.type === 'Movie') {
-        durationInput.readOnly = false;
-    } else {
-        durationInput.readOnly = true;
+    // Sorting logic
+    if (sortFilter === 'title') {
+        filteredAnime.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortFilter === 'rating') {
+        filteredAnime.sort((a, b) => (b.score || 0) - (a.score || 0));
+    } else if (sortFilter === 'episodes') {
+        filteredAnime.sort((a, b) => (b.episodes || 0) - (a.episodes || 0));
+    } else if (sortFilter === 'updated') {
+        filteredAnime.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
     }
 
-    // Update button text and show delete button
-    submitBtn.textContent = 'Update Anime';
-    deleteBtn.style.display = 'inline-block';
+    // Update the anime counter
+    const countEl = document.getElementById('anime-count');
+    if (countEl) {
+        countEl.textContent = `Total Anime: ${filteredAnime.length}`;
+    }
 
-    // Show modal
-    addAnimeModal.style.display = 'flex';
-
-    // Close search results if open
-    searchResults.style.display = 'none';
+    // Update the anime table
+    updateAnimeTableView(filteredAnime);
 }
 
-// Delete anime - Fixed version
-function deleteAnime() {
-    if (!currentEditId) return;
-
-    if (!confirm('Are you sure you want to delete this anime?')) return;
-
-    const anime = animeData.find(a => a.id == currentEditId);
-    if (anime) {
-        logActivity("deleted", anime.title);
-    }
-
-    animeData = animeData.filter(a => a.id != currentEditId);
-    saveData();
-
-    addAnimeModal.style.display = 'none';
-    animeForm.reset();
-    searchResults.style.display = 'none';
-    searchResults.innerHTML = '';
-
-    isEditing = false;
-    currentEditId = null;
-    submitBtn.textContent = 'Add Anime';
-    deleteBtn.style.display = 'none';
-
-    // Reset filters to show all statuses
-    document.getElementById('statusFilter').value = 'all';
-
-    // Refresh everything
-    updateAllComponents();
-
-    showToast('Anime deleted successfully!', 'success');
-}
-// Handle adding/updating anime - Saves actual dates with correct days
 function handleAddAnime(e) {
     e.preventDefault();
 
-    const title = document.getElementById('animeTitle').value;
-    const type = document.getElementById('animeType').value;
-    const episodes = parseInt(document.getElementById('animeEpisodes').value);
-    let duration = parseInt(document.getElementById('animeDuration').value);
-    const status = document.getElementById('animeStatus').value;
-    const progress = parseInt(document.getElementById('animeProgress').value);
-    const score = document.getElementById('animeScore').value ? parseFloat(document.getElementById('animeScore').value) : null;
-    const selectedYear = document.getElementById('animeYear').value;
-    const selectedMonth = document.getElementById('animeMonth').value;
-    const cover = document.getElementById('animeCover').value || 'https://placehold.co/150x200?text=No+Image';
-    const genres = document.getElementById('animeGenres').value.split(',').map(g => g.trim()).filter(g => g);
+    const title = document.getElementById('animeTitle')?.value.trim();
+    const type = document.getElementById('animeType')?.value || 'TV';
+    const episodes = parseInt(document.getElementById('animeEpisodes')?.value, 10) || 0;
+    const duration = parseInt(document.getElementById('animeDuration')?.value, 10) || (type === 'Movie' ? 120 : 20);
+    const status = document.getElementById('animeStatus')?.value || 'Plan to Watch';
+    const progress = parseInt(document.getElementById('animeProgress')?.value, 10) || 0;
+    const scoreValue = document.getElementById('animeScore')?.value;
+    const score = scoreValue ? parseFloat(scoreValue) : null;
+    const cover = document.getElementById('animeCover')?.value || '';
+    const genres = (document.getElementById('animeGenres')?.value || '')
+        .split(',')
+        .map(genre => genre.trim())
+        .filter(Boolean);
+    
+    // ✅ DECLARE existingAnime FIRST
+    const existingAnime = animeData.find(a => a.id === currentEditId);
+    
+    // ✅ THEN use it
+    let finishDate = null;
+    
+    if (status === 'Completed') {
+        if (isEditing && existingAnime?.userStatus === 'Completed' && existingAnime?.finishDate) {
+            // Already completed - keep original date
+            finishDate = existingAnime.finishDate;
+        } else {
+            // New completion - set today's date
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            finishDate = `${year}-${month}-${day}`;
+        }
+    } else if (isEditing && existingAnime?.finishDate) {
+        // Not completed - preserve existing finishDate
+        finishDate = existingAnime.finishDate;
+    }
+    
+    const action = isEditing ? 'edited' : 'added';
 
-    // For non-movie types, force duration to 20 minutes
-    if (type !== 'Movie') {
-        duration = 20;
+    if (!title) {
+        showToast('Please enter an anime title.', 'error');
+        return;
     }
 
-    // Get current date and time for real-time tracking
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-    const currentDay = String(now.getDate()).padStart(2, '0');
-    const currentHours = String(now.getHours()).padStart(2, '0');
-    const currentMinutes = String(now.getMinutes()).padStart(2, '0');
-    const currentDateTime = `${currentYear}-${currentMonth}-${currentDay} ${currentHours}:${currentMinutes}`;
-    const currentDateOnly = `${currentYear}-${currentMonth}-${currentDay}`;
+    if (episodes < 0 || progress < 0) {
+        showToast('Episodes and progress must be positive numbers.', 'error');
+        return;
+    }
 
-    let finishDate = null;
-    let completedTimestamp = null;
-    let createdAt = null;
-    let createdAtTimestamp = null;
+    if (progress > episodes && episodes > 0) {
+        showToast('Progress cannot exceed total episodes.', 'error');
+        return;
+    }
 
-    let action = "added";
+    const timestamp = new Date().toISOString();
 
-    if (isEditing && currentEditId) {
-        // EDITING EXISTING ANIME
-        const index = animeData.findIndex(a => a.id == currentEditId);
-        if (index !== -1) {
-            const existingAnime = animeData[index];
-
-            // Preserve original createdAt with its actual day
-            if (existingAnime.createdAt) {
-                createdAt = existingAnime.createdAt;
-                createdAtTimestamp = existingAnime.createdAtTimestamp;
-            } else {
-                createdAt = currentDateOnly;
-                createdAtTimestamp = Date.now();
-            }
-
-            // Handle finish date for Completed status
-            if (status === 'Completed') {
-                if (existingAnime.finishDate && existingAnime.userStatus === 'Completed') {
-                    // If already completed, preserve existing finish date
-                    finishDate = existingAnime.finishDate;
-                    completedTimestamp = existingAnime.completedTimestamp;
-                } else {
-                    // Newly completed - use current date
-                    finishDate = currentDateOnly;
-                    completedTimestamp = Date.now();
-                }
-
-                // Allow user to override month/year (but preserve the actual day)
-                if (selectedYear && selectedMonth) {
-                    const existingDay = finishDate.split('-')[2];
-                    finishDate = `${selectedYear}-${selectedMonth}-${existingDay}`;
-                }
-            } else {
-                finishDate = null;
-                completedTimestamp = null;
-            }
-
-            action = "edited";
-            animeData[index] = {
-                ...animeData[index],
-                title,
-                type,
-                episodes,
-                duration,
-                userStatus: status,
-                progress,
-                score,
-                genres,
-                finishDate: status === 'Completed' ? finishDate : null,
-                completedTimestamp: status === 'Completed' ? completedTimestamp : null,
-                cover,
-                updatedAt: currentDateTime,
-                // Preserve original createdAt
-                createdAt: createdAt,
-                createdAtTimestamp: createdAtTimestamp
-            };
-        }
+    if (existingAnime && isEditing) {
+        existingAnime.title = title;
+        existingAnime.type = type;
+        existingAnime.episodes = episodes;
+        existingAnime.duration = duration;
+        existingAnime.userStatus = status;
+        existingAnime.progress = progress;
+        existingAnime.score = score;
+        existingAnime.cover = cover;
+        existingAnime.genres = genres;
+        existingAnime.finishDate = finishDate;
+        existingAnime.updatedAt = timestamp;
     } else {
-        // NEW ANIME
-        // Set creation date to current date (with actual day)
-        createdAt = currentDateOnly;
-        createdAtTimestamp = Date.now();
-
-        // Handle finish date for Completed status
-        if (status === 'Completed') {
-            // Use current date as completion date
-            finishDate = currentDateOnly;
-            completedTimestamp = Date.now();
-
-            // Allow user to override month/year (backdating)
-            if (selectedYear && selectedMonth) {
-                finishDate = `${selectedYear}-${selectedMonth}-${currentDay}`;
-            }
-        }
-
         const newAnime = {
-            id: animeData.length > 0 ? Math.max(...animeData.map(a => a.id)) + 1 : 1,
+            id: Date.now().toString(),
             title,
             type,
             episodes,
@@ -2325,13 +2379,11 @@ function handleAddAnime(e) {
             userStatus: status,
             progress,
             score,
-            genres,
-            finishDate: status === "Completed" ? finishDate : null,
-            completedTimestamp: status === "Completed" ? completedTimestamp : null,
             cover,
-            createdAt: createdAt,
-            createdAtTimestamp: createdAtTimestamp,
-            updatedAt: currentDateTime
+            genres,
+            finishDate,
+            createdAt: timestamp,
+            updatedAt: timestamp
         };
 
         animeData.push(newAnime);
@@ -2339,31 +2391,40 @@ function handleAddAnime(e) {
 
     saveData();
 
-    // Log the activity
-    if (status === 'Completed') {
-        logActivity("completed", title);
-    } else if (action === "added") {
-        logActivity("added", title);
-    } else {
-        logActivity("edited", title);
+    // Log activity
+    if (status === 'Completed' && (!isEditing || (isEditing && existingAnime?.userStatus !== 'Completed'))) {
+        logActivity('completed', title);
+    } else if (action === 'added') {
+        logActivity('added', title);
+    } else if (isEditing) {
+        logActivity('edited', title);
     }
 
-    addAnimeModal.style.display = 'none';
-    animeForm.reset();
-    searchResults.style.display = 'none';
-    searchResults.innerHTML = '';
+    // Close modal and reset form
+    const addAnimeModal = document.getElementById('addAnimeModal');
+    const animeForm = document.getElementById('addAnimeForm');
+    const searchResults = document.getElementById('searchResults');
+    const submitBtn = document.getElementById('submitBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    
+    if (addAnimeModal) addAnimeModal.style.display = 'none';
+    if (animeForm) animeForm.reset();
+    if (searchResults) {
+        searchResults.style.display = 'none';
+        searchResults.innerHTML = '';
+    }
 
     const wasEditing = isEditing;
-
+    
     isEditing = false;
     currentEditId = null;
-    submitBtn.textContent = 'Add Anime';
-    deleteBtn.style.display = 'none';
+    if (submitBtn) submitBtn.textContent = 'Add Anime';
+    if (deleteBtn) deleteBtn.style.display = 'none';
 
-    // Refresh everything (table, charts, stats)
+    // Refresh everything
     updateAllComponents();
 
-    // Show correct success message
+    // Show success message
     showToast(wasEditing ? 'Anime updated successfully!' : 'Anime added successfully!', 'success');
 }
 
@@ -2374,6 +2435,7 @@ function saveData() {
 function updateAllComponents() {
     updateStats();
     updateCharts();
+    refreshAllCharts(); // ✅ ADD THIS LINE
     updateCurrentMonthAnime();
     updateAnimeDisplay();
     updateTotalAnimeCountAllMonths();
@@ -3304,7 +3366,7 @@ function initStatisticsCharts() {
         completionChart = new Chart(completionCtx, {
             type: 'bar',
             data: {
-                labels: ['2023', '2024', '2025', '2026', '2027', '2028'],
+                labels: [ '2024', '2025', '2026', '2027', '2028'],
                 datasets: [{
                     label: 'Anime Completed',
                     data: calculateYearlyCompletion(),
@@ -7883,6 +7945,72 @@ document.addEventListener('DOMContentLoaded', () => {
         initYearSelectors();
     }, 500);
 });
+
+// function to force refresh all charts including genre with filters
+function refreshAllCharts() {
+    // Update monthly progress chart
+    if (window.monthlyProgressChart) {
+        const monthlyData = calculateMonthlyProgress();
+        window.monthlyProgressChart.data.datasets[0].data = monthlyData;
+        window.monthlyProgressChart.data.datasets[1].data = monthlyData;
+        window.monthlyProgressChart.update();
+        
+        const totalCompleted = monthlyData.reduce((a, b) => a + b, 0);
+        const totalSpan = document.getElementById('monthly-total-anime');
+        if (totalSpan) {
+            totalSpan.textContent = `Total Completed: ${totalCompleted}`;
+        }
+    }
+    
+    // Update genre chart with current filter
+    if (typeof updateGenreChartWithFilter === 'function') {
+        updateGenreChartWithFilter();
+    }
+    
+    // Update statistics charts if they exist
+    if (completionChart) {
+        completionChart.data.datasets[0].data = calculateYearlyCompletion();
+        completionChart.update();
+    }
+    
+    if (scoreDistributionChart) {
+        scoreDistributionChart.data.datasets[0].data = calculateScoreDistribution();
+        scoreDistributionChart.update();
+    }
+    
+    if (statusDistributionChart) {
+        const statusData = calculateStatusDistribution();
+        statusDistributionChart.data.labels = Object.keys(statusData);
+        statusDistributionChart.data.datasets[0].data = Object.values(statusData);
+        statusDistributionChart.update();
+    }
+    
+    if (typeDistributionChart) {
+        const typeData = calculateTypeDistribution();
+        typeDistributionChart.data.labels = Object.keys(typeData);
+        typeDistributionChart.data.datasets[0].data = Object.values(typeData);
+        typeDistributionChart.update();
+    }
+    
+    if (genreStatsChart) {
+        const genreStats = calculateGenreStats();
+        genreStatsChart.data.labels = Object.keys(genreStats);
+        genreStatsChart.data.datasets[0].data = Object.values(genreStats);
+        genreStatsChart.update();
+    }
+    
+    // Update episodes over time chart
+    if (episodesOverTimeChart && currentEpisodesYear) {
+        updateEpisodesChart(currentEpisodesYear);
+    }
+    
+    // Update watch time chart
+    if (watchTimeByMonthChart && currentWatchTimeYear) {
+        updateWatchTimeChart(currentWatchTimeYear);
+    }
+}
+
+
 
 
 // Initialize the app with saved theme (theme loads before loader)

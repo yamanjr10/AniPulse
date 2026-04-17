@@ -4,18 +4,61 @@
 
 // --- Search Debounce ---
 let searchTimeout;
-const originalSearch = searchAnime;
-window.searchAnime = function () {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => originalSearch(), 400);
-};
+
+function setupDebouncedSearch() {
+  if (typeof window.searchAnime !== 'function' || window.searchAnime.__debounced) {
+    return;
+  }
+
+  const originalSearch = window.searchAnime.bind(window);
+
+  function debouncedSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => originalSearch(), 400);
+  }
+
+  debouncedSearch.__debounced = true;
+  window.searchAnime = debouncedSearch;
+}
+
+function setupToastQueue() {
+  if (typeof window.showToast !== 'function' || window.showToast.__queued) {
+    return;
+  }
+
+  const originalShowToast = window.showToast.bind(window);
+
+  function queuedShowToast(msg, type = 'info', customClass = '') {
+    toastQueue.push({ msg, type, customClass });
+    if (!showingToast) {
+      processNextToast(originalShowToast);
+    }
+  }
+
+  queuedShowToast.__queued = true;
+  window.showToast = queuedShowToast;
+}
+
+function processNextToast(oldShowToast) {
+  if (toastQueue.length === 0) {
+    showingToast = false;
+    return;
+  }
+  showingToast = true;
+  const { msg, type, customClass } = toastQueue.shift();
+  oldShowToast(msg, type, customClass);
+  setTimeout(() => processNextToast(oldShowToast), 2000);
+}
 
 // --- Auto Backup Reminder ---
 document.addEventListener('DOMContentLoaded', () => {
+  setupDebouncedSearch();
+  setupToastQueue();
+
   const lastBackup = localStorage.getItem('lastBackup');
   const now = Date.now();
   if (!lastBackup || now - parseInt(lastBackup) > 7 * 24 * 60 * 60 * 1000) {
-    showToast('Reminder: Export your AnimeTracker data for backup!', 'info');
+    window.showToast('Reminder: Export your AnimeTracker data for backup!', 'info');
   }
   localStorage.setItem('lastBackup', now.toString());
 });
