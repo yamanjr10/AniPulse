@@ -2090,7 +2090,7 @@ function updateAnimeTableView(animeList) {
             : '-';
 
         const safeTitle = anime.title.length > 35 ? anime.title.slice(0, 35) + '...' : anime.title;
-        
+
         // Combine tooltips
         const combinedTooltip = [creationTooltip, completionTooltip].filter(Boolean).join(' | ');
 
@@ -2101,8 +2101,8 @@ function updateAnimeTableView(animeList) {
                 <div class="anime-info">
                     <div class="anime-title" title="${anime.title}">${safeTitle}</div>
                     ${anime.genres && anime.genres.length > 0
-                        ? `<div class="anime-genres">${anime.genres.slice(0, 3).join(', ')}</div>`
-                        : ''}
+                ? `<div class="anime-genres">${anime.genres.slice(0, 3).join(', ')}</div>`
+                : ''}
                 </div>
             </div>
         `;
@@ -2246,7 +2246,7 @@ function handleAddAnime(e) {
         const index = animeData.findIndex(a => a.id == currentEditId);
         if (index !== -1) {
             const existingAnime = animeData[index];
-            
+
             // Preserve original createdAt with its actual day
             if (existingAnime.createdAt) {
                 createdAt = existingAnime.createdAt;
@@ -2255,7 +2255,7 @@ function handleAddAnime(e) {
                 createdAt = currentDateOnly;
                 createdAtTimestamp = Date.now();
             }
-            
+
             // Handle finish date for Completed status
             if (status === 'Completed') {
                 if (existingAnime.finishDate && existingAnime.userStatus === 'Completed') {
@@ -2267,7 +2267,7 @@ function handleAddAnime(e) {
                     finishDate = currentDateOnly;
                     completedTimestamp = Date.now();
                 }
-                
+
                 // Allow user to override month/year (but preserve the actual day)
                 if (selectedYear && selectedMonth) {
                     const existingDay = finishDate.split('-')[2];
@@ -2277,7 +2277,7 @@ function handleAddAnime(e) {
                 finishDate = null;
                 completedTimestamp = null;
             }
-            
+
             action = "edited";
             animeData[index] = {
                 ...animeData[index],
@@ -2303,19 +2303,19 @@ function handleAddAnime(e) {
         // Set creation date to current date (with actual day)
         createdAt = currentDateOnly;
         createdAtTimestamp = Date.now();
-        
+
         // Handle finish date for Completed status
         if (status === 'Completed') {
             // Use current date as completion date
             finishDate = currentDateOnly;
             completedTimestamp = Date.now();
-            
+
             // Allow user to override month/year (backdating)
             if (selectedYear && selectedMonth) {
                 finishDate = `${selectedYear}-${selectedMonth}-${currentDay}`;
             }
         }
-        
+
         const newAnime = {
             id: animeData.length > 0 ? Math.max(...animeData.map(a => a.id)) + 1 : 1,
             title,
@@ -2371,40 +2371,41 @@ function handleAddAnime(e) {
 function saveData() {
     localStorage.setItem('animeData', JSON.stringify(animeData));
 }
-
-// Update all components
 function updateAllComponents() {
     updateStats();
     updateCharts();
-    updateTopRatedAnime();
     updateCurrentMonthAnime();
-    updateRecentActivity();
     updateAnimeDisplay();
     updateTotalAnimeCountAllMonths();
     updateSidebarUserInfo();
 
-    // Update statistics if on statistics page
+    const dashboardPage = document.getElementById('dashboard-page');
+
+    // ✅ ONLY run on dashboard
+    if (dashboardPage && dashboardPage.classList.contains('active')) {
+        updateTopRatedAnime();
+        updateRecentActivity();
+    }
+
+    // ✅ Statistics page
     if (document.getElementById('statistics-page').classList.contains('active')) {
         initStatisticsCharts();
         updateStatisticsTables();
     }
 
-    // 🌀 Auto-refresh Episodes Over Time chart (real-time chart sync)
+    // Other global updates
     if (typeof updateEpisodesOverTimeDisplay === "function") {
         const currentYear = new Date().getFullYear();
         updateEpisodesOverTimeDisplay(currentYear);
     }
 
-    // 🟢 Auto-refresh "Currently Watching" dashboard section
     if (typeof updateCurrentlyWatching === "function") {
         updateCurrentlyWatching();
     }
 
-    // 🟢 GitHub-style activity refresh
     if (typeof renderActivityHeatmap === "function") {
         renderActivityHeatmap(animeData);
     }
-
 }
 
 // JSON + PDF Export
@@ -2543,13 +2544,13 @@ function getUserName() {
     if (userProfile && userProfile.name) {
         return userProfile.name;
     }
-    
+
     // Then check legacy userName
     const userName = localStorage.getItem('userName');
     if (userName) {
         return userName;
     }
-    
+
     return null;
 }
 
@@ -2558,12 +2559,12 @@ function setUserName(name) {
     if (!name || name.trim() === '') {
         name = 'Otaku';
     }
-    
+
     const trimmedName = name.trim();
-    
+
     // Save to legacy location
     localStorage.setItem('userName', trimmedName);
-    
+
     // Save to userProfile (used by settings)
     let userProfile = JSON.parse(localStorage.getItem('userProfile'));
     if (!userProfile) {
@@ -2575,12 +2576,12 @@ function setUserName(name) {
         userProfile.name = trimmedName;
     }
     localStorage.setItem('userProfile', JSON.stringify(userProfile));
-    
+
     // Update all displays
     updateUserNameDisplay(trimmedName);
     updateGreetingMessage();
     updateSidebarUserInfo();
-    
+
     return trimmedName;
 }
 
@@ -2593,25 +2594,25 @@ function updateUserNameDisplay(name) {
         userAvatar.src = `https://ui-avatars.com/api/?name=${encodedName}&background=6a5acd&color=fff`;
         userAvatar.alt = name;
     }
-    
+
     // Update top bar username text
     const topUserName = document.querySelector('.user-profile span');
     if (topUserName) {
         topUserName.textContent = name;
     }
-    
+
     // Update tooltip
     const tooltip = document.querySelector('.user-profile .tooltip');
     if (tooltip) {
         tooltip.textContent = name;
     }
-    
+
     // Update sidebar username
     const sidebarUsername = document.querySelector('.sidebar-username');
     if (sidebarUsername) {
         sidebarUsername.textContent = name;
     }
-    
+
     // Update sidebar avatar
     const sidebarAvatar = document.querySelector('.sidebar-avatar');
     if (sidebarAvatar) {
@@ -2619,19 +2620,19 @@ function updateUserNameDisplay(name) {
         sidebarAvatar.src = `https://ui-avatars.com/api/?name=${encodedName}&background=6a5acd&color=fff`;
         sidebarAvatar.alt = name;
     }
-    
+
     // Update settings page input
     const usernameInput = document.getElementById('usernameInput');
     if (usernameInput && usernameInput.value !== name) {
         usernameInput.value = name;
     }
-    
+
     // Update profile preview in settings
     const profilePreviewName = document.getElementById('profilePreviewName');
     if (profilePreviewName) {
         profilePreviewName.textContent = name;
     }
-    
+
     // Update profile preview avatar
     const profilePreviewAvatar = document.getElementById('profilePreviewAvatar');
     if (profilePreviewAvatar) {
@@ -2644,15 +2645,15 @@ function updateUserNameDisplay(name) {
 function updateGreetingMessage() {
     const userName = getUserName();
     const greetingLine = document.querySelector('.greeting-line');
-    
+
     if (greetingLine) {
         const hour = new Date().getHours();
         let timeGreeting = '';
-        
+
         if (hour < 12) timeGreeting = 'Good Morning';
         else if (hour < 17) timeGreeting = 'Good Afternoon';
         else timeGreeting = 'Good Evening';
-        
+
         if (userName && userName !== 'AnimeFan94' && userName !== 'AnimeFan') {
             greetingLine.innerHTML = `${timeGreeting}, ${userName}! <span class="greeting-emoji">👋</span>`;
         } else {
@@ -2667,7 +2668,7 @@ function showNameEntryModal() {
     if (nameEntryModal) {
         nameEntryModal.style.display = 'flex';
         document.body.classList.add('modal-open');
-        
+
         // Clear input and focus
         const input = document.getElementById('userNameInput');
         if (input) {
@@ -2689,10 +2690,10 @@ function hideNameEntryModal() {
 // Initialize user name on app start
 function initializeUserName() {
     const savedName = getUserName();
-    
+
     // Check if modal has been shown in this session
     const modalShown = sessionStorage.getItem('nameModalShown');
-    
+
     if (!savedName && !modalShown) {
         // First time - show modal
         setTimeout(() => {
@@ -2714,18 +2715,18 @@ function initializeUserName() {
 function initNameEntryForm() {
     const form = document.getElementById('nameEntryForm');
     if (!form) return;
-    
+
     // Remove existing listener to avoid duplicates
     const newForm = form.cloneNode(true);
     form.parentNode.replaceChild(newForm, form);
-    
-    newForm.addEventListener('submit', function(e) {
+
+    newForm.addEventListener('submit', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         const userNameInput = document.getElementById('userNameInput');
         let name = userNameInput ? userNameInput.value.trim() : '';
-        
+
         if (name && name.length > 0) {
             setUserName(name);
             showToast(`Welcome, ${name}! 🎉`, 'success');
@@ -2733,9 +2734,9 @@ function initNameEntryForm() {
             setUserName('Otaku');
             showToast('Welcome, Otaku! 🎉', 'success');
         }
-        
+
         hideNameEntryModal();
-        
+
         // Refresh all components
         setTimeout(() => {
             if (typeof updateAllComponents === 'function') {
@@ -2744,11 +2745,11 @@ function initNameEntryForm() {
             updateGreetingMessage();
         }, 100);
     });
-    
+
     // Allow Enter key to submit
     const nameInput = document.getElementById('userNameInput');
     if (nameInput) {
-        nameInput.addEventListener('keypress', function(e) {
+        nameInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 newForm.dispatchEvent(new Event('submit'));
@@ -2761,9 +2762,9 @@ function initNameEntryForm() {
 function initModalCloseHandlers() {
     const modal = document.getElementById('nameEntryModal');
     if (!modal) return;
-    
+
     // Close on backdrop click
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             const nameInput = document.getElementById('userNameInput');
             const name = nameInput ? nameInput.value.trim() : '';
@@ -2776,9 +2777,9 @@ function initModalCloseHandlers() {
             showToast('Welcome!', 'success');
         }
     });
-    
+
     // Close on Escape key
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
             const nameInput = document.getElementById('userNameInput');
             const name = nameInput ? nameInput.value.trim() : '';
@@ -2797,15 +2798,15 @@ function initModalCloseHandlers() {
 function initSettingsNameSync() {
     const usernameInput = document.getElementById('usernameInput');
     if (!usernameInput) return;
-    
+
     // Set initial value
     const currentName = getUserName();
     if (currentName) {
         usernameInput.value = currentName;
     }
-    
+
     // Listen for changes
-    usernameInput.addEventListener('change', function() {
+    usernameInput.addEventListener('change', function () {
         const newName = this.value.trim();
         if (newName && newName.length > 0) {
             setUserName(newName);
@@ -2821,7 +2822,7 @@ function initSettingsNameSync() {
 // Override the existing updateSidebarUserInfo to include name sync
 const originalUpdateSidebarUserInfo = window.updateSidebarUserInfo;
 if (typeof originalUpdateSidebarUserInfo === 'function') {
-    window.updateSidebarUserInfo = function() {
+    window.updateSidebarUserInfo = function () {
         originalUpdateSidebarUserInfo();
         const userName = getUserName();
         if (userName) {
@@ -2832,13 +2833,13 @@ if (typeof originalUpdateSidebarUserInfo === 'function') {
 }
 
 // Initialize everything when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize name system FIRST
     initializeUserName();
     initNameEntryForm();
     initModalCloseHandlers();
     initSettingsNameSync();
-    
+
     // Update greeting after a short delay
     setTimeout(() => {
         updateGreetingMessage();
@@ -5527,7 +5528,7 @@ class ActivityHeatmap {
     generateFromAnimeData() {
         const contributions = {};
         const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
-        
+
         animeData.forEach(anime => {
             // Track completions based on finishDate
             if (anime.userStatus === 'Completed' && anime.finishDate) {
@@ -5537,7 +5538,7 @@ class ActivityHeatmap {
                     contributions[key] = (contributions[key] || 0) + 1;
                 }
             }
-            
+
             // Also track updates (progress changes, edits)
             if (anime.updatedAt) {
                 let updateDate;
@@ -5548,7 +5549,7 @@ class ActivityHeatmap {
                 } else {
                     updateDate = new Date(anime.updatedAt);
                 }
-                
+
                 if (!isNaN(updateDate.getTime())) {
                     const key = this.formatDateKey(updateDate);
                     // Add 0.5 for updates (will be rounded)
@@ -5556,12 +5557,12 @@ class ActivityHeatmap {
                 }
             }
         });
-        
+
         // Round all values
         Object.keys(contributions).forEach(key => {
             contributions[key] = Math.round(contributions[key]);
         });
-        
+
         return contributions;
     }
 
@@ -5576,25 +5577,25 @@ class ActivityHeatmap {
     // Add contribution when anime is added/updated/completed
     addContribution(amount = 1, anime = null, action = null) {
         const today = this.formatDateKey(this.currentDay);
-        
+
         let finalAmount = amount;
-        
+
         // Bonus for completing an anime
         if (action === 'completed') {
             finalAmount = 2;
         }
-        
+
         if (finalAmount > 0) {
             this.contributions[today] = (this.contributions[today] || 0) + finalAmount;
             this.saveContributions();
             this.render();
-            
+
             // Only show toast for user actions (not on refresh)
             if (action) {
                 this.showToast(`+${finalAmount} contribution${finalAmount !== 1 ? 's' : ''} added!`);
             }
         }
-        
+
         return finalAmount;
     }
 
@@ -5602,7 +5603,7 @@ class ActivityHeatmap {
         // Remove existing toasts
         const existingToasts = document.querySelectorAll('.heatmap-toast');
         existingToasts.forEach(toast => toast.remove());
-        
+
         const toast = document.createElement('div');
         toast.className = 'heatmap-toast';
         toast.textContent = message;
@@ -5618,9 +5619,9 @@ class ActivityHeatmap {
         toast.style.zIndex = '9999';
         toast.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
         toast.style.animation = 'fadeInOut 2s ease';
-        
+
         document.body.appendChild(toast);
-        
+
         setTimeout(() => {
             toast.remove();
         }, 2000);
@@ -5653,25 +5654,25 @@ class ActivityHeatmap {
         const weeks = [];
         const today = new Date();
         const maxDate = (year === this.currentYear) ? today : new Date(year, 11, 31);
-        
+
         // Find first Sunday of the year
         const firstDay = new Date(year, 0, 1);
         let firstSunday = new Date(firstDay);
         const dayOfWeek = firstDay.getDay();
         firstSunday.setDate(firstDay.getDate() - dayOfWeek);
-        
+
         // Generate weeks
         for (let week = 0; week < 53; week++) {
             const weekStart = new Date(firstSunday);
             weekStart.setDate(firstSunday.getDate() + (week * 7));
-            
+
             if (weekStart > maxDate) break;
-            
+
             const days = [];
             for (let day = 0; day < 7; day++) {
                 const currentDate = new Date(weekStart);
                 currentDate.setDate(weekStart.getDate() + day);
-                
+
                 if (currentDate <= maxDate && currentDate >= new Date(year, 0, 1)) {
                     const count = this.getContribution(currentDate);
                     days.push({
@@ -5683,22 +5684,22 @@ class ActivityHeatmap {
                     days.push(null);
                 }
             }
-            
+
             if (days.some(d => d !== null)) {
                 weeks.push(days);
             }
         }
-        
+
         return weeks;
     }
 
     renderMonthLabels(weeks) {
         const container = document.getElementById('heatmapMonths');
         if (!container) return;
-        
+
         const monthPositions = {};
         let currentMonth = -1;
-        
+
         weeks.forEach((week, weekIndex) => {
             week.forEach((day, dayIndex) => {
                 if (day && day.date.getDate() <= 7 && day.date.getMonth() !== currentMonth) {
@@ -5711,11 +5712,11 @@ class ActivityHeatmap {
                 }
             });
         });
-        
+
         const sortedMonths = Object.entries(monthPositions)
             .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
             .map(([_, data]) => data);
-        
+
         container.innerHTML = sortedMonths.map(month => `
             <span class="month-label" style="left: ${month.position}px;">${month.name}</span>
         `).join('');
@@ -5724,17 +5725,17 @@ class ActivityHeatmap {
     renderHeatmap() {
         const container = document.getElementById('heatmapGrid');
         if (!container) return;
-        
+
         const weeks = this.getWeeksData(this.currentYear);
         container.innerHTML = '';
-        
+
         weeks.forEach(week => {
             const col = document.createElement('div');
             col.className = 'heatmap-col';
             col.style.display = 'flex';
             col.style.flexDirection = 'column';
             col.style.gap = '3px';
-            
+
             week.forEach(day => {
                 if (day === null) {
                     const emptyCell = document.createElement('div');
@@ -5753,17 +5754,17 @@ class ActivityHeatmap {
                     cell.style.borderRadius = '3px';
                     cell.style.cursor = 'pointer';
                     cell.style.transition = 'all 0.15s ease';
-                    
+
                     cell.addEventListener('mouseenter', (e) => this.showTooltip(e, day));
                     cell.addEventListener('mouseleave', () => this.hideTooltip());
-                    
+
                     col.appendChild(cell);
                 }
             });
-            
+
             container.appendChild(col);
         });
-        
+
         this.renderMonthLabels(weeks);
     }
 
@@ -5772,13 +5773,13 @@ class ActivityHeatmap {
         const years = [currentYear - 2, currentYear - 1, currentYear];
         const container = document.getElementById('heatmapYears');
         if (!container) return;
-        
+
         container.innerHTML = years.map(year => `
             <button class="year-btn ${year === this.currentYear ? 'active' : ''}" data-year="${year}">
                 ${year}
             </button>
         `).join('');
-        
+
         container.querySelectorAll('.year-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 this.currentYear = parseInt(btn.dataset.year);
@@ -5799,25 +5800,25 @@ class ActivityHeatmap {
 
     showTooltip(event, day) {
         if (!day) return;
-        
+
         const count = day.count;
         const date = day.date;
         const formattedDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         const contributionText = count === 1 ? 'completion' : 'completions';
-        
+
         this.tooltip.innerHTML = `${count} anime ${contributionText} on ${formattedDate}`;
         this.tooltip.style.display = 'block';
-        
+
         let left = event.clientX + 15;
         let top = event.clientY - 30;
-        
+
         if (left + 200 > window.innerWidth) {
             left = event.clientX - 200;
         }
         if (top < 0) {
             top = event.clientY + 20;
         }
-        
+
         this.tooltip.style.left = left + 'px';
         this.tooltip.style.top = top + 'px';
     }
@@ -5834,7 +5835,7 @@ class ActivityHeatmap {
             const action = event.detail?.action || null;
             this.addContribution(amount, anime, action);
         });
-        
+
         // Sync across tabs
         window.addEventListener('storage', (e) => {
             if (e.key === 'animeContributions') {
@@ -5856,7 +5857,7 @@ class ActivityHeatmap {
             }
         }, 60000);
     }
-    
+
     // Force refresh heatmap from actual anime data
     refreshFromAnimeData() {
         this.contributions = this.generateFromAnimeData();
@@ -5879,8 +5880,8 @@ class ActivityHeatmap {
 function onAnimeAdded(anime) {
     if (window.heatmap) {
         window.heatmap.addContribution(1, anime, 'add');
-        window.dispatchEvent(new CustomEvent('animeUpdate', { 
-            detail: { count: 1, anime: anime, action: 'add' } 
+        window.dispatchEvent(new CustomEvent('animeUpdate', {
+            detail: { count: 1, anime: anime, action: 'add' }
         }));
     }
 }
@@ -5889,8 +5890,8 @@ function onAnimeAdded(anime) {
 function onAnimeCompleted(anime) {
     if (window.heatmap) {
         window.heatmap.addContribution(2, anime, 'completed');
-        window.dispatchEvent(new CustomEvent('animeUpdate', { 
-            detail: { count: 2, anime: anime, action: 'completed' } 
+        window.dispatchEvent(new CustomEvent('animeUpdate', {
+            detail: { count: 2, anime: anime, action: 'completed' }
         }));
     }
 }
@@ -5899,8 +5900,8 @@ function onAnimeCompleted(anime) {
 function onAnimeUpdated(anime) {
     if (window.heatmap) {
         window.heatmap.addContribution(1, anime, 'update');
-        window.dispatchEvent(new CustomEvent('animeUpdate', { 
-            detail: { count: 1, anime: anime, action: 'update' } 
+        window.dispatchEvent(new CustomEvent('animeUpdate', {
+            detail: { count: 1, anime: anime, action: 'update' }
         }));
     }
 }
@@ -5909,9 +5910,9 @@ function onAnimeUpdated(anime) {
 function hookHeatmapToAnimeFunctions() {
     // Store reference to original function
     const originalHandleAddAnime = window.handleAddAnime;
-    
+
     if (typeof originalHandleAddAnime === 'function') {
-        window.handleAddAnime = function(e) {
+        window.handleAddAnime = function (e) {
             const wasEditing = window.isEditing;
             const title = document.getElementById('animeTitle')?.value;
             const status = document.getElementById('animeStatus')?.value;
@@ -5919,10 +5920,10 @@ function hookHeatmapToAnimeFunctions() {
                 title: title,
                 episodes: parseInt(document.getElementById('animeEpisodes')?.value) || 0
             };
-            
+
             // Call original function
             originalHandleAddAnime(e);
-            
+
             // Trigger heatmap update after a short delay
             setTimeout(() => {
                 if (window.heatmap) {
@@ -5941,11 +5942,11 @@ function hookHeatmapToAnimeFunctions() {
             }, 300);
         };
     }
-    
+
     // Hook delete function
     const originalDeleteAnime = window.deleteAnime;
     if (typeof originalDeleteAnime === 'function') {
-        window.deleteAnime = function() {
+        window.deleteAnime = function () {
             originalDeleteAnime();
             setTimeout(() => {
                 if (window.heatmap) {
@@ -5954,11 +5955,11 @@ function hookHeatmapToAnimeFunctions() {
             }, 300);
         };
     }
-    
+
     // Refresh on any data change
     const originalUpdateAllComponents = window.updateAllComponents;
     if (typeof originalUpdateAllComponents === 'function') {
-        window.updateAllComponents = function() {
+        window.updateAllComponents = function () {
             originalUpdateAllComponents();
             setTimeout(() => {
                 if (window.heatmap) {
@@ -5976,17 +5977,17 @@ function hookHeatmapToAnimeFunctions() {
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize heatmap
     window.heatmap = new ActivityHeatmap();
-    
+
     // Refresh from actual data after a short delay
     setTimeout(() => {
         if (window.heatmap) {
             window.heatmap.refreshFromAnimeData();
         }
     }, 500);
-    
+
     // Hook into anime functions
     setTimeout(hookHeatmapToAnimeFunctions, 1000);
-    
+
     // Add CSS animation
     const style = document.createElement('style');
     style.textContent = `
@@ -6014,7 +6015,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     `;
     document.head.appendChild(style);
-    
+
     console.log('Activity Heatmap initialized successfully!');
 });
 

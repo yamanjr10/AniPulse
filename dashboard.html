@@ -343,7 +343,8 @@
                         <i class="fas fa-calendar-day"></i> Activity Heatmap
                     </div>
                     <div class="total-contributions" id="totalContributionsDisplay">
-                        <i class="fas fa-fire"></i> <span id="totalCount">0</span> contributions
+                        <i class="fas fa-fire"></i> <span id="totalCount">0</span> contributions in <span
+                            id="currentYearDisplay">2026</span>
                     </div>
                 </div>
 
@@ -356,24 +357,18 @@
 
                 <!-- Heatmap Grid -->
                 <div class="heatmap-wrapper">
-                    <div class="heatmap-container">
-                        <!-- Month Labels -->
-                        <div class="heatmap-months" id="heatmapMonths"></div>
-
-                        <!-- Heatmap Grid -->
-                        <div class="heatmap-grid" id="heatmapGrid"></div>
-                    </div>
+                    <div class="heatmap-grid" id="heatmapGrid"></div>
                 </div>
 
                 <!-- Legend -->
                 <div class="heatmap-legend">
                     <span class="legend-text">Less</span>
                     <div class="legend-colors">
-                        <div class="legend-color less"></div>
+                        <div class="legend-color" style="background: #2d3748;"></div>
                         <div class="legend-color" style="background: #9be9a8;"></div>
                         <div class="legend-color" style="background: #40c463;"></div>
                         <div class="legend-color" style="background: #30a14e;"></div>
-                        <div class="legend-color more" style="background: #216e39;"></div>
+                        <div class="legend-color" style="background: #216e39;"></div>
                     </div>
                     <span class="legend-text">More</span>
                 </div>
@@ -400,8 +395,7 @@
                     <div class="activity-header">
                         <div class="activity-title">Latest Updates</div>
                     </div>
-                    <div class="activity-list" id="recent-activity">
-                    </div>
+                    <div class="activity-list" id="recent-activity"> </div>
                 </div>
             </div>
         </div>
@@ -1013,6 +1007,78 @@
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             window.location.href = "login.html";
+        });
+
+        // Page Navigation 
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                // Don't trigger for logout button
+                if (this.id === 'logoutBtn') return;
+
+                const pageId = this.getAttribute('data-page');
+                if (!pageId) return;
+
+                // Remove active class from all menu items
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                // Hide all pages
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                    page.style.display = 'none';
+                });
+
+                // Show selected page
+                const activePage = document.getElementById(`${pageId}-page`);
+                if (activePage) {
+                    activePage.classList.add('active');
+                    activePage.style.display = 'block';
+                }
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Initialize page-specific content
+                if (pageId === 'statistics') {
+                    setTimeout(() => {
+                        if (typeof initStatisticsCharts === 'function') initStatisticsCharts();
+                        if (typeof updateStatisticsTables === 'function') updateStatisticsTables();
+                    }, 100);
+                } else if (pageId === 'watchlist') {
+                    setTimeout(() => {
+                        if (typeof updateWatchlist === 'function') updateWatchlist('all', 1);
+                    }, 100);
+                } else if (pageId === 'achievements') {
+                    setTimeout(() => {
+                        if (typeof updateAchievements === 'function') updateAchievements();
+                    }, 100);
+                } else if (pageId === 'ranking') {
+                    setTimeout(() => {
+                        if (typeof initRankingPage === 'function') initRankingPage();
+                    }, 100);
+                }
+            });
+        });
+
+        // Make sure dashboard is visible on load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Hide all pages first
+            document.querySelectorAll('.page').forEach(page => {
+                page.style.display = 'none';
+            });
+
+            // Show dashboard page
+            const dashboardPage = document.getElementById('dashboard-page');
+            if (dashboardPage) {
+                dashboardPage.style.display = 'block';
+                dashboardPage.classList.add('active');
+            }
+
+            // Set active menu item
+            const dashboardMenuItem = document.querySelector('.menu-item[data-page="dashboard"]');
+            if (dashboardMenuItem) {
+                dashboardMenuItem.classList.add('active');
+            }
         });
     </script>
 </body>
