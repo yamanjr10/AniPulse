@@ -1764,7 +1764,7 @@ function updateTopRatedAnime() {
     const topRatedAnime = animeData
         .filter(anime => anime.score && anime.score >= 8)
         .sort((a, b) => b.score - a.score)
-        .slice(0, 8);
+        .slice(0, 9);
 
     if (topRatedAnime.length === 0) {
         topRatedContainer.innerHTML = '<div class="no-anime">No highly rated anime yet. Rate some anime to see them here!</div>';
@@ -2315,26 +2315,69 @@ function handleAddAnime(e) {
         .map(genre => genre.trim())
         .filter(Boolean);
     
-    // ✅ DECLARE existingAnime FIRST
-    const existingAnime = animeData.find(a => a.id === currentEditId);
+    // Get Nepal local time (UTC+5:45) with full timestamp
+    const getNepalTime = () => {
+        const now = new Date();
+        const nepalOffset = 5 * 60 + 45; // 5 hours 45 minutes in minutes
+        const utcOffset = now.getTimezoneOffset();
+        const nepalTimeMs = now.getTime() + (nepalOffset + utcOffset) * 60 * 1000;
+        return new Date(nepalTimeMs);
+    };
     
-    // ✅ THEN use it
+    // Format full timestamp for Nepal time (YYYY-MM-DD HH:MM:SS)
+    const getNepalTimestamp = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+    
+    // Format date only for finishDate if needed (without time)
+    const getNepalDateOnly = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    
+    // Get current Nepal time
+    const nepalNow = getNepalTime();
+    const nepalTimestamp = getNepalTimestamp(nepalNow);
+    const nepalDateOnly = getNepalDateOnly(nepalNow);
+    
+    // Get next sequential numeric ID
+    const getNextId = () => {
+        if (animeData.length === 0) return 1;
+        const maxId = Math.max(...animeData.map(a => {
+            const id = typeof a.id === 'number' ? a.id : parseInt(a.id);
+            return isNaN(id) ? 0 : id;
+        }));
+        return maxId + 1;
+    };
+    
+    // ✅ DECLARE existingAnime FIRST
+    const existingAnime = animeData.find(a => a.id == currentEditId);
+    
+    // ✅ Handle finishDate with time tracking
     let finishDate = null;
+    let finishTimestamp = null;
     
     if (status === 'Completed') {
-        if (isEditing && existingAnime?.userStatus === 'Completed' && existingAnime?.finishDate) {
-            // Already completed - keep original date
+        if (isEditing && existingAnime?.userStatus === 'Completed' && existingAnime?.finishTimestamp) {
+            // Already completed - keep original finish timestamp
+            finishTimestamp = existingAnime.finishTimestamp;
             finishDate = existingAnime.finishDate;
         } else {
-            // New completion - set today's date
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            finishDate = `${year}-${month}-${day}`;
+            // New completion - set Nepal timestamp with time
+            finishTimestamp = nepalTimestamp;
+            finishDate = nepalDateOnly;
         }
-    } else if (isEditing && existingAnime?.finishDate) {
-        // Not completed - preserve existing finishDate
+    } else if (isEditing && existingAnime?.finishTimestamp) {
+        // Not completed - preserve existing finishTimestamp
+        finishTimestamp = existingAnime.finishTimestamp;
         finishDate = existingAnime.finishDate;
     }
     
@@ -2355,9 +2398,8 @@ function handleAddAnime(e) {
         return;
     }
 
-    const timestamp = new Date().toISOString();
-
     if (existingAnime && isEditing) {
+        // Update existing anime - preserve original createdAt
         existingAnime.title = title;
         existingAnime.type = type;
         existingAnime.episodes = episodes;
@@ -2368,10 +2410,12 @@ function handleAddAnime(e) {
         existingAnime.cover = cover;
         existingAnime.genres = genres;
         existingAnime.finishDate = finishDate;
-        existingAnime.updatedAt = timestamp;
+        existingAnime.finishTimestamp = finishTimestamp;
+        existingAnime.updatedAt = nepalTimestamp;
+        existingAnime.updatedTimestamp = nepalTimestamp;
     } else {
         const newAnime = {
-            id: Date.now().toString(),
+            id: getNextId(),
             title,
             type,
             episodes,
@@ -2381,9 +2425,12 @@ function handleAddAnime(e) {
             score,
             cover,
             genres,
-            finishDate,
-            createdAt: timestamp,
-            updatedAt: timestamp
+            finishDate: finishDate,
+            finishTimestamp: finishTimestamp,  // Full timestamp with time
+            createdAt: nepalTimestamp,         // Full timestamp with time
+            createdTimestamp: nepalTimestamp,  // Full timestamp with time
+            updatedAt: nepalTimestamp,         // Full timestamp with time
+            updatedTimestamp: nepalTimestamp   // Full timestamp with time
         };
 
         animeData.push(newAnime);
@@ -8010,7 +8057,181 @@ function refreshAllCharts() {
     }
 }
 
+// =============================================
+// PWA INSTALLATION SYSTEM (COMPLETE FIX)
+// =============================================
 
+// ✅ Use a single declaration - check if already exists
+if (typeof window.pwaDeferredPrompt === 'undefined') {
+    window.pwaDeferredPrompt = null;
+}
+if (typeof window.installPromptShown === 'undefined') {
+    window.installPromptShown = false;
+}
+
+// SAFE Service Worker Registration - with error handling
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Only register if not a chrome-extension URL
+        if (!window.location.protocol.startsWith('chrome-')) {
+            // Check if service-worker.js exists with a GET request, not HEAD
+            fetch('/service-worker.js', { method: 'GET', cache: 'no-store' })
+                .then(response => {
+                    if (response.ok) {
+                        navigator.serviceWorker.register('/service-worker.js')
+                            .then(reg => {
+                                console.log('✅ Service Worker Registered:', reg.scope);
+                            })
+                            .catch(err => {
+                                console.log('⚠️ Service Worker registration failed:', err);
+                            });
+                    } else {
+                        console.log('ℹ️ service-worker.js not found');
+                    }
+                })
+                .catch(() => {
+                    console.log('ℹ️ Cannot check service-worker.js');
+                });
+        }
+    });
+}
+
+// Before install prompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.pwaDeferredPrompt = e;
+    
+    const promptShown = sessionStorage.getItem('installPromptShown');
+    
+    if (!promptShown && !window.installPromptShown) {
+        setTimeout(() => {
+            showCustomInstallPrompt();
+        }, 3000);
+    }
+    
+    console.log('📱 App can be installed');
+});
+
+// Show custom install prompt
+function showCustomInstallPrompt() {
+    const installPrompt = document.getElementById('installPrompt');
+    if (!installPrompt || window.installPromptShown) return;
+    
+    window.installPromptShown = true;
+    sessionStorage.setItem('installPromptShown', 'true');
+    installPrompt.style.display = 'block';
+    
+    setTimeout(() => {
+        if (installPrompt && installPrompt.style.display === 'block') {
+            installPrompt.style.display = 'none';
+        }
+    }, 15000);
+}
+
+// Handle install button click
+async function installApp() {
+    if (!window.pwaDeferredPrompt) {
+        if (typeof showToast === 'function') {
+            showToast('Click the install icon (⋮) in your browser address bar to install', 'info');
+        } else {
+            alert('Click the install icon (⋮) in your browser address bar to install');
+        }
+        return;
+    }
+    
+    window.pwaDeferredPrompt.prompt();
+    
+    const { outcome } = await window.pwaDeferredPrompt.userChoice;
+    console.log(`User response to install prompt: ${outcome}`);
+    
+    const installPrompt = document.getElementById('installPrompt');
+    if (installPrompt) {
+        installPrompt.style.display = 'none';
+    }
+    
+    window.pwaDeferredPrompt = null;
+    
+    if (outcome === 'accepted') {
+        if (typeof showToast === 'function') {
+            showToast('🎉 Thanks for installing AniPulse!', 'success');
+        }
+    }
+}
+
+// Close install prompt
+function closeInstallPrompt() {
+    const installPrompt = document.getElementById('installPrompt');
+    if (installPrompt) {
+        installPrompt.style.display = 'none';
+    }
+}
+
+// Add install button to settings page
+function addInstallButtonToSettings() {
+    setTimeout(() => {
+        const dangerZone = document.querySelector('.danger-zone');
+        if (!dangerZone) return;
+        
+        if (document.getElementById('installDesktopBtn')) return;
+        
+        const installSection = document.createElement('div');
+        installSection.className = 'settings-group';
+        installSection.style.marginTop = '1.5rem';
+        installSection.innerHTML = `
+            <h3><i class="fas fa-download"></i> Install App</h3>
+            <p style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">
+                Install AniPulse as a standalone app for quick access and offline support.
+            </p>
+            <button id="installDesktopBtn" class="install-desktop-btn">
+                <i class="fas fa-download"></i>
+                Install AniPulse App
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        `;
+        
+        dangerZone.parentNode.insertBefore(installSection, dangerZone);
+        
+        const installBtn = document.getElementById('installDesktopBtn');
+        if (installBtn) {
+            installBtn.addEventListener('click', installApp);
+        }
+    }, 2000);
+}
+
+// Check if app is already installed
+function isAppInstalled() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                        window.navigator.standalone === true;
+    
+    if (isStandalone) {
+        const installPrompt = document.getElementById('installPrompt');
+        if (installPrompt) installPrompt.style.display = 'none';
+        return true;
+    }
+    return false;
+}
+
+// Initialize PWA features safely
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        isAppInstalled();
+        addInstallButtonToSettings();
+        
+        const installBtn = document.getElementById('installAppBtn');
+        if (installBtn) {
+            installBtn.addEventListener('click', installApp);
+        }
+        
+        const closePromptBtn = document.getElementById('closeInstallPrompt');
+        if (closePromptBtn) {
+            closePromptBtn.addEventListener('click', closeInstallPrompt);
+        }
+    } catch (error) {
+        console.log('PWA features not initialized:', error);
+    }
+});
+
+console.log('🚀 PWA Installation system ready');
 
 
 // Initialize the app with saved theme (theme loads before loader)

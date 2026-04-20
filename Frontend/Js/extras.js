@@ -2,6 +2,24 @@
 //UPDATE 1.0.0
 // =============================================
 
+// Make sure showToast is available
+if (typeof showToast === 'undefined') {
+    window.showToast = function(message, type = 'info') {
+        console.log(`[Toast] ${type}: ${message}`);
+        // Create a simple toast if the main one isn't available
+        const toastContainer = document.getElementById('toastContainer');
+        if (toastContainer) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        } else {
+            alert(message);
+        }
+    };
+}
+
 // --- Search Debounce ---
 let searchTimeout;
 

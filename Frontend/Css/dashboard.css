@@ -10018,3 +10018,198 @@ body.modal-open {
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
   outline: none;
 }
+
+/* Install Prompt Styles - Add to dashboard.css */
+.install-prompt {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 10000;
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.install-prompt-content {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.install-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+}
+
+.install-text {
+    flex: 1;
+}
+
+.install-text h4 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.install-text p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.install-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.install-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.install-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+}
+
+.install-btn {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 30px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.install-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+}
+
+.install-desktop-btn {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform 0.2s;
+    width: 100%;
+    justify-content: center;
+}
+
+.install-desktop-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Dark Theme Colors - Make it darker and grayer */
+:root {
+    /* Dark Gray Theme */
+    --primary: #6a5acd;
+    --primary-dark: #5b4cb4;
+    --accent: #8b5cf6;
+    
+    /* Backgrounds - Darker Gray */
+    --bg-dark: #0a0c12;
+    --bg-darker: #06080c;
+    --bg-card: #11141c;
+    --bg-hover: #1a1f2a;
+    
+    /* Text Colors */
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    /* Border Colors */
+    --border: #1e2430;
+    --border-light: #2a303c;
+    
+    /* Card Colors */
+    --card-bg: #11141c;
+    --card-border: #1e2430;
+    
+    /* Sidebar */
+    --sidebar-bg: #0a0c12;
+    --sidebar-border: #1a1f2a;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] {
+    --bg-dark: #0a0c12;
+    --bg-darker: #06080c;
+    --bg-card: #11141c;
+    --sidebar-bg: #0a0c12;
+    --card-bg: #11141c;
+    --border: #1e2430;
+}
+
+[data-theme="light"] {
+    --bg-dark: #f8fafc;
+    --bg-darker: #f1f5f9;
+    --bg-card: #ffffff;
+    --sidebar-bg: #ffffff;
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+}
+
+/* Apply background colors */
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+}
+
+.sidebar {
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+}
+
+.top-bar {
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+}
+
+.chart-card, .stat-card, .activity-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+}
+

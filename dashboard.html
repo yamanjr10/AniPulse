@@ -21,6 +21,19 @@
         crossorigin="anonymous"></script>
     <link rel="stylesheet" href="Frontend/Css/dashboard.css">
     <link rel="stylesheet" href="Frontend/Css/responsive.css">
+    <link rel="manifest" href="/manifest.json">
+    <!-- Update the favicon and theme colors -->
+    <link rel="icon" type="image/png" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="shortcut icon" href="/icon.png">
+
+    <!-- Update theme colors for PWA -->
+    <meta name="theme-color" content="#1a1f2e">
+    <meta name="msapplication-TileColor" content="#1a1f2e">
+    <meta name="msapplication-TileImage" content="/icon.png">
+
+    <!-- Add dark mode preference -->
+    <meta name="color-scheme" content="dark light">
 </head>
 
 <body data-theme="dark">
@@ -133,9 +146,6 @@
                             </div>
                             <div class="menu-item" data-page="settings">
                                 <i class="fas fa-cog"></i><span>Settings</span>
-                            </div>
-                            <div class="menu-item" id="logoutBtn">
-                                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
                             </div>
 
                         </div>
@@ -969,6 +979,27 @@
                 <div class="activity-list-full" id="all-activity-list">
                     <!-- All activities will be populated here -->
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Install Prompt Container -->
+    <div id="installPrompt" class="install-prompt" style="display: none;">
+        <div class="install-prompt-content">
+            <div class="install-icon">
+                <i class="fas fa-download"></i>
+            </div>
+            <div class="install-text">
+                <h4>Install AniPulse</h4>
+                <p>Install as app for faster access and offline support</p>
+            </div>
+            <div class="install-actions">
+                <button id="closeInstallPrompt" class="install-close">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button id="installAppBtn" class="install-btn">
+                    Install <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
         </div>
     </div>
