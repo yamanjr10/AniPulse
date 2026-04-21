@@ -2297,7 +2297,6 @@ function updateAnimeDisplay() {
     // Update the anime table
     updateAnimeTableView(filteredAnime);
 }
-
 function handleAddAnime(e) {
     e.preventDefault();
 
@@ -2315,91 +2314,59 @@ function handleAddAnime(e) {
         .map(genre => genre.trim())
         .filter(Boolean);
     
-    // Get Nepal local time (UTC+5:45) with full timestamp
-    const getNepalTime = () => {
-        const now = new Date();
-        const nepalOffset = 5 * 60 + 45; // 5 hours 45 minutes in minutes
-        const utcOffset = now.getTimezoneOffset();
-        const nepalTimeMs = now.getTime() + (nepalOffset + utcOffset) * 60 * 1000;
-        return new Date(nepalTimeMs);
-    };
+    // Get selected date from form
+    const selectedYear = document.getElementById('animeYear')?.value;
+    const selectedMonth = document.getElementById('animeMonth')?.value;
     
-    // Format full timestamp for Nepal time (YYYY-MM-DD HH:MM:SS)
-    const getNepalTimestamp = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
+    // Simple Nepal timestamp function
+    const getNepalTimestamp = () => {
+        const now = new Date();
+        const nepalOffset = 5 * 60 + 45;
+        const utcOffset = now.getTimezoneOffset();
+        const nepalTime = new Date(now.getTime() + (nepalOffset + utcOffset) * 60 * 1000);
+        const year = nepalTime.getFullYear();
+        const month = String(nepalTime.getMonth() + 1).padStart(2, '0');
+        const day = String(nepalTime.getDate()).padStart(2, '0');
+        const hours = String(nepalTime.getHours()).padStart(2, '0');
+        const minutes = String(nepalTime.getMinutes()).padStart(2, '0');
+        const seconds = String(nepalTime.getSeconds()).padStart(2, '0');
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
     
-    // Format date only for finishDate if needed (without time)
-    const getNepalDateOnly = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-    
-    // Get current Nepal time
-    const nepalNow = getNepalTime();
-    const nepalTimestamp = getNepalTimestamp(nepalNow);
-    const nepalDateOnly = getNepalDateOnly(nepalNow);
-    
-    // Get next sequential numeric ID
     const getNextId = () => {
         if (animeData.length === 0) return 1;
-        const maxId = Math.max(...animeData.map(a => {
-            const id = typeof a.id === 'number' ? a.id : parseInt(a.id);
-            return isNaN(id) ? 0 : id;
-        }));
+        const maxId = Math.max(...animeData.map(a => parseInt(a.id) || 0));
         return maxId + 1;
     };
     
-    // ✅ DECLARE existingAnime FIRST
     const existingAnime = animeData.find(a => a.id == currentEditId);
+    const nowTimestamp = getNepalTimestamp();
     
-    // ✅ Handle finishDate with time tracking
+    // Handle finish date - use selected date if provided, otherwise keep existing or null
     let finishDate = null;
     let finishTimestamp = null;
     
     if (status === 'Completed') {
-        if (isEditing && existingAnime?.userStatus === 'Completed' && existingAnime?.finishTimestamp) {
-            // Already completed - keep original finish timestamp
-            finishTimestamp = existingAnime.finishTimestamp;
+        if (selectedYear && selectedMonth) {
+            // Use the date the user selected
+            const year = selectedYear;
+            const month = String(selectedMonth).padStart(2, '0');
+            finishDate = `${year}-${month}-01`;
+            finishTimestamp = `${year}-${month}-01 23:59:59`;
+        } else if (existingAnime?.finishDate) {
+            // Keep existing date when editing
             finishDate = existingAnime.finishDate;
+            finishTimestamp = existingAnime.finishTimestamp;
         } else {
-            // New completion - set Nepal timestamp with time
-            finishTimestamp = nepalTimestamp;
-            finishDate = nepalDateOnly;
+            // Fallback to current date
+            const today = nowTimestamp.split(' ')[0];
+            finishDate = today;
+            finishTimestamp = `${today} 23:59:59`;
         }
-    } else if (isEditing && existingAnime?.finishTimestamp) {
-        // Not completed - preserve existing finishTimestamp
-        finishTimestamp = existingAnime.finishTimestamp;
-        finishDate = existingAnime.finishDate;
     }
     
-    const action = isEditing ? 'edited' : 'added';
-
-    if (!title) {
-        showToast('Please enter an anime title.', 'error');
-        return;
-    }
-
-    if (episodes < 0 || progress < 0) {
-        showToast('Episodes and progress must be positive numbers.', 'error');
-        return;
-    }
-
-    if (progress > episodes && episodes > 0) {
-        showToast('Progress cannot exceed total episodes.', 'error');
-        return;
-    }
-
     if (existingAnime && isEditing) {
-        // Update existing anime - preserve original createdAt
+        // Update existing
         existingAnime.title = title;
         existingAnime.type = type;
         existingAnime.episodes = episodes;
@@ -2411,9 +2378,9 @@ function handleAddAnime(e) {
         existingAnime.genres = genres;
         existingAnime.finishDate = finishDate;
         existingAnime.finishTimestamp = finishTimestamp;
-        existingAnime.updatedAt = nepalTimestamp;
-        existingAnime.updatedTimestamp = nepalTimestamp;
+        existingAnime.updatedAt = nowTimestamp;
     } else {
+        // Add new
         const newAnime = {
             id: getNextId(),
             title,
@@ -2426,28 +2393,25 @@ function handleAddAnime(e) {
             cover,
             genres,
             finishDate: finishDate,
-            finishTimestamp: finishTimestamp,  // Full timestamp with time
-            createdAt: nepalTimestamp,         // Full timestamp with time
-            createdTimestamp: nepalTimestamp,  // Full timestamp with time
-            updatedAt: nepalTimestamp,         // Full timestamp with time
-            updatedTimestamp: nepalTimestamp   // Full timestamp with time
+            finishTimestamp: finishTimestamp,
+            createdAt: nowTimestamp,
+            updatedAt: nowTimestamp
         };
-
         animeData.push(newAnime);
     }
-
+    
     saveData();
-
+    
     // Log activity
-    if (status === 'Completed' && (!isEditing || (isEditing && existingAnime?.userStatus !== 'Completed'))) {
+    if (status === 'Completed' && (!isEditing || existingAnime?.userStatus !== 'Completed')) {
         logActivity('completed', title);
-    } else if (action === 'added') {
+    } else if (!isEditing) {
         logActivity('added', title);
     } else if (isEditing) {
         logActivity('edited', title);
     }
-
-    // Close modal and reset form
+    
+    // Close modal and reset
     const addAnimeModal = document.getElementById('addAnimeModal');
     const animeForm = document.getElementById('addAnimeForm');
     const searchResults = document.getElementById('searchResults');
@@ -2460,19 +2424,17 @@ function handleAddAnime(e) {
         searchResults.style.display = 'none';
         searchResults.innerHTML = '';
     }
-
-    const wasEditing = isEditing;
     
     isEditing = false;
     currentEditId = null;
     if (submitBtn) submitBtn.textContent = 'Add Anime';
     if (deleteBtn) deleteBtn.style.display = 'none';
-
-    // Refresh everything
+    
+    // Force immediate save and refresh
+    saveData();
     updateAllComponents();
-
-    // Show success message
-    showToast(wasEditing ? 'Anime updated successfully!' : 'Anime added successfully!', 'success');
+    
+    showToast(isEditing ? 'Anime updated!' : 'Anime added!', 'success');
 }
 
 // Save data to localStorage
@@ -8232,6 +8194,94 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 console.log('🚀 PWA Installation system ready');
+
+// =============================================
+// FLOATING SCROLL TO TOP BUTTON
+// =============================================
+
+(function initScrollToTop() {
+    const scrollBtn = document.getElementById('scrollToTop');
+    if (!scrollBtn) return;
+    
+    let scrollTimeout;
+    let isVisible = false;
+    
+    // Function to check scroll position and show/hide button
+    function toggleScrollButton() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Show button when scrolled down more than 300px
+        if (scrollTop > 300) {
+            if (!isVisible) {
+                scrollBtn.classList.add('show');
+                isVisible = true;
+            }
+        } else {
+            if (isVisible) {
+                scrollBtn.classList.remove('show');
+                isVisible = false;
+            }
+        }
+        
+        // Update scroll progress ring (optional)
+        const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / documentHeight) * 360;
+        document.documentElement.style.setProperty('--scroll-progress', `${scrollPercent}deg`);
+    }
+    
+    // Smooth scroll to top
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+        
+        // Visual feedback
+        scrollBtn.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            scrollBtn.style.transform = '';
+        }, 200);
+        
+        // Optional: Show toast notification
+        if (typeof showToast === 'function') {
+            showToast('📤 Back to top!', 'info');
+        }
+    }
+    
+    // Throttled scroll event for better performance
+    function handleScroll() {
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(toggleScrollButton, 100);
+    }
+    
+    // Add event listeners
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', toggleScrollButton);
+    scrollBtn.addEventListener('click', scrollToTop);
+    
+    // Initial check
+    setTimeout(toggleScrollButton, 500);
+    
+    // Re-check when page changes (for page navigation)
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            setTimeout(toggleScrollButton, 300);
+        });
+    });
+    
+    // Also check when modal closes
+    const observer = new MutationObserver(() => {
+        toggleScrollButton();
+    });
+    
+    observer.observe(document.body, {
+        attributes: true,
+        childList: true,
+        subtree: true
+    });
+    
+    console.log('✅ Scroll to Top button initialized');
+})();
 
 
 // Initialize the app with saved theme (theme loads before loader)

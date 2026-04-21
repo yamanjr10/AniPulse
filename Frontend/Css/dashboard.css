@@ -10019,197 +10019,308 @@ body.modal-open {
   outline: none;
 }
 
-/* Install Prompt Styles - Add to dashboard.css */
-.install-prompt {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    z-index: 10000;
-    animation: slideUp 0.5s ease;
+
+/* Skeleton loading animation */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--color-bg-tertiary) 0%,
+        var(--color-bg-secondary) 50%,
+        var(--color-bg-tertiary) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s infinite;
+    border-radius: var(--radius-md);
 }
 
-@keyframes slideUp {
-    from {
-        transform: translateY(100px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+@keyframes skeletonLoading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
-.install-prompt-content {
-    background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    max-width: 500px;
-    margin: 0 auto;
+/* Skeleton variants */
+.skeleton-text {
+    height: 1rem;
+    width: 100%;
+    margin-bottom: 0.5rem;
 }
 
-.install-icon {
+.skeleton-avatar {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    border-radius: 12px;
+    border-radius: 50%;
+}
+
+.skeleton-card {
+    height: 200px;
+    border-radius: var(--radius-lg);
+}
+
+/* ============================================
+   PREMIUM UI ENHANCEMENTS 
+   ============================================ */
+
+/* Animated gradient borders on hover */
+.stat-card, .chart-card, .anime-card, .dna-card {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.stat-card:hover, .chart-card:hover, .anime-card:hover, .dna-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.3);
+}
+
+/* Floating animation for stats */
+.stat-value {
+    animation: floatSoft 3s ease-in-out infinite;
+}
+
+@keyframes floatSoft {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+}
+
+.stat-card:nth-child(1) .stat-value { animation-delay: 0s; }
+.stat-card:nth-child(2) .stat-value { animation-delay: 0.15s; }
+.stat-card:nth-child(3) .stat-value { animation-delay: 0.3s; }
+.stat-card:nth-child(4) .stat-value { animation-delay: 0.45s; }
+
+/* Ripple effect for buttons */
+.btn, .action-btn, .filter-btn, .page-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:active::after, .action-btn:active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
+    transform: translate(-50%, -50%);
+    animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+    0% { width: 0; height: 0; opacity: 0.5; }
+    100% { width: 200%; height: 200%; opacity: 0; }
+}
+
+/* Gradient text for all section titles */
+.section-title {
+    background: linear-gradient(135deg, #ffffff, #a78bfa, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+[data-theme="light"] .section-title {
+    background: linear-gradient(135deg, #1e293b, #8b5cf6, #6366f1);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* Premium empty state */
+.no-anime, .no-activity {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, 
+        rgba(139, 92, 246, 0.05), 
+        rgba(99, 102, 241, 0.02));
+    border-radius: var(--radius-2xl);
+    border: 2px dashed rgba(139, 92, 246, 0.2);
+}
+
+.no-anime::before, .no-activity::before {
+    content: '\f07c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 400;
+    font-size: 48px;
+    display: block;
+    color: #8b5cf6;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+/* Enhanced scrollbar */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+}
+
+/* ============================================
+   FLOATING SCROLL TO TOP BUTTON
+   ============================================ */
+
+.floating-scroll-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+}
+
+.scroll-top-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+    background: linear-gradient(135deg, #1a1f2e, #0f1420);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    color: #a78bfa;
+    cursor: pointer;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    gap: 2px;
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.9);
+}
+
+.scroll-top-btn.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.scroll-top-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+}
+
+.btn-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Hover effects */
+.scroll-top-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-color: transparent;
     color: white;
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
 }
 
-.install-text {
-    flex: 1;
-}
-
-.install-text h4 {
-    margin: 0 0 4px 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-color);
-}
-
-.install-text p {
-    margin: 0;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-.install-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.install-close {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-}
-
-.install-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--text-color);
-}
-
-.install-btn {
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    border: none;
-    padding: 8px 16px;
-    border-radius: 30px;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.install-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
-}
-
-.install-desktop-btn {
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: transform 0.2s;
-    width: 100%;
-    justify-content: center;
-}
-
-.install-desktop-btn:hover {
+.scroll-top-btn:hover i {
     transform: translateY(-2px);
 }
 
-/* Dark Theme Colors - Make it darker and grayer */
-:root {
-    /* Dark Gray Theme */
-    --primary: #6a5acd;
-    --primary-dark: #5b4cb4;
-    --accent: #8b5cf6;
+.scroll-top-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Pulse animation when first appears */
+@keyframes gentlePulse {
+    0%, 100% {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 25px rgba(139, 92, 246, 0.5);
+    }
+}
+
+.scroll-top-btn.show {
+    animation: gentlePulse 1s ease-in-out;
+}
+
+/* Light mode styles */
+[data-theme="light"] .scroll-top-btn {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border-color: rgba(99, 102, 241, 0.3);
+    color: #6366f1;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .scroll-top-btn:hover {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .floating-scroll-top {
+        bottom: 20px;
+        right: 20px;
+    }
     
-    /* Backgrounds - Darker Gray */
-    --bg-dark: #0a0c12;
-    --bg-darker: #06080c;
-    --bg-card: #11141c;
-    --bg-hover: #1a1f2a;
+    .scroll-top-btn {
+        width: 46px;
+        height: 46px;
+    }
     
-    /* Text Colors */
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    .scroll-top-btn i {
+        font-size: 1rem;
+    }
     
-    /* Border Colors */
-    --border: #1e2430;
-    --border-light: #2a303c;
+    .btn-label {
+        font-size: 0.5rem;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+    .floating-scroll-top {
+        bottom: 15px;
+        right: 15px;
+    }
     
-    /* Card Colors */
-    --card-bg: #11141c;
-    --card-border: #1e2430;
-    
-    /* Sidebar */
-    --sidebar-bg: #0a0c12;
-    --sidebar-border: #1a1f2a;
+    .scroll-top-btn {
+        width: 42px;
+        height: 42px;
+    }
 }
 
-/* Dark mode overrides */
-[data-theme="dark"] {
-    --bg-dark: #0a0c12;
-    --bg-darker: #06080c;
-    --bg-card: #11141c;
-    --sidebar-bg: #0a0c12;
-    --card-bg: #11141c;
-    --border: #1e2430;
+/* Entrance animation */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-[data-theme="light"] {
-    --bg-dark: #f8fafc;
-    --bg-darker: #f1f5f9;
-    --bg-card: #ffffff;
-    --sidebar-bg: #ffffff;
-    --card-bg: #ffffff;
-    --border: #e2e8f0;
+.scroll-top-btn.show {
+    animation: slideInUp 0.3s ease forwards;
 }
 
-/* Apply background colors */
-body {
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
+/* Optional: Add a progress ring around button */
+.scroll-top-btn {
+    position: relative;
 }
 
-.sidebar {
-    background-color: var(--sidebar-bg);
-    border-right: 1px solid var(--sidebar-border);
+.scroll-top-btn::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    background: conic-gradient(#8b5cf6 var(--scroll-progress, 0deg), transparent 0deg);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
-.top-bar {
-    background-color: var(--bg-card);
-    border-bottom: 1px solid var(--border);
-}
-
-.chart-card, .stat-card, .activity-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
+.scroll-top-btn:hover::before {
+    opacity: 0.4;
 }
 
