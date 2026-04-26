@@ -1168,33 +1168,6 @@ function initCharts() {
     // Custom hover effect for line points
     const canvasElement = document.getElementById('monthlyProgressChart');
 
-    // Create custom tooltip for line points
-    let lineTooltip = document.querySelector('.monthly-progress-line-tooltip');
-    if (!lineTooltip) {
-        lineTooltip = document.createElement('div');
-        lineTooltip.className = 'monthly-progress-line-tooltip';
-        lineTooltip.style.cssText = `
-        position: fixed;
-        background: linear-gradient(135deg, #1a1f2e, #0f1420);
-        color: white;
-        padding: 10px 18px;
-        border-radius: 14px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        border: 1px solid rgba(139, 92, 246, 0.4);
-        backdrop-filter: blur(12px);
-        pointer-events: none;
-        z-index: 1000;
-        white-space: nowrap;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        opacity: 0;
-        transition: opacity 0.2s ease, transform 0.2s ease;
-        font-family: 'Inter', monospace;
-        letter-spacing: 0.3px;
-    `;
-        document.body.appendChild(lineTooltip);
-    }
-
     // Update tooltip style based on theme
     if (!isDark) {
         lineTooltip.style.background = 'linear-gradient(135deg, #ffffff, #f8fafc)';
@@ -3165,54 +3138,6 @@ function updateSingleStatCard(statName, change) {
         <i class="${iconClass}"></i>
         <span>${change.text}</span>
     `;
-}
-
-// Initialize sample data
-function initializeSampleData() {
-    // Add sample anime data if none exists
-    if (animeData.length === 0) {
-        const sampleAnime = [
-            {
-                id: 1,
-                title: "Demon Slayer: Kimetsu no Yaiba",
-                type: "TV",
-                episodes: 26,
-                duration: 20,
-                userStatus: "Completed",
-                progress: 26,
-                score: 9.0,
-                genres: ["Action", "Fantasy", "Supernatural"],
-                finishDate: "2025-10-15",
-                cover: "https://cdn.myanimelist.net/images/anime/1286/99889.jpg",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            },
-            {
-                id: 2,
-                title: "Your Name",
-                type: "Movie",
-                episodes: 1,
-                duration: 120,
-                userStatus: "Completed",
-                progress: 1,
-                score: 9.5,
-                genres: ["Romance", "Supernatural", "Drama"],
-                finishDate: "2025-10-10",
-                cover: "https://cdn.myanimelist.net/images/anime/5/87048.jpg",
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            }
-        ];
-
-        animeData = sampleAnime;
-        saveData();
-
-        // Log sample activities
-        logActivity("added", "Demon Slayer: Kimetsu no Yaiba");
-        logActivity("completed", "Demon Slayer: Kimetsu no Yaiba");
-        logActivity("added", "Your Name");
-        logActivity("completed", "Your Name");
-    }
 }
 
 // Add these functions to calculate detailed statistics
@@ -8241,11 +8166,6 @@ console.log('🚀 PWA Installation system ready');
         setTimeout(() => {
             scrollBtn.style.transform = '';
         }, 200);
-        
-        // Optional: Show toast notification
-        if (typeof showToast === 'function') {
-            showToast('📤 Back to top!', 'info');
-        }
     }
     
     // Throttled scroll event for better performance
