@@ -1231,7 +1231,6 @@ function initCharts() {
     if (canvasElement) {
         canvasElement.addEventListener('mousemove', showLineTooltip);
         canvasElement.addEventListener('mouseleave', () => {
-            lineTooltip.style.opacity = '0';
             canvasElement.style.cursor = 'default';
         });
     }
@@ -7945,180 +7944,298 @@ function refreshAllCharts() {
 }
 
 // =============================================
-// PWA INSTALLATION SYSTEM (COMPLETE FIX)
+// PWA INSTALLATION FIX - DEBUG VERSION
 // =============================================
 
-// ✅ Use a single declaration - check if already exists
-if (typeof window.pwaDeferredPrompt === 'undefined') {
-    window.pwaDeferredPrompt = null;
-}
-if (typeof window.installPromptShown === 'undefined') {
-    window.installPromptShown = false;
-}
-
-// SAFE Service Worker Registration - with error handling
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // Only register if not a chrome-extension URL
-        if (!window.location.protocol.startsWith('chrome-')) {
-            // Check if service-worker.js exists with a GET request, not HEAD
-            fetch('/service-worker.js', { method: 'GET', cache: 'no-store' })
-                .then(response => {
-                    if (response.ok) {
-                        navigator.serviceWorker.register('/service-worker.js')
-                            .then(reg => {
-                                console.log('✅ Service Worker Registered:', reg.scope);
-                            })
-                            .catch(err => {
-                                console.log('⚠️ Service Worker registration failed:', err);
-                            });
-                    } else {
-                        console.log('ℹ️ service-worker.js not found');
-                    }
-                })
-                .catch(() => {
-                    console.log('ℹ️ Cannot check service-worker.js');
-                });
-        }
-    });
-}
-
-// Before install prompt event
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    window.pwaDeferredPrompt = e;
+(function() {
+    console.log('🚀 Initializing PWA Install Handler...');
     
-    const promptShown = sessionStorage.getItem('installPromptShown');
+    let deferredPrompt = null;
+    let installButtonShown = false;
     
-    if (!promptShown && !window.installPromptShown) {
+    // Listen for beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('📱 beforeinstallprompt event fired!');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show custom install banner after 2 seconds
         setTimeout(() => {
-            showCustomInstallPrompt();
-        }, 3000);
-    }
+            showInstallBanner();
+        }, 2000);
+    });
     
-    console.log('📱 App can be installed');
-});
-
-// Show custom install prompt
-function showCustomInstallPrompt() {
-    const installPrompt = document.getElementById('installPrompt');
-    if (!installPrompt || window.installPromptShown) return;
-    
-    window.installPromptShown = true;
-    sessionStorage.setItem('installPromptShown', 'true');
-    installPrompt.style.display = 'block';
-    
-    setTimeout(() => {
-        if (installPrompt && installPrompt.style.display === 'block') {
-            installPrompt.style.display = 'none';
+    // Function to show custom install banner
+    function showInstallBanner() {
+        if (installButtonShown) {
+            console.log('Banner already shown');
+            return;
         }
-    }, 15000);
-}
-
-// Handle install button click
-async function installApp() {
-    if (!window.pwaDeferredPrompt) {
-        if (typeof showToast === 'function') {
-            showToast('Click the install icon (⋮) in your browser address bar to install', 'info');
-        } else {
-            alert('Click the install icon (⋮) in your browser address bar to install');
+        if (!deferredPrompt) {
+            console.log('No deferredPrompt available');
+            return;
         }
-        return;
-    }
-    
-    window.pwaDeferredPrompt.prompt();
-    
-    const { outcome } = await window.pwaDeferredPrompt.userChoice;
-    console.log(`User response to install prompt: ${outcome}`);
-    
-    const installPrompt = document.getElementById('installPrompt');
-    if (installPrompt) {
-        installPrompt.style.display = 'none';
-    }
-    
-    window.pwaDeferredPrompt = null;
-    
-    if (outcome === 'accepted') {
-        if (typeof showToast === 'function') {
-            showToast('🎉 Thanks for installing AniPulse!', 'success');
-        }
-    }
-}
-
-// Close install prompt
-function closeInstallPrompt() {
-    const installPrompt = document.getElementById('installPrompt');
-    if (installPrompt) {
-        installPrompt.style.display = 'none';
-    }
-}
-
-// Add install button to settings page
-function addInstallButtonToSettings() {
-    setTimeout(() => {
-        const dangerZone = document.querySelector('.danger-zone');
-        if (!dangerZone) return;
         
-        if (document.getElementById('installDesktopBtn')) return;
+        // Check if already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('App already installed');
+            return;
+        }
         
-        const installSection = document.createElement('div');
-        installSection.className = 'settings-group';
-        installSection.style.marginTop = '1.5rem';
-        installSection.innerHTML = `
-            <h3><i class="fas fa-download"></i> Install App</h3>
-            <p style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">
-                Install AniPulse as a standalone app for quick access and offline support.
-            </p>
-            <button id="installDesktopBtn" class="install-desktop-btn">
-                <i class="fas fa-download"></i>
-                Install AniPulse App
-                <i class="fas fa-arrow-right"></i>
-            </button>
+        // Check if user dismissed recently
+        const dismissed = localStorage.getItem('installPromptDismissed');
+        if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) {
+            console.log('User dismissed prompt recently');
+            return;
+        }
+        
+        console.log('Showing install banner...');
+        installButtonShown = true;
+        
+        // Remove existing banner if any
+        const existingBanner = document.getElementById('custom-install-banner');
+        if (existingBanner) existingBanner.remove();
+        
+        // Create custom install banner
+        const banner = document.createElement('div');
+        banner.id = 'custom-install-banner';
+        banner.innerHTML = `
+            <div class="install-banner-content">
+                <div class="install-banner-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <div class="install-banner-text">
+                    <h4>Install AniPulse</h4>
+                    <p>Install as app for faster access and offline support</p>
+                </div>
+                <div class="install-banner-buttons">
+                    <button class="install-banner-btn install-now-btn">
+                        <i class="fas fa-download"></i> Install
+                    </button>
+                    <button class="install-banner-btn install-later-btn">
+                        <i class="fas fa-times"></i> Later
+                    </button>
+                </div>
+            </div>
         `;
         
-        dangerZone.parentNode.insertBefore(installSection, dangerZone);
+        // Add styles
+        const style = document.createElement('style');
+        style.textContent = `
+            #custom-install-banner {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                right: 20px;
+                z-index: 100000;
+                background: linear-gradient(135deg, #1a1f2e, #0f1420);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                border: 1px solid rgba(139, 92, 246, 0.4);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                animation: slideUpBanner 0.4s ease-out;
+                padding: 16px;
+            }
+            
+            @keyframes slideUpBanner {
+                from {
+                    transform: translateY(100px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+            
+            .install-banner-content {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                flex-wrap: wrap;
+            }
+            
+            .install-banner-icon {
+                width: 48px;
+                height: 48px;
+                background: linear-gradient(135deg, #6366F1, #8B5CF6);
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                color: white;
+                flex-shrink: 0;
+            }
+            
+            .install-banner-text {
+                flex: 1;
+            }
+            
+            .install-banner-text h4 {
+                margin: 0 0 4px 0;
+                font-size: 1rem;
+                font-weight: 700;
+                color: white;
+            }
+            
+            .install-banner-text p {
+                margin: 0;
+                font-size: 0.8rem;
+                color: rgba(255, 255, 255, 0.7);
+            }
+            
+            .install-banner-buttons {
+                display: flex;
+                gap: 10px;
+                flex-shrink: 0;
+            }
+            
+            .install-banner-btn {
+                padding: 8px 20px;
+                border-radius: 40px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                border: none;
+            }
+            
+            .install-now-btn {
+                background: linear-gradient(135deg, #6366F1, #8B5CF6);
+                color: white;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .install-now-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+            }
+            
+            .install-later-btn {
+                background: rgba(255, 255, 255, 0.08);
+                color: rgba(255, 255, 255, 0.7);
+                border: 1px solid rgba(139, 92, 246, 0.3);
+            }
+            
+            .install-later-btn:hover {
+                background: rgba(239, 68, 68, 0.15);
+                color: #EF4444;
+                border-color: rgba(239, 68, 68, 0.3);
+            }
+            
+            @media (max-width: 640px) {
+                .install-banner-text p {
+                    display: none;
+                }
+                
+                .install-banner-icon {
+                    width: 40px;
+                    height: 40px;
+                    font-size: 20px;
+                }
+                
+                .install-banner-btn {
+                    padding: 6px 16px;
+                    font-size: 0.75rem;
+                }
+            }
+        `;
         
-        const installBtn = document.getElementById('installDesktopBtn');
-        if (installBtn) {
-            installBtn.addEventListener('click', installApp);
-        }
-    }, 2000);
-}
-
-// Check if app is already installed
-function isAppInstalled() {
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                        window.navigator.standalone === true;
+        document.head.appendChild(style);
+        document.body.appendChild(banner);
+        
+        // Add event listeners
+        const installBtn = banner.querySelector('.install-now-btn');
+        const laterBtn = banner.querySelector('.install-later-btn');
+        
+        installBtn.addEventListener('click', async () => {
+            console.log('Install button clicked');
+            if (!deferredPrompt) {
+                alert('Install prompt not available. Use browser menu to install.');
+                banner.remove();
+                return;
+            }
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Install outcome: ${outcome}`);
+            
+            if (outcome === 'accepted') {
+                console.log('User installed the app');
+                showToast('🎉 Installing AniPulse...', 'success');
+            }
+            
+            deferredPrompt = null;
+            banner.remove();
+        });
+        
+        laterBtn.addEventListener('click', () => {
+            console.log('User dismissed banner');
+            localStorage.setItem('installPromptDismissed', Date.now().toString());
+            banner.remove();
+        });
+    }
     
-    if (isStandalone) {
-        const installPrompt = document.getElementById('installPrompt');
-        if (installPrompt) installPrompt.style.display = 'none';
-        return true;
+    // Also add install button to settings
+    function addInstallToSettings() {
+        setTimeout(() => {
+            const settingsContainer = document.querySelector('#settings-page .settings-groups-container');
+            if (!settingsContainer) return;
+            
+            if (document.getElementById('settings-install-btn')) return;
+            if (window.matchMedia('(display-mode: standalone)').matches) return;
+            
+            const installSection = document.createElement('div');
+            installSection.className = 'settings-group';
+            installSection.innerHTML = `
+                <h3><i class="fas fa-download"></i> Install App</h3>
+                <p>Install AniPulse as a standalone app for the best experience.</p>
+                <button id="settings-install-btn" style="
+                    width: 100%;
+                    padding: 12px;
+                    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+                    border: none;
+                    border-radius: 12px;
+                    color: white;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                ">
+                    <i class="fas fa-download"></i> Install AniPulse
+                </button>
+            `;
+            
+            const firstGroup = settingsContainer.querySelector('.settings-group');
+            if (firstGroup) {
+                settingsContainer.insertBefore(installSection, firstGroup);
+            } else {
+                settingsContainer.appendChild(installSection);
+            }
+            
+            const installBtn = document.getElementById('settings-install-btn');
+            if (installBtn) {
+                installBtn.addEventListener('click', () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                    } else {
+                        alert('Click the install icon (⊕) in your browser address bar');
+                    }
+                });
+            }
+        }, 2000);
     }
-    return false;
-}
-
-// Initialize PWA features safely
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        isAppInstalled();
-        addInstallButtonToSettings();
-        
-        const installBtn = document.getElementById('installAppBtn');
-        if (installBtn) {
-            installBtn.addEventListener('click', installApp);
-        }
-        
-        const closePromptBtn = document.getElementById('closeInstallPrompt');
-        if (closePromptBtn) {
-            closePromptBtn.addEventListener('click', closeInstallPrompt);
-        }
-    } catch (error) {
-        console.log('PWA features not initialized:', error);
-    }
-});
-
-console.log('🚀 PWA Installation system ready');
+    
+    addInstallToSettings();
+    
+    console.log('✅ PWA Install Handler Ready');
+})();
 
 // =============================================
 // FLOATING SCROLL TO TOP BUTTON

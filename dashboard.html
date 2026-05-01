@@ -24,7 +24,7 @@
     <link rel="manifest" href="/manifest.json">
     <!-- Update the favicon and theme colors -->
     <link rel="icon" type="image/png" href="/icon.png">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon/icon-192x192.png">
     <link rel="shortcut icon" href="/icon.png">
 
     <!-- Update theme colors for PWA -->
@@ -33,6 +33,16 @@
 
     <!-- Add dark mode preference -->
     <meta name="color-scheme" content="dark light">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6366F1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniPulse">
+    <link rel="apple-touch-icon" href="/icon/icon-192x192.png">
+    <link rel="shortcut icon" href="/icon/icon.png" type="image/png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon/icon-512x512.png">
+
 </head>
 
 <body data-theme="dark">
@@ -1041,12 +1051,6 @@
     <script defer src="Frontend/Js/extras.js"></script>
 
     <script>
-        document.getElementById("logoutBtn").addEventListener("click", () => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            window.location.href = "login.html";
-        });
-
         // Page Navigation 
         document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', function (e) {
