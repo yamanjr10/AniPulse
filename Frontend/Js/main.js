@@ -366,324 +366,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // =============================================
-// UPCOMING ANIME FUNCTIONALITY
-// =============================================
-
-// Initialize upcoming page
-function initUpcomingPage() {
-    upcomingFilters = document.querySelectorAll('.upcoming-filters .filter-btn');
-    upcomingContent = document.getElementById('upcoming-content');
-    upcomingLoading = document.getElementById('upcoming-loading');
-    upcomingError = document.getElementById('upcoming-error');
-
-    // Add event listeners for filter buttons
-    upcomingFilters.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const type = this.getAttribute('data-type');
-
-            // Update active state
-            upcomingFilters.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-
-            // Show/hide sections based on type
-            const myUpdatesSection = document.getElementById('my-updates-section');
-            if (type === 'my-updates') {
-                myUpdatesSection.style.display = 'block';
-                loadMyUpdates();
-            } else {
-                myUpdatesSection.style.display = 'none';
-                loadUpcomingAnime(type);
-            }
-        });
-    });
-
-    // Retry button
-    document.getElementById('retry-upcoming')?.addEventListener('click', loadUpcomingData);
-}
-
-// Load all upcoming data
-async function loadUpcomingData() {
-    try {
-        upcomingLoading.style.display = 'block';
-        upcomingError.style.display = 'none';
-        upcomingContent.style.display = 'none';
-
-        // Load different types of anime data
-        await Promise.all([
-            loadUpcomingAnime('upcoming'),
-            loadUpcomingAnime('trending'),
-            loadUpcomingAnime('seasonal')
-        ]);
-
-        // Check for user updates
-        await checkForUserUpdates();
-
-        upcomingLoading.style.display = 'none';
-        upcomingContent.style.display = 'block';
-
-    } catch (error) {
-        console.error('Error loading upcoming data:', error);
-        upcomingLoading.style.display = 'none';
-        upcomingError.style.display = 'block';
-    }
-}
-
-// Load specific type of anime
-async function loadUpcomingAnime(type = 'upcoming') {
-    try {
-        let url, params;
-
-        switch (type) {
-            case 'upcoming':
-                url = 'https://api.jikan.moe/v4/top/anime';
-                params = 'filter=upcoming&limit=12';
-                break;
-            case 'trending':
-                url = 'https://api.jikan.moe/v4/top/anime';
-                params = 'filter=airing&limit=12';
-                break;
-            case 'seasonal':
-                const now = new Date();
-                const year = now.getFullYear();
-                const season = getCurrentSeason(now);
-                url = `https://api.jikan.moe/v4/seasons/${year}/${season}`;
-                params = 'limit=12';
-                break;
-        }
-
-        const response = await fetch(`${url}?${params}`);
-        const data = await response.json();
-
-        if (data.data) {
-            upcomingAnimeData[type] = data.data;
-            renderUpcomingAnime(type);
-        }
-
-    } catch (error) {
-        console.error(`Error loading ${type} anime:`, error);
-        throw error;
-    }
-}
-
-// Get current season
-function getCurrentSeason(date) {
-    const month = date.getMonth() + 1;
-    if (month >= 3 && month <= 5) return 'spring';
-    if (month >= 6 && month <= 8) return 'summer';
-    if (month >= 9 && month <= 11) return 'fall';
-    return 'winter';
-}
-
-// Render anime for a specific type
-function renderUpcomingAnime(type) {
-    const container = document.getElementById('upcoming-anime-grid');
-    if (!container) return;
-
-    const animeList = upcomingAnimeData[type];
-
-    if (animeList.length === 0) {
-        container.innerHTML = '<div class="no-anime">No anime found.</div>';
-        return;
-    }
-
-    container.innerHTML = animeList.map(anime => {
-        const title = anime.title_english || anime.title;
-        const score = anime.score ? anime.score.toFixed(1) : 'N/A';
-        const episodes = anime.episodes || '?';
-        const startDate = anime.aired?.from ?
-            new Date(anime.aired.from).toLocaleDateString() : 'TBA';
-
-        // Check if this anime is in user's list
-        const userAnime = animeData.find(a =>
-            a.title.toLowerCase().includes(title.toLowerCase()) ||
-            title.toLowerCase().includes(a.title.toLowerCase())
-        );
-
-        const updateBadge = userAnime ?
-            `<div class="anime-update-badge" title="This anime is in your list!">
-                <i class="fas fa-check"></i>
-            </div>` : '';
-
-        return `
-            <div class="anime-card" onclick="handleUpcomingAnimeClick('${anime.mal_id}', '${title.replace(/'/g, "\\'")}')">
-                ${updateBadge}
-                <img src="${anime.images?.jpg?.image_url || 'https://via.placeholder.com/300x400/6a5acd/ffffff?text=No+Image'}" 
-                     alt="${title}" 
-                     class="anime-cover"
-                     onerror="this.src='https://via.placeholder.com/300x400/6a5acd/ffffff?text=No+Image'">
-                <div class="anime-info">
-                    <div class="anime-title">${title}</div>
-                    <div class="anime-meta">
-                        <span>${anime.type || 'TV'}</span>
-                        <span>${episodes} eps</span>
-                        ${anime.score ? `<span class="anime-score">⭐ ${score}</span>` : ''}
-                    </div>
-                    <div class="anime-meta">
-                        <small>Starts: ${startDate}</small>
-                    </div>
-                    ${userAnime ? `
-                    <div class="update-description" style="color: var(--info)">
-                        <i class="fas fa-info-circle"></i>
-                        Already in your list!
-                    </div>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// Handle click on upcoming anime
-function handleUpcomingAnimeClick(malId, title) {
-    // Check if anime already exists in user's list
-    const existingAnime = animeData.find(a =>
-        a.title.toLowerCase() === title.toLowerCase()
-    );
-
-    if (existingAnime) {
-        editAnime(existingAnime.id);
-    } else {
-        // Pre-fill the add anime form
-        isEditing = false;
-        currentEditId = null;
-        animeForm.reset();
-        submitBtn.textContent = 'Add Anime';
-        deleteBtn.style.display = 'none';
-
-        // Set the title to trigger search
-        animeTitleInput.value = title;
-        searchAnime();
-
-        addAnimeModal.style.display = 'flex';
-    }
-}
-
-// Check for user updates (new episodes, seasons, etc.)
-async function checkForUserUpdates() {
-    const updates = [];
-    const now = new Date();
-    const oneDayAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-
-    // Check each anime in user's list for updates
-    for (const userAnime of animeData) {
-        if (userAnime.userStatus === 'Watching' || userAnime.userStatus === 'Plan to Watch') {
-            try {
-                // Search for the anime to get latest info
-                const response = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(userAnime.title)}&limit=1`);
-                const data = await response.json();
-
-                if (data.data && data.data.length > 0) {
-                    const latestInfo = data.data[0];
-
-                    // Check for new episodes
-                    if (latestInfo.episodes && userAnime.episodes) {
-                        if (latestInfo.episodes > userAnime.episodes) {
-                            updates.push({
-                                type: 'new_episodes',
-                                anime: userAnime,
-                                latestInfo: latestInfo,
-                                newEpisodes: latestInfo.episodes - userAnime.episodes,
-                                message: `New episodes available for ${userAnime.title}! (${latestInfo.episodes} total)`
-                            });
-                        }
-                    }
-
-                    // Check for new season
-                    if (latestInfo.title !== userAnime.title &&
-                        latestInfo.title.includes(userAnime.title)) {
-                        updates.push({
-                            type: 'new_season',
-                            anime: userAnime,
-                            latestInfo: latestInfo,
-                            message: `New season released: ${latestInfo.title}`
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error(`Error checking updates for ${userAnime.title}:`, error);
-            }
-
-            // Add small delay to avoid rate limiting
-            await new Promise(resolve => setTimeout(resolve, 200));
-        }
-    }
-
-    // Show notifications for new updates
-    showUpdateNotifications(updates);
-
-    // Store updates for the upcoming page
-    localStorage.setItem('userAnimeUpdates', JSON.stringify({
-        updates: updates,
-        lastChecked: now.toISOString()
-    }));
-
-    return updates;
-}
-
-// Show update notifications
-function showUpdateNotifications(updates) {
-    const seenUpdates = JSON.parse(localStorage.getItem('seenUpdates') || '[]');
-    const newUpdates = updates.filter(update =>
-        !seenUpdates.includes(`${update.anime.id}-${update.type}`)
-    );
-
-    newUpdates.forEach(update => {
-        // Show toast notification
-        showToast(update.message, 'info', 'update-toast');
-
-        // Mark as seen
-        seenUpdates.push(`${update.anime.id}-${update.type}`);
-    });
-
-    // Store seen updates (keep only from last 7 days)
-    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const filteredSeen = seenUpdates.filter(updateId => {
-        // Simple filtering - in real app you might want to parse dates
-        return true; // Keep all for now
-    });
-
-    localStorage.setItem('seenUpdates', JSON.stringify(filteredSeen));
-}
-
-// Load user-specific updates
-function loadMyUpdates() {
-    const updatesData = JSON.parse(localStorage.getItem('userAnimeUpdates') || '{"updates":[]}');
-    const container = document.getElementById('my-updates-grid');
-
-    if (!container) return;
-
-    const updates = updatesData.updates || [];
-
-    if (updates.length === 0) {
-        container.innerHTML = `
-            <div class="no-anime">
-                <i class="fas fa-bell-slash"></i>
-                <div>No updates for your watchlist yet.<br>We'll notify you when new episodes or seasons are released!</div>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = updates.map(update => `
-        <div class="compact-anime-card" onclick="editAnime('${update.anime.id}')">
-            <img src="${update.anime.cover || 'https://via.placeholder.com/60x80/6a5acd/ffffff?text=No+Image'}" 
-                 alt="${update.anime.title}">
-            <div class="compact-anime-info">
-                <div class="compact-anime-title">${update.anime.title}</div>
-                <div class="compact-anime-meta">
-                    ${update.type === 'new_episodes' ?
-            `${update.newEpisodes} new episode${update.newEpisodes > 1 ? 's' : ''} available` :
-            'New season available'}
-                </div>
-                <div class="update-description">
-                    ${update.message}
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-// =============================================
 // EXISTING FUNCTIONALITY 
 // =============================================
 
@@ -8320,6 +8002,577 @@ function refreshAllCharts() {
     console.log('✅ Scroll to Top button initialized');
 })();
 
+
+// ============================================
+// FIX MODAL SCROLL ISSUE
+// ============================================
+
+(function fixModalScrollIssue() {
+    console.log('🔧 Applying modal scroll fix...');
+    
+    // Function to properly close modals and restore scrolling
+    function closeModal(modalElement) {
+        if (!modalElement) return;
+        
+        // Hide the modal
+        modalElement.style.display = 'none';
+        
+        // Remove the modal-open class from body
+        document.body.classList.remove('modal-open');
+        
+        // Reset body styles
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.top = '';
+        document.body.style.paddingRight = '';
+        
+        // For iOS Safari fix
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('position');
+        document.body.style.removeProperty('width');
+        document.body.style.removeProperty('height');
+        document.body.style.removeProperty('top');
+        
+        // Remove any inline styles that might be causing issues
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.removeProperty('overflow');
+        
+        console.log('✅ Modal closed, scroll restored');
+    }
+    
+    // Function to properly open modal and disable background scroll
+    function openModal(modalElement) {
+        if (!modalElement) return;
+        
+        // Show the modal
+        modalElement.style.display = 'flex';
+        
+        // Add modal-open class to body
+        document.body.classList.add('modal-open');
+        
+        // Prevent background scrolling
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        
+        console.log('✅ Modal opened, scroll disabled');
+    }
+    
+    // Fix Add Anime Modal
+    const addModal = document.getElementById('addAnimeModal');
+    if (addModal) {
+        // Get all close buttons for this modal
+        const closeButtons = addModal.querySelectorAll('.close-modal');
+        const cancelBtn = addModal.querySelector('#cancelBtn');
+        
+        // Close when clicking the backdrop
+        addModal.addEventListener('click', (e) => {
+            if (e.target === addModal) {
+                closeModal(addModal);
+            }
+        });
+        
+        // Close when clicking close buttons
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                closeModal(addModal);
+            });
+        });
+        
+        // Close when clicking cancel button
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                closeModal(addModal);
+            });
+        }
+        
+        console.log('✅ Add Anime Modal fixed');
+    }
+    
+    // Fix Import Modal
+    const importModal = document.getElementById('importModal');
+    if (importModal) {
+        // Get all close buttons
+        const closeButtons = importModal.querySelectorAll('.close-modal');
+        const cancelBtn = importModal.querySelector('#cancelImportBtn');
+        
+        // Close when clicking the backdrop
+        importModal.addEventListener('click', (e) => {
+            if (e.target === importModal) {
+                closeModal(importModal);
+            }
+        });
+        
+        // Close when clicking close buttons
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                closeModal(importModal);
+            });
+        });
+        
+        // Close when clicking cancel button
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                closeModal(importModal);
+            });
+        }
+        
+        console.log('✅ Import Modal fixed');
+    }
+    
+    // Fix Add Anime Button
+    const addAnimeBtn = document.getElementById('addAnimeBtn');
+    if (addAnimeBtn) {
+        // Remove existing listeners to avoid duplicates
+        const newBtn = addAnimeBtn.cloneNode(true);
+        addAnimeBtn.parentNode.replaceChild(newBtn, addAnimeBtn);
+        
+        newBtn.addEventListener('click', () => {
+            if (addModal) {
+                // Reset form
+                const form = document.getElementById('addAnimeForm');
+                if (form) form.reset();
+                
+                // Reset editing state
+                if (typeof window.isEditing !== 'undefined') {
+                    window.isEditing = false;
+                    window.currentEditId = null;
+                }
+                
+                const submitBtn = document.getElementById('submitBtn');
+                const deleteBtn = document.getElementById('deleteBtn');
+                if (submitBtn) submitBtn.textContent = 'Add Anime';
+                if (deleteBtn) deleteBtn.style.display = 'none';
+                
+                // Open modal
+                openModal(addModal);
+            }
+        });
+        
+        console.log('✅ Add Anime Button fixed');
+    }
+    
+    // Fix Import Button
+    const importBtn = document.getElementById('importBtn');
+    if (importBtn) {
+        // Remove existing listeners
+        const newBtn = importBtn.cloneNode(true);
+        importBtn.parentNode.replaceChild(newBtn, importBtn);
+        
+        newBtn.addEventListener('click', () => {
+            if (importModal) {
+                openModal(importModal);
+            }
+        });
+        
+        console.log('✅ Import Button fixed');
+    }
+    
+    // Fix Escape key for all modals
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (addModal && addModal.style.display === 'flex') {
+                closeModal(addModal);
+            }
+            if (importModal && importModal.style.display === 'flex') {
+                closeModal(importModal);
+            }
+        }
+    });
+    
+    // Fix form submit to ensure modal closes
+    const animeForm = document.getElementById('addAnimeForm');
+    if (animeForm) {
+        animeForm.addEventListener('submit', () => {
+            setTimeout(() => {
+                if (addModal && addModal.style.display !== 'flex') {
+                    closeModal(addModal);
+                } else if (addModal) {
+                    // Force close after a short delay if still open
+                    setTimeout(() => {
+                        if (addModal.style.display === 'flex') {
+                            closeModal(addModal);
+                        }
+                    }, 500);
+                }
+            }, 200);
+        });
+    }
+    
+    // Helper function to manually restore scroll (for emergencies)
+    window.restoreScroll = function() {
+        if (addModal) addModal.style.display = 'none';
+        if (importModal) importModal.style.display = 'none';
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.classList.remove('modal-open');
+        document.documentElement.style.overflow = '';
+        console.log('✅ Scroll manually restored');
+    };
+    
+    // Add CSS for modal-open state
+    if (!document.getElementById('modal-fix-styles')) {
+        const style = document.createElement('style');
+        style.id = 'modal-fix-styles';
+        style.textContent = `
+            body.modal-open {
+                overflow: hidden !important;
+                position: fixed !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    console.log('✅ Modal scroll fix applied successfully!');
+    console.log('💡 If scroll gets stuck, type restoreScroll() in console to fix it');
+})();
+
+// ============================================
+// FIX GENRE DISTRIBUTION CHART - PREVENT CORRUPTION
+// ============================================
+
+(function fixGenreChart() {
+    console.log('🔧 Applying genre chart stability fix...');
+    
+    // Store chart instance globally
+    let genreChartInstance = null;
+    let chartRetryCount = 0;
+    const MAX_RETRIES = 3;
+    
+    // Function to safely destroy and recreate genre chart
+    function safeRecreateGenreChart() {
+        const canvas = document.getElementById('genreDistributionChart');
+        if (!canvas) return false;
+        
+        // Check if canvas is visible and has valid dimensions
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) {
+            console.log('⏳ Chart canvas not visible, waiting...');
+            return false;
+        }
+        
+        try {
+            // Destroy existing chart if it exists
+            if (genreChartInstance && typeof genreChartInstance.destroy === 'function') {
+                genreChartInstance.destroy();
+                genreChartInstance = null;
+            }
+            
+            // Get fresh context
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return false;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Get current data from animeData
+            const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+            const currentFilter = localStorage.getItem('genreFilterType') || 'month';
+            
+            // Calculate genre distribution based on current filter
+            const filteredAnime = getFilteredAnimeByTimeWrapper(animeData, currentFilter);
+            const genreDistribution = calculateGenreDistributionWrapper(filteredAnime);
+            
+            const labels = Object.keys(genreDistribution);
+            const data = Object.values(genreDistribution);
+            
+            // Handle empty data
+            if (labels.length === 0) {
+                // Show no data message
+                const noDataMsg = document.getElementById('genreNoDataMessage');
+                if (noDataMsg) noDataMsg.style.display = 'block';
+                canvas.style.opacity = '0.5';
+                
+                // Create placeholder chart
+                genreChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['No Data'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['rgba(100, 100, 100, 0.3)'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+                return true;
+            }
+            
+            // Hide no data message
+            const noDataMsg = document.getElementById('genreNoDataMessage');
+            if (noDataMsg) noDataMsg.style.display = 'none';
+            canvas.style.opacity = '1';
+            
+            // Color palette
+            const colorPalette = [
+                '#ef4444', '#3b82f6', '#facc15', '#a855f7', '#10b981',
+                '#ec4899', '#f97316', '#6366f1', '#84cc16', '#14b8a6',
+                '#c026d3', '#06b6d4', '#e11d48', '#78350f', '#22c55e',
+                '#f59e0b', '#9333ea', '#64748b', '#f9e616'
+            ];
+            
+            const backgroundColors = labels.map((_, index) => 
+                colorPalette[index % colorPalette.length]
+            );
+            
+            // Create new chart
+            genreChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 3,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: getComputedStyle(document.body).getPropertyValue('--color-text-secondary') || '#94a3b8',
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ Genre chart recreated successfully');
+            chartRetryCount = 0;
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Error recreating genre chart:', error);
+            return false;
+        }
+    }
+    
+    // Wrapper for getFilteredAnimeByTime
+    function getFilteredAnimeByTimeWrapper(animeData, filterType) {
+        const completedAnime = animeData.filter(anime => anime.userStatus === 'Completed');
+        
+        if (filterType === 'all') return completedAnime;
+        
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        
+        return completedAnime.filter(anime => {
+            let completionDate = null;
+            if (anime.finishDate) {
+                completionDate = new Date(anime.finishDate);
+            } else if (anime.completedTimestamp) {
+                completionDate = new Date(anime.completedTimestamp);
+            } else if (anime.updatedAt) {
+                completionDate = new Date(anime.updatedAt);
+            }
+            
+            if (!completionDate || isNaN(completionDate.getTime())) return false;
+            
+            switch (filterType) {
+                case 'month':
+                    return completionDate.getMonth() === currentMonth &&
+                           completionDate.getFullYear() === currentYear;
+                case 'lastMonth':
+                    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+                    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                    return completionDate.getMonth() === lastMonth &&
+                           completionDate.getFullYear() === lastMonthYear;
+                case 'year':
+                    return completionDate.getFullYear() === currentYear;
+                default:
+                    return true;
+            }
+        });
+    }
+    
+    // Wrapper for calculateGenreDistribution
+    function calculateGenreDistributionWrapper(filteredAnime) {
+        const genreCount = {};
+        filteredAnime.forEach(anime => {
+            if (anime.genres && Array.isArray(anime.genres) && anime.genres.length > 0) {
+                anime.genres.forEach(genre => {
+                    const cleanGenre = genre.trim();
+                    if (cleanGenre) {
+                        genreCount[cleanGenre] = (genreCount[cleanGenre] || 0) + 1;
+                    }
+                });
+            }
+        });
+        return genreCount;
+    }
+    
+    // Function to check if chart is corrupted
+    function isChartCorrupted() {
+        const canvas = document.getElementById('genreDistributionChart');
+        if (!canvas) return false;
+        
+        try {
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return true;
+            
+            // Check if canvas has valid size
+            if (canvas.width === 0 || canvas.height === 0) return true;
+            
+            // Check if chart instance exists and is valid
+            if (genreChartInstance && typeof genreChartInstance.destroy !== 'function') {
+                return true;
+            }
+            
+            return false;
+        } catch (e) {
+            return true;
+        }
+    }
+    
+    // Function to fix chart on statistics page view
+    function fixChartOnPageView() {
+        const statsMenuItem = document.querySelector('.menu-item[data-page="statistics"]');
+        if (statsMenuItem) {
+            statsMenuItem.addEventListener('click', () => {
+                setTimeout(() => {
+                    if (isChartCorrupted()) {
+                        console.log('🔄 Chart corrupted, recreating...');
+                        safeRecreateGenreChart();
+                    } else {
+                        // Even if not corrupted, force a refresh
+                        setTimeout(() => {
+                            if (genreChartInstance && typeof genreChartInstance.update === 'function') {
+                                genreChartInstance.update();
+                            } else {
+                                safeRecreateGenreChart();
+                            }
+                        }, 100);
+                    }
+                }, 300);
+            });
+        }
+    }
+    
+    // Fix when window resizes (can cause corruption)
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (document.getElementById('statistics-page')?.classList.contains('active')) {
+                if (genreChartInstance && typeof genreChartInstance.resize === 'function') {
+                    genreChartInstance.resize();
+                } else {
+                    safeRecreateGenreChart();
+                }
+            }
+        }, 250);
+    });
+    
+    // Fix when theme changes (dark/light mode)
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'data-theme') {
+                setTimeout(() => {
+                    if (document.getElementById('statistics-page')?.classList.contains('active')) {
+                        safeRecreateGenreChart();
+                    }
+                }, 200);
+            }
+        });
+    });
+    observer.observe(document.body, { attributes: true });
+    
+    // Fix when returning to statistics page from other pages
+    function fixOnPageVisibility() {
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                if (document.getElementById('statistics-page')?.classList.contains('active')) {
+                    setTimeout(() => {
+                        if (isChartCorrupted()) {
+                            safeRecreateGenreChart();
+                        } else if (genreChartInstance) {
+                            genreChartInstance.update();
+                        }
+                    }, 200);
+                }
+            }
+        });
+    }
+    
+    // Hook into existing updateGenreChartWithFilter function
+    const originalUpdateGenre = window.updateGenreChartWithFilter;
+    if (typeof originalUpdateGenre === 'function') {
+        window.updateGenreChartWithFilter = function() {
+            try {
+                originalUpdateGenre();
+            } catch (error) {
+                console.warn('Original genre update failed, using safe version:', error);
+                safeRecreateGenreChart();
+            }
+        };
+    }
+    
+    // Also hook into refreshAllCharts
+    const originalRefreshAll = window.refreshAllCharts;
+    if (typeof originalRefreshAll === 'function') {
+        window.refreshAllCharts = function() {
+            originalRefreshAll();
+            setTimeout(() => {
+                if (document.getElementById('statistics-page')?.classList.contains('active')) {
+                    safeRecreateGenreChart();
+                }
+            }, 150);
+        };
+    }
+    
+    // Initialize
+    fixChartOnPageView();
+    fixOnPageVisibility();
+    
+    // Run initial check when statistics page becomes visible
+    setInterval(() => {
+        if (document.getElementById('statistics-page')?.classList.contains('active')) {
+            if (isChartCorrupted()) {
+                console.log('🔄 Periodic check: Chart corrupted, recreating...');
+                safeRecreateGenreChart();
+            }
+        }
+    }, 5000); // Check every 5 seconds
+    
+    // Make safe recreate function available globally
+    window.fixGenreChart = safeRecreateGenreChart;
+    
+    console.log('✅ Genre chart stability fix applied!');
+    console.log('💡 If chart breaks, type fixGenreChart() in console to fix it');
+})();
 
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();
