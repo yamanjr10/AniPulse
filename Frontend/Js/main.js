@@ -2,6 +2,59 @@
 //UPDATE 1.0.0
 // =============================================
 
+// ============================================
+// FORCE VERSION CHECK - ALWAYS GET LATEST
+// ============================================
+
+const APP_VERSION = '2.0.0';
+
+// Check if this is a new version
+if (localStorage.getItem('sw_version') !== APP_VERSION) {
+    console.log('🔄 New version detected! Clearing old caches...');
+    
+    // Clear all old caches
+    if ('caches' in window) {
+        caches.keys().then(keys => {
+            keys.forEach(key => {
+                if (key !== 'anipulse-v7') {
+                    caches.delete(key);
+                    console.log('🗑️ Deleted cache:', key);
+                }
+            });
+        });
+    }
+    
+    // Unregister old service workers
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => {
+                if (registration.active && registration.active.scriptURL.includes('service-worker.js')) {
+                    registration.update();
+                }
+            });
+        });
+    }
+    
+    // Save new version
+    localStorage.setItem('sw_version', APP_VERSION);
+    
+    // Force reload after a short delay
+    setTimeout(() => {
+        if (!sessionStorage.getItem('reloaded')) {
+            sessionStorage.setItem('reloaded', 'true');
+            location.reload(true);
+        }
+    }, 500);
+}
+
+// Check if service worker is controlling the page
+if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    console.log('✅ Service Worker active');
+} else {
+    console.log('⚠️ No Service Worker, refreshing...');
+    setTimeout(() => location.reload(), 500);
+}
+
 // ✅ AUTO-RELOAD SYSTEM - Detects changes and refreshes page automatically
 let lastChecksum = null;
 let autoReloadInterval = null;
