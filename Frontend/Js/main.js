@@ -8378,4 +8378,3 @@ function refreshAllCharts() {
 
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();
-
