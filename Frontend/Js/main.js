@@ -884,8 +884,6 @@ function initCharts() {
             }
         }
     });
-         
-    
 
     // Function to update chart when data changes
     function updateMonthlyProgressChart() {
@@ -8413,6 +8411,8 @@ function safeApplyEmptyStates() {
         }
     } catch(e) {}
 }
+
+
 
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();
