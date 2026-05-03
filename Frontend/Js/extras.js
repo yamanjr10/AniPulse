@@ -400,4 +400,70 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
- 
+ // =============================================
+// CHECK FOR USER UPDATES - FIX MISSING FUNCTION
+// =============================================
+
+async function checkForUserUpdates() {
+    console.log('🔍 Checking for user updates...');
+    
+    try {
+        const updates = [];
+        const now = new Date();
+        
+        // Check each anime in user's list for updates
+        for (const userAnime of animeData) {
+            if (userAnime.userStatus === 'Watching' || userAnime.userStatus === 'Plan to Watch') {
+                try {
+                    // Search for the anime to get latest info
+                    const response = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(userAnime.title)}&limit=1`);
+                    const data = await response.json();
+                    
+                    if (data.data && data.data.length > 0) {
+                        const latestInfo = data.data[0];
+                        
+                        // Check for new episodes
+                        if (latestInfo.episodes && userAnime.episodes) {
+                            if (latestInfo.episodes > userAnime.episodes) {
+                                updates.push({
+                                    type: 'new_episodes',
+                                    anime: userAnime,
+                                    latestInfo: latestInfo,
+                                    newEpisodes: latestInfo.episodes - userAnime.episodes,
+                                    message: `New episodes available for ${userAnime.title}! (${latestInfo.episodes} total)`
+                                });
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error checking updates for ${userAnime.title}:`, error);
+                }
+                
+                // Add small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+        }
+        
+        // Show notifications for new updates
+        if (updates.length > 0) {
+            updates.forEach(update => {
+                if (typeof showToast === 'function') {
+                    showToast(update.message, 'info', 'update-toast');
+                }
+            });
+        }
+        
+        // Store updates for the upcoming page
+        localStorage.setItem('userAnimeUpdates', JSON.stringify({
+            updates: updates,
+            lastChecked: now.toISOString()
+        }));
+        
+        console.log(`✅ Update check complete. Found ${updates.length} updates.`);
+        return updates;
+        
+    } catch (error) {
+        console.error('Error checking for updates:', error);
+        return [];
+    }
+}
