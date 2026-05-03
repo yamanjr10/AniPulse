@@ -2,7 +2,43 @@
 //UPDATE 1.0.0
 // =============================================
 
+// ============================================
+// GLOBAL VARIABLES DEFINITION - FIX LINE TOOLTIP
+// ============================================
 
+// Define lineTooltip globally BEFORE any function uses it
+let lineTooltip = null;
+
+// Create lineTooltip function
+function createLineTooltip() {
+    if (lineTooltip) return lineTooltip;
+    
+    lineTooltip = document.getElementById('lineChartTooltip');
+    if (!lineTooltip) {
+        lineTooltip = document.createElement('div');
+        lineTooltip.id = 'lineChartTooltip';
+        lineTooltip.style.position = 'fixed';
+        lineTooltip.style.background = 'linear-gradient(135deg, #1a1f2e, #0f1420)';
+        lineTooltip.style.color = 'white';
+        lineTooltip.style.padding = '8px 14px';
+        lineTooltip.style.borderRadius = '12px';
+        lineTooltip.style.fontSize = '0.75rem';
+        lineTooltip.style.fontWeight = '500';
+        lineTooltip.style.border = '1px solid rgba(139, 92, 246, 0.4)';
+        lineTooltip.style.backdropFilter = 'blur(8px)';
+        lineTooltip.style.pointerEvents = 'none';
+        lineTooltip.style.zIndex = '10000';
+        lineTooltip.style.whiteSpace = 'nowrap';
+        lineTooltip.style.opacity = '0';
+        lineTooltip.style.transition = 'opacity 0.2s ease';
+        document.body.appendChild(lineTooltip);
+        console.log('✅ lineTooltip created');
+    }
+    return lineTooltip;
+}
+
+// Call it immediately
+createLineTooltip();
 
 // ✅ AUTO-RELOAD SYSTEM - Detects changes and refreshes page automatically
 let lastChecksum = null;
@@ -848,76 +884,8 @@ function initCharts() {
             }
         }
     });
-
-    // Custom hover effect for line points
-    const canvasElement = document.getElementById('monthlyProgressChart');
-
-    // Update tooltip style based on theme
-    if (!isDark) {
-        lineTooltip.style.background = 'linear-gradient(135deg, #ffffff, #f8fafc)';
-        lineTooltip.style.color = '#1e293b';
-        lineTooltip.style.borderColor = 'rgba(99, 102, 241, 0.3)';
-        lineTooltip.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.1)';
-    }
-
-    const showLineTooltip = (e) => {
-        if (!window.monthlyProgressChart) return;
-
-        const activeElements = window.monthlyProgressChart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, false);
-
-        if (activeElements && activeElements.length > 0) {
-            const element = activeElements[0];
-            const datasetIndex = element.datasetIndex;
-            const dataIndex = element.index;
-
-            if (dataIndex > currentMonth) {
-                lineTooltip.style.opacity = '0';
-                return;
-            }
-
-            if (datasetIndex === 1) {
-                const value = monthlyBarData[dataIndex];
-                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                const month = months[dataIndex];
-                const percentChange = percentageChanges[dataIndex];
-
-                let tooltipText = '';
-                let tooltipColor = '';
-
-                if (dataIndex === 0) {
-                    tooltipText = `Starting Point: ${value} anime in ${month}`;
-                    tooltipColor = '#94A3B8';
-                } else if (percentChange !== null && dataIndex <= currentMonth) {
-                    const isIncrease = percentChange > 0;
-                    const trendIcon = isIncrease ? '▲' : (percentChange < 0 ? '▼' : '●');
-                    const changeValue = Math.abs(percentChange).toFixed(1);
-                    const changeWord = percentChange > 0 ? 'increase' : (percentChange < 0 ? 'decrease' : 'no change');
-                    tooltipColor = isIncrease ? '#10B981' : (percentChange < 0 ? '#EF4444' : '#94A3B8');
-                    tooltipText = `${trendIcon} ${percentChange > 0 ? '+' : ''}${changeValue}% ${changeWord} from ${months[dataIndex - 1]}`;
-                }
-
-                lineTooltip.innerHTML = tooltipText;
-                lineTooltip.style.borderColor = tooltipColor + '40';
-                lineTooltip.style.opacity = '1';
-                lineTooltip.style.left = (e.clientX + 15) + 'px';
-                lineTooltip.style.top = (e.clientY - 40) + 'px';
-                canvasElement.style.cursor = 'pointer';
-            } else {
-                lineTooltip.style.opacity = '0';
-                canvasElement.style.cursor = 'default';
-            }
-        } else {
-            lineTooltip.style.opacity = '0';
-            canvasElement.style.cursor = 'default';
-        }
-    };
-
-    if (canvasElement) {
-        canvasElement.addEventListener('mousemove', showLineTooltip);
-        canvasElement.addEventListener('mouseleave', () => {
-            canvasElement.style.cursor = 'default';
-        });
-    }
+         
+    
 
     // Function to update chart when data changes
     function updateMonthlyProgressChart() {
@@ -8376,7 +8344,75 @@ function refreshAllCharts() {
     console.log('💡 If chart breaks, type fixGenreChart() in console to fix it');
 })();
 
+// ============================================
+// SAFE EMPTY STATES - NO ERRORS
+// ============================================
 
+function showEmptyState(container, type, customMessage = null) {
+    if (!container) return;
+    
+    try {
+        const emptyStates = {
+            anime: {
+                icon: 'fa-tv',
+                title: 'No Anime Yet',
+                message: 'Start your anime journey by adding your first anime!',
+                action: 'Add Your First Anime'
+            },
+            watchlist: {
+                icon: 'fa-heart',
+                title: 'Watchlist is Empty',
+                message: 'Add some anime to your watchlist to keep track.',
+                action: 'Browse Anime'
+            },
+            activity: {
+                icon: 'fa-history',
+                title: 'No Activity Yet',
+                message: 'Your recent activity will appear here.',
+                action: 'Add Anime'
+            }
+        };
+        
+        const state = emptyStates[type] || emptyStates.anime;
+        
+        container.innerHTML = `
+            <div class="empty-state animated">
+                <div class="empty-state-icon">
+                    <i class="fas ${state.icon}"></i>
+                </div>
+                <h3 class="empty-state-title">${customMessage?.title || state.title}</h3>
+                <p class="empty-state-message">${customMessage?.message || state.message}</p>
+                <button class="empty-state-action btn-primary" data-action="${type}">
+                    <i class="fas fa-plus"></i>
+                    ${customMessage?.action || state.action}
+                </button>
+            </div>
+        `;
+        
+        const actionBtn = container.querySelector('.empty-state-action');
+        if (actionBtn) {
+            actionBtn.addEventListener('click', () => {
+                if (type === 'anime' || type === 'activity') {
+                    document.getElementById('addAnimeBtn')?.click();
+                } else if (type === 'watchlist') {
+                    document.querySelector('.menu-item[data-page="anime-list"]')?.click();
+                }
+            });
+        }
+    } catch(e) {
+        console.warn('Empty state error:', e);
+    }
+}
+
+// Safe apply function
+function safeApplyEmptyStates() {
+    try {
+        const topRated = document.getElementById('top-rated-anime');
+        if (topRated && animeData && animeData.filter(a => a.score && a.score >= 8).length === 0) {
+            showEmptyState(topRated, 'rating');
+        }
+    } catch(e) {}
+}
 
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();

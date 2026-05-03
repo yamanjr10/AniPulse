@@ -10826,6 +10826,83 @@ body.modal-open {
     opacity: 0.4;
 }
 
+/* Empty State Styles */
+.empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--border-color);
+    animation: fadeInUp 0.4s ease-out;
+}
 
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-lg);
+    opacity: 0.6;
+}
+
+.empty-state-icon i {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.empty-state-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+
+.empty-state-message {
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.empty-state-action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-xl);
+}
+
+/* Empty State Variations */
+.empty-state.search i { background: linear-gradient(135deg, #3B82F6, #2563EB); }
+.empty-state.watchlist i { background: linear-gradient(135deg, #EF4444, #DC2626); }
+.empty-state.stats i { background: linear-gradient(135deg, #10B981, #059669); }
+.empty-state.achievements i { background: linear-gradient(135deg, #F59E0B, #D97706); }
+
+/* Animated empty state */
+.empty-state.animated {
+    animation: floatEmpty 3s ease-in-out infinite;
+}
+
+@keyframes floatEmpty {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .empty-state {
+        padding: var(--space-xl);
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+    }
+    
+    .empty-state-title {
+        font-size: 1.1rem;
+    }
+}
 
 
