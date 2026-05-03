@@ -694,10 +694,6 @@ h6 {
   color: #A78BFA !important;
 }
 
-#logoutBtn:hover i {
-  color: #EF4444 !important;
-}
-
 /* Light Theme Support - Glass morph version */
 [data-theme="light"] .top-bar {
   background: rgba(255, 255, 255, 0.7) !important;
@@ -828,6 +824,463 @@ h6 {
   .profile-dropdown {
     width: calc(100vw - 30px) !important;
     right: -5px !important;
+  }
+}
+
+/* ============================================
+   PREMIUM SIDEBAR MENU - ICON + TEXT COLOR CHANGE
+   ============================================ */
+
+.sidebar-menu {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  font-weight: 500;
+}
+
+/* Glow effect on hover */
+.menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.menu-item:hover::before {
+  left: 100%;
+}
+
+/* Icon styling - smooth transition */
+.menu-item i {
+  width: 22px;
+  font-size: 1.1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+/* Text styling */
+.menu-item span {
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+/* ============================================
+   HOVER EFFECTS - ICON + TEXT COLOR CHANGE
+   ============================================ */
+
+.menu-item:hover {
+  transform: translateX(6px);
+}
+
+/* Dashboard - Purple theme */
+.menu-item[data-page="dashboard"]:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.08));
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+}
+
+.menu-item[data-page="dashboard"]:hover i {
+  color: #A78BFA;
+  text-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.menu-item[data-page="dashboard"]:hover span {
+  color: #A78BFA;
+  text-shadow: 0 0 4px rgba(167, 139, 250, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* My Anime - Blue theme */
+.menu-item[data-page="anime-list"]:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.08));
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+}
+
+.menu-item[data-page="anime-list"]:hover i {
+  color: #60A5FA;
+  text-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.menu-item[data-page="anime-list"]:hover span {
+  color: #60A5FA;
+  text-shadow: 0 0 4px rgba(96, 165, 250, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* Watch List - Red theme */
+.menu-item[data-page="watchlist"]:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08));
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
+}
+
+.menu-item[data-page="watchlist"]:hover i {
+  color: #F87171;
+  text-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.menu-item[data-page="watchlist"]:hover span {
+  color: #F87171;
+  text-shadow: 0 0 4px rgba(248, 113, 113, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* My Stats - Green theme */
+.menu-item[data-page="statistics"]:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
+}
+
+.menu-item[data-page="statistics"]:hover i {
+  color: #34D399;
+  text-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.menu-item[data-page="statistics"]:hover span {
+  color: #34D399;
+  text-shadow: 0 0 4px rgba(52, 211, 153, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* Achievements - Yellow theme */
+.menu-item[data-page="achievements"]:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08));
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25);
+}
+
+.menu-item[data-page="achievements"]:hover i {
+  color: #FBBF24;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.menu-item[data-page="achievements"]:hover span {
+  color: #FBBF24;
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* Community - Cyan theme */
+.menu-item[data-page="community"]:hover {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.08));
+  box-shadow: 0 8px 20px rgba(6, 182, 212, 0.25);
+}
+
+.menu-item[data-page="community"]:hover i {
+  color: #22D3EE;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.menu-item[data-page="community"]:hover span {
+  color: #22D3EE;
+  text-shadow: 0 0 4px rgba(34, 211, 238, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* Settings - Gray theme */
+.menu-item[data-page="settings"]:hover {
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(71, 85, 105, 0.08));
+  box-shadow: 0 8px 20px rgba(100, 116, 139, 0.25);
+}
+
+.menu-item[data-page="settings"]:hover i {
+  color: #94A3B8;
+  text-shadow: 0 0 8px rgba(148, 163, 184, 0.5);
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.menu-item[data-page="settings"]:hover span {
+  color: #94A3B8;
+  text-shadow: 0 0 4px rgba(148, 163, 184, 0.3);
+  letter-spacing: 0.3px;
+}
+
+/* ============================================
+   ACTIVE STATE STYLES
+   ============================================ */
+
+/* Dashboard Active */
+.menu-item.active[data-page="dashboard"] {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.12));
+  border-left: 3px solid #A78BFA;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.menu-item.active[data-page="dashboard"] i {
+  color: #A78BFA;
+  text-shadow: 0 0 6px rgba(167, 139, 250, 0.4);
+}
+
+.menu-item.active[data-page="dashboard"] span {
+  color: #A78BFA;
+  font-weight: 600;
+}
+
+/* My Anime Active */
+.menu-item.active[data-page="anime-list"] {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.12));
+  border-left: 3px solid #60A5FA;
+}
+
+.menu-item.active[data-page="anime-list"] i {
+  color: #60A5FA;
+  text-shadow: 0 0 6px rgba(96, 165, 250, 0.4);
+}
+
+.menu-item.active[data-page="anime-list"] span {
+  color: #60A5FA;
+  font-weight: 600;
+}
+
+/* Watch List Active */
+.menu-item.active[data-page="watchlist"] {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.12));
+  border-left: 3px solid #F87171;
+}
+
+.menu-item.active[data-page="watchlist"] i {
+  color: #F87171;
+  text-shadow: 0 0 6px rgba(248, 113, 113, 0.4);
+}
+
+.menu-item.active[data-page="watchlist"] span {
+  color: #F87171;
+  font-weight: 600;
+}
+
+/* My Stats Active */
+.menu-item.active[data-page="statistics"] {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.12));
+  border-left: 3px solid #34D399;
+}
+
+.menu-item.active[data-page="statistics"] i {
+  color: #34D399;
+  text-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
+}
+
+.menu-item.active[data-page="statistics"] span {
+  color: #34D399;
+  font-weight: 600;
+}
+
+/* Achievements Active */
+.menu-item.active[data-page="achievements"] {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.12));
+  border-left: 3px solid #FBBF24;
+}
+
+.menu-item.active[data-page="achievements"] i {
+  color: #FBBF24;
+  text-shadow: 0 0 6px rgba(251, 191, 36, 0.4);
+}
+
+.menu-item.active[data-page="achievements"] span {
+  color: #FBBF24;
+  font-weight: 600;
+}
+
+/* Community Active */
+.menu-item.active[data-page="community"] {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(8, 145, 178, 0.12));
+  border-left: 3px solid #22D3EE;
+}
+
+.menu-item.active[data-page="community"] i {
+  color: #22D3EE;
+  text-shadow: 0 0 6px rgba(34, 211, 238, 0.4);
+}
+
+.menu-item.active[data-page="community"] span {
+  color: #22D3EE;
+  font-weight: 600;
+}
+
+/* Settings Active */
+.menu-item.active[data-page="settings"] {
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.2), rgba(71, 85, 105, 0.12));
+  border-left: 3px solid #94A3B8;
+}
+
+.menu-item.active[data-page="settings"] i {
+  color: #94A3B8;
+  text-shadow: 0 0 6px rgba(148, 163, 184, 0.4);
+}
+
+.menu-item.active[data-page="settings"] span {
+  color: #94A3B8;
+  font-weight: 600;
+}
+
+/* ============================================
+   CLICK RIPPLE EFFECT
+   ============================================ */
+
+.menu-item:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+
+.menu-item:active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.5;
+  }
+  100% {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   ICON BOUNCE ANIMATION ON HOVER
+   ============================================ */
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-3px) scale(1.1);
+  }
+  80% {
+    transform: translateY(1px) scale(1.05);
+  }
+}
+
+.menu-item:hover i {
+  animation: iconBounce 0.5s ease;
+}
+
+/* ============================================
+   ACTIVE ITEM PULSE EFFECT
+   ============================================ */
+
+@keyframes activeGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+}
+
+.menu-item.active {
+  animation: activeGlow 2s infinite;
+}
+
+/* ============================================
+   SLIDE IN ANIMATION FOR ACTIVE ITEM
+   ============================================ */
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.menu-item.active {
+  animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   DARK MODE ADJUSTMENTS
+   ============================================ */
+
+[data-theme="dark"] .menu-item:hover {
+  backdrop-filter: blur(4px);
+}
+
+[data-theme="dark"] .menu-item.active {
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================
+   LIGHT MODE ADJUSTMENTS
+   ============================================ */
+
+[data-theme="light"] .menu-item.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+}
+
+/* ============================================
+   MOBILE TOUCH OPTIMIZATIONS
+   ============================================ */
+
+@media (hover: none) and (pointer: coarse) {
+  .menu-item:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease;
+  }
+  
+  .menu-item:hover {
+    transform: none;
+  }
+  
+  .menu-item:hover::before {
+    left: -100%;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION PREFERENCE
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-item,
+  .menu-item::before,
+  .menu-item i,
+  .menu-item::after,
+  .menu-item span {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .menu-item:hover {
+    transform: translateX(4px);
   }
 }
 
