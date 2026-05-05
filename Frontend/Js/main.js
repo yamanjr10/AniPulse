@@ -12,7 +12,7 @@ let lineTooltip = null;
 // Create lineTooltip function
 function createLineTooltip() {
     if (lineTooltip) return lineTooltip;
-    
+
     lineTooltip = document.getElementById('lineChartTooltip');
     if (!lineTooltip) {
         lineTooltip = document.createElement('div');
@@ -707,7 +707,8 @@ function initCharts() {
                             family: "'Inter', sans-serif"
                         },
                         filter: (legendItem) => {
-                            return legendItem.text !== 'Trend Line';
+                            // Hide BOTH 'Trend Line' AND 'Anime Completed'
+                            return legendItem.text !== 'Trend Line' && legendItem.text !== 'Anime Completed';
                         }
                     }
                 },
@@ -760,7 +761,7 @@ function initCharts() {
                                 const percentChange = percentageChanges[dataIndex];
                                 if (percentChange !== null && dataIndex > 0 && dataIndex <= currentMonth) {
                                     const isPositive = percentChange > 0;
-                                    const arrow = isPositive ? '▲' : (percentChange < 0 ? '▼' : '●');
+                                    const arrow = isPositive ? '+' : (percentChange < 0 ? '-' : '●');
                                     const changeText = percentChange > 0
                                         ? `${arrow} ${percentChange.toFixed(1)}% increase`
                                         : percentChange < 0
@@ -768,34 +769,13 @@ function initCharts() {
                                             : `● No change`;
                                     return [
                                         `Completed: ${value} anime`,
-                                        `Trend: ${changeText}`
+                                        `Change: ${changeText}`
                                     ];
                                 }
                                 return `Completed: ${value} anime`;
                             }
                             return null;
                         },
-                        footer: function (tooltipItems) {
-                            const dataIndex = tooltipItems[0].dataIndex;
-                            const currentValue = monthlyBarData[dataIndex];
-                            const prevValue = dataIndex > 0 ? monthlyBarData[dataIndex - 1] : null;
-                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-                            if (dataIndex > currentMonth) {
-                                return `Coming in ${months[dataIndex]}`;
-                            }
-
-                            if (dataIndex > 0 && prevValue !== null && dataIndex <= currentMonth) {
-                                const diff = currentValue - prevValue;
-                                if (diff > 0) {
-                                    return `+${diff} compared to ${months[dataIndex - 1]}`;
-                                } else if (diff < 0) {
-                                    return `${diff} compared to ${months[dataIndex - 1]}`;
-                                }
-                                return `Same as ${months[dataIndex - 1]}`;
-                            }
-                            return `First month of ${currentYear}`;
-                        }
                     }
                 }
             },
@@ -1935,11 +1915,11 @@ function handleAddAnime(e) {
         .split(',')
         .map(genre => genre.trim())
         .filter(Boolean);
-    
+
     // Get selected date from form
     const selectedYear = document.getElementById('animeYear')?.value;
     const selectedMonth = document.getElementById('animeMonth')?.value;
-    
+
     // Simple Nepal timestamp function
     const getNepalTimestamp = () => {
         const now = new Date();
@@ -1954,20 +1934,20 @@ function handleAddAnime(e) {
         const seconds = String(nepalTime.getSeconds()).padStart(2, '0');
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
-    
+
     const getNextId = () => {
         if (animeData.length === 0) return 1;
         const maxId = Math.max(...animeData.map(a => parseInt(a.id) || 0));
         return maxId + 1;
     };
-    
+
     const existingAnime = animeData.find(a => a.id == currentEditId);
     const nowTimestamp = getNepalTimestamp();
-    
+
     // Handle finish date - use selected date if provided, otherwise keep existing or null
     let finishDate = null;
     let finishTimestamp = null;
-    
+
     if (status === 'Completed') {
         if (selectedYear && selectedMonth) {
             // Use the date the user selected
@@ -1986,7 +1966,7 @@ function handleAddAnime(e) {
             finishTimestamp = `${today} 23:59:59`;
         }
     }
-    
+
     if (existingAnime && isEditing) {
         // Update existing
         existingAnime.title = title;
@@ -2021,9 +2001,9 @@ function handleAddAnime(e) {
         };
         animeData.push(newAnime);
     }
-    
+
     saveData();
-    
+
     // Log activity
     if (status === 'Completed' && (!isEditing || existingAnime?.userStatus !== 'Completed')) {
         logActivity('completed', title);
@@ -2032,30 +2012,30 @@ function handleAddAnime(e) {
     } else if (isEditing) {
         logActivity('edited', title);
     }
-    
+
     // Close modal and reset
     const addAnimeModal = document.getElementById('addAnimeModal');
     const animeForm = document.getElementById('addAnimeForm');
     const searchResults = document.getElementById('searchResults');
     const submitBtn = document.getElementById('submitBtn');
     const deleteBtn = document.getElementById('deleteBtn');
-    
+
     if (addAnimeModal) addAnimeModal.style.display = 'none';
     if (animeForm) animeForm.reset();
     if (searchResults) {
         searchResults.style.display = 'none';
         searchResults.innerHTML = '';
     }
-    
+
     isEditing = false;
     currentEditId = null;
     if (submitBtn) submitBtn.textContent = 'Add Anime';
     if (deleteBtn) deleteBtn.style.display = 'none';
-    
+
     // Force immediate save and refresh
     saveData();
     updateAllComponents();
-    
+
     showToast(isEditing ? 'Anime updated!' : 'Anime added!', 'success');
 }
 
@@ -2949,7 +2929,7 @@ function initStatisticsCharts() {
         completionChart = new Chart(completionCtx, {
             type: 'bar',
             data: {
-                labels: [ '2024', '2025', '2026', '2027', '2028'],
+                labels: ['2024', '2025', '2026', '2027', '2028'],
                 datasets: [{
                     label: 'Anime Completed',
                     data: calculateYearlyCompletion(),
@@ -7537,56 +7517,56 @@ function refreshAllCharts() {
         window.monthlyProgressChart.data.datasets[0].data = monthlyData;
         window.monthlyProgressChart.data.datasets[1].data = monthlyData;
         window.monthlyProgressChart.update();
-        
+
         const totalCompleted = monthlyData.reduce((a, b) => a + b, 0);
         const totalSpan = document.getElementById('monthly-total-anime');
         if (totalSpan) {
             totalSpan.textContent = `Total Completed: ${totalCompleted}`;
         }
     }
-    
+
     // Update genre chart with current filter
     if (typeof updateGenreChartWithFilter === 'function') {
         updateGenreChartWithFilter();
     }
-    
+
     // Update statistics charts if they exist
     if (completionChart) {
         completionChart.data.datasets[0].data = calculateYearlyCompletion();
         completionChart.update();
     }
-    
+
     if (scoreDistributionChart) {
         scoreDistributionChart.data.datasets[0].data = calculateScoreDistribution();
         scoreDistributionChart.update();
     }
-    
+
     if (statusDistributionChart) {
         const statusData = calculateStatusDistribution();
         statusDistributionChart.data.labels = Object.keys(statusData);
         statusDistributionChart.data.datasets[0].data = Object.values(statusData);
         statusDistributionChart.update();
     }
-    
+
     if (typeDistributionChart) {
         const typeData = calculateTypeDistribution();
         typeDistributionChart.data.labels = Object.keys(typeData);
         typeDistributionChart.data.datasets[0].data = Object.values(typeData);
         typeDistributionChart.update();
     }
-    
+
     if (genreStatsChart) {
         const genreStats = calculateGenreStats();
         genreStatsChart.data.labels = Object.keys(genreStats);
         genreStatsChart.data.datasets[0].data = Object.values(genreStats);
         genreStatsChart.update();
     }
-    
+
     // Update episodes over time chart
     if (episodesOverTimeChart && currentEpisodesYear) {
         updateEpisodesChart(currentEpisodesYear);
     }
-    
+
     // Update watch time chart
     if (watchTimeByMonthChart && currentWatchTimeYear) {
         updateWatchTimeChart(currentWatchTimeYear);
@@ -7597,11 +7577,11 @@ function refreshAllCharts() {
 // SIMPLE WORKING PWA INSTALL - SINGLE VERSION
 // ============================================
 
-(function() {
+(function () {
     console.log('📱 Setting up PWA install...');
-    
+
     let deferredPrompt = null;
-    
+
     // Listen for install prompt
     window.addEventListener('beforeinstallprompt', (e) => {
         console.log('✅ Install prompt available!');
@@ -7609,31 +7589,31 @@ function refreshAllCharts() {
         deferredPrompt = e;
         showInstallButton();
     });
-    
+
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
         console.log('App already installed');
         return;
     }
-    
+
     function showInstallButton() {
         // Don't add if already exists
         if (document.getElementById('pwa-install-btn')) return;
-        
+
         // Check if user dismissed
         if (localStorage.getItem('pwa-dismissed')) return;
-        
+
         // Find where to add button
         const userActions = document.querySelector('.user-actions');
         if (!userActions) return;
-        
+
         const installBtn = document.createElement('button');
         installBtn.id = 'pwa-install-btn';
         installBtn.className = 'theme-toggle';
         installBtn.innerHTML = '<i class="fas fa-download"></i>';
         installBtn.title = 'Install App';
         installBtn.style.cursor = 'pointer';
-        
+
         installBtn.onclick = async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -7650,7 +7630,7 @@ function refreshAllCharts() {
                 showToast(msg, 'info');
             }
         };
-        
+
         // Add after theme toggle
         const themeToggle = document.querySelector('.theme-toggle');
         if (themeToggle) {
@@ -7658,7 +7638,7 @@ function refreshAllCharts() {
         } else {
             userActions.appendChild(installBtn);
         }
-        
+
         // Auto-hide after 30 seconds (optional)
         setTimeout(() => {
             if (installBtn.parentNode) {
@@ -7666,7 +7646,7 @@ function refreshAllCharts() {
             }
         }, 30000);
     }
-    
+
     // Optional: Add dismiss functionality
     function addDismissOption() {
         setTimeout(() => {
@@ -7681,9 +7661,9 @@ function refreshAllCharts() {
             }
         }, 1000);
     }
-    
+
     addDismissOption();
-    
+
     console.log('✅ PWA install ready - look for download icon');
 })();
 
@@ -7694,14 +7674,14 @@ function refreshAllCharts() {
 (function initScrollToTop() {
     const scrollBtn = document.getElementById('scrollToTop');
     if (!scrollBtn) return;
-    
+
     let scrollTimeout;
     let isVisible = false;
-    
+
     // Function to check scroll position and show/hide button
     function toggleScrollButton() {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
+
         // Show button when scrolled down more than 300px
         if (scrollTop > 300) {
             if (!isVisible) {
@@ -7714,59 +7694,59 @@ function refreshAllCharts() {
                 isVisible = false;
             }
         }
-        
+
         // Update scroll progress ring (optional)
         const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
         const scrollPercent = (scrollTop / documentHeight) * 360;
         document.documentElement.style.setProperty('--scroll-progress', `${scrollPercent}deg`);
     }
-    
+
     // Smooth scroll to top
     function scrollToTop() {
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
         });
-        
+
         // Visual feedback
         scrollBtn.style.transform = 'scale(0.95)';
         setTimeout(() => {
             scrollBtn.style.transform = '';
         }, 200);
     }
-    
+
     // Throttled scroll event for better performance
     function handleScroll() {
         if (scrollTimeout) clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(toggleScrollButton, 100);
     }
-    
+
     // Add event listeners
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', toggleScrollButton);
     scrollBtn.addEventListener('click', scrollToTop);
-    
+
     // Initial check
     setTimeout(toggleScrollButton, 500);
-    
+
     // Re-check when page changes (for page navigation)
     document.querySelectorAll('.menu-item').forEach(item => {
         item.addEventListener('click', () => {
             setTimeout(toggleScrollButton, 300);
         });
     });
-    
+
     // Also check when modal closes
     const observer = new MutationObserver(() => {
         toggleScrollButton();
     });
-    
+
     observer.observe(document.body, {
         attributes: true,
         childList: true,
         subtree: true
     });
-    
+
     console.log('✅ Scroll to Top button initialized');
 })();
 
@@ -7777,17 +7757,17 @@ function refreshAllCharts() {
 
 (function fixModalScrollIssue() {
     console.log('🔧 Applying modal scroll fix...');
-    
+
     // Function to properly close modals and restore scrolling
     function closeModal(modalElement) {
         if (!modalElement) return;
-        
+
         // Hide the modal
         modalElement.style.display = 'none';
-        
+
         // Remove the modal-open class from body
         document.body.classList.remove('modal-open');
-        
+
         // Reset body styles
         document.body.style.overflow = '';
         document.body.style.position = '';
@@ -7795,150 +7775,150 @@ function refreshAllCharts() {
         document.body.style.height = '';
         document.body.style.top = '';
         document.body.style.paddingRight = '';
-        
+
         // For iOS Safari fix
         document.body.style.removeProperty('overflow');
         document.body.style.removeProperty('position');
         document.body.style.removeProperty('width');
         document.body.style.removeProperty('height');
         document.body.style.removeProperty('top');
-        
+
         // Remove any inline styles that might be causing issues
         document.documentElement.style.overflow = '';
         document.documentElement.style.removeProperty('overflow');
-        
+
         console.log('✅ Modal closed, scroll restored');
     }
-    
+
     // Function to properly open modal and disable background scroll
     function openModal(modalElement) {
         if (!modalElement) return;
-        
+
         // Show the modal
         modalElement.style.display = 'flex';
-        
+
         // Add modal-open class to body
         document.body.classList.add('modal-open');
-        
+
         // Prevent background scrolling
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
         document.body.style.height = '100%';
-        
+
         console.log('✅ Modal opened, scroll disabled');
     }
-    
+
     // Fix Add Anime Modal
     const addModal = document.getElementById('addAnimeModal');
     if (addModal) {
         // Get all close buttons for this modal
         const closeButtons = addModal.querySelectorAll('.close-modal');
         const cancelBtn = addModal.querySelector('#cancelBtn');
-        
+
         // Close when clicking the backdrop
         addModal.addEventListener('click', (e) => {
             if (e.target === addModal) {
                 closeModal(addModal);
             }
         });
-        
+
         // Close when clicking close buttons
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 closeModal(addModal);
             });
         });
-        
+
         // Close when clicking cancel button
         if (cancelBtn) {
             cancelBtn.addEventListener('click', () => {
                 closeModal(addModal);
             });
         }
-        
+
         console.log('✅ Add Anime Modal fixed');
     }
-    
+
     // Fix Import Modal
     const importModal = document.getElementById('importModal');
     if (importModal) {
         // Get all close buttons
         const closeButtons = importModal.querySelectorAll('.close-modal');
         const cancelBtn = importModal.querySelector('#cancelImportBtn');
-        
+
         // Close when clicking the backdrop
         importModal.addEventListener('click', (e) => {
             if (e.target === importModal) {
                 closeModal(importModal);
             }
         });
-        
+
         // Close when clicking close buttons
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 closeModal(importModal);
             });
         });
-        
+
         // Close when clicking cancel button
         if (cancelBtn) {
             cancelBtn.addEventListener('click', () => {
                 closeModal(importModal);
             });
         }
-        
+
         console.log('✅ Import Modal fixed');
     }
-    
+
     // Fix Add Anime Button
     const addAnimeBtn = document.getElementById('addAnimeBtn');
     if (addAnimeBtn) {
         // Remove existing listeners to avoid duplicates
         const newBtn = addAnimeBtn.cloneNode(true);
         addAnimeBtn.parentNode.replaceChild(newBtn, addAnimeBtn);
-        
+
         newBtn.addEventListener('click', () => {
             if (addModal) {
                 // Reset form
                 const form = document.getElementById('addAnimeForm');
                 if (form) form.reset();
-                
+
                 // Reset editing state
                 if (typeof window.isEditing !== 'undefined') {
                     window.isEditing = false;
                     window.currentEditId = null;
                 }
-                
+
                 const submitBtn = document.getElementById('submitBtn');
                 const deleteBtn = document.getElementById('deleteBtn');
                 if (submitBtn) submitBtn.textContent = 'Add Anime';
                 if (deleteBtn) deleteBtn.style.display = 'none';
-                
+
                 // Open modal
                 openModal(addModal);
             }
         });
-        
+
         console.log('✅ Add Anime Button fixed');
     }
-    
+
     // Fix Import Button
     const importBtn = document.getElementById('importBtn');
     if (importBtn) {
         // Remove existing listeners
         const newBtn = importBtn.cloneNode(true);
         importBtn.parentNode.replaceChild(newBtn, importBtn);
-        
+
         newBtn.addEventListener('click', () => {
             if (importModal) {
                 openModal(importModal);
             }
         });
-        
+
         console.log('✅ Import Button fixed');
     }
-    
+
     // Fix Escape key for all modals
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -7950,7 +7930,7 @@ function refreshAllCharts() {
             }
         }
     });
-    
+
     // Fix form submit to ensure modal closes
     const animeForm = document.getElementById('addAnimeForm');
     if (animeForm) {
@@ -7969,9 +7949,9 @@ function refreshAllCharts() {
             }, 200);
         });
     }
-    
+
     // Helper function to manually restore scroll (for emergencies)
-    window.restoreScroll = function() {
+    window.restoreScroll = function () {
         if (addModal) addModal.style.display = 'none';
         if (importModal) importModal.style.display = 'none';
         document.body.style.overflow = '';
@@ -7982,7 +7962,7 @@ function refreshAllCharts() {
         document.documentElement.style.overflow = '';
         console.log('✅ Scroll manually restored');
     };
-    
+
     // Add CSS for modal-open state
     if (!document.getElementById('modal-fix-styles')) {
         const style = document.createElement('style');
@@ -7997,7 +7977,7 @@ function refreshAllCharts() {
         `;
         document.head.appendChild(style);
     }
-    
+
     console.log('✅ Modal scroll fix applied successfully!');
     console.log('💡 If scroll gets stuck, type restoreScroll() in console to fix it');
 })();
@@ -8008,56 +7988,56 @@ function refreshAllCharts() {
 
 (function fixGenreChart() {
     console.log('🔧 Applying genre chart stability fix...');
-    
+
     // Store chart instance globally
     let genreChartInstance = null;
     let chartRetryCount = 0;
     const MAX_RETRIES = 3;
-    
+
     // Function to safely destroy and recreate genre chart
     function safeRecreateGenreChart() {
         const canvas = document.getElementById('genreDistributionChart');
         if (!canvas) return false;
-        
+
         // Check if canvas is visible and has valid dimensions
         const rect = canvas.getBoundingClientRect();
         if (rect.width === 0 || rect.height === 0) {
             console.log('⏳ Chart canvas not visible, waiting...');
             return false;
         }
-        
+
         try {
             // Destroy existing chart if it exists
             if (genreChartInstance && typeof genreChartInstance.destroy === 'function') {
                 genreChartInstance.destroy();
                 genreChartInstance = null;
             }
-            
+
             // Get fresh context
             const ctx = canvas.getContext('2d');
             if (!ctx) return false;
-            
+
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             // Get current data from animeData
             const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
             const currentFilter = localStorage.getItem('genreFilterType') || 'month';
-            
+
             // Calculate genre distribution based on current filter
             const filteredAnime = getFilteredAnimeByTimeWrapper(animeData, currentFilter);
             const genreDistribution = calculateGenreDistributionWrapper(filteredAnime);
-            
+
             const labels = Object.keys(genreDistribution);
             const data = Object.values(genreDistribution);
-            
+
             // Handle empty data
             if (labels.length === 0) {
                 // Show no data message
                 const noDataMsg = document.getElementById('genreNoDataMessage');
                 if (noDataMsg) noDataMsg.style.display = 'block';
                 canvas.style.opacity = '0.5';
-                
+
                 // Create placeholder chart
                 genreChartInstance = new Chart(ctx, {
                     type: 'doughnut',
@@ -8077,12 +8057,12 @@ function refreshAllCharts() {
                 });
                 return true;
             }
-            
+
             // Hide no data message
             const noDataMsg = document.getElementById('genreNoDataMessage');
             if (noDataMsg) noDataMsg.style.display = 'none';
             canvas.style.opacity = '1';
-            
+
             // Color palette
             const colorPalette = [
                 '#ef4444', '#3b82f6', '#facc15', '#a855f7', '#10b981',
@@ -8090,11 +8070,11 @@ function refreshAllCharts() {
                 '#c026d3', '#06b6d4', '#e11d48', '#78350f', '#22c55e',
                 '#f59e0b', '#9333ea', '#64748b', '#f9e616'
             ];
-            
-            const backgroundColors = labels.map((_, index) => 
+
+            const backgroundColors = labels.map((_, index) =>
                 colorPalette[index % colorPalette.length]
             );
-            
+
             // Create new chart
             genreChartInstance = new Chart(ctx, {
                 type: 'doughnut',
@@ -8124,7 +8104,7 @@ function refreshAllCharts() {
                         },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     const label = context.label || '';
                                     const value = context.raw || 0;
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -8136,27 +8116,27 @@ function refreshAllCharts() {
                     }
                 }
             });
-            
+
             console.log('✅ Genre chart recreated successfully');
             chartRetryCount = 0;
             return true;
-            
+
         } catch (error) {
             console.error('❌ Error recreating genre chart:', error);
             return false;
         }
     }
-    
+
     // Wrapper for getFilteredAnimeByTime
     function getFilteredAnimeByTimeWrapper(animeData, filterType) {
         const completedAnime = animeData.filter(anime => anime.userStatus === 'Completed');
-        
+
         if (filterType === 'all') return completedAnime;
-        
+
         const now = new Date();
         const currentYear = now.getFullYear();
         const currentMonth = now.getMonth();
-        
+
         return completedAnime.filter(anime => {
             let completionDate = null;
             if (anime.finishDate) {
@@ -8166,18 +8146,18 @@ function refreshAllCharts() {
             } else if (anime.updatedAt) {
                 completionDate = new Date(anime.updatedAt);
             }
-            
+
             if (!completionDate || isNaN(completionDate.getTime())) return false;
-            
+
             switch (filterType) {
                 case 'month':
                     return completionDate.getMonth() === currentMonth &&
-                           completionDate.getFullYear() === currentYear;
+                        completionDate.getFullYear() === currentYear;
                 case 'lastMonth':
                     const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
                     const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
                     return completionDate.getMonth() === lastMonth &&
-                           completionDate.getFullYear() === lastMonthYear;
+                        completionDate.getFullYear() === lastMonthYear;
                 case 'year':
                     return completionDate.getFullYear() === currentYear;
                 default:
@@ -8185,7 +8165,7 @@ function refreshAllCharts() {
             }
         });
     }
-    
+
     // Wrapper for calculateGenreDistribution
     function calculateGenreDistributionWrapper(filteredAnime) {
         const genreCount = {};
@@ -8201,30 +8181,30 @@ function refreshAllCharts() {
         });
         return genreCount;
     }
-    
+
     // Function to check if chart is corrupted
     function isChartCorrupted() {
         const canvas = document.getElementById('genreDistributionChart');
         if (!canvas) return false;
-        
+
         try {
             const ctx = canvas.getContext('2d');
             if (!ctx) return true;
-            
+
             // Check if canvas has valid size
             if (canvas.width === 0 || canvas.height === 0) return true;
-            
+
             // Check if chart instance exists and is valid
             if (genreChartInstance && typeof genreChartInstance.destroy !== 'function') {
                 return true;
             }
-            
+
             return false;
         } catch (e) {
             return true;
         }
     }
-    
+
     // Function to fix chart on statistics page view
     function fixChartOnPageView() {
         const statsMenuItem = document.querySelector('.menu-item[data-page="statistics"]');
@@ -8248,7 +8228,7 @@ function refreshAllCharts() {
             });
         }
     }
-    
+
     // Fix when window resizes (can cause corruption)
     let resizeTimer;
     window.addEventListener('resize', () => {
@@ -8263,7 +8243,7 @@ function refreshAllCharts() {
             }
         }, 250);
     });
-    
+
     // Fix when theme changes (dark/light mode)
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
@@ -8277,7 +8257,7 @@ function refreshAllCharts() {
         });
     });
     observer.observe(document.body, { attributes: true });
-    
+
     // Fix when returning to statistics page from other pages
     function fixOnPageVisibility() {
         document.addEventListener('visibilitychange', () => {
@@ -8294,11 +8274,11 @@ function refreshAllCharts() {
             }
         });
     }
-    
+
     // Hook into existing updateGenreChartWithFilter function
     const originalUpdateGenre = window.updateGenreChartWithFilter;
     if (typeof originalUpdateGenre === 'function') {
-        window.updateGenreChartWithFilter = function() {
+        window.updateGenreChartWithFilter = function () {
             try {
                 originalUpdateGenre();
             } catch (error) {
@@ -8307,11 +8287,11 @@ function refreshAllCharts() {
             }
         };
     }
-    
+
     // Also hook into refreshAllCharts
     const originalRefreshAll = window.refreshAllCharts;
     if (typeof originalRefreshAll === 'function') {
-        window.refreshAllCharts = function() {
+        window.refreshAllCharts = function () {
             originalRefreshAll();
             setTimeout(() => {
                 if (document.getElementById('statistics-page')?.classList.contains('active')) {
@@ -8320,11 +8300,11 @@ function refreshAllCharts() {
             }, 150);
         };
     }
-    
+
     // Initialize
     fixChartOnPageView();
     fixOnPageVisibility();
-    
+
     // Run initial check when statistics page becomes visible
     setInterval(() => {
         if (document.getElementById('statistics-page')?.classList.contains('active')) {
@@ -8334,10 +8314,10 @@ function refreshAllCharts() {
             }
         }
     }, 5000); // Check every 5 seconds
-    
+
     // Make safe recreate function available globally
     window.fixGenreChart = safeRecreateGenreChart;
-    
+
     console.log('✅ Genre chart stability fix applied!');
     console.log('💡 If chart breaks, type fixGenreChart() in console to fix it');
 })();
@@ -8348,7 +8328,7 @@ function refreshAllCharts() {
 
 function showEmptyState(container, type, customMessage = null) {
     if (!container) return;
-    
+
     try {
         const emptyStates = {
             anime: {
@@ -8370,9 +8350,9 @@ function showEmptyState(container, type, customMessage = null) {
                 action: 'Add Anime'
             }
         };
-        
+
         const state = emptyStates[type] || emptyStates.anime;
-        
+
         container.innerHTML = `
             <div class="empty-state animated">
                 <div class="empty-state-icon">
@@ -8386,7 +8366,7 @@ function showEmptyState(container, type, customMessage = null) {
                 </button>
             </div>
         `;
-        
+
         const actionBtn = container.querySelector('.empty-state-action');
         if (actionBtn) {
             actionBtn.addEventListener('click', () => {
@@ -8397,7 +8377,7 @@ function showEmptyState(container, type, customMessage = null) {
                 }
             });
         }
-    } catch(e) {
+    } catch (e) {
         console.warn('Empty state error:', e);
     }
 }
@@ -8409,7 +8389,7 @@ function safeApplyEmptyStates() {
         if (topRated && animeData && animeData.filter(a => a.score && a.score >= 8).length === 0) {
             showEmptyState(topRated, 'rating');
         }
-    } catch(e) {}
+    } catch (e) { }
 }
 
 
