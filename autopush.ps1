@@ -15,7 +15,7 @@ git add .
 
 # Commit with timestamp
 $time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Anipulse Version 2.0.0"
+git commit -m "Anipulse Version 2.0.1 - Beta Release"
 
 # Force push to remote
 git push -u origin $branch --force
