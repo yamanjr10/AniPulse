@@ -427,11 +427,11 @@ let activeRequest = null;
 
 // Get best title (prioritize English)
 function getBestTitle(anime) {
-    return anime.title_english || 
-           anime.title_romaji || 
-           anime.title_japanese || 
-           anime.title || 
-           'Unknown Title';
+    return anime.title_english ||
+        anime.title_romaji ||
+        anime.title_japanese ||
+        anime.title ||
+        'Unknown Title';
 }
 
 // Escape HTML to prevent XSS
@@ -448,9 +448,9 @@ async function searchAnime() {
     const query = searchInput?.value.trim();
     const searchResults = document.getElementById('searchResults');
     const searchLoading = document.getElementById('searchLoading');
-    
+
     console.log('🔍 Searching for:', query);
-    
+
     if (!query || query.length < 3) {
         if (searchResults) searchResults.style.display = 'none';
         if (searchLoading) searchLoading.style.display = 'none';
@@ -472,7 +472,7 @@ async function searchAnime() {
 
     const now = Date.now();
     const timeSinceLastRequest = now - lastRequestTime;
-    
+
     if (timeSinceLastRequest < MIN_REQUEST_INTERVAL && activeRequest) {
         const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
         console.log(`⏳ Waiting ${waitTime}ms...`);
@@ -483,20 +483,20 @@ async function searchAnime() {
         }, waitTime);
         return;
     }
-    
+
     executeSearch(query, searchResults, searchLoading, cacheKey);
 }
 
 async function executeSearch(query, searchResults, searchLoading, cacheKey) {
     if (activeRequest) return;
-    
+
     activeRequest = true;
     lastRequestTime = Date.now();
-    
+
     try {
         console.log('🌐 Fetching from Jikan API...');
         const response = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=8`);
-        
+
         if (response.status === 429) {
             if (searchResults) {
                 searchResults.innerHTML = '<div style="padding: 12px; text-align: center; color: #ff6b6b;">⏳ Too many requests. Please wait...</div>';
@@ -510,13 +510,13 @@ async function executeSearch(query, searchResults, searchLoading, cacheKey) {
             }, 5000);
             return;
         }
-        
+
         const data = await response.json();
         searchCache.set(cacheKey, data);
         setTimeout(() => searchCache.delete(cacheKey), 10 * 60 * 1000);
-        
+
         displaySearchResults(data, searchResults);
-        
+
     } catch (error) {
         console.error('Search error:', error);
         if (searchResults) {
@@ -532,14 +532,14 @@ async function executeSearch(query, searchResults, searchLoading, cacheKey) {
 // Display search results
 function displaySearchResults(data, searchResults) {
     if (!searchResults) return;
-    
+
     if (data.data && data.data.length > 0) {
         searchResults.innerHTML = '';
-        
+
         data.data.forEach(anime => {
             const englishTitle = getBestTitle(anime);
             const japaneseTitle = anime.title_japanese || '';
-            
+
             const item = document.createElement('div');
             item.className = 'search-result-item';
             item.style.cssText = `
@@ -551,12 +551,12 @@ function displaySearchResults(data, searchResults) {
                 border-bottom: 1px solid rgba(255,255,255,0.1);
                 transition: background 0.2s;
             `;
-            
+
             // Display title with Japanese in small text
-            const titleDisplay = japaneseTitle && japaneseTitle !== englishTitle 
+            const titleDisplay = japaneseTitle && japaneseTitle !== englishTitle
                 ? `${escapeHtml(englishTitle)} <span style="font-size: 0.7rem; opacity: 0.6;">(${escapeHtml(japaneseTitle)})</span>`
                 : escapeHtml(englishTitle);
-            
+
             item.innerHTML = `
                 <img src="${anime.images?.jpg?.image_url || 'https://via.placeholder.com/45x65/6a5acd/ffffff?text=No+Image'}" 
                      style="width: 45px; height: 65px; object-fit: cover; border-radius: 8px;">
@@ -568,7 +568,7 @@ function displaySearchResults(data, searchResults) {
                     </small>
                 </div>
             `;
-            
+
             // IMPORTANT: Store the complete anime data
             const animeData = {
                 title: englishTitle,
@@ -582,14 +582,14 @@ function displaySearchResults(data, searchResults) {
                 genres: anime.genres || [],
                 synopsis: anime.synopsis || ''
             };
-            
+
             // Direct click handler
-            item.onclick = function(e) {
+            item.onclick = function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 selectAnimeFromSearch(animeData);
             };
-            
+
             searchResults.appendChild(item);
         });
         searchResults.style.display = 'block';
@@ -600,12 +600,12 @@ function displaySearchResults(data, searchResults) {
 }
 
 // FIXED: Select anime and fill the form correctly
-window.selectAnimeFromSearch = function(anime) {
+window.selectAnimeFromSearch = function (anime) {
     if (!anime) {
         console.error('No anime data provided');
         return;
     }
-    
+
     // Get all form elements
     const titleInput = document.getElementById('animeTitle');
     const typeSelect = document.getElementById('animeType');
@@ -615,28 +615,28 @@ window.selectAnimeFromSearch = function(anime) {
     const genresInput = document.getElementById('animeGenres');
     const scoreInput = document.getElementById('animeScore');
     const searchResults = document.getElementById('searchResults');
-    
+
     // IMPORTANT: Set the actual anime title (not the search query)
     if (titleInput) {
         titleInput.value = anime.title;
     }
-    
+
     // Set type
     if (typeSelect) {
         const animeType = anime.type || 'TV';
         typeSelect.value = animeType;
-        
+
         // Trigger change event to update duration
         const changeEvent = new Event('change');
         typeSelect.dispatchEvent(changeEvent);
     }
-    
+
     // Set episodes
     if (episodesInput) {
         const episodes = anime.episodes || 1;
         episodesInput.value = episodes;
     }
-    
+
     // Set duration based on type
     if (durationInput) {
         if (anime.type === 'Movie') {
@@ -647,12 +647,12 @@ window.selectAnimeFromSearch = function(anime) {
             durationInput.readOnly = true;
         }
     }
-    
+
     // Set cover image
     if (coverInput && anime.images?.jpg?.image_url) {
         coverInput.value = anime.images.jpg.image_url;
     }
-    
+
     // Set genres
     if (genresInput && anime.genres && anime.genres.length > 0) {
         const unwantedGenres = ['Award Winning'];
@@ -662,7 +662,7 @@ window.selectAnimeFromSearch = function(anime) {
             .join(', ');
         genresInput.value = genres;
     }
-    
+
     // Set score
     if (scoreInput && anime.score) {
         const score = typeof anime.score === 'number' ? anime.score : parseFloat(anime.score);
@@ -670,16 +670,16 @@ window.selectAnimeFromSearch = function(anime) {
             scoreInput.value = score;
         }
     }
-    
+
     // Close search results
     if (searchResults) {
         searchResults.style.display = 'none';
         searchResults.innerHTML = '';
     }
-    
+
     // Show success message
     showToast(`✓ Selected: ${anime.title}`, 'success');
-    
+
     // Also update the search input to show the selected title
     if (titleInput) {
         // Small visual feedback
@@ -691,32 +691,32 @@ window.selectAnimeFromSearch = function(anime) {
 };
 
 // Initialize search
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('🔍 Initializing search system...');
-    
+
     const searchInput = document.getElementById('animeTitle');
-    
+
     if (!searchInput) {
         console.error('❌ Search input not found!');
         return;
     }
-    
+
     // Fix form group positioning
     const formGroup = searchInput.closest('.form-group');
     if (formGroup && getComputedStyle(formGroup).position !== 'relative') {
         formGroup.style.position = 'relative';
     }
-    
+
     // Remove existing listeners by cloning
     const newSearchInput = searchInput.cloneNode(true);
     searchInput.parentNode.replaceChild(newSearchInput, searchInput);
-    
+
     let searchTimeout;
-    newSearchInput.addEventListener('input', function(e) {
+    newSearchInput.addEventListener('input', function (e) {
         const query = this.value.trim();
-        
+
         if (searchTimeout) clearTimeout(searchTimeout);
-        
+
         // Show hint for short queries
         if (query.length > 0 && query.length < 3) {
             const searchResults = document.getElementById('searchResults');
@@ -726,7 +726,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return;
         }
-        
+
         // Debounce search
         searchTimeout = setTimeout(() => {
             if (query.length >= 3) {
@@ -739,9 +739,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 800);
     });
-    
+
     console.log('✅ Search system ready!');
-    
+
     // Test the function
     console.log('selectAnimeFromSearch function exists:', typeof window.selectAnimeFromSearch === 'function');
 });
@@ -1993,26 +1993,26 @@ function updateAnimeTableView(animeList) {
         // Format completion date - Show only Month Year in table
         let completionDate = '-';
         let completionTooltip = '';
-        if (anime.finishDate) {
-            const parts = anime.finishDate.split('-');
-            if (parts.length >= 2) {
-                const [year, month, day] = parts;
+        
+        if (anime.userStatus === 'Completed') {
+            // Use finishDate (YYYY-MM) for display in table
+            if (anime.finishDate && anime.finishDate.length >= 7) {
+                const [year, month] = anime.finishDate.split('-');
                 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 completionDate = `${monthNames[parseInt(month) - 1]} ${year}`;
-                if (day) {
-                    completionTooltip = `Completed on: ${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
-                }
             }
-        }
-
-        // Format creation date for tooltip
-        let creationTooltip = '';
-        if (anime.createdAt) {
-            const parts = anime.createdAt.split('-');
-            if (parts.length >= 2) {
-                const [year, month, day] = parts;
-                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                creationTooltip = `Added on: ${monthNames[parseInt(month) - 1]} ${parseInt(day || '1')}, ${year}`;
+            
+            // Use actualFinishDate for tooltip (exact date)
+            if (anime.actualFinishDate) {
+                const actualParts = anime.actualFinishDate.split('-');
+                if (actualParts.length >= 3) {
+                    const [year, month, day] = actualParts;
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    completionTooltip = `Completed on: ${monthNames[parseInt(month) - 1]} ${year}`;
+                }
+            } else if (anime.finishDate) {
+                // Fallback if no actualFinishDate
+                completionTooltip = `Completed in: ${completionDate}`;
             }
         }
 
@@ -2036,6 +2036,17 @@ function updateAnimeTableView(animeList) {
         const safeTitle = anime.title.length > 35 ? anime.title.slice(0, 35) + '...' : anime.title;
         const escapedTitle = safeTitle.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
+        // Format creation date for tooltip
+        let creationTooltip = '';
+        if (anime.createdAt) {
+            const parts = anime.createdAt.split(' ')[0].split('-');
+            if (parts.length >= 3) {
+                const [year, month, day] = parts;
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                creationTooltip = `Added on: ${monthNames[parseInt(month) - 1]} ${year}`;
+            }
+        }
+
         // Combine tooltips
         const combinedTooltip = [creationTooltip, completionTooltip].filter(Boolean).join(' | ');
 
@@ -2054,7 +2065,7 @@ function updateAnimeTableView(animeList) {
         `;
 
         return `
-            <tr data-id="${anime.id}" class="clickable-row" style="cursor: pointer;">
+            <tr data-id="${anime.id}" style="cursor: pointer;">
                 <td>${titleWithCover}</td>
                 <td>${anime.type || 'TV'}</td>
                 <td>${progressBar}</td>
@@ -2072,11 +2083,9 @@ function updateAnimeTableView(animeList) {
 
     // Add click event listener using event delegation
     const clickHandler = function (e) {
-        // Find the closest row with data-id attribute
         const row = e.target.closest('tr[data-id]');
         if (!row) return;
 
-        // Don't trigger if clicking on interactive elements
         if (e.target.closest('.progress-wrapper') ||
             e.target.closest('.badge') ||
             e.target.closest('a') ||
@@ -2151,6 +2160,7 @@ function updateAnimeDisplay() {
     // Update the anime table
     updateAnimeTableView(filteredAnime);
 }
+
 function handleAddAnime(e) {
     e.preventDefault();
 
@@ -2168,7 +2178,7 @@ function handleAddAnime(e) {
         .map(genre => genre.trim())
         .filter(Boolean);
 
-    // Get selected date from form
+    // Get selected date from form (month/year only for display)
     const selectedYear = document.getElementById('animeYear')?.value;
     const selectedMonth = document.getElementById('animeMonth')?.value;
 
@@ -2195,27 +2205,32 @@ function handleAddAnime(e) {
 
     const existingAnime = animeData.find(a => a.id == currentEditId);
     const nowTimestamp = getNepalTimestamp();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+    const currentDay = String(now.getDate()).padStart(2, '0');
 
-    // Handle finish date - use selected date if provided, otherwise keep existing or null
-    let finishDate = null;
-    let finishTimestamp = null;
+    // Handle finish date with ACTUAL date storage
+    let finishDate = null;        // For display: YYYY-MM (or YYYY-MM-DD for sorting)
+    let actualFinishDate = null;  // Store actual completion date
 
     if (status === 'Completed') {
-        if (selectedYear && selectedMonth) {
-            // Use the date the user selected
+        if (existingAnime && isEditing && existingAnime.actualFinishDate) {
+            // Editing existing - preserve the actual date
+            actualFinishDate = existingAnime.actualFinishDate;
+            finishDate = existingAnime.finishDate || actualFinishDate.substring(0, 7);
+        } else if (selectedYear && selectedMonth && !existingAnime) {
+            // User manually selected month/year (rare, backwards compatibility)
             const year = selectedYear;
             const month = String(selectedMonth).padStart(2, '0');
-            finishDate = `${year}-${month}-01`;
-            finishTimestamp = `${year}-${month}-01 23:59:59`;
-        } else if (existingAnime?.finishDate) {
-            // Keep existing date when editing
-            finishDate = existingAnime.finishDate;
-            finishTimestamp = existingAnime.finishTimestamp;
+            // Use the last day of selected month as actual date approximation
+            const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+            actualFinishDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+            finishDate = `${year}-${month}`;
         } else {
-            // Fallback to current date
-            const today = nowTimestamp.split(' ')[0];
-            finishDate = today;
-            finishTimestamp = `${today} 23:59:59`;
+            // NEW COMPLETION - Store the ACTUAL date
+            actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
+            finishDate = `${currentYear}-${currentMonth}`;  // Store as YYYY-MM for display
         }
     }
 
@@ -2231,7 +2246,7 @@ function handleAddAnime(e) {
         existingAnime.cover = cover;
         existingAnime.genres = genres;
         existingAnime.finishDate = finishDate;
-        existingAnime.finishTimestamp = finishTimestamp;
+        existingAnime.actualFinishDate = actualFinishDate;
         existingAnime.updatedAt = nowTimestamp;
     } else {
         // Add new
@@ -2247,7 +2262,7 @@ function handleAddAnime(e) {
             cover,
             genres,
             finishDate: finishDate,
-            finishTimestamp: finishTimestamp,
+            actualFinishDate: actualFinishDate,
             createdAt: nowTimestamp,
             updatedAt: nowTimestamp
         };
