@@ -2210,8 +2210,14 @@ function handleAddAnime(e) {
     const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
     const currentDay = String(now.getDate()).padStart(2, '0');
 
+    // Track what changed for toast message
+    let wasCompletedBefore = existingAnime?.userStatus === 'Completed';
+    let isNowCompleted = status === 'Completed';
+    let statusChangedToCompleted = isEditing && !wasCompletedBefore && isNowCompleted;
+    let statusChangedFromCompleted = isEditing && wasCompletedBefore && !isNowCompleted;
+
     // Handle finish date with ACTUAL date storage
-    let finishDate = null;        // For display: YYYY-MM (or YYYY-MM-DD for sorting)
+    let finishDate = null;        // For display: YYYY-MM
     let actualFinishDate = null;  // Store actual completion date
 
     if (status === 'Completed') {
@@ -2231,6 +2237,36 @@ function handleAddAnime(e) {
             // NEW COMPLETION - Store the ACTUAL date
             actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
             finishDate = `${currentYear}-${currentMonth}`;  // Store as YYYY-MM for display
+        }
+    }
+
+    // Determine toast message BEFORE making changes
+    let toastMessage = '';
+    let logAction = '';
+    
+    if (!isEditing) {
+        // Adding new anime
+        if (status === 'Completed') {
+            toastMessage = ` "${title}" added and marked as completed!`;
+            logAction = 'completed';
+        } else {
+            toastMessage = ` "${title}" added to your ${status === 'Watching' ? 'watching' : 'plan to watch'} list!`;
+            logAction = 'added';
+        }
+    } else if (isEditing) {
+        // Editing existing anime
+        if (statusChangedToCompleted) {
+            toastMessage = ` "${title}" marked as completed! Great job!`;
+            logAction = 'completed';
+        } else if (statusChangedFromCompleted) {
+            toastMessage = ` "${title}" updated (Completed → ${status})`;
+            logAction = 'edited';
+        } else if (existingAnime.title !== title) {
+            toastMessage = ` "${existingAnime.title}" renamed to "${title}"`;
+            logAction = 'edited';
+        } else {
+            toastMessage = ` "${title}" updated successfully!`;
+            logAction = 'edited';
         }
     }
 
@@ -2271,14 +2307,8 @@ function handleAddAnime(e) {
 
     saveData();
 
-    // Log activity
-    if (status === 'Completed' && (!isEditing || existingAnime?.userStatus !== 'Completed')) {
-        logActivity('completed', title);
-    } else if (!isEditing) {
-        logActivity('added', title);
-    } else if (isEditing) {
-        logActivity('edited', title);
-    }
+    // Log activity with determined action
+    logActivity(logAction, title);
 
     // Close modal and reset
     const addAnimeModal = document.getElementById('addAnimeModal');
@@ -2303,7 +2333,8 @@ function handleAddAnime(e) {
     saveData();
     updateAllComponents();
 
-    showToast(isEditing ? 'Anime updated!' : 'Anime added!', 'success');
+    // Show appropriate toast message
+    showToast(toastMessage, 'success');
 }
 
 // Save data to localStorage
@@ -2313,7 +2344,7 @@ function saveData() {
 function updateAllComponents() {
     updateStats();
     updateCharts();
-    refreshAllCharts(); // ✅ ADD THIS LINE
+    refreshAllCharts();
     updateCurrentMonthAnime();
     updateAnimeDisplay();
     updateTotalAnimeCountAllMonths();
