@@ -1512,22 +1512,35 @@ function calculateGenreDistribution() {
     return genreCount;
 }
 
-// Calculate yearly completion
+// Calculate yearly completion - FIXED VERSION
 function calculateYearlyCompletion() {
-    const yearlyData = [0, 0, 0, 0, 0, 0]; // 2023-2028
+    const currentYear = new Date().getFullYear();
+    
+    // Define the years we want to display
+    const years = [2024, 2025, 2026, 2027, 2028];
+    const yearlyData = [0, 0, 0, 0, 0]; // Index 0=2024, 1=2025, etc.
 
     animeData.forEach(anime => {
-        if (anime.userStatus === 'Completed' && anime.finishDate) {
-            const finishDate = new Date(anime.finishDate);
-            const year = finishDate.getFullYear();
-            const index = year - 2023;
-
-            if (index >= 0 && index < 6) {
-                yearlyData[index]++;
+        if (anime.userStatus === 'Completed') {
+            let completionYear = null;
+            
+            // Try to get the completion year from different fields
+            if (anime.actualFinishDate) {
+                completionYear = parseInt(anime.actualFinishDate.split('-')[0]);
+            } else if (anime.finishDate) {
+                // finishDate could be "2026-05" or "2026-05-01"
+                completionYear = parseInt(anime.finishDate.split('-')[0]);
+            } else if (anime.finishTimestamp) {
+                completionYear = parseInt(anime.finishTimestamp.split('-')[0]);
+            }
+            
+            // Find which year index this belongs to
+            const yearIndex = years.indexOf(completionYear);
+            if (yearIndex !== -1) {
+                yearlyData[yearIndex]++;
             }
         }
     });
-
     return yearlyData;
 }
 
