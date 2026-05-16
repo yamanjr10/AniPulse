@@ -538,322 +538,263 @@ h6 {
 .theme-toggle:hover i {
   color: white !important;
 }
+/* ============================================
+   USER PROFILE - MODERN GLASS DESIGN
+   ============================================ */
 
-/* User Profile */
+/* User Profile Container */
 .user-profile {
-  position: relative !important;
-  cursor: pointer !important;
+  position: relative;
+  cursor: pointer;
+  margin-left: 8px;
 }
 
+/* Avatar Styling */
 .user-avatar {
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 16px !important;
-  border: 2px solid #8B5CF6 !important;
-  object-fit: cover !important;
-  transition: all 0.3s ease !important;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 2px solid #8B5CF6;
+  object-fit: cover;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-profile:hover .user-avatar {
-  transform: scale(1.05) !important;
-  border-color: #A78BFA !important;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3) !important;
-}
-
-/* Profile Dropdown */
-.profile-dropdown {
-  position: absolute !important;
-  top: 55px !important;
-  right: 0 !important;
-  width: 300px !important;
-  background: rgba(20, 28, 45, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border-radius: 20px !important;
-  border: 1px solid rgba(139, 92, 246, 0.3) !important;
-  padding: 20px !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  transform: translateY(-10px) !important;
-  transition: all 0.3s ease !important;
-  z-index: 1001 !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
-}
-
-.profile-dropdown.open {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translateY(0) !important;
-}
-
-/* User Info inside dropdown */
-.profile-dropdown .sidebar-user {
-  display: flex !important;
-  align-items: center !important;
-  gap: 15px !important;
-  padding-bottom: 15px !important;
-  margin-bottom: 15px !important;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
-}
-
-.profile-dropdown .user-avatar-container {
-  position: relative !important;
-}
-
-.profile-dropdown .sidebar-avatar {
-  width: 55px !important;
-  height: 55px !important;
-  border-radius: 16px !important;
-  border: 2px solid #8B5CF6 !important;
-  object-fit: cover !important;
-}
-
-.online-status {
-  position: absolute !important;
-  bottom: 3px !important;
-  right: 3px !important;
-  width: 12px !important;
-  height: 12px !important;
-  background: #10B981 !important;
-  border-radius: 50% !important;
-  border: 2px solid rgba(20, 28, 45, 0.95) !important;
-}
-
-.profile-dropdown .sidebar-user-info {
-  flex: 1 !important;
-}
-
-.profile-dropdown .sidebar-username {
-  font-weight: 700 !important;
-  font-size: 1rem !important;
-  color: white !important;
-  margin-bottom: 5px !important;
-  align-items: center !important;
-}
-
-.profile-dropdown .sidebar-user-stats {
-  display: flex !important;
-  gap: 15px !important;
-}
-
-.profile-dropdown .stat-item {
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.profile-dropdown .stat-number {
-  font-weight: 800 !important;
-  font-size: 1.1rem !important;
-  color: #A78BFA !important;
-}
-
-.profile-dropdown .stat-label {
-  font-size: 0.7rem !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-}
-
-/* Menu Items */
-.profile-dropdown .sidebar-menu {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 5px !important;
-}
-
-.profile-dropdown .menu-item {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  padding: 10px 12px !important;
-  border-radius: 12px !important;
-  color: rgba(255, 255, 255, 0.8) !important;
-  font-size: 0.9rem !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-}
-
-.profile-dropdown .menu-item i {
-  width: 22px !important;
-  font-size: 1rem !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-}
-
-.profile-dropdown .menu-item:hover {
-  background: rgba(139, 92, 246, 0.2) !important;
-  transform: translateX(5px) !important;
-}
-
-.profile-dropdown .menu-item:hover i {
-  color: #A78BFA !important;
-}
-
-.profile-dropdown .menu-item.active {
-  background: rgba(139, 92, 246, 0.25) !important;
-  color: #A78BFA !important;
-  border-left: 3px solid #A78BFA !important;
-}
-
-.profile-dropdown .menu-item.active i {
-  color: #A78BFA !important;
-}
-
-/* Light Theme Support - Glass morph version */
-[data-theme="light"] .top-bar {
-  background: rgba(255, 255, 255, 0.7) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(139, 92, 246, 0.25) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
-}
-
-[data-theme="light"] .top-bar::before {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4)) !important;
-}
-
-[data-theme="light"] .app-logo span {
-  background: linear-gradient(135deg, #1E293B, #8B5CF6) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-}
-
-[data-theme="light"] .search-trigger,
-[data-theme="light"] .theme-toggle {
-  background: rgba(0, 0, 0, 0.05) !important;
-  border-color: rgba(139, 92, 246, 0.3) !important;
-}
-
-[data-theme="light"] .search-trigger i,
-[data-theme="light"] .theme-toggle i {
-  color: #1E293B !important;
-}
-
-[data-theme="light"] .search-dropdown,
-[data-theme="light"] .profile-dropdown {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(139, 92, 246, 0.3) !important;
-}
-
-[data-theme="light"] .profile-dropdown .sidebar-username {
-  color: #1E293B !important;
-}
-
-[data-theme="light"] .profile-dropdown .stat-number {
-  color: #6366F1 !important;
-}
-
-[data-theme="light"] .profile-dropdown .menu-item {
-  color: #334155 !important;
-}
-
-[data-theme="light"] .profile-dropdown .menu-item i {
-  color: #64748B !important;
-}
-
-[data-theme="light"] .profile-dropdown .menu-item:hover {
-  background: rgba(99, 102, 241, 0.1) !important;
-}
-
-[data-theme="light"] .search-input-wrapper input {
-  background: rgba(0, 0, 0, 0.05) !important;
-  color: #1E293B !important;
-}
-
-/* Mobile Responsive */
-@media (max-width: 1024px) {
-  .top-bar {
-    left: 24px !important;
-    right: 24px !important;
-    width: calc(100% - 48px) !important;
-    top: 24px !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .top-bar {
-    left: 16px !important;
-    right: 16px !important;
-    width: calc(100% - 32px) !important;
-    top: 16px !important;
-    padding: 0 20px !important;
-    border-radius: 22px !important;
-  }
-
-  .app-logo h2 {
-    font-size: 1.2rem !important;
-  }
-
-  .app-logo i {
-    font-size: 1.4rem !important;
-  }
-
-  .search-trigger,
-  .theme-toggle,
-  .user-avatar {
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 14px !important;
-  }
-
-  .search-dropdown,
-  .profile-dropdown {
-    width: 280px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .top-bar {
-    left: 12px !important;
-    right: 12px !important;
-    width: calc(100% - 24px) !important;
-    top: 12px !important;
-    padding: 0 12px !important;
-    border-radius: 18px !important;
-    height: 60px !important;
-  }
-
-  .user-actions {
-    gap: 10px !important;
-  }
-
-  .search-trigger,
-  .theme-toggle,
-  .user-avatar {
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 12px !important;
-  }
-
-  .search-dropdown,
-  .profile-dropdown {
-    width: calc(100vw - 30px) !important;
-    right: -5px !important;
-  }
+  transform: scale(1.05);
+  border-color: #A78BFA;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
 }
 
 /* ============================================
-   PREMIUM SIDEBAR MENU - ICON + TEXT COLOR CHANGE
+   PROFILE DROPDOWN - GLASS MORPHISM
+   ============================================ */
+
+.profile-dropdown {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  width: 320px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px) scale(0.98);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.profile-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* Dropdown Arrow */
+.profile-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 18px;
+  width: 16px;
+  height: 16px;
+  background: rgba(15, 23, 42, 0.95);
+  border-left: 1px solid rgba(139, 92, 246, 0.25);
+  border-top: 1px solid rgba(139, 92, 246, 0.25);
+  transform: rotate(45deg);
+  backdrop-filter: blur(20px);
+}
+
+/* User Info Section */
+.profile-dropdown .sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.profile-dropdown .user-avatar-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-dropdown .sidebar-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  border: 2px solid #8B5CF6;
+  object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+/* Online Status Indicator */
+.online-status {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  background: #10B981;
+  border-radius: 50%;
+  border: 2px solid rgba(15, 23, 42, 0.95);
+  animation: pulseOnline 2s infinite;
+}
+
+@keyframes pulseOnline {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* User Info Text */
+.profile-dropdown .sidebar-user-info {
+  flex: 1;
+}
+
+.profile-dropdown .sidebar-username {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #F1F5F9;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+/* User Stats */
+.profile-dropdown .sidebar-user-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.profile-dropdown .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.profile-dropdown .stat-number {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #A78BFA;
+  line-height: 1.2;
+}
+
+.profile-dropdown .stat-label {
+  font-size: 0.7rem;
+  color: rgba(241, 245, 249, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================
+   DROPDOWN MENU ITEMS
+   ============================================ */
+
+.profile-dropdown .sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-dropdown .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: rgba(241, 245, 249, 0.8);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover Effect for Dropdown Items */
+.profile-dropdown .menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.2), transparent);
+  transition: left 0.4s ease;
+}
+
+.profile-dropdown .menu-item:hover::before {
+  left: 100%;
+}
+
+.profile-dropdown .menu-item i {
+  width: 22px;
+  font-size: 0.95rem;
+  color: rgba(241, 245, 249, 0.6);
+  transition: all 0.25s ease;
+}
+
+.profile-dropdown .menu-item span {
+  flex: 1;
+}
+
+.profile-dropdown .menu-item:hover {
+  background: rgba(139, 92, 246, 0.15);
+  transform: translateX(5px);
+}
+
+.profile-dropdown .menu-item:hover i {
+  color: #A78BFA;
+  transform: scale(1.1);
+}
+
+/* Active State in Dropdown */
+.profile-dropdown .menu-item.active {
+  background: rgba(139, 92, 246, 0.2);
+  color: #A78BFA;
+  border-left: 3px solid #A78BFA;
+}
+
+.profile-dropdown .menu-item.active i {
+  color: #A78BFA;
+}
+
+/* ============================================
+   SIDEBAR MENU - ENHANCED
    ============================================ */
 
 .sidebar-menu {
-  padding: var(--space-md);
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 8px;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md) var(--space-lg);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  color: #94A3B8;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
-/* Glow effect on hover */
+/* Glass Reflection Effect */
 .menu-item::before {
   content: '';
   position: absolute;
@@ -861,7 +802,7 @@ h6 {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
   transition: left 0.5s ease;
 }
 
@@ -869,16 +810,16 @@ h6 {
   left: 100%;
 }
 
-/* Icon styling - smooth transition */
+/* Icon Styling */
 .menu-item i {
-  width: 22px;
+  width: 24px;
   font-size: 1.1rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 1;
 }
 
-/* Text styling */
+/* Text Styling */
 .menu-item span {
   position: relative;
   z-index: 1;
@@ -886,17 +827,17 @@ h6 {
 }
 
 /* ============================================
-   HOVER EFFECTS - ICON + TEXT COLOR CHANGE
+   HOVER EFFECTS - PER MENU ITEM
    ============================================ */
 
 .menu-item:hover {
-  transform: translateX(6px);
+  transform: translateX(8px);
 }
 
-/* Dashboard - Purple theme */
+/* Dashboard - Purple Theme */
 .menu-item[data-page="dashboard"]:hover {
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.08));
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
 }
 
 .menu-item[data-page="dashboard"]:hover i {
@@ -907,14 +848,13 @@ h6 {
 
 .menu-item[data-page="dashboard"]:hover span {
   color: #A78BFA;
-  text-shadow: 0 0 4px rgba(167, 139, 250, 0.3);
   letter-spacing: 0.3px;
 }
 
-/* My Anime - Blue theme */
+/* My Anime - Blue Theme */
 .menu-item[data-page="anime-list"]:hover {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.08));
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
 }
 
 .menu-item[data-page="anime-list"]:hover i {
@@ -925,14 +865,13 @@ h6 {
 
 .menu-item[data-page="anime-list"]:hover span {
   color: #60A5FA;
-  text-shadow: 0 0 4px rgba(96, 165, 250, 0.3);
   letter-spacing: 0.3px;
 }
 
-/* Watch List - Red theme */
+/* Watch List - Red Theme */
 .menu-item[data-page="watchlist"]:hover {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08));
-  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
 }
 
 .menu-item[data-page="watchlist"]:hover i {
@@ -943,14 +882,13 @@ h6 {
 
 .menu-item[data-page="watchlist"]:hover span {
   color: #F87171;
-  text-shadow: 0 0 4px rgba(248, 113, 113, 0.3);
   letter-spacing: 0.3px;
 }
 
-/* My Stats - Green theme */
+/* Statistics - Green Theme */
 .menu-item[data-page="statistics"]:hover {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
 }
 
 .menu-item[data-page="statistics"]:hover i {
@@ -961,14 +899,13 @@ h6 {
 
 .menu-item[data-page="statistics"]:hover span {
   color: #34D399;
-  text-shadow: 0 0 4px rgba(52, 211, 153, 0.3);
   letter-spacing: 0.3px;
 }
 
-/* Achievements - Yellow theme */
+/* Achievements - Yellow/Orange Theme */
 .menu-item[data-page="achievements"]:hover {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08));
-  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
 }
 
 .menu-item[data-page="achievements"]:hover i {
@@ -979,14 +916,13 @@ h6 {
 
 .menu-item[data-page="achievements"]:hover span {
   color: #FBBF24;
-  text-shadow: 0 0 4px rgba(251, 191, 36, 0.3);
   letter-spacing: 0.3px;
 }
 
-/* Community - Cyan theme */
+/* Community - Cyan Theme */
 .menu-item[data-page="community"]:hover {
   background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.08));
-  box-shadow: 0 8px 20px rgba(6, 182, 212, 0.25);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
 }
 
 .menu-item[data-page="community"]:hover i {
@@ -997,14 +933,13 @@ h6 {
 
 .menu-item[data-page="community"]:hover span {
   color: #22D3EE;
-  text-shadow: 0 0 4px rgba(34, 211, 238, 0.3);
   letter-spacing: 0.3px;
 }
 
-/* Settings - Gray theme */
+/* Settings - Gray/Slate Theme */
 .menu-item[data-page="settings"]:hover {
   background: linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(71, 85, 105, 0.08));
-  box-shadow: 0 8px 20px rgba(100, 116, 139, 0.25);
+  box-shadow: 0 4px 15px rgba(100, 116, 139, 0.2);
 }
 
 .menu-item[data-page="settings"]:hover i {
@@ -1015,7 +950,6 @@ h6 {
 
 .menu-item[data-page="settings"]:hover span {
   color: #94A3B8;
-  text-shadow: 0 0 4px rgba(148, 163, 184, 0.3);
   letter-spacing: 0.3px;
 }
 
@@ -1023,11 +957,39 @@ h6 {
    ACTIVE STATE STYLES
    ============================================ */
 
+.menu-item.active {
+  position: relative;
+  animation: slideInLeft 0.4s ease;
+}
+
+.menu-item.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: currentColor;
+  border-radius: 3px;
+  animation: glowLine 1.5s infinite;
+}
+
+@keyframes glowLine {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 6px 2px currentColor;
+  }
+}
+
 /* Dashboard Active */
 .menu-item.active[data-page="dashboard"] {
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.12));
-  border-left: 3px solid #A78BFA;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  color: #A78BFA;
 }
 
 .menu-item.active[data-page="dashboard"] i {
@@ -1035,111 +997,98 @@ h6 {
   text-shadow: 0 0 6px rgba(167, 139, 250, 0.4);
 }
 
-.menu-item.active[data-page="dashboard"] span {
-  color: #A78BFA;
-  font-weight: 600;
-}
-
 /* My Anime Active */
 .menu-item.active[data-page="anime-list"] {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.12));
-  border-left: 3px solid #60A5FA;
+  color: #60A5FA;
 }
 
 .menu-item.active[data-page="anime-list"] i {
   color: #60A5FA;
-  text-shadow: 0 0 6px rgba(96, 165, 250, 0.4);
-}
-
-.menu-item.active[data-page="anime-list"] span {
-  color: #60A5FA;
-  font-weight: 600;
 }
 
 /* Watch List Active */
 .menu-item.active[data-page="watchlist"] {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.12));
-  border-left: 3px solid #F87171;
+  color: #F87171;
 }
 
 .menu-item.active[data-page="watchlist"] i {
   color: #F87171;
-  text-shadow: 0 0 6px rgba(248, 113, 113, 0.4);
 }
 
-.menu-item.active[data-page="watchlist"] span {
-  color: #F87171;
-  font-weight: 600;
-}
-
-/* My Stats Active */
+/* Statistics Active */
 .menu-item.active[data-page="statistics"] {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.12));
-  border-left: 3px solid #34D399;
+  color: #34D399;
 }
 
 .menu-item.active[data-page="statistics"] i {
   color: #34D399;
-  text-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
-}
-
-.menu-item.active[data-page="statistics"] span {
-  color: #34D399;
-  font-weight: 600;
 }
 
 /* Achievements Active */
 .menu-item.active[data-page="achievements"] {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.12));
-  border-left: 3px solid #FBBF24;
+  color: #FBBF24;
 }
 
 .menu-item.active[data-page="achievements"] i {
   color: #FBBF24;
-  text-shadow: 0 0 6px rgba(251, 191, 36, 0.4);
-}
-
-.menu-item.active[data-page="achievements"] span {
-  color: #FBBF24;
-  font-weight: 600;
 }
 
 /* Community Active */
 .menu-item.active[data-page="community"] {
   background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(8, 145, 178, 0.12));
-  border-left: 3px solid #22D3EE;
+  color: #22D3EE;
 }
 
 .menu-item.active[data-page="community"] i {
   color: #22D3EE;
-  text-shadow: 0 0 6px rgba(34, 211, 238, 0.4);
-}
-
-.menu-item.active[data-page="community"] span {
-  color: #22D3EE;
-  font-weight: 600;
 }
 
 /* Settings Active */
 .menu-item.active[data-page="settings"] {
   background: linear-gradient(135deg, rgba(100, 116, 139, 0.2), rgba(71, 85, 105, 0.12));
-  border-left: 3px solid #94A3B8;
+  color: #94A3B8;
 }
 
 .menu-item.active[data-page="settings"] i {
   color: #94A3B8;
-  text-shadow: 0 0 6px rgba(148, 163, 184, 0.4);
-}
-
-.menu-item.active[data-page="settings"] span {
-  color: #94A3B8;
-  font-weight: 600;
 }
 
 /* ============================================
-   CLICK RIPPLE EFFECT
+   ANIMATIONS
    ============================================ */
 
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-3px) scale(1.1);
+  }
+  80% {
+    transform: translateY(1px) scale(1.05);
+  }
+}
+
+.menu-item:hover i {
+  animation: iconBounce 0.4s ease;
+}
+
+/* Click Ripple Effect */
 .menu-item:active {
   transform: scale(0.97);
   transition: transform 0.1s ease;
@@ -1172,83 +1121,158 @@ h6 {
 }
 
 /* ============================================
-   ICON BOUNCE ANIMATION ON HOVER
+   LIGHT THEME SUPPORT
    ============================================ */
 
-@keyframes iconBounce {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  40% {
-    transform: translateY(-3px) scale(1.1);
-  }
-  80% {
-    transform: translateY(1px) scale(1.05);
-  }
+[data-theme="light"] .profile-dropdown {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(139, 92, 246, 0.3);
 }
 
-.menu-item:hover i {
-  animation: iconBounce 0.5s ease;
+[data-theme="light"] .profile-dropdown::before {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+[data-theme="light"] .profile-dropdown .sidebar-username {
+  color: #1E293B;
+}
+
+[data-theme="light"] .profile-dropdown .stat-number {
+  color: #6366F1;
+}
+
+[data-theme="light"] .profile-dropdown .stat-label {
+  color: rgba(30, 41, 59, 0.6);
+}
+
+[data-theme="light"] .profile-dropdown .menu-item {
+  color: #334155;
+}
+
+[data-theme="light"] .profile-dropdown .menu-item i {
+  color: #64748B;
+}
+
+[data-theme="light"] .profile-dropdown .menu-item:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+[data-theme="light"] .profile-dropdown .menu-item:hover i {
+  color: #6366F1;
 }
 
 /* ============================================
-   ACTIVE ITEM PULSE EFFECT
+   RESPONSIVE DESIGN
    ============================================ */
 
-@keyframes activeGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+/* Tablet */
+@media (max-width: 1024px) {
+  .profile-dropdown {
+    width: 300px;
   }
-  50% {
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-  }
-}
-
-.menu-item.active {
-  animation: activeGlow 2s infinite;
-}
-
-/* ============================================
-   SLIDE IN ANIMATION FOR ACTIVE ITEM
-   ============================================ */
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+  
+  .profile-dropdown .sidebar-avatar {
+    width: 50px;
+    height: 50px;
   }
 }
 
-.menu-item.active {
-  animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* Mobile Landscape */
+@media (max-width: 768px) {
+  .user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+  
+  .profile-dropdown {
+    width: 280px;
+    padding: 16px;
+    top: 50px;
+  }
+  
+  .profile-dropdown .sidebar-avatar {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .profile-dropdown .sidebar-username {
+    font-size: 0.9rem;
+  }
+  
+  .profile-dropdown .stat-number {
+    font-size: 1rem;
+  }
+  
+  .profile-dropdown .menu-item {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Mobile Portrait */
+@media (max-width: 480px) {
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  
+  .profile-dropdown {
+    width: calc(100vw - 30px);
+    right: -10px;
+    border-radius: 16px;
+  }
+  
+  .profile-dropdown::before {
+    right: 14px;
+  }
+  
+  .profile-dropdown .sidebar-user {
+    gap: 12px;
+  }
+  
+  .profile-dropdown .sidebar-avatar {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .profile-dropdown .sidebar-user-stats {
+    gap: 12px;
+  }
+  
+  .menu-item {
+    padding: 10px 14px;
+    gap: 12px;
+  }
+  
+  .menu-item i {
+    width: 20px;
+    font-size: 1rem;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 375px) {
+  .profile-dropdown .sidebar-user-stats {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .profile-dropdown .stat-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .profile-dropdown .stat-label {
+    font-size: 0.65rem;
+  }
 }
 
 /* ============================================
-   DARK MODE ADJUSTMENTS
-   ============================================ */
-
-[data-theme="dark"] .menu-item:hover {
-  backdrop-filter: blur(4px);
-}
-
-[data-theme="dark"] .menu-item.active {
-  backdrop-filter: blur(4px);
-}
-
-/* ============================================
-   LIGHT MODE ADJUSTMENTS
-   ============================================ */
-
-[data-theme="light"] .menu-item.active {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
-}
-
-/* ============================================
-   MOBILE TOUCH OPTIMIZATIONS
+   TOUCH DEVICE OPTIMIZATIONS
    ============================================ */
 
 @media (hover: none) and (pointer: coarse) {
@@ -1264,6 +1288,10 @@ h6 {
   .menu-item:hover::before {
     left: -100%;
   }
+  
+  .profile-dropdown .menu-item:active {
+    transform: scale(0.98);
+  }
 }
 
 /* ============================================
@@ -1275,13 +1303,18 @@ h6 {
   .menu-item::before,
   .menu-item i,
   .menu-item::after,
-  .menu-item span {
+  .profile-dropdown,
+  .user-avatar {
     animation: none !important;
     transition: none !important;
   }
   
   .menu-item:hover {
     transform: translateX(4px);
+  }
+  
+  .online-status {
+    animation: none;
   }
 }
 
