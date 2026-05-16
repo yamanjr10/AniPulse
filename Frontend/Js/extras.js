@@ -469,31 +469,32 @@ async function checkForUserUpdates() {
 }
 
 // =============================================
-// CLEAN LEVEL SYSTEM - SAFE VERSION
+// LEVEL SYSTEM 
 // =============================================
 
 // Level definitions
 const LEVELS = [
-    { level: 1, title: "Rookie", xpRequired: 0 },
-    { level: 2, title: "Watcher", xpRequired: 100 },
-    { level: 3, title: "Collector", xpRequired: 250 },
-    { level: 4, title: "Enthusiast", xpRequired: 500 },
-    { level: 5, title: "Dedicated", xpRequired: 800 },
-    { level: 6, title: "Marathoner", xpRequired: 1200 },
-    { level: 7, title: "Master", xpRequired: 1700 },
-    { level: 8, title: "Veteran", xpRequired: 2300 },
-    { level: 9, title: "Elite", xpRequired: 3000 },
-    { level: 10, title: "Legend", xpRequired: 4000 },
-    { level: 11, title: "Sage", xpRequired: 5200 },
-    { level: 12, title: "Completionist", xpRequired: 6500 },
-    { level: 13, title: "Archivist", xpRequired: 8000 },
-    { level: 14, title: "Master", xpRequired: 10000 },
-    { level: 15, title: "Grand Master", xpRequired: 12500 },
-    { level: 16, title: "Anime God", xpRequired: 15000 },
-    { level: 17, title: "Transcendent", xpRequired: 18000 },
-    { level: 18, title: "Mythic", xpRequired: 22000 },
-    { level: 19, title: "Eternal", xpRequired: 27000 },
-    { level: 20, title: "Legendary", xpRequired: 35000 }
+  { level: 1, title: "Newbie", xpRequired: 0 },
+  { level: 2, title: "Scout", xpRequired: 100 },
+  { level: 3, title: "Viewer", xpRequired: 250 },
+  { level: 4, title: "Otaku", xpRequired: 500 },
+  { level: 5, title: "Fanatic", xpRequired: 800 },
+  { level: 6, title: "Binge Hunter", xpRequired: 1200 },
+  { level: 7, title: "Senpai", xpRequired: 1700 },
+  { level: 8, title: "Shonen Hero", xpRequired: 2300 },
+  { level: 9, title: "Elite Otaku", xpRequired: 3000 },
+  { level: 10, title: "Anime Legend", xpRequired: 4000 },
+  { level: 11, title: "Sage", xpRequired: 5200 },
+  { level: 12, title: "Archive Keeper", xpRequired: 6500 },
+  { level: 13, title: "Dimension Traveler", xpRequired: 8000 },
+  { level: 14, title: "Anime Master", xpRequired: 10000 },
+  { level: 15, title: "Grand Senpai", xpRequired: 12500 },
+  { level: 16, title: "Hokage", xpRequired: 15000 },
+  { level: 17, title: "Transcendent", xpRequired: 18000 },
+  { level: 18, title: "Elite", xpRequired: 22000 },
+  { level: 19, title: "Eternal Watcher", xpRequired: 27000 },
+  { level: 20, title: "Legend", xpRequired: 35000 },
+  { level: 21, title: "Anime Deity", xpRequired: 45000 },
 ];
 
 // Calculate total XP (safe version)
