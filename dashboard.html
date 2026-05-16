@@ -30,7 +30,7 @@
     <!-- Update theme colors for PWA -->
     <meta name="theme-color" content="#1a1f2e">
     <meta name="msapplication-TileImage" content="/icon.png">
-    
+
     <!-- Force no caching of HTML -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -96,6 +96,25 @@
             <!-- User Action -->
             <div class="user-actions">
 
+                <!-- Notification Bell -->
+                <div class="notification-bell" id="notificationBell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-dot" id="notificationDot" style="display: none;"></span>
+                </div>
+
+                <!-- Notification Center -->
+                <div class="notification-center" id="notificationCenter">
+                    <div class="notification-header">
+                        <h4><i class="fas fa-bell"></i> Notifications</h4>
+                        <button id="clearAllNotifications">Clear all</button>
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        <div style="text-align: center; padding: 20px; color: #64748b;">
+                            No notifications yet
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Search -->
                 <div class="search-trigger" id="searchToggle">
                     <i class="fas fa-search"></i>
@@ -120,7 +139,7 @@
                     <!-- Profile Dropdown -->
                     <div class="profile-dropdown">
 
-                        <!--  sidebar user profile -->
+                        <!-- sidebar user profile -->
                         <div class="sidebar-user">
                             <div class="user-avatar-container">
                                 <img loading="lazy"
@@ -130,6 +149,11 @@
                             </div>
                             <div class="sidebar-user-info">
                                 <div class="sidebar-username">Loading...</div>
+                                <!-- Clean Level Badge -->
+                                <div class="sidebar-level" id="sidebarLevel">
+                                    <span class="level-badge" id="levelBadgeText">Lv.16</span>
+                                    <span class="level-title" id="levelTitleText">Anime God</span>
+                                </div>
                                 <div class="sidebar-user-stats">
                                     <div class="stat-item">
                                         <span class="stat-number" id="statNumber">0</span>
@@ -712,433 +736,459 @@
                 <h2 class="section-title"><i class="fas fa-cog"></i> Settings</h2>
 
                 <div class="settings-container">
-                    <!-- Profile Preview - Full Width -->
+                    <!-- Profile Preview -->
                     <div class="profile-preview">
                         <img loading="lazy"
                             src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
                             alt="User Avatar" class="profile-preview-avatar" id="profilePreviewAvatar">
                         <div class="profile-preview-info">
-                            <div class="profile-preview-name" id="profilePreviewName">Yaman Jr</div>
+                            <div class="profile-preview-name" id="profilePreviewName">Aris</div>
                             <div class="profile-preview-join-date">
                                 <i class="fas fa-calendar-plus"></i>
-                                <span id="memberSinceText">Member since ...</span>
+                                <span id="memberSinceText">Member since May 2026</span>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Settings Groups Container -->
-                <div class="settings-groups-container">
-                    <!-- Profile Settings -->
-                    <div class="settings-group">
-                        <h3><i class="fas fa-user"></i> Profile Settings</h3>
-                        <div class="settings-item">
-                            <label for="usernameInput">Display Name</label>
-                            <input type="text" id="usernameInput" placeholder="Enter your display name">
+                    <!-- Level Progress Card - Clean Design -->
+                    <div class="level-card">
+                        <div class="level-card-header">
+                            <div class="level-rank">
+                                <i class="fas fa-trophy"></i>
+                                <span id="settingsLevelTitle">Anime God</span>
+                            </div>
+                            <div class="level-number" id="settingsLevelNumber">Level 16</div>
+                        </div>
+                        <div class="level-progress">
+                            <div class="progress-track">
+                                <div class="progress-fill" id="settingsProgressFill" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span id="settingsCurrentXP">2464</span>
+                                <span>/</span>
+                                <span id="settingsNextXP">3000</span>
+                                <span>XP</span>
+                            </div>
+                        </div>
+                        <div class="level-next">
+                            <i class="fas fa-arrow-up"></i>
+                            <span id="settingsNextInfo">Next: Transcendent at 18000 XP</span>
+                        </div>
+                    </div>
+
+                    <!-- Settings Groups Container -->
+                    <div class="settings-groups-container">
+                        <!-- Profile Settings -->
+                        <div class="settings-group">
+                            <h3><i class="fas fa-user"></i> Profile Settings</h3>
+                            <div class="settings-item">
+                                <label for="usernameInput">Display Name</label>
+                                <input type="text" id="usernameInput" placeholder="Enter your display name">
+                            </div>
+
+                            <div class="settings-item">
+                                <label for="avatarInput">Profile Photo</label>
+                                <div class="file-input-wrapper">
+                                    <input type="file" id="avatarInput" accept="image/*">
+                                    <div class="file-input-btn" style="background-color: var(--primary)">
+                                        <i class="fas fa-upload"></i> Choose Image
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-item">
+                                <button id="resetAvatar" class="btn-reset">
+                                    <i class="fas fa-undo"></i> Reset to Default Avatar
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="settings-item">
-                            <label for="avatarInput">Profile Photo</label>
-                            <div class="file-input-wrapper">
-                                <input type="file" id="avatarInput" accept="image/*">
-                                <div class="file-input-btn" style="background-color: var(--primary)">
-                                    <i class="fas fa-upload"></i> Choose Image
+                        <!-- 🎨 Appearance Settings -->
+                        <div class="settings-group modern-appearance" id="appearance-settings">
+                            <h3><i class="fas fa-palette"></i> Appearance</h3>
+
+                            <div class="settings-item">
+                                <label class="section-label">Theme</label>
+                                <div class="theme-selection">
+                                    <div class="theme-card" data-theme="light">
+                                        <div class="theme-sample light"></div>
+                                        <span class="theme-label">Light</span>
+                                    </div>
+                                    <div class="theme-card active" data-theme="dark">
+                                        <div class="theme-sample dark"></div>
+                                        <span class="theme-label">Dark</span>
+                                    </div>
+                                    <div class="theme-card" data-theme="system">
+                                        <div class="theme-sample system"></div>
+                                        <span class="theme-label">System</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="settings-item">
-                            <button id="resetAvatar" class="btn-reset">
-                                <i class="fas fa-undo"></i> Reset to Default Avatar
+                        <!-- Backup & Restore Section - Full Width -->
+                        <div class="form-group">
+                            <h3 style="color: var(--primary); margin-bottom: 0.5rem;">
+                                Auto Backup
+                            </h3>
+                            <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem;">
+                                Automatically export and update your anime data JSON file whenever you make changes.
+                            </p>
+                            <button id="enableBackupBtn" class="action-btn" style="max-width: 250px; padding: 0.75rem;">
+                                <div class="action-icon info" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-save"></i>
+                                </div>
+                                <div class="action-text">Enable Auto Backup</div>
                             </button>
+                            <small id="backupStatus"
+                                style="display:block; margin-top:0.5rem; color:var(--text-light);"></small>
                         </div>
-                    </div>
 
-                    <!-- 🎨 Appearance Settings -->
-                    <div class="settings-group modern-appearance" id="appearance-settings">
-                        <h3><i class="fas fa-palette"></i> Appearance</h3>
-
-                        <div class="settings-item">
-                            <label class="section-label">Theme</label>
-                            <div class="theme-selection">
-                                <div class="theme-card" data-theme="light">
-                                    <div class="theme-sample light"></div>
-                                    <span class="theme-label">Light</span>
-                                </div>
-                                <div class="theme-card active" data-theme="dark">
-                                    <div class="theme-sample dark"></div>
-                                    <span class="theme-label">Dark</span>
-                                </div>
-                                <div class="theme-card" data-theme="system">
-                                    <div class="theme-sample system"></div>
-                                    <span class="theme-label">System</span>
-                                </div>
+                        <!-- Danger Zone - Full Width -->
+                        <div class="danger-zone">
+                            <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                            <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+                                These actions are irreversible. Please proceed with caution.
+                            </p>
+                            <div class="danger-actions">
+                                <button class="btn btn-danger" id="clearDataBtn" disabled>
+                                    <i class="fas fa-trash"></i> Clear All Data
+                                </button>
+                                <button class="btn btn-success" id="exportDataBtn">
+                                    <i class="fas fa-file-export"></i> Export Data as JSON
+                                </button>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Backup & Restore Section - Full Width -->
-                    <div class="form-group">
-                        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">
-                            Auto Backup
-                        </h3>
-                        <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem;">
-                            Automatically export and update your anime data JSON file whenever you make changes.
-                        </p>
-                        <button id="enableBackupBtn" class="action-btn" style="max-width: 250px; padding: 0.75rem;">
-                            <div class="action-icon info" style="width: 40px; height: 40px;">
-                                <i class="fas fa-save"></i>
-                            </div>
-                            <div class="action-text">Enable Auto Backup</div>
+                        <button class="settings-btn" id="openRecapFromSettings">
+                            <i class="fas fa-chart-line"></i> View Recap
                         </button>
-                        <small id="backupStatus"
-                            style="display:block; margin-top:0.5rem; color:var(--text-light);"></small>
-                    </div>
 
-                    <!-- Danger Zone - Full Width -->
-                    <div class="danger-zone">
-                        <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
-                        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
-                            These actions are irreversible. Please proceed with caution.
-                        </p>
-                        <div class="danger-actions">
-                            <button class="btn btn-danger" id="clearDataBtn" disabled>
-                                <i class="fas fa-trash"></i> Clear All Data
-                            </button>
-                            <button class="btn btn-success" id="exportDataBtn">
-                                <i class="fas fa-file-export"></i> Export Data as JSON
-                            </button>
-                        </div>
-                    </div>
-
-                    <button class="settings-btn" id="openRecapFromSettings">
-                        <i class="fas fa-chart-line"></i> View Recap
-                    </button>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Anime Modal -->
-    <div id="addAnimeModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Add New Anime</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form id="addAnimeForm">
-                <input type="hidden" id="animeId">
-                <div class="form-group">
-                    <label for="animeTitle">Title</label>
-                    <input type="text" placeholder="Search for an anime..." id="animeTitle" required>
-                    <div class="search-loading" id="searchLoading">Searching...</div>
-                    <div class="search-results" id="searchResults"></div>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeType">Type</label>
-                    <select id="animeType" required>
-                        <option value="TV">TV Series</option>
-                        <option value="Movie">Movie</option>
-                        <option value="OVA">OVA</option>
-                        <option value="ONA">ONA</option>
-                        <option value="Special">Special</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeEpisodes">Total Episodes</label>
-                    <input type="number" id="animeEpisodes" value="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeDuration">Duration (minutes)</label>
-                    <input type="number" id="animeDuration" value="20" min="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeStatus">Status</label>
-                    <select id="animeStatus" required>
-                        <option value="Completed">Completed</option>
-                        <option value="Watching">Watching</option>
-                        <option value="Plan to Watch">Plan to Watch</option>
-                        <option value="Dropped">Dropped</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeProgress">Episode Progress</label>
-                    <input type="number" id="animeProgress" min="0" value="0" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeScore">Score (0-10)</label>
-                    <input type="number" id="animeScore" min="0" max="10" step="0.1" placeholder="7.5" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeYear">Completion Year</label>
-                    <select id="animeYear">
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                        <option value="2026" selected>2026</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                        <option value="2029">2029</option>
-                        <option value="2030">2030</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeMonth">Completion Month</label>
-                    <select id="animeMonth">
-                        <option value="01">January</option>
-                        <option value="02">February</option>
-                        <option value="03">March</option>
-                        <option value="04">April</option>
-                        <option value="05" selected>May</option>
-                        <option value="06">June</option>
-                        <option value="07">July</option>
-                        <option value="08">August</option>
-                        <option value="09">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeCover">Cover Image URL</label>
-                    <input type="text" id="animeCover" placeholder="Will be auto-filled from search" disabled>
-                </div>
-
-                <div class="form-group">
-                    <label for="animeGenres">Genres</label>
-                    <input type="text" id="animeGenres" placeholder="Will be auto-filled from search" disabled>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">Add Anime</button>
-                    <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;">Delete</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Import Modal -->
-    <div id="importModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Import Anime Data</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="form-group">
-                <label for="importFile">Select JSON file</label>
-                <div class="file-input-wrapper">
-                    <input type="file" id="importFile" accept=".json">
-                    <div class="file-input-btn">
-                        <i class="fas fa-file-import"></i> Choose File
                     </div>
                 </div>
             </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="importDataBtn">Import Data</button>
-            </div>
         </div>
-    </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Empty State Component (Add to CSS) -->
-<div class="empty-state" id="emptyStateTemplate" style="display: none;">
-    <div class="empty-state-icon">
-        <i class="fas"></i>
-    </div>
-    <h3 class="empty-state-title"></h3>
-    <p class="empty-state-message"></p>
-    <button class="empty-state-action btn-primary"></button>
-</div>
-
-    <!-- Name Entry Modal -->
-    <div id="nameEntryModal" class="modal">
-        <div class="modal-content" style="max-width: 450px;">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <i class="fas fa-user-astronaut"></i>
-                    Welcome to AnimeTracker Pro!
+        <!-- Add Anime Modal -->
+        <div id="addAnimeModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Add New Anime</h2>
+                    <button class="close-modal">&times;</button>
                 </div>
-                <button class="close-modal" onclick="hideNameEntryModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 20px; color: var(--color-text-secondary);">
-                    Let's personalize your experience. What should we call you?
-                </p>
-                <form id="nameEntryForm">
+                <form id="addAnimeForm">
+                    <input type="hidden" id="animeId">
                     <div class="form-group">
-                        <label for="userNameInput">Your Name</label>
-                        <input type="text" id="userNameInput" placeholder="Enter your name..." autocomplete="off"
-                            maxlength="30" style="font-size: 1.1rem; padding: 12px;">
+                        <label for="animeTitle">Title</label>
+                        <input type="text" placeholder="Search for an anime..." id="animeTitle" required>
+                        <div class="search-loading" id="searchLoading">Searching...</div>
+                        <div class="search-results" id="searchResults"></div>
                     </div>
+
+                    <div class="form-group">
+                        <label for="animeType">Type</label>
+                        <select id="animeType" required>
+                            <option value="TV">TV Series</option>
+                            <option value="Movie">Movie</option>
+                            <option value="OVA">OVA</option>
+                            <option value="ONA">ONA</option>
+                            <option value="Special">Special</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animeEpisodes">Total Episodes</label>
+                        <input type="number" id="animeEpisodes" value="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animeDuration">Duration (minutes)</label>
+                        <input type="number" id="animeDuration" value="20" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animeStatus">Status</label>
+                        <select id="animeStatus" required>
+                            <option value="Completed">Completed</option>
+                            <option value="Watching">Watching</option>
+                            <option value="Plan to Watch">Plan to Watch</option>
+                            <option value="Dropped">Dropped</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animeProgress">Episode Progress</label>
+                        <input type="number" id="animeProgress" min="0" value="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animeScore">Score (0-10)</label>
+                        <input type="number" id="animeScore" min="0" max="10" step="0.1" placeholder="7.5" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animeYear">Completion Year</label>
+                        <select id="animeYear">
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026" selected>2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030">2030</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animeMonth">Completion Month</label>
+                        <select id="animeMonth">
+                            <option value="01">January</option>
+                            <option value="02">February</option>
+                            <option value="03">March</option>
+                            <option value="04">April</option>
+                            <option value="05" selected>May</option>
+                            <option value="06">June</option>
+                            <option value="07">July</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animeCover">Cover Image URL</label>
+                        <input type="text" id="animeCover" placeholder="Will be auto-filled from search" disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="animeGenres">Genres</label>
+                        <input type="text" id="animeGenres" placeholder="Will be auto-filled from search" disabled>
+                    </div>
+
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            <i class="fas fa-check"></i> Save & Continue
-                        </button>
+                        <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Add Anime</button>
+                        <button type="button" class="btn btn-danger" id="deleteBtn"
+                            style="display: none;">Delete</button>
                     </div>
                 </form>
             </div>
         </div>
-    </div>
 
-    <!-- All Activity Modal -->
-    <div id="allActivityModal" class="modal">
-        <div class="modal-content large-modal">
-            <div class="modal-header">
-                <h2 class="modal-title">All Activity</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="activity-list-full" id="all-activity-list">
-                    <!-- All activities will be populated here -->
+        <!-- Import Modal -->
+        <div id="importModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Import Anime Data</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="form-group">
+                    <label for="importFile">Select JSON file</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="importFile" accept=".json">
+                        <div class="file-input-btn">
+                            <i class="fas fa-file-import"></i> Choose File
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="importDataBtn">Import Data</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Install Prompt Container -->
-    <div id="installPrompt" class="install-prompt" style="display: none;">
-        <div class="install-prompt-content">
-            <div class="install-icon">
-                <i class="fas fa-download"></i>
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Empty State Component (Add to CSS) -->
+        <div class="empty-state" id="emptyStateTemplate" style="display: none;">
+            <div class="empty-state-icon">
+                <i class="fas"></i>
             </div>
-            <div class="install-text">
-                <h4>Install AniPulse</h4>
-                <p>Install as app for faster access and offline support</p>
-            </div>
-            <div class="install-actions">
-                <button id="closeInstallPrompt" class="install-close">
-                    <i class="fas fa-times"></i>
-                </button>
-                <button id="installAppBtn" class="install-btn">
-                    Install <i class="fas fa-arrow-right"></i>
-                </button>
+            <h3 class="empty-state-title"></h3>
+            <p class="empty-state-message"></p>
+            <button class="empty-state-action btn-primary"></button>
+        </div>
+
+        <!-- Name Entry Modal -->
+        <div id="nameEntryModal" class="modal">
+            <div class="modal-content" style="max-width: 450px;">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <i class="fas fa-user-astronaut"></i>
+                        Welcome to AnimeTracker Pro!
+                    </div>
+                    <button class="close-modal" onclick="hideNameEntryModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 20px; color: var(--color-text-secondary);">
+                        Let's personalize your experience. What should we call you?
+                    </p>
+                    <form id="nameEntryForm">
+                        <div class="form-group">
+                            <label for="userNameInput">Your Name</label>
+                            <input type="text" id="userNameInput" placeholder="Enter your name..." autocomplete="off"
+                                maxlength="30" style="font-size: 1.1rem; padding: 12px;">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                <i class="fas fa-check"></i> Save & Continue
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Floating Scroll to Top Button -->
-    <div class="floating-scroll-top">
-        <button class="scroll-top-btn" id="scrollToTop" title="Scroll to top">
-            <i class="fas fa-arrow-up"></i>
-            <span class="btn-label">Top</span>
-        </button>
-    </div>
-
-    <!-- FULLSCREEN RECAP MODAL -->
-    <div id="recap-modal" class="recap-modal hidden">
-        <div class="recap-container">
-            <button class="recap-close">&times;</button>
-
-            <div class="recap-slide active" id="slide-1"></div>
-            <div class="recap-slide" id="slide-2"></div>
-            <div class="recap-slide" id="slide-3"></div>
-            <div class="recap-slide" id="slide-4"></div>
-            <div class="recap-slide" id="slide-5"></div>
-            <div class="recap-slide" id="slide-6"></div>
-            <div class="recap-slide" id="slide-7"></div>
-            <div class="recap-slide" id="slide-8"></div>
-            <div class="recap-slide" id="slide-9"></div>
-            <div class="recap-slide" id="slide-10"></div>
-            <div class="recap-slide" id="slide-11"></div>
-            <div class="recap-slide" id="slide-12"></div>
-
-            <div class="recap-controls">
-                <button id="prev-slide">←</button>
-                <button id="next-slide">→</button>
+        <!-- All Activity Modal -->
+        <div id="allActivityModal" class="modal">
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">All Activity</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="activity-list-full" id="all-activity-list">
+                        <!-- All activities will be populated here -->
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+
+        <!-- Install Prompt Container -->
+        <div id="installPrompt" class="install-prompt" style="display: none;">
+            <div class="install-prompt-content">
+                <div class="install-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <div class="install-text">
+                    <h4>Install AniPulse</h4>
+                    <p>Install as app for faster access and offline support</p>
+                </div>
+                <div class="install-actions">
+                    <button id="closeInstallPrompt" class="install-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button id="installAppBtn" class="install-btn">
+                        Install <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Scroll to Top Button -->
+        <div class="floating-scroll-top">
+            <button class="scroll-top-btn" id="scrollToTop" title="Scroll to top">
+                <i class="fas fa-arrow-up"></i>
+                <span class="btn-label">Top</span>
+            </button>
+        </div>
+
+        <!-- FULLSCREEN RECAP MODAL -->
+        <div id="recap-modal" class="recap-modal hidden">
+            <div class="recap-container">
+                <button class="recap-close">&times;</button>
+
+                <div class="recap-slide active" id="slide-1"></div>
+                <div class="recap-slide" id="slide-2"></div>
+                <div class="recap-slide" id="slide-3"></div>
+                <div class="recap-slide" id="slide-4"></div>
+                <div class="recap-slide" id="slide-5"></div>
+                <div class="recap-slide" id="slide-6"></div>
+                <div class="recap-slide" id="slide-7"></div>
+                <div class="recap-slide" id="slide-8"></div>
+                <div class="recap-slide" id="slide-9"></div>
+                <div class="recap-slide" id="slide-10"></div>
+                <div class="recap-slide" id="slide-11"></div>
+                <div class="recap-slide" id="slide-12"></div>
+
+                <div class="recap-controls">
+                    <button id="prev-slide">←</button>
+                    <button id="next-slide">→</button>
+                </div>
+            </div>
+        </div>
 
 
-    <script defer src="Frontend/Js/main.js"></script>
-    <script defer src="Frontend/Js/extras.js"></script>
+        <script defer src="Frontend/Js/main.js"></script>
+        <script defer src="Frontend/Js/extras.js"></script>
 
-    <script>
-        // Page Navigation 
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', function (e) {
-                // Don't trigger for logout button
-                if (this.id === 'logoutBtn') return;
+        <script>
+            // Page Navigation 
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function (e) {
+                    // Don't trigger for logout button
+                    if (this.id === 'logoutBtn') return;
 
-                const pageId = this.getAttribute('data-page');
-                if (!pageId) return;
+                    const pageId = this.getAttribute('data-page');
+                    if (!pageId) return;
 
-                // Remove active class from all menu items
-                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
+                    // Remove active class from all menu items
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
 
-                // Hide all pages
+                    // Hide all pages
+                    document.querySelectorAll('.page').forEach(page => {
+                        page.classList.remove('active');
+                        page.style.display = 'none';
+                    });
+
+                    // Show selected page
+                    const activePage = document.getElementById(`${pageId}-page`);
+                    if (activePage) {
+                        activePage.classList.add('active');
+                        activePage.style.display = 'block';
+                    }
+
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    // Initialize page-specific content
+                    if (pageId === 'statistics') {
+                        setTimeout(() => {
+                            if (typeof initStatisticsCharts === 'function') initStatisticsCharts();
+                            if (typeof updateStatisticsTables === 'function') updateStatisticsTables();
+                        }, 100);
+                    } else if (pageId === 'watchlist') {
+                        setTimeout(() => {
+                            if (typeof updateWatchlist === 'function') updateWatchlist('all', 1);
+                        }, 100);
+                    } else if (pageId === 'achievements') {
+                        setTimeout(() => {
+                            if (typeof updateAchievements === 'function') updateAchievements();
+                        }, 100);
+                    } else if (pageId === 'ranking') {
+                        setTimeout(() => {
+                            if (typeof initRankingPage === 'function') initRankingPage();
+                        }, 100);
+                    }
+                });
+            });
+
+            // Make sure dashboard is visible on load
+            document.addEventListener('DOMContentLoaded', function () {
+                // Hide all pages first
                 document.querySelectorAll('.page').forEach(page => {
-                    page.classList.remove('active');
                     page.style.display = 'none';
                 });
 
-                // Show selected page
-                const activePage = document.getElementById(`${pageId}-page`);
-                if (activePage) {
-                    activePage.classList.add('active');
-                    activePage.style.display = 'block';
+                // Show dashboard page
+                const dashboardPage = document.getElementById('dashboard-page');
+                if (dashboardPage) {
+                    dashboardPage.style.display = 'block';
+                    dashboardPage.classList.add('active');
                 }
 
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-
-                // Initialize page-specific content
-                if (pageId === 'statistics') {
-                    setTimeout(() => {
-                        if (typeof initStatisticsCharts === 'function') initStatisticsCharts();
-                        if (typeof updateStatisticsTables === 'function') updateStatisticsTables();
-                    }, 100);
-                } else if (pageId === 'watchlist') {
-                    setTimeout(() => {
-                        if (typeof updateWatchlist === 'function') updateWatchlist('all', 1);
-                    }, 100);
-                } else if (pageId === 'achievements') {
-                    setTimeout(() => {
-                        if (typeof updateAchievements === 'function') updateAchievements();
-                    }, 100);
-                } else if (pageId === 'ranking') {
-                    setTimeout(() => {
-                        if (typeof initRankingPage === 'function') initRankingPage();
-                    }, 100);
+                // Set active menu item
+                const dashboardMenuItem = document.querySelector('.menu-item[data-page="dashboard"]');
+                if (dashboardMenuItem) {
+                    dashboardMenuItem.classList.add('active');
                 }
             });
-        });
-
-        // Make sure dashboard is visible on load
-        document.addEventListener('DOMContentLoaded', function () {
-            // Hide all pages first
-            document.querySelectorAll('.page').forEach(page => {
-                page.style.display = 'none';
-            });
-
-            // Show dashboard page
-            const dashboardPage = document.getElementById('dashboard-page');
-            if (dashboardPage) {
-                dashboardPage.style.display = 'block';
-                dashboardPage.classList.add('active');
-            }
-
-            // Set active menu item
-            const dashboardMenuItem = document.querySelector('.menu-item[data-page="dashboard"]');
-            if (dashboardMenuItem) {
-                dashboardMenuItem.classList.add('active');
-            }
-        });
-    </script>
+        </script>
 </body>
 
 </html>

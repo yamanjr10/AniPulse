@@ -468,3 +468,561 @@ async function checkForUserUpdates() {
     }
 }
 
+// =============================================
+// CLEAN LEVEL SYSTEM - SAFE VERSION
+// =============================================
+
+// Level definitions
+const LEVELS = [
+    { level: 1, title: "Rookie", xpRequired: 0 },
+    { level: 2, title: "Watcher", xpRequired: 100 },
+    { level: 3, title: "Collector", xpRequired: 250 },
+    { level: 4, title: "Enthusiast", xpRequired: 500 },
+    { level: 5, title: "Dedicated", xpRequired: 800 },
+    { level: 6, title: "Marathoner", xpRequired: 1200 },
+    { level: 7, title: "Master", xpRequired: 1700 },
+    { level: 8, title: "Veteran", xpRequired: 2300 },
+    { level: 9, title: "Elite", xpRequired: 3000 },
+    { level: 10, title: "Legend", xpRequired: 4000 },
+    { level: 11, title: "Sage", xpRequired: 5200 },
+    { level: 12, title: "Completionist", xpRequired: 6500 },
+    { level: 13, title: "Archivist", xpRequired: 8000 },
+    { level: 14, title: "Master", xpRequired: 10000 },
+    { level: 15, title: "Grand Master", xpRequired: 12500 },
+    { level: 16, title: "Anime God", xpRequired: 15000 },
+    { level: 17, title: "Transcendent", xpRequired: 18000 },
+    { level: 18, title: "Mythic", xpRequired: 22000 },
+    { level: 19, title: "Eternal", xpRequired: 27000 },
+    { level: 20, title: "Legendary", xpRequired: 35000 }
+];
+
+// Calculate total XP (safe version)
+function calculateTotalXPSafe() {
+    let xp = 0;
+    try {
+        const animeList = animeData || [];
+        animeList.forEach(anime => {
+            if (anime.userStatus === 'Completed') {
+                xp += 10;
+                const episodes = anime.episodes || 0;
+                xp += Math.floor(episodes / 2);
+                if (anime.score >= 8) xp += 5;
+                if (anime.score >= 9) xp += 10;
+                if (anime.type === 'Movie') xp += 5;
+            }
+            if (anime.userStatus === 'Watching') {
+                xp += Math.floor((anime.progress || 0) / 5);
+            }
+            if (anime.score && anime.score > 0) xp += 2;
+        });
+        const totalHours = parseFloat(calculateTotalHours()) || 0;
+        xp += Math.floor(totalHours * 2);
+    } catch(e) {
+        console.warn('XP calculation error:', e);
+    }
+    return xp;
+}
+
+function getCurrentLevelSafe(xp) {
+    try {
+        let currentLevel = LEVELS[0];
+        for (let i = LEVELS.length - 1; i >= 0; i--) {
+            if (xp >= LEVELS[i].xpRequired) {
+                currentLevel = LEVELS[i];
+                break;
+            }
+        }
+        return currentLevel;
+    } catch(e) {
+        return LEVELS[0];
+    }
+}
+
+function getNextLevelSafe(currentXp) {
+    try {
+        for (let i = 0; i < LEVELS.length; i++) {
+            if (currentXp < LEVELS[i].xpRequired) {
+                return LEVELS[i];
+            }
+        }
+    } catch(e) {}
+    return null;
+}
+
+// Update sidebar level (safe)
+function updateSidebarLevelSafe() {
+    try {
+        const badgeEl = document.getElementById('levelBadgeText');
+        const titleEl = document.getElementById('levelTitleText');
+        
+        if (!badgeEl || !titleEl) return;
+        
+        const totalXP = calculateTotalXPSafe();
+        const currentLevel = getCurrentLevelSafe(totalXP);
+        
+        badgeEl.textContent = `Lv.${currentLevel.level}`;
+        titleEl.textContent = currentLevel.title;
+    } catch(e) {
+        console.warn('Sidebar level update error:', e);
+    }
+}
+
+// Update settings level (safe)
+function updateSettingsLevelSafe() {
+    try {
+        const titleEl = document.getElementById('settingsLevelTitle');
+        const numberEl = document.getElementById('settingsLevelNumber');
+        const fillEl = document.getElementById('settingsProgressFill');
+        const currentXPSpan = document.getElementById('settingsCurrentXP');
+        const nextXPSpan = document.getElementById('settingsNextXP');
+        const nextInfoEl = document.getElementById('settingsNextInfo');
+        
+        if (!titleEl || !numberEl) return;
+        
+        const totalXP = calculateTotalXPSafe();
+        const currentLevel = getCurrentLevelSafe(totalXP);
+        const nextLevel = getNextLevelSafe(totalXP);
+        
+        titleEl.textContent = currentLevel.title;
+        numberEl.textContent = `Level ${currentLevel.level}`;
+        
+        if (nextLevel && fillEl) {
+            const currentReq = currentLevel.xpRequired;
+            const nextReq = nextLevel.xpRequired;
+            const currentXP = totalXP - currentReq;
+            const neededXP = nextReq - currentReq;
+            const percentage = (currentXP / neededXP) * 100;
+            fillEl.style.width = `${percentage}%`;
+            
+            if (currentXPSpan) currentXPSpan.textContent = totalXP;
+            if (nextXPSpan) nextXPSpan.textContent = nextReq;
+            if (nextInfoEl) nextInfoEl.textContent = `Next: ${nextLevel.title} at ${nextReq} XP`;
+        } else if (fillEl) {
+            fillEl.style.width = '100%';
+            if (currentXPSpan) currentXPSpan.textContent = totalXP;
+            if (nextXPSpan) nextXPSpan.textContent = totalXP;
+            if (nextInfoEl) nextInfoEl.textContent = `Maximum Level Reached!`;
+        }
+    } catch(e) {
+        console.warn('Settings level update error:', e);
+    }
+}
+
+// Check level up (safe)
+let lastXPSafe = parseInt(localStorage.getItem('lastXPSafe') || '0');
+
+function checkLevelUpSafe() {
+    try {
+        const currentXP = calculateTotalXPSafe();
+        
+        if (currentXP > lastXPSafe) {
+            const oldLevel = getCurrentLevelSafe(lastXPSafe);
+            const newLevel = getCurrentLevelSafe(currentXP);
+            
+            if (oldLevel.level !== newLevel.level) {
+                showToast(`✨ Level Up! ${oldLevel.title} → ${newLevel.title}`, 'success');
+            }
+            
+            lastXPSafe = currentXP;
+            localStorage.setItem('lastXPSafe', lastXPSafe.toString());
+        }
+        
+        updateSidebarLevelSafe();
+        updateSettingsLevelSafe();
+    } catch(e) {
+        console.warn('Level check error:', e);
+    }
+}
+
+// Initialize level system (safe - no overrides)
+function initLevelSystemSafe() {
+    setTimeout(() => {
+        updateSidebarLevelSafe();
+        updateSettingsLevelSafe();
+    }, 100);
+}
+
+// Call when DOM is ready - NO OVERRIDES
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(initLevelSystemSafe, 1000);
+});
+
+// Call when anime data changes - using existing saveData
+const originalSaveDataBackup = window.saveData;
+if (typeof originalSaveDataBackup === 'function') {
+    window.saveData = function() {
+        originalSaveDataBackup();
+        setTimeout(checkLevelUpSafe, 200);
+    };
+} else {
+    // If saveData doesn't exist, create a wrapper
+    window.saveData = function() {
+        localStorage.setItem('animeData', JSON.stringify(animeData));
+        setTimeout(checkLevelUpSafe, 200);
+    };
+}
+
+// =============================================
+//  SMART NOTIFICATIONS
+// =============================================
+
+// Notification storage
+let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+let lastNotificationCheck = localStorage.getItem('lastNotificationCheck') || new Date().toISOString();
+
+// Save notifications
+function saveNotifications() {
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+    updateNotificationBadge();
+}
+
+// Add notification
+function addNotification(type, title, message, relatedId = null) {
+    const notification = {
+        id: Date.now(),
+        type: type, // 'progress', 'completed', 'reminder', 'achievement'
+        title: title,
+        message: message,
+        relatedId: relatedId,
+        timestamp: new Date().toISOString(),
+        read: false
+    };
+    
+    notifications.unshift(notification);
+    
+    // Keep only last 50 notifications
+    if (notifications.length > 50) {
+        notifications = notifications.slice(0, 50);
+    }
+    
+    saveNotifications();
+    
+    // Show toast for immediate notification
+    showToast(message, type === 'completed' ? 'success' : 'info');
+    
+    // Update bell icon
+    updateNotificationBadge();
+    
+    return notification;
+}
+
+// Update notification badge
+function updateNotificationBadge() {
+    const unreadCount = notifications.filter(n => !n.read).length;
+    const dot = document.getElementById('notificationDot');
+    const bell = document.getElementById('notificationBell');
+    
+    if (dot) {
+        dot.style.display = unreadCount > 0 ? 'block' : 'none';
+    }
+    
+    // Add bounce animation if there are new notifications
+    if (unreadCount > 0 && bell) {
+        bell.classList.add('notification-bounce');
+        setTimeout(() => bell.classList.remove('notification-bounce'), 500);
+    }
+}
+
+// Render notifications in center
+function renderNotifications() {
+    const listEl = document.getElementById('notificationList');
+    if (!listEl) return;
+    
+    if (notifications.length === 0) {
+        listEl.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748b;">No notifications yet</div>';
+        return;
+    }
+    
+    const getIcon = (type) => {
+        switch(type) {
+            case 'progress': return 'fa-chart-line';
+            case 'completed': return 'fa-check-circle';
+            case 'reminder': return 'fa-bell';
+            case 'achievement': return 'fa-trophy';
+            default: return 'fa-info-circle';
+        }
+    };
+    
+    const getIconClass = (type) => {
+        switch(type) {
+            case 'progress': return 'progress';
+            case 'completed': return 'completed';
+            case 'reminder': return 'reminder';
+            case 'achievement': return 'achievement';
+            default: return '';
+        }
+    };
+    
+    listEl.innerHTML = notifications.map(notif => `
+        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+            <div class="notification-icon ${getIconClass(notif.type)}">
+                <i class="fas ${getIcon(notif.type)}"></i>
+            </div>
+            <div class="notification-content">
+                <div class="notification-title">${notif.title}</div>
+                <div class="notification-message">${notif.message}</div>
+                <div class="notification-time">${formatTimeAgo(notif.timestamp)}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Add click handlers
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const id = parseInt(item.dataset.id);
+            const notification = notifications.find(n => n.id === id);
+            if (notification && !notification.read) {
+                notification.read = true;
+                saveNotifications();
+                renderNotifications();
+            }
+            
+            // If it's a progress notification, open the anime
+            if (notification && notification.relatedId) {
+                const modal = document.getElementById('addAnimeModal');
+                if (modal && typeof window.editAnime === 'function') {
+                    window.editAnime(notification.relatedId);
+                }
+            }
+        });
+    });
+}
+
+// Check for near-completion anime
+function checkProgressNotifications() {
+    const watchingAnime = animeData.filter(anime => anime.userStatus === 'Watching');
+    const today = new Date().toDateString();
+    const notifiedToday = JSON.parse(localStorage.getItem('notifiedProgress') || '{}');
+    
+    watchingAnime.forEach(anime => {
+        const progress = anime.progress || 0;
+        const total = anime.episodes || 0;
+        
+        if (total === 0) return;
+        
+        const percentage = (progress / total) * 100;
+        const remaining = total - progress;
+        const key = `${anime.id}_${Math.floor(percentage / 10)}`;
+        
+        if (notifiedToday[key] === today) return;
+        
+        // Progress notifications at key milestones
+        if (percentage >= 25 && percentage < 30) {
+            addNotification('progress', 'Progress Update', 
+                `"${anime.title}" is 25% complete! (${progress}/${total} episodes)`, anime.id);
+            notifiedToday[key] = today;
+        } else if (percentage >= 50 && percentage < 55) {
+            addNotification('progress', 'Halfway There!', 
+                `You're halfway through "${anime.title}"! ${remaining} episodes to go!`, anime.id);
+            notifiedToday[key] = today;
+        } else if (percentage >= 75 && percentage < 80) {
+            addNotification('progress', 'Almost Done!', 
+                `"${anime.title}" is 75% complete! Just ${remaining} episodes left!`, anime.id);
+            notifiedToday[key] = today;
+        } else if (percentage >= 90 && percentage < 95) {
+            addNotification('progress', 'Final Stretch!', 
+                `"${anime.title}" is 90% done! ${remaining} episodes remaining!`, anime.id);
+            notifiedToday[key] = today;
+        } else if (percentage >= 98 && percentage < 100) {
+            addNotification('progress', 'So Close!', 
+                `Just ${remaining} episode left of "${anime.title}"! Finish strong!`, anime.id);
+            notifiedToday[key] = today;
+        }
+    });
+    
+    localStorage.setItem('notifiedProgress', JSON.stringify(notifiedToday));
+}
+
+// Check for stale watching (reminders)
+function checkReminderNotifications() {
+    const watchingAnime = animeData.filter(anime => anime.userStatus === 'Watching');
+    const today = new Date();
+    const lastReminded = JSON.parse(localStorage.getItem('lastReminded') || '{}');
+    
+    watchingAnime.forEach(anime => {
+        const lastUpdated = anime.updatedAt ? new Date(anime.updatedAt) : new Date(anime.createdAt);
+        if (!lastUpdated) return;
+        
+        const daysSinceUpdate = Math.floor((today - lastUpdated) / (1000 * 60 * 60 * 24));
+        const key = anime.id.toString();
+        
+        if (lastReminded[key] === today.toDateString()) return;
+        
+        if (daysSinceUpdate === 7) {
+            addNotification('reminder', 'Been a While', 
+                `It's been a week since you watched "${anime.title}". Still planning to continue?`, anime.id);
+            lastReminded[key] = today.toDateString();
+        } else if (daysSinceUpdate === 14) {
+            addNotification('reminder', 'Long Time No Watch', 
+                `"${anime.title}" hasn't been updated in 2 weeks. Consider updating its status.`, anime.id);
+            lastReminded[key] = today.toDateString();
+        } else if (daysSinceUpdate === 30) {
+            addNotification('reminder', 'Abandoned?', 
+                `It's been a month since you watched "${anime.title}". Maybe it's time to drop or continue?`, anime.id);
+            lastReminded[key] = today.toDateString();
+        }
+    });
+    
+    localStorage.setItem('lastReminded', JSON.stringify(lastReminded));
+}
+
+// Check for completion achievements
+function checkCompletionNotifications(anime) {
+    const completedCount = animeData.filter(a => a.userStatus === 'Completed').length;
+    
+    // Milestone achievements
+    const milestones = [1, 5, 10, 25, 50, 100, 250, 500];
+    const lastMilestone = localStorage.getItem('lastCompletionMilestone') || 0;
+    
+    for (const milestone of milestones) {
+        if (completedCount >= milestone && lastMilestone < milestone) {
+            addNotification('achievement', 'Achievement Unlocked! 🏆', 
+                `You've completed ${milestone} anime! Keep up the great work!`);
+            localStorage.setItem('lastCompletionMilestone', milestone);
+            break;
+        }
+    }
+}
+
+// Weekly summary notification
+function sendWeeklySummary() {
+    const lastSummary = localStorage.getItem('lastWeeklySummary');
+    const now = new Date();
+    const weekNumber = Math.floor(now.getDate() / 7);
+    
+    if (lastSummary === `${now.getFullYear()}-${now.getMonth()}-${weekNumber}`) return;
+    
+    const completedThisWeek = animeData.filter(anime => {
+        if (anime.userStatus !== 'Completed') return false;
+        const completedDate = anime.actualFinishDate || anime.finishDate;
+        if (!completedDate) return false;
+        const date = new Date(completedDate);
+        const daysAgo = (now - date) / (1000 * 60 * 60 * 24);
+        return daysAgo <= 7;
+    }).length;
+    
+    const addedThisWeek = animeData.filter(anime => {
+        const addedDate = anime.createdAt ? new Date(anime.createdAt) : null;
+        if (!addedDate) return false;
+        const daysAgo = (now - addedDate) / (1000 * 60 * 60 * 24);
+        return daysAgo <= 7;
+    }).length;
+    
+    if (completedThisWeek > 0 || addedThisWeek > 0) {
+        addNotification('achievement', 'Weekly Summary', 
+            `This week: ${completedThisWeek} completed, ${addedThisWeek} added to your list!`);
+    }
+    
+    localStorage.setItem('lastWeeklySummary', `${now.getFullYear()}-${now.getMonth()}-${weekNumber}`);
+}
+
+// Daily reminder to update progress
+function sendDailyReminder() {
+    const lastReminder = localStorage.getItem('lastDailyReminder');
+    const today = new Date().toDateString();
+    
+    if (lastReminder === today) return;
+    
+    const watchingCount = animeData.filter(a => a.userStatus === 'Watching').length;
+    
+    if (watchingCount > 0) {
+        addNotification('reminder', 'Daily Reminder', 
+            `You have ${watchingCount} anime in progress. Don't forget to update your progress!`);
+    }
+    
+    localStorage.setItem('lastDailyReminder', today);
+}
+
+// Initialize notification system
+function initNotifications() {
+    // Check for notifications periodically
+    setInterval(() => {
+        checkProgressNotifications();
+        checkReminderNotifications();
+    }, 1000 * 60 * 60); // Every hour
+    
+    // Daily checks
+    setInterval(() => {
+        sendDailyReminder();
+    }, 1000 * 60 * 60 * 24); // Every day
+    
+    // Weekly summary
+    setInterval(() => {
+        sendWeeklySummary();
+    }, 1000 * 60 * 60 * 24 * 7); // Every week
+    
+    // Initial checks
+    setTimeout(() => {
+        checkProgressNotifications();
+        checkReminderNotifications();
+        sendDailyReminder();
+        sendWeeklySummary();
+    }, 5000);
+    
+    // Bell click handler
+    const bell = document.getElementById('notificationBell');
+    const center = document.getElementById('notificationCenter');
+    
+    if (bell && center) {
+        bell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            center.classList.toggle('show');
+            renderNotifications();
+        });
+        
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!center.contains(e.target) && !bell.contains(e.target)) {
+                center.classList.remove('show');
+            }
+        });
+    }
+    
+    // Clear all button
+    const clearBtn = document.getElementById('clearAllNotifications');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            notifications = [];
+            saveNotifications();
+            renderNotifications();
+        });
+    }
+}
+
+// Hook into anime completion for immediate notification
+const originalHandleAddAnimeForNotifications = window.handleAddAnime;
+if (typeof originalHandleAddAnimeForNotifications === 'function') {
+    window.handleAddAnime = function(e) {
+        const wasCompleted = document.getElementById('animeStatus')?.value === 'Completed';
+        originalHandleAddAnimeForNotifications(e);
+        
+        setTimeout(() => {
+            if (wasCompleted) {
+                const title = document.getElementById('animeTitle')?.value;
+                addNotification('completed', 'Anime Completed! 🎉', 
+                    `Congratulations on completing "${title}"!`);
+                checkCompletionNotifications();
+            }
+            checkProgressNotifications();
+        }, 500);
+    };
+}
+
+// Add bounce animation CSS
+const notifStyle = document.createElement('style');
+notifStyle.textContent = `
+    @keyframes notificationBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+    }
+    .notification-bounce {
+        animation: notificationBounce 0.5s ease;
+    }
+`;
+document.head.appendChild(notifStyle);
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initNotifications, 2000);
+});
+
