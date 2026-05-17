@@ -11652,3 +11652,138 @@ body.modal-open {
 .notification-bounce {
   animation: notificationBounce 0.4s ease;
 }
+
+/* ============================================
+   DAILY XP TRACKER
+   ============================================ */
+
+.daily-xp-tracker {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    transition: all 0.3s ease;
+}
+
+.daily-xp-tracker:hover {
+    background: rgba(139, 92, 246, 0.08);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.tracker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tracker-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.tracker-title i {
+    color: #f59e0b;
+    font-size: 0.9rem;
+}
+
+.tracker-limit {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.15);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.tracker-progress {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.tracker-progress-bar {
+    background: linear-gradient(90deg, #10b981, #34d399);
+    height: 100%;
+    width: 0%;
+    border-radius: 10px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.tracker-progress-bar.warning {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.tracker-progress-bar.danger {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.tracker-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    margin-bottom: 12px;
+}
+
+.xp-earned {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.xp-remaining {
+    color: #64748b;
+}
+
+.tracker-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(245, 158, 11, 0.15);
+    border-radius: 10px;
+    font-size: 0.7rem;
+    color: #fbbf24;
+    animation: pulse 1.5s infinite;
+}
+
+.tracker-warning i {
+    font-size: 0.8rem;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Animation for XP update */
+@keyframes xpUpdate {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+        color: #10b981;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.xp-updated {
+    animation: xpUpdate 0.5s ease;
+}

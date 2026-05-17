@@ -469,6 +469,10 @@ async function checkForUserUpdates() {
 }
 
 // =============================================
+// COMPLETE ANIPULSE SYSTEM - LEVELS, XP, NOTIFICATIONS
+// =============================================
+
+// =============================================
 // LEVEL SYSTEM 
 // =============================================
 
@@ -497,7 +501,39 @@ const LEVELS = [
     { level: 21, title: "Anime Deity", xpRequired: 45000 },
 ];
 
-// Calculate total XP (safe version)
+// =============================================
+// ANTI-SPAM & ANTI-EXPLOIT XP SYSTEM
+// =============================================
+
+// Track all XP grants to prevent abuse
+let xpTransactionLog = JSON.parse(localStorage.getItem('xpTransactionLog')) || [];
+let xpDailyLimit = JSON.parse(localStorage.getItem('xpDailyLimit')) || { date: new Date().toDateString(), total: 0 };
+
+// Track pending XP (XP that couldn't be awarded due to daily limit)
+let pendingXP = JSON.parse(localStorage.getItem('pendingXP')) || {
+    amount: 0,
+    source: [],
+    lastUpdated: new Date().toISOString()
+};
+
+// XP Limits Configuration
+const XP_LIMITS = {
+    DAILY_MAX: 500,           // Max XP per day
+    PER_ANIME_MAX: 200,       // Max XP per single anime
+    MAX_EPISODES_PER_DAY: 50, // Max new episodes across all anime per day
+    MAX_ANIME_PER_DAY: 20,    // Max anime added per day
+    HOURLY_MAX: 150,          // Max XP per hour
+    WARNING_THRESHOLD: 400,   // Show warning at 80% of daily limit
+    MIN_TIME_BETWEEN_UPDATES: 60000, // 1 minute between same anime updates
+};
+
+// Track daily anime additions
+let dailyAnimeCount = JSON.parse(localStorage.getItem('dailyAnimeCount')) || { date: new Date().toDateString(), count: 0 };
+
+// =============================================
+// CORE XP CALCULATION FUNCTIONS
+// =============================================
+
 function calculateTotalXPSafe() {
     let xp = 0;
     try {
@@ -507,8 +543,8 @@ function calculateTotalXPSafe() {
                 xp += 10;
                 const episodes = anime.episodes || 0;
                 xp += Math.floor(episodes / 2);
-                if (anime.score >= 8) xp += 5;
                 if (anime.score >= 9) xp += 10;
+                else if (anime.score >= 8) xp += 5;
                 if (anime.type === 'Movie') xp += 5;
             }
             if (anime.userStatus === 'Watching') {
@@ -550,245 +586,88 @@ function getNextLevelSafe(currentXp) {
     return null;
 }
 
-// Update sidebar level (safe)
-function updateSidebarLevelSafe() {
-    try {
-        const badgeEl = document.getElementById('levelBadgeText');
-        const titleEl = document.getElementById('levelTitleText');
-
-        if (!badgeEl || !titleEl) return;
-
-        const totalXP = calculateTotalXPSafe();
-        const currentLevel = getCurrentLevelSafe(totalXP);
-
-        badgeEl.textContent = `Lv.${currentLevel.level}`;
-        titleEl.textContent = currentLevel.title;
-    } catch (e) {
-        console.warn('Sidebar level update error:', e);
-    }
-}
-
-// Update settings level (safe)
-function updateSettingsLevelSafe() {
-    try {
-        const titleEl = document.getElementById('settingsLevelTitle');
-        const numberEl = document.getElementById('settingsLevelNumber');
-        const fillEl = document.getElementById('settingsProgressFill');
-        const currentXPSpan = document.getElementById('settingsCurrentXP');
-        const nextXPSpan = document.getElementById('settingsNextXP');
-        const nextInfoEl = document.getElementById('settingsNextInfo');
-
-        if (!titleEl || !numberEl) return;
-
-        const totalXP = calculateTotalXPSafe();
-        const currentLevel = getCurrentLevelSafe(totalXP);
-        const nextLevel = getNextLevelSafe(totalXP);
-
-        titleEl.textContent = currentLevel.title;
-        numberEl.textContent = `Level ${currentLevel.level}`;
-
-        if (nextLevel && fillEl) {
-            const currentReq = currentLevel.xpRequired;
-            const nextReq = nextLevel.xpRequired;
-            const currentXP = totalXP - currentReq;
-            const neededXP = nextReq - currentReq;
-            const percentage = (currentXP / neededXP) * 100;
-            fillEl.style.width = `${percentage}%`;
-
-            if (currentXPSpan) currentXPSpan.textContent = totalXP;
-            if (nextXPSpan) nextXPSpan.textContent = nextReq;
-            if (nextInfoEl) nextInfoEl.textContent = `Next: ${nextLevel.title} at ${nextReq} XP`;
-        } else if (fillEl) {
-            fillEl.style.width = '100%';
-            if (currentXPSpan) currentXPSpan.textContent = totalXP;
-            if (nextXPSpan) nextXPSpan.textContent = totalXP;
-            if (nextInfoEl) nextInfoEl.textContent = `Maximum Level Reached!`;
-        }
-    } catch (e) {
-        console.warn('Settings level update error:', e);
-    }
-}
-
-// Check level up (safe)
-let lastXPSafe = parseInt(localStorage.getItem('lastXPSafe') || '0');
-
-function checkLevelUpSafe() {
-    try {
-        const currentXP = calculateTotalXPSafe();
-
-        if (currentXP > lastXPSafe) {
-            const oldLevel = getCurrentLevelSafe(lastXPSafe);
-            const newLevel = getCurrentLevelSafe(currentXP);
-
-            if (oldLevel.level !== newLevel.level) {
-                showToast(`✨ Level Up! ${oldLevel.title} → ${newLevel.title}`, 'success');
-            }
-
-            lastXPSafe = currentXP;
-            localStorage.setItem('lastXPSafe', lastXPSafe.toString());
-        }
-
-        updateSidebarLevelSafe();
-        updateSettingsLevelSafe();
-    } catch (e) {
-        console.warn('Level check error:', e);
-    }
-}
-
-// Initialize level system (safe - no overrides)
-function initLevelSystemSafe() {
-    setTimeout(() => {
-        updateSidebarLevelSafe();
-        updateSettingsLevelSafe();
-    }, 100);
-}
-
-// Call when DOM is ready - NO OVERRIDES
-document.addEventListener('DOMContentLoaded', function () {
-    setTimeout(initLevelSystemSafe, 1000);
-});
-
-// Call when anime data changes - using existing saveData
-const originalSaveDataBackup = window.saveData;
-if (typeof originalSaveDataBackup === 'function') {
-    window.saveData = function () {
-        originalSaveDataBackup();
-        setTimeout(checkLevelUpSafe, 200);
-    };
-} else {
-    // If saveData doesn't exist, create a wrapper
-    window.saveData = function () {
-        localStorage.setItem('animeData', JSON.stringify(animeData));
-        setTimeout(checkLevelUpSafe, 200);
-    };
-}
 // =============================================
-// ENHANCED SMART NOTIFICATIONS WITH COUNT BADGE
+// ACTION DETECTION FOR XP CALCULATION
 // =============================================
 
-// Notification storage
+function detectAnimeAction(oldAnime, newAnime) {
+    if (!oldAnime) {
+        if (newAnime.userStatus === 'Completed') return 'add_completed';
+        if (newAnime.userStatus === 'Watching') return 'add_watching';
+        return 'add_plan';
+    }
+    if (oldAnime.userStatus !== newAnime.userStatus) {
+        if (newAnime.userStatus === 'Completed') return 'status_to_completed';
+        if (newAnime.userStatus === 'Watching' && oldAnime.userStatus === 'Plan to Watch') return 'status_to_watching';
+        return 'status_change';
+    }
+    if (oldAnime.userStatus === 'Watching' && newAnime.progress > oldAnime.progress) return 'progress_update';
+    if (newAnime.episodes > oldAnime.episodes) return 'episode_increase';
+    if (!oldAnime.score && newAnime.score) return 'rating';
+    return 'no_change';
+}
+
+// =============================================
+// NOTIFICATION STORAGE & FUNCTIONS
+// =============================================
+
 let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
-let lastNotificationCheck = localStorage.getItem('lastNotificationCheck') || new Date().toISOString();
+let previousXP = parseInt(localStorage.getItem('previousXP')) || 0;
 
-// Save notifications
 function saveNotifications() {
     localStorage.setItem('notifications', JSON.stringify(notifications));
     updateNotificationBadge();
 }
 
-// Update notification badge with count number
 function updateNotificationBadge() {
     const unreadCount = notifications.filter(n => !n.read).length;
     const dot = document.getElementById('notificationDot');
     const bell = document.getElementById('notificationBell');
-    
     if (dot) {
         if (unreadCount > 0) {
             dot.style.display = 'flex';
             dot.textContent = unreadCount > 99 ? '99+' : unreadCount;
             dot.classList.add('has-count');
-            
-            // Remove animation class after animation ends
-            setTimeout(() => {
-                if (dot) dot.classList.remove('has-count');
-            }, 500);
+            setTimeout(() => dot?.classList.remove('has-count'), 500);
         } else {
             dot.style.display = 'none';
             dot.textContent = '';
         }
     }
-    
-    // Add bounce animation to bell if there are new notifications
     if (unreadCount > 0 && bell) {
         bell.classList.add('notification-bounce');
         setTimeout(() => bell.classList.remove('notification-bounce'), 500);
     }
 }
 
-// Mark all as read
-function markAllAsRead() {
-    notifications.forEach(notif => {
-        notif.read = true;
-    });
-    saveNotifications();
-    renderNotifications();
-    updateNotificationBadge();
-    showToast('All notifications marked as read', 'info');
-}
-
-// Clear all notifications
-function clearAllNotifications() {
-    if (confirm('Are you sure you want to clear all notifications?')) {
-        notifications = [];
-        saveNotifications();
-        renderNotifications();
-        updateNotificationBadge();
-        showToast('All notifications cleared', 'info');
-    }
-}
-
-// Add notification (enhanced version)
 function addNotification(type, title, message, relatedId = null) {
     const notification = {
-        id: Date.now(),
-        type: type, // 'progress', 'completed', 'reminder', 'achievement', 'level', 'profile', 'anime'
-        title: title,
-        message: message,
-        relatedId: relatedId,
-        timestamp: new Date().toISOString(),
-        read: false
+        id: Date.now(), type, title, message, relatedId,
+        timestamp: new Date().toISOString(), read: false
     };
-    
     notifications.unshift(notification);
-    
-    // Keep only last 100 notifications
-    if (notifications.length > 100) {
-        notifications = notifications.slice(0, 100);
-    }
-    
+    if (notifications.length > 100) notifications = notifications.slice(0, 100);
     saveNotifications();
-    
-    // Show toast for immediate notification
     let toastType = 'info';
-    if (type === 'completed') toastType = 'success';
-    if (type === 'achievement') toastType = 'success';
+    if (type === 'completed' || type === 'achievement') toastType = 'success';
     if (type === 'level') toastType = 'warning';
-    if (type === 'profile') toastType = 'info';
-    if (type === 'anime') toastType = 'success';
-    
+    if (type === 'xp') toastType = 'success';
     showToast(message, toastType);
-    
-    // Update bell icon with new count
     updateNotificationBadge();
-    
-    // Render if open
     const center = document.getElementById('notificationCenter');
-    if (center && center.classList.contains('show')) {
-        renderNotifications();
-    }
-    
+    if (center?.classList.contains('show')) renderNotifications();
     return notification;
 }
 
-// Render notifications in center
 function renderNotifications() {
     const listEl = document.getElementById('notificationList');
     if (!listEl) return;
-    
     if (notifications.length === 0) {
-        listEl.innerHTML = `
-            <div class="notification-empty">
-                <i class="fas fa-bell-slash"></i>
-                <p>No notifications yet</p>
-                <p style="font-size: 0.7rem; margin-top: 8px;">Activity will appear here</p>
-            </div>
-        `;
-        updateNotificationBadge();
+        listEl.innerHTML = `<div class="notification-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></div>`;
         return;
     }
-    
     const getIcon = (type) => {
-        switch(type) {
+        switch (type) {
             case 'progress': return 'fa-chart-line';
             case 'completed': return 'fa-check-circle';
             case 'reminder': return 'fa-clock';
@@ -796,12 +675,12 @@ function renderNotifications() {
             case 'level': return 'fa-level-up-alt';
             case 'profile': return 'fa-user-edit';
             case 'anime': return 'fa-tv';
+            case 'xp': return 'fa-chart-line';
             default: return 'fa-info-circle';
         }
     };
-    
     const getIconClass = (type) => {
-        switch(type) {
+        switch (type) {
             case 'progress': return 'progress';
             case 'completed': return 'completed';
             case 'reminder': return 'reminder';
@@ -809,15 +688,13 @@ function renderNotifications() {
             case 'level': return 'level';
             case 'profile': return 'profile';
             case 'anime': return 'anime';
+            case 'xp': return 'xp';
             default: return '';
         }
     };
-    
     listEl.innerHTML = notifications.map(notif => `
         <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
-            <div class="notification-icon ${getIconClass(notif.type)}">
-                <i class="fas ${getIcon(notif.type)}"></i>
-            </div>
+            <div class="notification-icon ${getIconClass(notif.type)}"><i class="fas ${getIcon(notif.type)}"></i></div>
             <div class="notification-content">
                 <div class="notification-title">${escapeHtml(notif.title)}</div>
                 <div class="notification-message">${escapeHtml(notif.message)}</div>
@@ -825,8 +702,6 @@ function renderNotifications() {
             </div>
         </div>
     `).join('');
-    
-    // Add click handlers
     document.querySelectorAll('.notification-item').forEach(item => {
         item.addEventListener('click', () => {
             const id = parseInt(item.dataset.id);
@@ -837,9 +712,7 @@ function renderNotifications() {
                 renderNotifications();
                 updateNotificationBadge();
             }
-            
-            // If it's a notification with relatedId, open the anime
-            if (notification && notification.relatedId && typeof window.editAnime === 'function') {
+            if (notification?.relatedId && typeof window.editAnime === 'function') {
                 document.getElementById('notificationCenter')?.classList.remove('show');
                 window.editAnime(notification.relatedId);
             }
@@ -847,50 +720,647 @@ function renderNotifications() {
     });
 }
 
-// =============================================
-// NOTIFICATION GENERATORS
-// =============================================
-
-// Add notification for level up
-function addLevelUpNotification(oldLevel, newLevel) {
-    addNotification('level', '🌟 Level Up!', 
-        `Congratulations! You've reached ${newLevel.title} (Level ${newLevel.level})!`);
+function markAllAsRead() {
+    notifications.forEach(n => n.read = true);
+    saveNotifications();
+    renderNotifications();
+    updateNotificationBadge();
+    showToast('All notifications marked as read', 'info');
 }
 
-// Add notification for anime added
+function clearAllNotifications() {
+    if (confirm('Are you sure you want to clear all notifications?')) {
+        notifications = [];
+        saveNotifications();
+        renderNotifications();
+        updateNotificationBadge();
+        showToast('All notifications cleared', 'info');
+    }
+}
+
+// =============================================
+// XP CARRYOVER SYSTEM
+// =============================================
+
+function addToPendingXP(xpAmount, animeTitle, reason) {
+    pendingXP.amount += xpAmount;
+    pendingXP.source.push({ anime: animeTitle, amount: xpAmount, reason, timestamp: new Date().toISOString() });
+    pendingXP.lastUpdated = new Date().toISOString();
+    localStorage.setItem('pendingXP', JSON.stringify(pendingXP));
+    addNotification('info', '⏳ XP Queued', `${xpAmount} XP from "${animeTitle}" has been queued for tomorrow.`);
+    updatePendingXPDisplay();
+    return true;
+}
+
+function processPendingXP() {
+    if (pendingXP.amount > 0) {
+        const today = new Date().toDateString();
+        const lastProcessed = localStorage.getItem('lastPendingProcessed');
+        if (lastProcessed !== today) {
+            const currentXP = calculateTotalXPSafe();
+            const newXP = currentXP + pendingXP.amount;
+            showXPGainNotification(`${pendingXP.source.length} queued item(s)`, pendingXP.amount, currentXP, newXP);
+            addNotification('xp', '📦 Queued XP Awarded!', `You received ${pendingXP.amount} XP from ${pendingXP.source.length} queued items!`);
+            pendingXP = { amount: 0, source: [], lastUpdated: new Date().toISOString() };
+            localStorage.setItem('pendingXP', JSON.stringify(pendingXP));
+            localStorage.setItem('lastPendingProcessed', today);
+            setTimeout(() => {
+                updateSettingsLevelSafe();
+                updateSidebarLevelSafe();
+                updateDailyXPTracker();
+            }, 100);
+            return true;
+        }
+    }
+    return false;
+}
+
+// =============================================
+// UI UPDATE FUNCTIONS
+// =============================================
+
+function updateSidebarLevelSafe() {
+    try {
+        const badgeEl = document.getElementById('levelBadgeText');
+        const titleEl = document.getElementById('levelTitleText');
+        if (!badgeEl || !titleEl) return;
+        const totalXP = calculateTotalXPSafe();
+        const currentLevel = getCurrentLevelSafe(totalXP);
+        badgeEl.textContent = `Lv.${currentLevel.level}`;
+        titleEl.textContent = currentLevel.title;
+    } catch (e) { console.warn('Sidebar level update error:', e); }
+}
+
+function updateSettingsLevelSafe() {
+    try {
+        const titleEl = document.getElementById('settingsLevelTitle');
+        const numberEl = document.getElementById('settingsLevelNumber');
+        const fillEl = document.getElementById('settingsProgressFill');
+        const currentXPSpan = document.getElementById('settingsCurrentXP');
+        const nextXPSpan = document.getElementById('settingsNextXP');
+        const nextInfoEl = document.getElementById('settingsNextInfo');
+        if (!titleEl || !numberEl) return;
+        const totalXP = calculateTotalXPSafe();
+        const currentLevel = getCurrentLevelSafe(totalXP);
+        const nextLevel = getNextLevelSafe(totalXP);
+        titleEl.textContent = currentLevel.title;
+        numberEl.textContent = `Level ${currentLevel.level}`;
+        if (nextLevel && fillEl) {
+            const currentReq = currentLevel.xpRequired;
+            const nextReq = nextLevel.xpRequired;
+            const currentXP = totalXP - currentReq;
+            const neededXP = nextReq - currentReq;
+            const percentage = (currentXP / neededXP) * 100;
+            fillEl.style.width = `${percentage}%`;
+            if (currentXPSpan) currentXPSpan.textContent = totalXP;
+            if (nextXPSpan) nextXPSpan.textContent = nextReq;
+            if (nextInfoEl) nextInfoEl.textContent = `Next: ${nextLevel.title} at ${nextReq} XP`;
+        } else if (fillEl) {
+            fillEl.style.width = '100%';
+            if (currentXPSpan) currentXPSpan.textContent = totalXP;
+            if (nextXPSpan) nextXPSpan.textContent = totalXP;
+            if (nextInfoEl) nextInfoEl.textContent = `Maximum Level Reached!`;
+        }
+    } catch (e) { console.warn('Settings level update error:', e); }
+}
+
+// =============================================
+// XP GAIN NOTIFICATION
+// =============================================
+
+function calculateLevelProgressPercentage(xp) {
+    const currentLevel = getCurrentLevelSafe(xp);
+    const nextLevel = getNextLevelSafe(xp);
+    if (!nextLevel) return 100;
+    return ((xp - currentLevel.xpRequired) / (nextLevel.xpRequired - currentLevel.xpRequired)) * 100;
+}
+
+function showXPGainNotification(animeTitle, gainedXP, oldXP, newXP) {
+    const currentLevel = getCurrentLevelSafe(newXP);
+    const nextLevel = getNextLevelSafe(newXP);
+    let xpNeeded = nextLevel ? nextLevel.xpRequired - newXP : 0;
+    const xpToast = document.createElement('div');
+    xpToast.className = 'xp-gain-toast';
+    xpToast.innerHTML = `
+        <div class="xp-gain-icon"><i class="fas fa-chart-line"></i></div>
+        <div class="xp-gain-content">
+            <div class="xp-gain-title">✨ +${gainedXP} XP Earned!</div>
+            <div class="xp-gain-anime">From: ${animeTitle}</div>
+            <div class="xp-gain-progress"><span class="xp-old">${oldXP}</span> <i class="fas fa-arrow-right"></i> <span class="xp-new">${newXP}</span> <span class="xp-total">XP</span></div>
+            ${nextLevel ? `<div class="xp-next-info"><i class="fas fa-target"></i> ${xpNeeded} more XP for ${nextLevel.title} (Lv.${nextLevel.level})</div>` : '<div class="xp-next-info">🏆 Maximum Level Reached!</div>'}
+        </div>
+        <div class="xp-gain-progress-bar"><div class="xp-progress-fill" style="width: ${calculateLevelProgressPercentage(newXP)}%"></div></div>
+    `;
+    document.body.appendChild(xpToast);
+    setTimeout(() => {
+        const fill = xpToast.querySelector('.xp-progress-fill');
+        if (fill) fill.style.width = `${calculateLevelProgressPercentage(newXP)}%`;
+    }, 100);
+    addNotification('xp', '⭐ XP Earned!', `You earned ${gainedXP} XP from "${animeTitle}". Total: ${newXP} XP`);
+    setTimeout(() => {
+        xpToast.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => xpToast.remove(), 300);
+    }, 6000);
+}
+
+function showXPLossNotification(animeTitle, lostXP, oldXP, newXP) {
+    const lossToast = document.createElement('div');
+    lossToast.className = 'xp-loss-toast';
+    lossToast.innerHTML = `
+        <div class="xp-gain-icon" style="background: rgba(239,68,68,0.15);"><i class="fas fa-chart-line" style="color:#ef4444;"></i></div>
+        <div class="xp-gain-content">
+            <div class="xp-gain-title" style="color:#f87171;">📉 -${lostXP} XP</div>
+            <div class="xp-gain-anime">Removed: ${animeTitle}</div>
+            <div class="xp-gain-progress"><span class="xp-old">${oldXP}</span> <i class="fas fa-arrow-right"></i> <span class="xp-new">${newXP}</span> <span class="xp-total">XP</span></div>
+        </div>
+        <div class="xp-gain-progress-bar"><div class="xp-progress-fill" style="width: ${calculateLevelProgressPercentage(newXP)}%"></div></div>
+    `;
+    document.body.appendChild(lossToast);
+    setTimeout(() => {
+        lossToast.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => lossToast.remove(), 300);
+    }, 4000);
+}
+
+// =============================================
+// DAILY XP TRACKER
+// =============================================
+
+function getTodayEarnedXP() {
+    const today = new Date().toDateString();
+    return (xpDailyLimit?.date === today) ? (xpDailyLimit.total || 0) : 0;
+}
+
+function updateDailyXPTracker() {
+    const earnedXP = getTodayEarnedXP();
+    const remainingXP = Math.max(0, XP_LIMITS.DAILY_MAX - earnedXP);
+    const percentage = Math.min(100, (earnedXP / XP_LIMITS.DAILY_MAX) * 100);
+    const limitText = document.getElementById('dailyLimitText');
+    const progressBar = document.getElementById('dailyXPProgressBar');
+    const earnedSpan = document.getElementById('xpEarnedToday');
+    const remainingSpan = document.getElementById('xpRemainingToday');
+    const warningDiv = document.getElementById('dailyXPWarning');
+    if (limitText) limitText.textContent = `${earnedXP} / ${XP_LIMITS.DAILY_MAX} XP`;
+    if (progressBar) {
+        progressBar.style.width = `${percentage}%`;
+        progressBar.classList.remove('warning', 'danger');
+        if (percentage >= 90) progressBar.classList.add('danger');
+        else if (percentage >= 75) progressBar.classList.add('warning');
+    }
+    if (earnedSpan) earnedSpan.textContent = `${earnedXP} XP earned today`;
+    if (remainingSpan) {
+        remainingSpan.textContent = remainingXP > 0 ? `${remainingXP} XP remaining` : `Limit reached! ${pendingXP.amount > 0 ? pendingXP.amount + ' XP queued' : 'XP will be queued'}`;
+        remainingSpan.style.color = remainingXP > 0 ? '#10b981' : '#f59e0b';
+    }
+    if (warningDiv) {
+        if (percentage >= 75) {
+            warningDiv.style.display = 'flex';
+            warningDiv.innerHTML = remainingXP <= 0 ? `<i class="fas fa-hourglass-end"></i><span>Daily limit reached! ${pendingXP.amount > 0 ? `${pendingXP.amount} XP queued for tomorrow.` : 'New XP will be queued for tomorrow.'}</span>` : `<i class="fas fa-exclamation-triangle"></i><span>Only ${remainingXP} XP left today! XP after this will be queued.</span>`;
+        } else warningDiv.style.display = 'none';
+    }
+    updatePendingXPDisplay();
+}
+
+function updatePendingXPDisplay() {
+    const pendingDiv = document.querySelector('.pending-xp-display');
+    if (pendingDiv) {
+        if (pendingXP.amount > 0) {
+            const uniqueAnime = [...new Set(pendingXP.source.map(s => s.anime))];
+            pendingDiv.innerHTML = `
+                <div style="display:flex;align-items:center;gap:8px;"><i class="fas fa-clock" style="color:#f59e0b;"></i><span><strong>${pendingXP.amount} XP Queued</strong></span><span style="margin-left:auto;font-size:0.65rem;color:#f59e0b;">⏳ Pending</span></div>
+                <div style="font-size:0.65rem;color:#94a3b8;margin-top:4px;">From: ${uniqueAnime.slice(0, 3).join(', ')}${uniqueAnime.length > 3 ? ` +${uniqueAnime.length - 3} more` : ''}</div>
+                <div style="font-size:0.6rem;color:#64748b;margin-top:6px;"><i class="fas fa-info-circle"></i> Will be awarded automatically tomorrow</div>
+                <div class="tracker-progress" style="margin-top:8px;height:4px;"><div class="tracker-progress-bar" style="width:${Math.min(100, (pendingXP.amount / XP_LIMITS.DAILY_MAX) * 100)}%; background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div>
+            `;
+            pendingDiv.style.display = 'block';
+        } else pendingDiv.style.display = 'none';
+    }
+}
+
+function addDailyXPTrackerToSettings() {
+    const levelCard = document.querySelector('.level-card');
+    if (levelCard && !document.querySelector('.daily-xp-tracker')) {
+        const trackerHTML = `<div class="daily-xp-tracker" id="dailyXPTracker"><div class="tracker-header"><div class="tracker-title"><i class="fas fa-calendar-day"></i><span>Today's XP Limit</span></div><div class="tracker-limit" id="dailyLimitText">0 / ${XP_LIMITS.DAILY_MAX} XP</div></div><div class="tracker-progress"><div class="tracker-progress-bar" id="dailyXPProgressBar" style="width:0%"></div></div><div class="tracker-stats"><span class="xp-earned" id="xpEarnedToday">0 XP earned today</span><span class="xp-remaining" id="xpRemainingToday">${XP_LIMITS.DAILY_MAX} XP remaining</span></div><div class="tracker-warning" id="dailyXPWarning" style="display:none;"><i class="fas fa-exclamation-triangle"></i><span>Approaching limit! XP will be queued.</span></div></div>`;
+        levelCard.insertAdjacentHTML('beforeend', trackerHTML);
+    }
+}
+
+function addPendingXPDisplay() {
+    const levelCard = document.querySelector('.level-card');
+    if (levelCard && !document.querySelector('.pending-xp-display')) {
+        const pendingDiv = document.createElement('div');
+        pendingDiv.className = 'pending-xp-display';
+        pendingDiv.style.cssText = `margin-top:16px;padding:12px;background:rgba(245,158,11,0.1);border-radius:12px;border-left:3px solid #f59e0b;font-size:0.75rem;`;
+        levelCard.appendChild(pendingDiv);
+        updatePendingXPDisplay();
+    }
+}
+
+// =============================================
+// DAILY LIMIT RESET
+// =============================================
+
+function checkAndResetDailyLimits() {
+    const now = new Date();
+    const today = now.toDateString();
+    const lastReset = localStorage.getItem('lastDailyReset');
+    if (!lastReset || new Date(lastReset).toDateString() !== today) {
+        processPendingXP();
+        xpDailyLimit = { date: today, total: 0, episodeCount: 0 };
+        localStorage.setItem('xpDailyLimit', JSON.stringify(xpDailyLimit));
+        dailyAnimeCount = { date: today, count: 0 };
+        localStorage.setItem('dailyAnimeCount', JSON.stringify(dailyAnimeCount));
+        localStorage.setItem('lastDailyReset', now.toISOString());
+        setTimeout(() => {
+            updateDailyXPTracker();
+            updateSettingsLevelSafe();
+            updateSidebarLevelSafe();
+            addNotification('info', '📅 New Day!', `Daily XP limit reset! You can earn ${XP_LIMITS.DAILY_MAX} XP today.`);
+        }, 100);
+    }
+}
+setInterval(checkAndResetDailyLimits, 60 * 1000);
+
+// =============================================
+// MAIN XP CALCULATION WITH CARRYOVER
+// =============================================
+
+function canAddAnimeToday() {
+    const today = new Date().toDateString();
+    if (dailyAnimeCount.date !== today) dailyAnimeCount = { date: today, count: 0 };
+    return dailyAnimeCount.count < XP_LIMITS.MAX_ANIME_PER_DAY;
+}
+
+function recordAnimeAddition() {
+    const today = new Date().toDateString();
+    if (dailyAnimeCount.date !== today) dailyAnimeCount = { date: today, count: 0 };
+    dailyAnimeCount.count++;
+    localStorage.setItem('dailyAnimeCount', JSON.stringify(dailyAnimeCount));
+}
+
+function checkHourlyLimit() {
+    const lastHour = Date.now() - 3600000;
+    const hourlyXP = xpTransactionLog.filter(t => new Date(t.timestamp).getTime() > lastHour).reduce((s, t) => s + t.amount, 0);
+    if (hourlyXP >= XP_LIMITS.HOURLY_MAX) {
+        addNotification('warning', '⏰ Slow Down!', `You've earned ${hourlyXP} XP in the last hour. Max ${XP_LIMITS.HOURLY_MAX} XP/hour.`);
+        return false;
+    }
+    return true;
+}
+
+function getTimeSinceLastUpdate(animeId) {
+    const last = localStorage.getItem(`last_update_${animeId}`);
+    return last ? Date.now() - parseInt(last) : XP_LIMITS.MIN_TIME_BETWEEN_UPDATES + 1;
+}
+
+function getAnimeCompletionCount(animeId) {
+    return (JSON.parse(localStorage.getItem('animeCompletions')) || {})[animeId] || 0;
+}
+
+function recordAnimeCompletion(animeId) {
+    const completions = JSON.parse(localStorage.getItem('animeCompletions')) || {};
+    completions[animeId] = (completions[animeId] || 0) + 1;
+    localStorage.setItem('animeCompletions', JSON.stringify(completions));
+}
+
+function recordXPTransaction(animeId, amount, reason, oldXP, newXP) {
+    xpTransactionLog.unshift({ id: Date.now(), animeId, amount, reason, oldXP, newXP, timestamp: new Date().toISOString(), fingerprint: getSimpleFingerprint() });
+    if (xpTransactionLog.length > 1000) xpTransactionLog = xpTransactionLog.slice(0, 1000);
+    localStorage.setItem('xpTransactionLog', JSON.stringify(xpTransactionLog));
+    const today = new Date().toDateString();
+    if (xpDailyLimit.date !== today) xpDailyLimit = { date: today, total: 0, episodeCount: 0 };
+    xpDailyLimit.total += amount;
+    localStorage.setItem('xpDailyLimit', JSON.stringify(xpDailyLimit));
+    localStorage.setItem(`last_update_${animeId}`, Date.now().toString());
+    updateDailyXPTracker();
+}
+
+function getSimpleFingerprint() {
+    const info = `${navigator.userAgent}_${navigator.language}_${screen.width}x${screen.height}`;
+    let hash = 0;
+    for (let i = 0; i < info.length; i++) hash = ((hash << 5) - hash) + info.charCodeAt(i);
+    return Math.abs(hash).toString(16);
+}
+
+function isPotentialHacker() {
+    const lastHour = Date.now() - 3600000;
+    if (xpTransactionLog.filter(t => new Date(t.timestamp).getTime() > lastHour).length > 20) {
+        addNotification('warning', '🚨 Activity Limit', 'Too many actions. Please slow down.');
+        return true;
+    }
+    return false;
+}
+
+function getAnimeTotalXP(animeId) {
+    return xpTransactionLog.filter(t => t.animeId === animeId).reduce((s, t) => s + t.amount, 0);
+}
+
+function isSuspiciousActivity(anime, oldEp, newEp, oldProg, newProg) {
+    const today = new Date().toDateString();
+    if (xpDailyLimit.date !== today) xpDailyLimit = { date: today, total: 0, episodeCount: 0 };
+    if ((newEp - oldEp) > XP_LIMITS.MAX_EPISODES_PER_DAY) {
+        addNotification('warning', '⚠️ Suspicious', `Cannot add more than ${XP_LIMITS.MAX_EPISODES_PER_DAY} episodes/day.`);
+        return true;
+    }
+    if (getTimeSinceLastUpdate(anime.id) < XP_LIMITS.MIN_TIME_BETWEEN_UPDATES && (newProg - oldProg) > 10) {
+        addNotification('warning', '⚠️ Slow Down', 'Please wait before updating again.');
+        return true;
+    }
+    if (getAnimeCompletionCount(anime.id) > 1) {
+        addNotification('warning', '⚠️ Already Completed', `"${anime.title}" already completed. No more XP.`);
+        return true;
+    }
+    return false;
+}
+
+function calculateXPSafely(anime, action, oldData = null) {
+    if (action === 'add_completed' && !canAddAnimeToday()) {
+        addNotification('warning', '📚 Daily Limit', `Already added ${XP_LIMITS.MAX_ANIME_PER_DAY} anime today. Come back tomorrow!`);
+        return 0;
+    }
+    if (!checkHourlyLimit()) return 0;
+    if (oldData && isSuspiciousActivity(anime, oldData.episodes, anime.episodes, oldData.progress, anime.progress)) return 0;
+    if (isPotentialHacker()) return 0;
+
+    let xpGained = 0;
+    if (action === 'add_completed' && getAnimeCompletionCount(anime.id) === 0) {
+        xpGained = 10 + Math.floor((anime.episodes || 0) / 2);
+        if (anime.score >= 9) xpGained += 10;
+        else if (anime.score >= 8) xpGained += 5;
+        if (anime.type === 'Movie') xpGained += 5;
+    } else if (action === 'status_to_completed' && oldData && getAnimeCompletionCount(anime.id) === 0) {
+        xpGained = 10;
+        if (anime.score >= 9) xpGained += 10;
+        else if (anime.score >= 8) xpGained += 5;
+    } else if (action === 'status_to_watching' && oldData) {
+        const progress = anime.progress || 0;
+        if (progress > 0) xpGained = Math.floor(progress / 5);
+    } else if (action === 'progress_update' && oldData) {
+        const increase = (anime.progress || 0) - (oldData.progress || 0);
+        if (increase > 0 && increase <= 50) xpGained = Math.floor(increase / 5);
+    } else if (action === 'episode_increase' && oldData) {
+        const increase = (anime.episodes || 0) - (oldData.episodes || 0);
+        if (increase > 0 && increase <= 10) xpGained = Math.floor(increase / 2);
+    } else if (action === 'rating' && oldData && !oldData.score && anime.score) xpGained = 2;
+
+    if (xpGained === 0) return 0;
+
+    const remainingDaily = XP_LIMITS.DAILY_MAX - xpDailyLimit.total;
+    let finalXP = Math.min(xpGained, remainingDaily);
+    let excess = xpGained - finalXP;
+    if (excess > 0) addToPendingXP(excess, anime.title, action);
+
+    const animeTotal = getAnimeTotalXP(anime.id);
+    if (animeTotal + finalXP > XP_LIMITS.PER_ANIME_MAX) finalXP = Math.max(0, XP_LIMITS.PER_ANIME_MAX - animeTotal);
+
+    if (xpDailyLimit.total + finalXP >= XP_LIMITS.WARNING_THRESHOLD && xpDailyLimit.total < XP_LIMITS.WARNING_THRESHOLD) {
+        addNotification('info', '📊 Daily XP Progress', `${XP_LIMITS.DAILY_MAX - (xpDailyLimit.total + finalXP)} XP left today! ${pendingXP.amount} XP queued.`);
+    }
+    if (finalXP > 0 && action === 'add_completed') {
+        recordAnimeAddition();
+        recordAnimeCompletion(anime.id);
+    }
+    return finalXP;
+}
+
+// =============================================
+// LEVEL UP CHECK
+// =============================================
+
+let lastXPSafe = parseInt(localStorage.getItem('lastXPSafe') || '0');
+
+function checkLevelUpSafe() {
+    try {
+        const currentXP = calculateTotalXPSafe();
+        if (currentXP > lastXPSafe) {
+            const oldLevel = getCurrentLevelSafe(lastXPSafe);
+            const newLevel = getCurrentLevelSafe(currentXP);
+            if (oldLevel.level !== newLevel.level) {
+                showToast(`✨ Level Up! ${oldLevel.title} → ${newLevel.title}`, 'success');
+                addNotification('level', '🌟 Level Up!', `You reached ${newLevel.title} (Level ${newLevel.level})!`);
+            }
+            lastXPSafe = currentXP;
+            localStorage.setItem('lastXPSafe', lastXPSafe.toString());
+        }
+        updateSidebarLevelSafe();
+        updateSettingsLevelSafe();
+    } catch (e) { console.warn('Level check error:', e); }
+}
+
+// =============================================
+// NOTIFICATION GENERATORS (reminders, summaries, milestones)
+// =============================================
+
+function checkProgressNotifications() { /* existing implementation */ }
+function checkReminderNotifications() { /* existing implementation */ }
+function getConsecutiveMonthsWithCompletions() { /* existing implementation */ }
+function checkYearlyMilestones() { /* existing implementation */ }
+function checkCompletionNotifications() { /* existing implementation */ }
+function sendWeeklySummary() { /* existing implementation */ }
+function sendDailyReminder() { /* existing implementation */ }
+
+// =============================================
+// MAIN HANDLER FOR ANIME ACTIONS
+// =============================================
+
+const originalHandleAddAnime = window.handleAddAnime;
+if (typeof originalHandleAddAnime === 'function') {
+    window.handleAddAnime = function (e) {
+        const titleInput = document.getElementById('animeTitle');
+        const statusSelect = document.getElementById('animeStatus');
+        const progressInput = document.getElementById('animeProgress');
+        const episodesInput = document.getElementById('animeEpisodes');
+        const scoreInput = document.getElementById('animeScore');
+        const typeSelect = document.getElementById('animeType');
+
+        const animeTitle = titleInput?.value?.trim() || 'Unknown';
+        const isBeingAdded = !window.isEditing;
+
+        let oldAnimeData = null;
+        if (window.isEditing && window.currentEditId) {
+            oldAnimeData = animeData.find(a => a.id == window.currentEditId);
+        }
+
+        const newAnimeData = {
+            id: window.currentEditId || Date.now(),
+            title: animeTitle,
+            userStatus: statusSelect?.value,
+            progress: parseInt(progressInput?.value) || 0,
+            episodes: parseInt(episodesInput?.value) || 0,
+            score: parseFloat(scoreInput?.value) || null,
+            type: typeSelect?.value
+        };
+
+        const action = detectAnimeAction(oldAnimeData, newAnimeData);
+        const xpBefore = calculateTotalXPSafe();
+        const levelBefore = getCurrentLevelSafe(xpBefore);
+
+        originalHandleAddAnime(e);
+
+        setTimeout(() => {
+            const xpAfter = calculateTotalXPSafe();
+            const levelAfter = getCurrentLevelSafe(xpAfter);
+            const xpGained = xpAfter - xpBefore;
+
+            if (xpGained > 0 && animeTitle !== 'Unknown') {
+                showXPGainNotification(animeTitle, xpGained, xpBefore, xpAfter);
+                updateSettingsLevelSafe();
+                updateSidebarLevelSafe();
+                updateDailyXPTracker();
+                if (levelBefore.level !== levelAfter.level) {
+                    addNotification('level', '🎉 Level Up!', `You reached ${levelAfter.title} (Level ${levelAfter.level})!`);
+                }
+            }
+
+            if (action === 'status_to_watching' && animeTitle !== 'Unknown') {
+                addNotification('anime', '🎬 Started Watching', `You started watching "${animeTitle}". Update progress to earn more XP!`);
+            } else if (action === 'status_to_completed' && animeTitle !== 'Unknown') {
+                addNotification('completed', '✨ Anime Completed! ✨', `Congratulations on completing "${animeTitle}"! 🎉`);
+                checkCompletionNotifications();
+            } else if (isBeingAdded && animeTitle !== 'Unknown') {
+                if (newAnimeData.userStatus === 'Completed') {
+                    addNotification('completed', '✨ Anime Completed! ✨', `Congratulations on completing "${animeTitle}"! 🎉`);
+                    checkCompletionNotifications();
+                } else {
+                    addAnimeAddedNotification(animeTitle, newAnimeData.userStatus || 'Plan to Watch');
+                }
+            }
+            previousXP = xpAfter;
+            localStorage.setItem('previousXP', previousXP);
+        }, 600);
+    };
+}
+
+const originalDeleteAnime = window.deleteAnime;
+if (typeof originalDeleteAnime === 'function') {
+    window.deleteAnime = function () {
+        const xpBefore = calculateTotalXPSafe();
+        const titleInput = document.getElementById('animeTitle');
+        const animeTitle = titleInput?.value?.trim() || 'an anime';
+        originalDeleteAnime();
+        setTimeout(() => {
+            const xpAfter = calculateTotalXPSafe();
+            const xpLost = xpBefore - xpAfter;
+            if (xpLost > 0) {
+                showXPLossNotification(animeTitle, xpLost, xpBefore, xpAfter);
+                updateSettingsLevelSafe();
+                updateSidebarLevelSafe();
+                updateDailyXPTracker();
+            }
+            previousXP = xpAfter;
+            localStorage.setItem('previousXP', previousXP);
+        }, 300);
+    };
+}
+
+// =============================================
+// INITIALIZATION
+// =============================================
+
+function initLevelSystemSafe() {
+    setTimeout(() => {
+        updateSidebarLevelSafe();
+        updateSettingsLevelSafe();
+        addDailyXPTrackerToSettings();
+        addPendingXPDisplay();
+        updateDailyXPTracker();
+    }, 100);
+}
+
+function initNotifications() {
+    setInterval(() => { checkProgressNotifications(); checkReminderNotifications(); }, 3600000);
+    setInterval(sendDailyReminder, 86400000);
+    setInterval(sendWeeklySummary, 604800000);
+    setTimeout(() => {
+        checkProgressNotifications();
+        checkReminderNotifications();
+        sendWeeklySummary();
+        updateNotificationBadge();
+    }, 5000);
+
+    const bell = document.getElementById('notificationBell');
+    const center = document.getElementById('notificationCenter');
+    if (bell && center) {
+        const newBell = bell.cloneNode(true);
+        bell.parentNode.replaceChild(newBell, bell);
+        newBell.addEventListener('click', (e) => { e.stopPropagation(); center.classList.toggle('show'); renderNotifications(); });
+        document.addEventListener('click', (e) => { if (!center.contains(e.target) && !newBell.contains(e.target)) center.classList.remove('show'); });
+    }
+    const markBtn = document.getElementById('markAllReadBtn');
+    if (markBtn) markBtn.addEventListener('click', () => markAllAsRead());
+    const clearBtn = document.getElementById('clearAllNotifications');
+    if (clearBtn) clearBtn.addEventListener('click', () => clearAllNotifications());
+    const closeBtn = document.getElementById('notificationCloseBtn');
+    if (closeBtn) closeBtn.addEventListener('click', () => center?.classList.remove('show'));
+}
+
+// Final initialization on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        initLevelSystemSafe();
+        initNotifications();
+        checkAndResetDailyLimits();
+        checkLevelUpSafe();
+    }, 1000);
+});
+
+// Save data interceptor for level checks
+const originalSaveData = window.saveData;
+if (typeof originalSaveData === 'function') {
+    window.saveData = function () {
+        originalSaveData();
+        setTimeout(checkLevelUpSafe, 200);
+    };
+} else {
+    window.saveData = function () {
+        localStorage.setItem('animeData', JSON.stringify(animeData));
+        setTimeout(checkLevelUpSafe, 200);
+    };
+}
+
+// CSS styles injection
+if (!document.getElementById('notification-style')) {
+    const style = document.createElement('style');
+    style.id = 'notification-style';
+    style.textContent = `
+        @keyframes notificationBounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)} }
+        @keyframes badgePulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.2)} }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(100%)} to{opacity:1;transform:translateX(0)} }
+        @keyframes slideOutRight { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(100%)} }
+        .notification-bounce { animation: notificationBounce 0.5s ease; }
+        .notification-dot.has-count { animation: badgePulse 0.5s ease; }
+        .notification-icon.level { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .notification-icon.profile { background: rgba(59,130,246,0.15); color: #3b82f6; }
+        .notification-icon.anime { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+        .notification-icon.xp { background: rgba(16,185,129,0.15); color: #10b981; }
+        .xp-gain-toast, .xp-loss-toast { position: fixed; bottom: 30px; right: 30px; width: 340px; background: linear-gradient(135deg,#1a1f2e,#0f1420); border-radius: 16px; border-left: 4px solid #10b981; padding: 16px; z-index: 10002; animation: slideInRight 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .xp-loss-toast { border-left-color: #ef4444; }
+        .xp-gain-icon { width: 40px; height: 40px; background: rgba(16,185,129,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+        .xp-gain-icon i { font-size: 1.2rem; color: #10b981; }
+        .xp-gain-title { font-size: 1rem; font-weight: bold; color: #10b981; margin-bottom: 4px; }
+        .xp-gain-anime { font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px; }
+        .xp-gain-progress { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin: 8px 0; }
+        .xp-old { color: #64748b; text-decoration: line-through; }
+        .xp-new { color: #10b981; font-weight: bold; font-size: 1rem; }
+        .xp-next-info { font-size: 0.7rem; color: #a78bfa; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+        .xp-gain-progress-bar { margin-top: 12px; background: rgba(255,255,255,0.1); border-radius: 10px; height: 4px; overflow: hidden; }
+        .xp-progress-fill { background: linear-gradient(90deg,#10b981,#34d399); height: 100%; width: 0%; border-radius: 10px; transition: width 0.3s ease; }
+        .tracker-progress-bar.warning { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+        .tracker-progress-bar.danger { background: linear-gradient(90deg,#ef4444,#f87171); }
+    `;
+    document.head.appendChild(style);
+}
+
 function addAnimeAddedNotification(animeTitle, status) {
     if (status === 'Completed') {
-        addNotification('completed', '✨ Anime Completed!', 
-            `Congratulations on completing "${animeTitle}"! 🎉`);
+        addNotification('completed', '✨ Anime Completed!', `Congratulations on completing "${animeTitle}"! 🎉`);
     } else if (status === 'Watching') {
-        addNotification('anime', '📺 Started Watching', 
-            `You started watching "${animeTitle}". Enjoy the journey!`);
+        addNotification('anime', '📺 Started Watching', `You started watching "${animeTitle}". Enjoy the journey!`);
     } else {
-        addNotification('anime', '📚 Added to List', 
-            `"${animeTitle}" has been added to your list.`);
+        addNotification('anime', '📚 Added to List', `"${animeTitle}" has been added to your list.`);
     }
 }
 
-// Add notification for anime update
-function addAnimeUpdatedNotification(animeTitle, changes) {
-    let message = `"${animeTitle}" has been updated`;
-    if (changes) {
-        message += ` (${changes})`;
-    }
-    addNotification('anime', '✏️ Anime Updated', message);
-}
-
-// Add notification for profile change
-function addProfileUpdateNotification(changeType) {
-    const messages = {
-        name: 'Your display name has been updated',
-        avatar: 'Your profile picture has been changed',
-        theme: 'Theme preference has been updated'
-    };
-    addNotification('profile', '👤 Profile Updated', messages[changeType] || 'Your profile has been updated');
-}
-
-// Check for near-completion anime
 function checkProgressNotifications() {
     const watchingAnime = animeData.filter(anime => anime.userStatus === 'Watching');
     const today = new Date().toDateString();
@@ -899,316 +1369,155 @@ function checkProgressNotifications() {
     watchingAnime.forEach(anime => {
         const progress = anime.progress || 0;
         const total = anime.episodes || 0;
-        
         if (total === 0) return;
-        
         const percentage = (progress / total) * 100;
         const remaining = total - progress;
         const key = `${anime.id}_${Math.floor(percentage / 10)}`;
-        
         if (notifiedToday[key] === today) return;
-        
-        // Progress notifications at key milestones
         if (percentage >= 25 && percentage < 30) {
-            addNotification('progress', 'Progress Update',
-                `"${anime.title}" is 25% complete! (${progress}/${total} episodes)`, anime.id);
+            addNotification('progress', 'Progress Update', `"${anime.title}" is 25% complete! (${progress}/${total} episodes)`, anime.id);
             notifiedToday[key] = today;
         } else if (percentage >= 50 && percentage < 55) {
-            addNotification('progress', 'Halfway There!',
-                `You're halfway through "${anime.title}"! ${remaining} episodes to go!`, anime.id);
+            addNotification('progress', 'Halfway There!', `You're halfway through "${anime.title}"! ${remaining} episodes to go!`, anime.id);
             notifiedToday[key] = today;
         } else if (percentage >= 75 && percentage < 80) {
-            addNotification('progress', 'Almost Done!',
-                `"${anime.title}" is 75% complete! Just ${remaining} episodes left!`, anime.id);
+            addNotification('progress', 'Almost Done!', `"${anime.title}" is 75% complete! Just ${remaining} episodes left!`, anime.id);
             notifiedToday[key] = today;
         } else if (percentage >= 90 && percentage < 95) {
-            addNotification('progress', 'Final Stretch!',
-                `"${anime.title}" is 90% done! ${remaining} episodes remaining!`, anime.id);
+            addNotification('progress', 'Final Stretch!', `"${anime.title}" is 90% done! ${remaining} episodes remaining!`, anime.id);
             notifiedToday[key] = today;
         } else if (percentage >= 98 && percentage < 100) {
-            addNotification('progress', 'So Close!',
-                `Just ${remaining} episode left of "${anime.title}"! Finish strong!`, anime.id);
+            addNotification('progress', 'So Close!', `Just ${remaining} episode left of "${anime.title}"! Finish strong!`, anime.id);
             notifiedToday[key] = today;
         }
     });
-    
     localStorage.setItem('notifiedProgress', JSON.stringify(notifiedToday));
 }
 
-// Check for stale watching (reminders)
 function checkReminderNotifications() {
     const watchingAnime = animeData.filter(anime => anime.userStatus === 'Watching');
     const today = new Date();
     const lastReminded = JSON.parse(localStorage.getItem('lastReminded') || '{}');
-    
     watchingAnime.forEach(anime => {
         const lastUpdated = anime.updatedAt ? new Date(anime.updatedAt) : new Date(anime.createdAt);
         if (!lastUpdated) return;
-        
         const daysSinceUpdate = Math.floor((today - lastUpdated) / (1000 * 60 * 60 * 24));
         const key = anime.id.toString();
-        
         if (lastReminded[key] === today.toDateString()) return;
-        
         if (daysSinceUpdate === 7) {
-            addNotification('reminder', 'Been a While',
-                `It's been a week since you watched "${anime.title}". Still planning to continue?`, anime.id);
+            addNotification('reminder', 'Been a While', `It's been a week since you watched "${anime.title}". Still planning to continue?`, anime.id);
             lastReminded[key] = today.toDateString();
         } else if (daysSinceUpdate === 14) {
-            addNotification('reminder', 'Long Time No Watch',
-                `"${anime.title}" hasn't been updated in 2 weeks. Consider updating its status.`, anime.id);
+            addNotification('reminder', 'Long Time No Watch', `"${anime.title}" hasn't been updated in 2 weeks. Consider updating its status.`, anime.id);
             lastReminded[key] = today.toDateString();
         } else if (daysSinceUpdate === 30) {
-            addNotification('reminder', 'Abandoned?',
-                `It's been a month since you watched "${anime.title}". Maybe it's time to drop or continue?`, anime.id);
+            addNotification('reminder', 'Abandoned?', `It's been a month since you watched "${anime.title}". Maybe it's time to drop or continue?`, anime.id);
             lastReminded[key] = today.toDateString();
         }
     });
-    
     localStorage.setItem('lastReminded', JSON.stringify(lastReminded));
 }
 
-// Check for completion achievements (OVERALL + MONTHLY)
-function checkCompletionNotifications(anime) {
-    // Get ALL completed anime
-    const completedAnime = animeData.filter(a => a.userStatus === 'Completed');
-    const totalCompleted = completedAnime.length;
-    
-    // =============================================
-    // OVERALL MILESTONES (Lifetime achievements)
-    // =============================================
-    const overallMilestones = [1, 5, 10, 25, 50, 100, 250, 500];
-    const lastOverallMilestone = parseInt(localStorage.getItem('lastOverallMilestone')) || 0;
-    
-    for (const milestone of overallMilestones) {
-        if (totalCompleted >= milestone && lastOverallMilestone < milestone) {
-            addNotification('achievement', '🏆 Lifetime Achievement Unlocked!', 
-                `You've completed ${milestone} anime in total! Incredible dedication!`);
-            localStorage.setItem('lastOverallMilestone', milestone);
-            break;
-        }
-    }
-    
-    // =============================================
-    // MONTHLY MILESTONES (Based on actual monthly data)
-    // =============================================
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    
-    // Get completions from current month
-    const currentMonthCompletions = completedAnime.filter(anime => {
-        let completionDate = null;
-        if (anime.actualFinishDate) {
-            completionDate = new Date(anime.actualFinishDate);
-        } else if (anime.finishDate) {
-            completionDate = new Date(anime.finishDate);
-        } else if (anime.finishTimestamp) {
-            completionDate = new Date(anime.finishTimestamp);
-        }
-        
-        if (!completionDate || isNaN(completionDate.getTime())) return false;
-        
-        return completionDate.getFullYear() === currentYear && 
-               completionDate.getMonth() === currentMonth;
-    }).length;
-    
-    const monthlyMilestones = [1, 3, 5, 10, 15, 20, 30];
-    const lastMonthlyMilestone = parseInt(localStorage.getItem(`lastMonthlyMilestone_${currentYear}_${currentMonth}`)) || 0;
-    
-    for (const milestone of monthlyMilestones) {
-        if (currentMonthCompletions >= milestone && lastMonthlyMilestone < milestone) {
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                                'July', 'August', 'September', 'October', 'November', 'December'];
-            addNotification('achievement', '🏅 Monthly Milestone!', 
-                `You've completed ${milestone} anime in ${monthNames[currentMonth]}! Amazing month!`);
-            localStorage.setItem(`lastMonthlyMilestone_${currentYear}_${currentMonth}`, milestone);
-            break;
-        }
-    }
-    
-    // =============================================
-    // STREAK MILESTONES (Consecutive months with completions)
-    // =============================================
-    const streakMonths = getConsecutiveMonthsWithCompletions();
-    const streakMilestones = [3, 6, 12, 24];
-    const lastStreakMilestone = parseInt(localStorage.getItem('lastStreakMilestone')) || 0;
-    
-    for (const milestone of streakMilestones) {
-        if (streakMonths >= milestone && lastStreakMilestone < milestone) {
-            addNotification('achievement', '🔥 Streak Milestone!', 
-                `You've completed at least one anime for ${streakMonths} consecutive months! Keep the streak alive!`);
-            localStorage.setItem('lastStreakMilestone', milestone);
-            break;
-        }
-    }
-}
-
-// Helper function to calculate consecutive months with completions
 function getConsecutiveMonthsWithCompletions() {
     const completedAnime = animeData.filter(a => a.userStatus === 'Completed');
     const monthsWithCompletions = new Set();
-    
     completedAnime.forEach(anime => {
         let completionDate = null;
-        if (anime.actualFinishDate) {
-            completionDate = new Date(anime.actualFinishDate);
-        } else if (anime.finishDate) {
-            completionDate = new Date(anime.finishDate);
-        } else if (anime.finishTimestamp) {
-            completionDate = new Date(anime.finishTimestamp);
-        }
-        
+        if (anime.actualFinishDate) completionDate = new Date(anime.actualFinishDate);
+        else if (anime.finishDate) completionDate = new Date(anime.finishDate);
+        else if (anime.finishTimestamp) completionDate = new Date(anime.finishTimestamp);
         if (completionDate && !isNaN(completionDate.getTime())) {
-            const yearMonth = `${completionDate.getFullYear()}-${completionDate.getMonth()}`;
-            monthsWithCompletions.add(yearMonth);
+            monthsWithCompletions.add(`${completionDate.getFullYear()}-${completionDate.getMonth()}`);
         }
     });
-    
-    // Sort months chronologically
     const sortedMonths = Array.from(monthsWithCompletions).sort();
     if (sortedMonths.length === 0) return 0;
-    
-    // Calculate current streak from most recent month backwards
     const now = new Date();
     let currentStreak = 0;
     let checkDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    for (let i = 0; i < 24; i++) { // Check up to 24 months back
-        const yearMonth = `${checkDate.getFullYear()}-${checkDate.getMonth()}`;
-        if (monthsWithCompletions.has(yearMonth)) {
+    for (let i = 0; i < 24; i++) {
+        if (monthsWithCompletions.has(`${checkDate.getFullYear()}-${checkDate.getMonth()}`)) {
             currentStreak++;
             checkDate.setMonth(checkDate.getMonth() - 1);
-        } else {
-            break;
-        }
+        } else break;
     }
-    
     return currentStreak;
 }
 
-// Also add a function to check yearly milestones
 function checkYearlyMilestones() {
     const now = new Date();
     const currentYear = now.getFullYear();
     const completedAnime = animeData.filter(a => a.userStatus === 'Completed');
-    
     const thisYearCompletions = completedAnime.filter(anime => {
         let completionDate = null;
-        if (anime.actualFinishDate) {
-            completionDate = new Date(anime.actualFinishDate);
-        } else if (anime.finishDate) {
-            completionDate = new Date(anime.finishDate);
-        } else if (anime.finishTimestamp) {
-            completionDate = new Date(anime.finishTimestamp);
-        }
-        
+        if (anime.actualFinishDate) completionDate = new Date(anime.actualFinishDate);
+        else if (anime.finishDate) completionDate = new Date(anime.finishDate);
+        else if (anime.finishTimestamp) completionDate = new Date(anime.finishTimestamp);
         if (!completionDate || isNaN(completionDate.getTime())) return false;
         return completionDate.getFullYear() === currentYear;
     }).length;
-    
     const yearlyMilestones = [10, 25, 50, 100, 200, 365];
     const lastYearlyMilestone = parseInt(localStorage.getItem(`lastYearlyMilestone_${currentYear}`)) || 0;
-    
     for (const milestone of yearlyMilestones) {
         if (thisYearCompletions >= milestone && lastYearlyMilestone < milestone) {
-            addNotification('achievement', '🎯 Yearly Milestone!', 
-                `You've completed ${milestone} anime in ${currentYear}! What a year!`);
+            addNotification('achievement', '🎯 Yearly Milestone!', `You've completed ${milestone} anime in ${currentYear}! What a year!`);
             localStorage.setItem(`lastYearlyMilestone_${currentYear}`, milestone);
             break;
         }
     }
 }
 
-// Update the init function to check yearly milestones
-function checkCompletionNotifications(anime) {
-    // Get ALL completed anime
+function checkCompletionNotifications() {
     const completedAnime = animeData.filter(a => a.userStatus === 'Completed');
     const totalCompleted = completedAnime.length;
-    
-    // =============================================
-    // OVERALL MILESTONES (Lifetime achievements)
-    // =============================================
     const overallMilestones = [1, 5, 10, 25, 50, 100, 250, 500];
     const lastOverallMilestone = parseInt(localStorage.getItem('lastOverallMilestone')) || 0;
-    
     for (const milestone of overallMilestones) {
         if (totalCompleted >= milestone && lastOverallMilestone < milestone) {
-            addNotification('achievement', '🏆 Lifetime Achievement Unlocked!', 
-                `You've completed ${milestone} anime in total! Incredible dedication!`);
+            addNotification('achievement', '🏆 Lifetime Achievement!', `You've completed ${milestone} anime in total!`);
             localStorage.setItem('lastOverallMilestone', milestone);
             break;
         }
     }
-    
-    // =============================================
-    // MONTHLY MILESTONES (Based on actual monthly data)
-    // =============================================
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
-    
-    // Get completions from current month
     const currentMonthCompletions = completedAnime.filter(anime => {
         let completionDate = null;
-        if (anime.actualFinishDate) {
-            completionDate = new Date(anime.actualFinishDate);
-        } else if (anime.finishDate) {
-            completionDate = new Date(anime.finishDate);
-        } else if (anime.finishTimestamp) {
-            completionDate = new Date(anime.finishTimestamp);
-        }
-        
+        if (anime.actualFinishDate) completionDate = new Date(anime.actualFinishDate);
+        else if (anime.finishDate) completionDate = new Date(anime.finishDate);
+        else if (anime.finishTimestamp) completionDate = new Date(anime.finishTimestamp);
         if (!completionDate || isNaN(completionDate.getTime())) return false;
-        
-        return completionDate.getFullYear() === currentYear && 
-               completionDate.getMonth() === currentMonth;
+        return completionDate.getFullYear() === currentYear && completionDate.getMonth() === currentMonth;
     }).length;
-    
     const monthlyMilestones = [1, 3, 5, 10, 15, 20, 30];
     const lastMonthlyMilestone = parseInt(localStorage.getItem(`lastMonthlyMilestone_${currentYear}_${currentMonth}`)) || 0;
-    
     for (const milestone of monthlyMilestones) {
         if (currentMonthCompletions >= milestone && lastMonthlyMilestone < milestone) {
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                                'July', 'August', 'September', 'October', 'November', 'December'];
-            addNotification('achievement', '🏅 Monthly Milestone!', 
-                `You've completed ${milestone} anime in ${monthNames[currentMonth]}! Amazing month!`);
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            addNotification('achievement', '🏅 Monthly Milestone!', `You've completed ${milestone} anime in ${monthNames[currentMonth]}!`);
             localStorage.setItem(`lastMonthlyMilestone_${currentYear}_${currentMonth}`, milestone);
             break;
         }
     }
-    
-    // =============================================
-    // STREAK MILESTONES (Consecutive months with completions)
-    // =============================================
     const streakMonths = getConsecutiveMonthsWithCompletions();
     const streakMilestones = [3, 6, 12, 24];
     const lastStreakMilestone = parseInt(localStorage.getItem('lastStreakMilestone')) || 0;
-    
     for (const milestone of streakMilestones) {
         if (streakMonths >= milestone && lastStreakMilestone < milestone) {
-            addNotification('achievement', '🔥 Streak Milestone!', 
-                `You've completed at least one anime for ${streakMonths} consecutive months! Keep the streak alive!`);
+            addNotification('achievement', '🔥 Streak Milestone!', `${streakMonths} consecutive months with completions! Keep going!`);
             localStorage.setItem('lastStreakMilestone', milestone);
             break;
         }
     }
-    
-    // =============================================
-    // YEARLY MILESTONES
-    // =============================================
     checkYearlyMilestones();
 }
 
-// Weekly summary notification
 function sendWeeklySummary() {
     const lastSummary = localStorage.getItem('lastWeeklySummary');
     const now = new Date();
     const weekNumber = Math.floor(now.getDate() / 7);
-    
     if (lastSummary === `${now.getFullYear()}-${now.getMonth()}-${weekNumber}`) return;
-    
     const completedThisWeek = animeData.filter(anime => {
         if (anime.userStatus !== 'Completed') return false;
         const completedDate = anime.actualFinishDate || anime.finishDate;
@@ -1217,213 +1526,25 @@ function sendWeeklySummary() {
         const daysAgo = (now - date) / (1000 * 60 * 60 * 24);
         return daysAgo <= 7;
     }).length;
-    
     const addedThisWeek = animeData.filter(anime => {
         const addedDate = anime.createdAt ? new Date(anime.createdAt) : null;
         if (!addedDate) return false;
         const daysAgo = (now - addedDate) / (1000 * 60 * 60 * 24);
         return daysAgo <= 7;
     }).length;
-    
     if (completedThisWeek > 0 || addedThisWeek > 0) {
-        addNotification('achievement', 'Weekly Summary',
-            `This week: ${completedThisWeek} completed, ${addedThisWeek} added to your list!`);
+        addNotification('achievement', 'Weekly Summary', `This week: ${completedThisWeek} completed, ${addedThisWeek} added!`);
     }
-    
     localStorage.setItem('lastWeeklySummary', `${now.getFullYear()}-${now.getMonth()}-${weekNumber}`);
 }
 
-// Daily reminder to update progress
 function sendDailyReminder() {
     const lastReminder = localStorage.getItem('lastDailyReminder');
     const today = new Date().toDateString();
-    
     if (lastReminder === today) return;
-    
     const watchingCount = animeData.filter(a => a.userStatus === 'Watching').length;
-    
     if (watchingCount > 0) {
-        addNotification('reminder', 'Daily Reminder',
-            `You have ${watchingCount} anime in progress. Don't forget to update your progress!`);
+        addNotification('reminder', 'Daily Reminder', `You have ${watchingCount} anime in progress. Don't forget to update!`);
     }
-    
     localStorage.setItem('lastDailyReminder', today);
 }
-
-// Initialize notification system
-function initNotifications() {
-    // Check for notifications periodically
-    setInterval(() => {
-        checkProgressNotifications();
-        checkReminderNotifications();
-    }, 1000 * 60 * 60); // Every hour
-    
-    // Daily checks
-    setInterval(() => {
-        sendDailyReminder();
-    }, 1000 * 60 * 60 * 24); // Every day
-    
-    // Weekly summary
-    setInterval(() => {
-        sendWeeklySummary();
-    }, 1000 * 60 * 60 * 24 * 7); // Every week
-    
-    // Initial checks
-    setTimeout(() => {
-        checkProgressNotifications();
-        checkReminderNotifications();
-        sendDailyReminder();
-        sendWeeklySummary();
-        updateNotificationBadge();
-    }, 5000);
-    
-    // Bell click handler
-    const bell = document.getElementById('notificationBell');
-    const center = document.getElementById('notificationCenter');
-    
-    if (bell && center) {
-        // Remove existing listeners to avoid duplicates
-        const newBell = bell.cloneNode(true);
-        bell.parentNode.replaceChild(newBell, bell);
-        
-        newBell.addEventListener('click', (e) => {
-            e.stopPropagation();
-            center.classList.toggle('show');
-            renderNotifications();
-        });
-        
-        // Close when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!center.contains(e.target) && !newBell.contains(e.target)) {
-                center.classList.remove('show');
-            }
-        });
-    }
-    
-    // Mark all as read button
-    const markAllBtn = document.getElementById('markAllReadBtn');
-    if (markAllBtn) {
-        const newMarkBtn = markAllBtn.cloneNode(true);
-        markAllBtn.parentNode.replaceChild(newMarkBtn, markAllBtn);
-        
-        newMarkBtn.addEventListener('click', () => {
-            markAllAsRead();
-        });
-    }
-    
-    // Clear all button
-    const clearBtn = document.getElementById('clearAllNotifications');
-    if (clearBtn) {
-        const newClearBtn = clearBtn.cloneNode(true);
-        clearBtn.parentNode.replaceChild(newClearBtn, clearBtn);
-        
-        newClearBtn.addEventListener('click', () => {
-            clearAllNotifications();
-        });
-    }
-    
-    // Close button
-    const closeBtn = document.getElementById('notificationCloseBtn');
-    if (closeBtn && center) {
-        const newCloseBtn = closeBtn.cloneNode(true);
-        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-        
-        newCloseBtn.addEventListener('click', () => {
-            center.classList.remove('show');
-        });
-    }
-}
-
-// Hook into anime completion for immediate notification
-const originalHandleAddAnimeForNotifications = window.handleAddAnime;
-if (typeof originalHandleAddAnimeForNotifications === 'function') {
-    window.handleAddAnime = function(e) {
-        // Capture values BEFORE the original function runs
-        const titleInput = document.getElementById('animeTitle');
-        const statusSelect = document.getElementById('animeStatus');
-        
-        const animeTitle = titleInput?.value?.trim() || 'Unknown';
-        const isBeingCompleted = statusSelect?.value === 'Completed';
-        const isBeingAdded = !window.isEditing;
-        
-        // Check if this is an edit that's changing to completed
-        let wasAlreadyCompleted = false;
-        let oldStatus = '';
-        if (window.isEditing && window.currentEditId) {
-            const existingAnime = animeData.find(a => a.id == window.currentEditId);
-            wasAlreadyCompleted = existingAnime?.userStatus === 'Completed';
-            oldStatus = existingAnime?.userStatus || '';
-        }
-        
-        const isNewCompletion = isBeingCompleted && !wasAlreadyCompleted;
-        const isStatusChange = window.isEditing && oldStatus !== isBeingCompleted;
-        
-        // Call original function
-        originalHandleAddAnimeForNotifications(e);
-        
-        // Show notification after a short delay
-        setTimeout(() => {
-            if (isNewCompletion && animeTitle !== 'Unknown') {
-                addNotification('completed', '✨ Anime Completed! ✨', 
-                    `Congratulations on completing "${animeTitle}"! 🎉`);
-                checkCompletionNotifications();
-            } else if (isBeingAdded && animeTitle !== 'Unknown') {
-                if (isBeingCompleted) {
-                    addNotification('completed', '✨ Anime Completed! ✨', 
-                        `Congratulations on completing "${animeTitle}"! 🎉`);
-                    checkCompletionNotifications();
-                } else {
-                    addAnimeAddedNotification(animeTitle, statusSelect?.value || 'Plan to Watch');
-                }
-            } else if (isStatusChange && animeTitle !== 'Unknown') {
-                addAnimeUpdatedNotification(animeTitle, `Status changed to ${statusSelect?.value}`);
-            }
-            checkProgressNotifications();
-        }, 600);
-    };
-}
-
-// Add CSS for notification badge
-if (!document.getElementById('notification-style')) {
-    const notifStyle = document.createElement('style');
-    notifStyle.id = 'notification-style';
-    notifStyle.textContent = `
-        @keyframes notificationBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-        }
-        .notification-bounce {
-            animation: notificationBounce 0.5s ease;
-        }
-        
-        @keyframes badgePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-        
-        .notification-dot.has-count {
-            animation: badgePulse 0.5s ease;
-        }
-        
-        .notification-icon.level { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-        .notification-icon.profile { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-        .notification-icon.anime { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
-        
-        .unread-dot {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
-            box-shadow: 0 0 6px #ef4444;
-        }
-    `;
-    document.head.appendChild(notifStyle);
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(initNotifications, 2000);
-});
