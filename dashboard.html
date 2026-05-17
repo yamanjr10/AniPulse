@@ -97,7 +97,7 @@
             <div class="user-actions">
 
                 <!-- Notification Bell -->
-                <div class="notification-bell" id="notificationBell">
+                <div class="notification-bell" id="notificationBell" title="Notifications">
                     <i class="fas fa-bell"></i>
                     <span class="notification-dot" id="notificationDot" style="display: none;"></span>
                 </div>
@@ -106,11 +106,23 @@
                 <div class="notification-center" id="notificationCenter">
                     <div class="notification-header">
                         <h4><i class="fas fa-bell"></i> Notifications</h4>
-                        <button id="clearAllNotifications">Clear all</button>
+                        <div class="notification-actions">
+                            <button id="markAllReadBtn" class="mark-all-read">
+                                <i class="fas fa-check-double"></i> Mark all as read
+                            </button>
+                            <button id="clearAllNotifications" class="clear-all">
+                                <i class="fas fa-trash-alt"></i> Clear all
+                            </button>
+                        </div>
+                        <button class="notification-close" id="notificationCloseBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                     <div class="notification-list" id="notificationList">
-                        <div style="text-align: center; padding: 20px; color: #64748b;">
-                            No notifications yet
+                        <div class="notification-empty">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>No notifications yet</p>
+                            <p style="font-size: 0.7rem; margin-top: 8px;">Activity will appear here</p>
                         </div>
                     </div>
                 </div>
