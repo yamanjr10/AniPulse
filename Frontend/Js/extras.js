@@ -594,6 +594,7 @@ function detectAnimeAction(oldAnime, newAnime) {
     if (!oldAnime) {
         if (newAnime.userStatus === 'Completed') return 'add_completed';
         if (newAnime.userStatus === 'Watching') return 'add_watching';
+        if (newAnime.userStatus === 'Plan to Watch') return 'add_plan';
         return 'add_plan';
     }
     if (oldAnime.userStatus !== newAnime.userStatus) {
@@ -1074,52 +1075,109 @@ function isSuspiciousActivity(anime, oldEp, newEp, oldProg, newProg) {
 }
 
 function calculateXPSafely(anime, action, oldData = null) {
+    // PLAN TO WATCH - NO XP
+    if (action === 'add_plan') {
+        console.log(`📚 "${anime.title}" added as Plan to Watch: 0 XP`);
+        return 0;
+    }
+    
+    // Check daily anime limit for completed anime only
     if (action === 'add_completed' && !canAddAnimeToday()) {
         addNotification('warning', '📚 Daily Limit', `Already added ${XP_LIMITS.MAX_ANIME_PER_DAY} anime today. Come back tomorrow!`);
         return 0;
     }
+
     if (!checkHourlyLimit()) return 0;
     if (oldData && isSuspiciousActivity(anime, oldData.episodes, anime.episodes, oldData.progress, anime.progress)) return 0;
     if (isPotentialHacker()) return 0;
 
     let xpGained = 0;
+    
+    // ADD COMPLETED - Full XP
     if (action === 'add_completed' && getAnimeCompletionCount(anime.id) === 0) {
         xpGained = 10 + Math.floor((anime.episodes || 0) / 2);
         if (anime.score >= 9) xpGained += 10;
         else if (anime.score >= 8) xpGained += 5;
         if (anime.type === 'Movie') xpGained += 5;
-    } else if (action === 'status_to_completed' && oldData && getAnimeCompletionCount(anime.id) === 0) {
+        console.log(`🏆 Adding "${anime.title}" as Completed: ${xpGained} XP`);
+    }
+    // ADD WATCHING - XP for initial progress
+    else if (action === 'add_watching') {
+        const progress = anime.progress || 0;
+        xpGained = Math.floor(progress / 5);
+        console.log(`🎬 Adding "${anime.title}" as Watching: ${xpGained} XP (${progress} episodes)`);
+    }
+    // STATUS TO COMPLETED - Bonus XP
+    else if (action === 'status_to_completed' && oldData && getAnimeCompletionCount(anime.id) === 0) {
         xpGained = 10;
         if (anime.score >= 9) xpGained += 10;
         else if (anime.score >= 8) xpGained += 5;
-    } else if (action === 'status_to_watching' && oldData) {
+        console.log(`🏆 Completing "${anime.title}": ${xpGained} XP`);
+    }
+    // STATUS TO WATCHING - XP for progress
+    else if (action === 'status_to_watching' && oldData) {
         const progress = anime.progress || 0;
-        if (progress > 0) xpGained = Math.floor(progress / 5);
-    } else if (action === 'progress_update' && oldData) {
+        if (progress > 0) {
+            xpGained = Math.floor(progress / 5);
+            console.log(`🎬 Changing "${anime.title}" to Watching: ${xpGained} XP`);
+        }
+    }
+    // PROGRESS UPDATE - XP for new episodes
+    else if (action === 'progress_update' && oldData) {
         const increase = (anime.progress || 0) - (oldData.progress || 0);
-        if (increase > 0 && increase <= 50) xpGained = Math.floor(increase / 5);
-    } else if (action === 'episode_increase' && oldData) {
+        if (increase > 0 && increase <= 50) {
+            xpGained = Math.floor(increase / 5);
+            if (xpGained > 0) {
+                console.log(`📈 Progress update for "${anime.title}": +${xpGained} XP (${increase} episodes)`);
+            }
+        }
+    }
+    // EPISODE INCREASE - XP for new episodes in completed anime
+    else if (action === 'episode_increase' && oldData) {
         const increase = (anime.episodes || 0) - (oldData.episodes || 0);
-        if (increase > 0 && increase <= 10) xpGained = Math.floor(increase / 2);
-    } else if (action === 'rating' && oldData && !oldData.score && anime.score) xpGained = 2;
+        if (increase > 0 && increase <= 10) {
+            xpGained = Math.floor(increase / 2);
+            console.log(`📺 New episodes for "${anime.title}": +${xpGained} XP`);
+        }
+    }
+    // RATING ADDED - Small XP
+    else if (action === 'rating' && oldData && !oldData.score && anime.score) {
+        xpGained = 2;
+        console.log(`⭐ Rating added for "${anime.title}": +2 XP`);
+    }
 
     if (xpGained === 0) return 0;
 
+    // Apply daily limit - EXCESS GOES TO PENDING (CARRYOVER)
     const remainingDaily = XP_LIMITS.DAILY_MAX - xpDailyLimit.total;
     let finalXP = Math.min(xpGained, remainingDaily);
     let excess = xpGained - finalXP;
-    if (excess > 0) addToPendingXP(excess, anime.title, action);
-
-    const animeTotal = getAnimeTotalXP(anime.id);
-    if (animeTotal + finalXP > XP_LIMITS.PER_ANIME_MAX) finalXP = Math.max(0, XP_LIMITS.PER_ANIME_MAX - animeTotal);
-
-    if (xpDailyLimit.total + finalXP >= XP_LIMITS.WARNING_THRESHOLD && xpDailyLimit.total < XP_LIMITS.WARNING_THRESHOLD) {
-        addNotification('info', '📊 Daily XP Progress', `${XP_LIMITS.DAILY_MAX - (xpDailyLimit.total + finalXP)} XP left today! ${pendingXP.amount} XP queued.`);
+    if (excess > 0) {
+        addToPendingXP(excess, anime.title, action);
+        addNotification('warning', '⏳ Daily Limit Reached', `${excess} XP from "${anime.title}" has been queued for tomorrow.`);
     }
+
+    // Apply per-anime limit (no carryover for this)
+    const animeTotal = getAnimeTotalXP(anime.id);
+    if (animeTotal + finalXP > XP_LIMITS.PER_ANIME_MAX) {
+        finalXP = Math.max(0, XP_LIMITS.PER_ANIME_MAX - animeTotal);
+        if (finalXP === 0) {
+            addNotification('warning', '🎯 Anime XP Limit', `"${anime.title}" has reached the maximum ${XP_LIMITS.PER_ANIME_MAX} XP.`);
+        }
+    }
+
+    // Show warning when approaching limit
+    if (xpDailyLimit.total + finalXP >= XP_LIMITS.WARNING_THRESHOLD && xpDailyLimit.total < XP_LIMITS.WARNING_THRESHOLD) {
+        const remaining = XP_LIMITS.DAILY_MAX - (xpDailyLimit.total + finalXP);
+        addNotification('info', '📊 Daily XP Progress', `${remaining} XP left today! ${pendingXP.amount} XP queued.`);
+    }
+
+    // Record successful addition
     if (finalXP > 0 && action === 'add_completed') {
         recordAnimeAddition();
         recordAnimeCompletion(anime.id);
     }
+
     return finalXP;
 }
 
@@ -1160,96 +1218,184 @@ function sendWeeklySummary() { /* existing implementation */ }
 function sendDailyReminder() { /* existing implementation */ }
 
 // =============================================
-// MAIN HANDLER FOR ANIME ACTIONS
+// MAIN HANDLER FOR ANIME ACTIONS - FIXED
 // =============================================
 
 const originalHandleAddAnime = window.handleAddAnime;
 if (typeof originalHandleAddAnime === 'function') {
-    window.handleAddAnime = function (e) {
+    window.handleAddAnime = function(e) {
+        // Capture form values BEFORE any changes
         const titleInput = document.getElementById('animeTitle');
         const statusSelect = document.getElementById('animeStatus');
         const progressInput = document.getElementById('animeProgress');
         const episodesInput = document.getElementById('animeEpisodes');
         const scoreInput = document.getElementById('animeScore');
         const typeSelect = document.getElementById('animeType');
-
+        
         const animeTitle = titleInput?.value?.trim() || 'Unknown';
+        const newStatus = statusSelect?.value || 'Plan to Watch';
+        const newProgress = parseInt(progressInput?.value) || 0;
+        const newEpisodes = parseInt(episodesInput?.value) || 0;
+        const newScore = parseFloat(scoreInput?.value) || null;
+        const newType = typeSelect?.value || 'TV';
         const isBeingAdded = !window.isEditing;
 
+        console.log(`🔍 Action: ${isBeingAdded ? 'ADDING' : 'EDITING'} | Status: ${newStatus}`);
+        
+        // Capture old data if editing
         let oldAnimeData = null;
+        let oldStatus = '';
+        let oldProgress = 0;
+        let oldEpisodes = 0;
+        
         if (window.isEditing && window.currentEditId) {
-            oldAnimeData = animeData.find(a => a.id == window.currentEditId);
+            const existingAnime = animeData.find(a => a.id == window.currentEditId);
+            if (existingAnime) {
+                oldAnimeData = { ...existingAnime };
+                oldStatus = existingAnime.userStatus || '';
+                oldProgress = existingAnime.progress || 0;
+                oldEpisodes = existingAnime.episodes || 0;
+            }
         }
-
+        
+        // Create new anime data object for action detection
         const newAnimeData = {
             id: window.currentEditId || Date.now(),
             title: animeTitle,
-            userStatus: statusSelect?.value,
-            progress: parseInt(progressInput?.value) || 0,
-            episodes: parseInt(episodesInput?.value) || 0,
-            score: parseFloat(scoreInput?.value) || null,
-            type: typeSelect?.value
+            userStatus: newStatus,
+            progress: newProgress,
+            episodes: newEpisodes,
+            score: newScore,
+            type: newType
         };
-
-        const action = detectAnimeAction(oldAnimeData, newAnimeData);
-        const xpBefore = calculateTotalXPSafe();
-        const levelBefore = getCurrentLevelSafe(xpBefore);
-
-        originalHandleAddAnime(e);
-
-        setTimeout(() => {
-            const xpAfter = calculateTotalXPSafe();
-            const levelAfter = getCurrentLevelSafe(xpAfter);
-            const xpGained = xpAfter - xpBefore;
-
-            if (xpGained > 0 && animeTitle !== 'Unknown') {
-                showXPGainNotification(animeTitle, xpGained, xpBefore, xpAfter);
-                updateSettingsLevelSafe();
-                updateSidebarLevelSafe();
-                updateDailyXPTracker();
-                if (levelBefore.level !== levelAfter.level) {
-                    addNotification('level', '🎉 Level Up!', `You reached ${levelAfter.title} (Level ${levelAfter.level})!`);
+        
+        // Detect the action
+        let action = detectAnimeAction(oldAnimeData, newAnimeData);
+        
+        // For new Plan to Watch anime, action should be 'add_plan' which gives 0 XP
+        // For new Watching anime, action should be 'add_watching' which gives XP for progress
+        // For new Completed anime, action should be 'add_completed' which gives full XP
+        
+        // Calculate XP BEFORE calling original function
+        let xpToAdd = 0;
+        if (action === 'add_plan') {
+            xpToAdd = 0; // NO XP for Plan to Watch
+            console.log(`📝 Adding "${animeTitle}" as Plan to Watch: 0 XP`);
+        } else if (action === 'add_watching') {
+            xpToAdd = Math.floor(newProgress / 5);
+            console.log(`🎬 Adding "${animeTitle}" as Watching: ${xpToAdd} XP (${newProgress} episodes)`);
+        } else if (action === 'add_completed') {
+            xpToAdd = 10 + Math.floor(newEpisodes / 2);
+            if (newScore >= 9) xpToAdd += 10;
+            else if (newScore >= 8) xpToAdd += 5;
+            if (newType === 'Movie') xpToAdd += 5;
+            console.log(`🏆 Adding "${animeTitle}" as Completed: ${xpToAdd} XP`);
+        } else if (action === 'status_to_watching') {
+            xpToAdd = Math.floor(newProgress / 5);
+            console.log(`🎬 Changing "${animeTitle}" to Watching: ${xpToAdd} XP`);
+        } else if (action === 'status_to_completed') {
+            xpToAdd = 10;
+            if (newScore >= 9) xpToAdd += 10;
+            else if (newScore >= 8) xpToAdd += 5;
+            console.log(`🏆 Completing "${animeTitle}": ${xpToAdd} XP`);
+        } else if (action === 'progress_update') {
+            const increase = newProgress - oldProgress;
+            xpToAdd = Math.floor(increase / 5);
+            console.log(`📈 Progress update for "${animeTitle}": +${xpToAdd} XP (${increase} episodes)`);
+        }
+        
+        // Apply daily limit and carryover
+        let finalXP = xpToAdd;
+        let excessXP = 0;
+        
+        if (finalXP > 0) {
+            const remainingDaily = XP_LIMITS.DAILY_MAX - xpDailyLimit.total;
+            if (finalXP > remainingDaily) {
+                excessXP = finalXP - remainingDaily;
+                finalXP = remainingDaily;
+                if (excessXP > 0) {
+                    addToPendingXP(excessXP, animeTitle, action);
+                    addNotification('warning', '⏳ Daily Limit', `${excessXP} XP from "${animeTitle}" queued for tomorrow.`);
                 }
             }
-
+            
+            // Apply per-anime limit
+            const animeTotal = getAnimeTotalXP(newAnimeData.id);
+            if (animeTotal + finalXP > XP_LIMITS.PER_ANIME_MAX) {
+                finalXP = Math.max(0, XP_LIMITS.PER_ANIME_MAX - animeTotal);
+            }
+        }
+        
+        // Store XP to add
+        const xpBefore = calculateTotalXPSafe();
+        
+        // Call original function
+        originalHandleAddAnime(e);
+        
+        // Manually add XP after the fact if needed
+        if (finalXP > 0) {
+            setTimeout(() => {
+                const xpAfter = calculateTotalXPSafe();
+                
+                // If XP didn't increase automatically, add it manually
+                if (xpAfter === xpBefore && finalXP > 0) {
+                    // Manually add XP to localStorage
+                    const currentXP = calculateTotalXPSafe();
+                    const newTotalXP = currentXP + finalXP;
+                    
+                    // Store the addition
+                    const xpKey = 'manualXPAddition';
+                    const existingData = JSON.parse(localStorage.getItem(xpKey) || '{}');
+                    localStorage.setItem(xpKey, JSON.stringify({
+                        amount: finalXP,
+                        source: animeTitle,
+                        reason: action,
+                        timestamp: Date.now(),
+                        totalBefore: currentXP,
+                        totalAfter: newTotalXP
+                    }));
+                    
+                    // Update daily limit
+                    const today = new Date().toDateString();
+                    if (xpDailyLimit.date !== today) {
+                        xpDailyLimit = { date: today, total: 0, episodeCount: 0 };
+                    }
+                    xpDailyLimit.total += finalXP;
+                    localStorage.setItem('xpDailyLimit', JSON.stringify(xpDailyLimit));
+                    
+                    // Show notification
+                    showXPGainNotification(animeTitle, finalXP, currentXP, newTotalXP);
+                    updateSettingsLevelSafe();
+                    updateSidebarLevelSafe();
+                    updateDailyXPTracker();
+                    
+                    addNotification('xp', '⭐ XP Earned!', `You earned ${finalXP} XP from "${animeTitle}".`);
+                }
+                
+                // Check for level up
+                checkLevelUpSafe();
+            }, 500);
+        }
+        
+        // Show status change notifications
+        setTimeout(() => {
             if (action === 'status_to_watching' && animeTitle !== 'Unknown') {
                 addNotification('anime', '🎬 Started Watching', `You started watching "${animeTitle}". Update progress to earn more XP!`);
             } else if (action === 'status_to_completed' && animeTitle !== 'Unknown') {
                 addNotification('completed', '✨ Anime Completed! ✨', `Congratulations on completing "${animeTitle}"! 🎉`);
                 checkCompletionNotifications();
             } else if (isBeingAdded && animeTitle !== 'Unknown') {
-                if (newAnimeData.userStatus === 'Completed') {
+                if (newStatus === 'Completed') {
                     addNotification('completed', '✨ Anime Completed! ✨', `Congratulations on completing "${animeTitle}"! 🎉`);
                     checkCompletionNotifications();
-                } else {
-                    addAnimeAddedNotification(animeTitle, newAnimeData.userStatus || 'Plan to Watch');
+                } else if (newStatus === 'Watching') {
+                    addNotification('anime', '📺 Started Watching', `You started watching "${animeTitle}". Enjoy the journey!`);
+                } else if (newStatus === 'Plan to Watch') {
+                    // No XP notification for Plan to Watch
+                    console.log(`📚 "${animeTitle}" added to Plan to Watch`);
                 }
             }
-            previousXP = xpAfter;
-            localStorage.setItem('previousXP', previousXP);
         }, 600);
-    };
-}
-
-const originalDeleteAnime = window.deleteAnime;
-if (typeof originalDeleteAnime === 'function') {
-    window.deleteAnime = function () {
-        const xpBefore = calculateTotalXPSafe();
-        const titleInput = document.getElementById('animeTitle');
-        const animeTitle = titleInput?.value?.trim() || 'an anime';
-        originalDeleteAnime();
-        setTimeout(() => {
-            const xpAfter = calculateTotalXPSafe();
-            const xpLost = xpBefore - xpAfter;
-            if (xpLost > 0) {
-                showXPLossNotification(animeTitle, xpLost, xpBefore, xpAfter);
-                updateSettingsLevelSafe();
-                updateSidebarLevelSafe();
-                updateDailyXPTracker();
-            }
-            previousXP = xpAfter;
-            localStorage.setItem('previousXP', previousXP);
-        }, 300);
     };
 }
 
