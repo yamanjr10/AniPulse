@@ -2191,11 +2191,9 @@ function handleAddAnime(e) {
         .map(genre => genre.trim())
         .filter(Boolean);
 
-    // Get selected date from form (month/year only for display)
     const selectedYear = document.getElementById('animeYear')?.value;
     const selectedMonth = document.getElementById('animeMonth')?.value;
 
-    // Simple Nepal timestamp function
     const getNepalTimestamp = () => {
         const now = new Date();
         const nepalOffset = 5 * 60 + 45;
@@ -2223,42 +2221,56 @@ function handleAddAnime(e) {
     const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
     const currentDay = String(now.getDate()).padStart(2, '0');
 
-    // Track what changed for toast message
     let wasCompletedBefore = existingAnime?.userStatus === 'Completed';
     let isNowCompleted = status === 'Completed';
     let statusChangedToCompleted = isEditing && !wasCompletedBefore && isNowCompleted;
     let statusChangedFromCompleted = isEditing && wasCompletedBefore && !isNowCompleted;
 
-    // Handle finish date with ACTUAL date storage
-    let finishDate = null;        // For display: YYYY-MM
-    let actualFinishDate = null;  // Store actual completion date
+    // ============================================
+    // FIXED: Handle finish date - PRESERVE existing completed dates
+    // ============================================
+    let finishDate = null;
+    let actualFinishDate = null;
 
     if (status === 'Completed') {
-        if (existingAnime && isEditing && existingAnime.actualFinishDate) {
-            // Editing existing - preserve the actual date
+        // CRITICAL: If this anime already exists AND is already completed with a date, preserve it!
+        if (existingAnime && existingAnime.userStatus === 'Completed' && existingAnime.finishDate) {
+            // Already completed - NEVER change the dates
+            actualFinishDate = existingAnime.actualFinishDate;
+            finishDate = existingAnime.finishDate;
+            console.log(`📅 Preserved original completion date for ${title}: ${finishDate}`);
+        } 
+        else if (existingAnime && isEditing && existingAnime.actualFinishDate) {
+            // Editing existing that has a date but wasn't completed before
             actualFinishDate = existingAnime.actualFinishDate;
             finishDate = existingAnime.finishDate || actualFinishDate.substring(0, 7);
-        } else if (selectedYear && selectedMonth && !existingAnime) {
-            // User manually selected month/year (rare, backwards compatibility)
+        } 
+        else if (selectedYear && selectedMonth && !existingAnime) {
+            // User manually selected month/year (for new anime)
             const year = selectedYear;
             const month = String(selectedMonth).padStart(2, '0');
-            // Use the last day of selected month as actual date approximation
             const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
             actualFinishDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
             finishDate = `${year}-${month}`;
-        } else {
-            // NEW COMPLETION - Store the ACTUAL date
+        } 
+        else {
+            // NEW COMPLETION - Store the ACTUAL current date
             actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
-            finishDate = `${currentYear}-${currentMonth}`;  // Store as YYYY-MM for display
+            finishDate = `${currentYear}-${currentMonth}`;
+        }
+    } else {
+        // If status is NOT Completed, clear any finish dates (but only for new entries)
+        if (!existingAnime) {
+            finishDate = null;
+            actualFinishDate = null;
         }
     }
 
-    // Determine toast message BEFORE making changes
+    // Determine toast message
     let toastMessage = '';
     let logAction = '';
     
     if (!isEditing) {
-        // Adding new anime
         if (status === 'Completed') {
             toastMessage = ` "${title}" added and marked as completed!`;
             logAction = 'completed';
@@ -2267,7 +2279,6 @@ function handleAddAnime(e) {
             logAction = 'added';
         }
     } else if (isEditing) {
-        // Editing existing anime
         if (statusChangedToCompleted) {
             toastMessage = ` "${title}" marked as completed! Great job!`;
             logAction = 'completed';
@@ -2284,7 +2295,7 @@ function handleAddAnime(e) {
     }
 
     if (existingAnime && isEditing) {
-        // Update existing
+        // Update existing - preserve original dates if already completed
         existingAnime.title = title;
         existingAnime.type = type;
         existingAnime.episodes = episodes;
@@ -2294,11 +2305,17 @@ function handleAddAnime(e) {
         existingAnime.score = score;
         existingAnime.cover = cover;
         existingAnime.genres = genres;
-        existingAnime.finishDate = finishDate;
-        existingAnime.actualFinishDate = actualFinishDate;
+        
+        // Only update finish dates if they don't exist or if it's a new completion
+        if (!existingAnime.finishDate && finishDate) {
+            existingAnime.finishDate = finishDate;
+            existingAnime.actualFinishDate = actualFinishDate;
+        }
+        // If already completed, DO NOT overwrite the dates (already preserved above)
+        
         existingAnime.updatedAt = nowTimestamp;
     } else {
-        // Add new
+        // Add new anime
         const newAnime = {
             id: getNextId(),
             title,
@@ -2319,8 +2336,6 @@ function handleAddAnime(e) {
     }
 
     saveData();
-
-    // Log activity with determined action
     logActivity(logAction, title);
 
     // Close modal and reset
@@ -2342,11 +2357,8 @@ function handleAddAnime(e) {
     if (submitBtn) submitBtn.textContent = 'Add Anime';
     if (deleteBtn) deleteBtn.style.display = 'none';
 
-    // Force immediate save and refresh
     saveData();
     updateAllComponents();
-
-    // Show appropriate toast message
     showToast(toastMessage, 'success');
 }
 
