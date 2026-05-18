@@ -11137,3 +11137,917 @@ body.modal-open {
 .shake {
   animation: shake 0.3s ease-in-out;
 }
+
+/* ============================================
+   ENHANCED LEVEL SYSTEM UI - PREMIUM DESIGN
+   ============================================ */
+
+/* Level Colors by Rank */
+:root {
+  --level-newbie: linear-gradient(135deg, #6B7280, #4B5563);
+  --level-scout: linear-gradient(135deg, #8B5CF6, #6D28D9);
+  --level-viewer: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  --level-otaku: linear-gradient(135deg, #10B981, #047857);
+  --level-fanatic: linear-gradient(135deg, #F59E0B, #B45309);
+  --level-binge-hunter: linear-gradient(135deg, #EF4444, #B91C1C);
+  --level-senpai: linear-gradient(135deg, #EC4899, #BE185D);
+  --level-shonen-hero: linear-gradient(135deg, #F97316, #C2410C);
+  --level-elite-otaku: linear-gradient(135deg, #06B6D4, #155E75);
+  --level-anime-legend: linear-gradient(135deg, #8B5CF6, #4C1D95);
+  --level-sage: linear-gradient(135deg, #14B8A6, #115E59);
+  --level-archive-keeper: linear-gradient(135deg, #6366F1, #3730A3);
+  --level-dimension-traveler: linear-gradient(135deg, #A855F7, #4C1D95);
+  --level-anime-master: linear-gradient(135deg, #F43F5E, #9F1239);
+  --level-grand-senpai: linear-gradient(135deg, #D946EF, #701A75);
+  --level-hokage: linear-gradient(135deg, #FBBF24, #B45309);
+  --level-transcendent: linear-gradient(135deg, #34D399, #047857);
+  --level-elite: linear-gradient(135deg, #60A5FA, #1E3A8A);
+  --level-eternal-watcher: linear-gradient(135deg, #C084FC, #581C87);
+  --level-legend: linear-gradient(135deg, #F472B6, #9D174D);
+  --level-anime-deity: linear-gradient(135deg, #FBBF24, #991B1B);
+}
+
+/* Rank-specific border glows */
+.level-glow-newbie { box-shadow: 0 0 20px rgba(107, 114, 128, 0.3); }
+.level-glow-scout { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+.level-glow-viewer { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+.level-glow-otaku { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
+.level-glow-fanatic { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
+.level-glow-binge-hunter { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+.level-glow-senpai { box-shadow: 0 0 20px rgba(236, 72, 153, 0.3); }
+.level-glow-shonen-hero { box-shadow: 0 0 20px rgba(249, 115, 22, 0.3); }
+.level-glow-elite-otaku { box-shadow: 0 0 20px rgba(6, 182, 212, 0.3); }
+.level-glow-anime-legend { box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); }
+.level-glow-sage { box-shadow: 0 0 20px rgba(20, 184, 166, 0.3); }
+.level-glow-archive-keeper { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+.level-glow-dimension-traveler { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+.level-glow-anime-master { box-shadow: 0 0 20px rgba(244, 63, 94, 0.4); }
+.level-glow-grand-senpai { box-shadow: 0 0 20px rgba(217, 70, 239, 0.4); }
+.level-glow-hokage { box-shadow: 0 0 25px rgba(251, 191, 36, 0.5); }
+.level-glow-transcendent { box-shadow: 0 0 25px rgba(52, 211, 153, 0.4); }
+.level-glow-elite { box-shadow: 0 0 25px rgba(96, 165, 250, 0.4); }
+.level-glow-eternal-watcher { box-shadow: 0 0 25px rgba(192, 132, 252, 0.5); }
+.level-glow-legend { box-shadow: 0 0 30px rgba(244, 114, 182, 0.5); }
+.level-glow-anime-deity { box-shadow: 0 0 35px rgba(251, 191, 36, 0.6); }
+
+/* Sidebar Level Display - Enhanced */
+.user-level-display {
+  background: linear-gradient(135deg, rgba(15, 25, 45, 0.95), rgba(10, 18, 30, 0.98));
+  border-radius: 20px;
+  padding: 16px 14px;
+  margin: 12px 8px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.user-level-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--level-current, linear-gradient(90deg, #8B5CF6, #6366F1));
+}
+
+.user-level-display:hover {
+  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.level-badge {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.level-badge .level-number {
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: var(--level-current, linear-gradient(135deg, #8B5CF6, #6366F1));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.level-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.level-progress-container {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 30px;
+  overflow: hidden;
+  position: relative;
+}
+
+.level-progress-bar {
+  height: 6px;
+  background: var(--level-current, linear-gradient(90deg, #8B5CF6, #6366F1));
+  border-radius: 30px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.level-progress-bar::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+.level-progress-text {
+  font-size: 0.65rem;
+  text-align: center;
+  padding: 6px 0 2px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+/* Top Bar Mini Level Badge - Rank Based Colors */
+.level-mini-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 14px;
+  border-radius: 40px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.level-mini-badge:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Crown icon */
+.level-mini-badge i {
+  font-size: 14px;
+}
+
+/* Rank-specific border colors */
+.level-mini-badge[data-rank="Newbie"] { border-color: rgba(107, 114, 128, 0.5); }
+.level-mini-badge[data-rank="Scout"] { border-color: rgba(139, 92, 246, 0.5); }
+.level-mini-badge[data-rank="Viewer"] { border-color: rgba(59, 130, 246, 0.5); }
+.level-mini-badge[data-rank="Otaku"] { border-color: rgba(16, 185, 129, 0.5); }
+.level-mini-badge[data-rank="Fanatic"] { border-color: rgba(245, 158, 11, 0.5); }
+.level-mini-badge[data-rank="Binge Hunter"] { border-color: rgba(239, 68, 68, 0.5); }
+.level-mini-badge[data-rank="Senpai"] { border-color: rgba(236, 72, 153, 0.5); }
+.level-mini-badge[data-rank="Shonen Hero"] { border-color: rgba(249, 115, 22, 0.5); }
+.level-mini-badge[data-rank="Elite Otaku"] { border-color: rgba(6, 182, 212, 0.5); }
+.level-mini-badge[data-rank="Anime Legend"] { border-color: rgba(139, 92, 246, 0.6); }
+.level-mini-badge[data-rank="Sage"] { border-color: rgba(20, 184, 166, 0.5); }
+.level-mini-badge[data-rank="Archive Keeper"] { border-color: rgba(99, 102, 241, 0.6); }
+.level-mini-badge[data-rank="Dimension Traveler"] { border-color: rgba(168, 85, 247, 0.6); }
+.level-mini-badge[data-rank="Anime Master"] { border-color: rgba(244, 63, 94, 0.6); }
+.level-mini-badge[data-rank="Grand Senpai"] { border-color: rgba(217, 70, 239, 0.6); }
+.level-mini-badge[data-rank="Hokage"] { border-color: rgba(251, 191, 36, 0.7); }
+.level-mini-badge[data-rank="Transcendent"] { border-color: rgba(52, 211, 153, 0.6); }
+.level-mini-badge[data-rank="Elite"] { border-color: rgba(96, 165, 250, 0.6); }
+.level-mini-badge[data-rank="Eternal Watcher"] { border-color: rgba(192, 132, 252, 0.7); }
+.level-mini-badge[data-rank="Legend"] { border-color: rgba(244, 114, 182, 0.7); }
+.level-mini-badge[data-rank="Anime Deity"] { border-color: rgba(251, 191, 36, 0.8); }
+
+/* Crown icon colors based on rank */
+.level-mini-badge[data-rank="Newbie"] i { color: #9CA3AF; }
+.level-mini-badge[data-rank="Scout"] i { color: #A78BFA; }
+.level-mini-badge[data-rank="Viewer"] i { color: #60A5FA; }
+.level-mini-badge[data-rank="Otaku"] i { color: #34D399; }
+.level-mini-badge[data-rank="Fanatic"] i { color: #FBBF24; }
+.level-mini-badge[data-rank="Binge Hunter"] i { color: #F87171; }
+.level-mini-badge[data-rank="Senpai"] i { color: #F472B6; }
+.level-mini-badge[data-rank="Shonen Hero"] i { color: #FB923C; }
+.level-mini-badge[data-rank="Elite Otaku"] i { color: #22D3EE; }
+.level-mini-badge[data-rank="Anime Legend"] i { color: #C084FC; }
+.level-mini-badge[data-rank="Sage"] i { color: #2DD4BF; }
+.level-mini-badge[data-rank="Archive Keeper"] i { color: #818CF8; }
+.level-mini-badge[data-rank="Dimension Traveler"] i { color: #D8B4FE; }
+.level-mini-badge[data-rank="Anime Master"] i { color: #FB7185; }
+.level-mini-badge[data-rank="Grand Senpai"] i { color: #F0ABFC; }
+.level-mini-badge[data-rank="Hokage"] i { color: #FCD34D; }
+.level-mini-badge[data-rank="Transcendent"] i { color: #6EE7B7; }
+.level-mini-badge[data-rank="Elite"] i { color: #93C5FD; }
+.level-mini-badge[data-rank="Eternal Watcher"] i { color: #C4B5FD; }
+.level-mini-badge[data-rank="Legend"] i { color: #FDA4AF; }
+.level-mini-badge[data-rank="Anime Deity"] i { color: #FDE047; }
+
+/* Level number styling */
+.level-mini-badge .level-number {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* Rank-specific number gradients */
+.level-mini-badge[data-rank="Newbie"] .level-number { background: linear-gradient(135deg, #9CA3AF, #6B7280); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Scout"] .level-number { background: linear-gradient(135deg, #C084FC, #8B5CF6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Viewer"] .level-number { background: linear-gradient(135deg, #60A5FA, #3B82F6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Otaku"] .level-number { background: linear-gradient(135deg, #34D399, #10B981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Fanatic"] .level-number { background: linear-gradient(135deg, #FCD34D, #F59E0B); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Binge Hunter"] .level-number { background: linear-gradient(135deg, #F87171, #EF4444); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Senpai"] .level-number { background: linear-gradient(135deg, #F472B6, #EC4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Shonen Hero"] .level-number { background: linear-gradient(135deg, #FB923C, #F97316); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Elite Otaku"] .level-number { background: linear-gradient(135deg, #22D3EE, #06B6D4); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Anime Legend"] .level-number { background: linear-gradient(135deg, #D8B4FE, #A855F7); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Sage"] .level-number { background: linear-gradient(135deg, #5EEAD4, #14B8A6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Archive Keeper"] .level-number { background: linear-gradient(135deg, #A5B4FC, #6366F1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Dimension Traveler"] .level-number { background: linear-gradient(135deg, #E9D5FF, #A855F7); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Anime Master"] .level-number { background: linear-gradient(135deg, #FDA4AF, #F43F5E); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Grand Senpai"] .level-number { background: linear-gradient(135deg, #F5D0FE, #D946EF); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Hokage"] .level-number { background: linear-gradient(135deg, #FEF08A, #FBBF24); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Transcendent"] .level-number { background: linear-gradient(135deg, #A7F3D0, #34D399); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Elite"] .level-number { background: linear-gradient(135deg, #BFDBFE, #60A5FA); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Eternal Watcher"] .level-number { background: linear-gradient(135deg, #DDD6FE, #8B5CF6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Legend"] .level-number { background: linear-gradient(135deg, #FCE7F3, #F472B6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.level-mini-badge[data-rank="Anime Deity"] .level-number { background: linear-gradient(135deg, #FEF3C7, #F59E0B); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* Rank title styling */
+.level-title-mini {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+/* Rank-specific title colors */
+.level-mini-badge[data-rank="Newbie"] .level-title-mini { color: #9CA3AF; }
+.level-mini-badge[data-rank="Scout"] .level-title-mini { color: #A78BFA; }
+.level-mini-badge[data-rank="Viewer"] .level-title-mini { color: #60A5FA; }
+.level-mini-badge[data-rank="Otaku"] .level-title-mini { color: #34D399; }
+.level-mini-badge[data-rank="Fanatic"] .level-title-mini { color: #FBBF24; }
+.level-mini-badge[data-rank="Binge Hunter"] .level-title-mini { color: #F87171; }
+.level-mini-badge[data-rank="Senpai"] .level-title-mini { color: #F472B6; }
+.level-mini-badge[data-rank="Shonen Hero"] .level-title-mini { color: #FB923C; }
+.level-mini-badge[data-rank="Elite Otaku"] .level-title-mini { color: #22D3EE; }
+.level-mini-badge[data-rank="Anime Legend"] .level-title-mini { color: #C084FC; }
+.level-mini-badge[data-rank="Sage"] .level-title-mini { color: #2DD4BF; }
+.level-mini-badge[data-rank="Archive Keeper"] .level-title-mini { color: #818CF8; }
+.level-mini-badge[data-rank="Dimension Traveler"] .level-title-mini { color: #D8B4FE; }
+.level-mini-badge[data-rank="Anime Master"] .level-title-mini { color: #FB7185; }
+.level-mini-badge[data-rank="Grand Senpai"] .level-title-mini { color: #F0ABFC; }
+.level-mini-badge[data-rank="Hokage"] .level-title-mini { color: #FCD34D; font-weight: 700; text-shadow: 0 0 5px rgba(251, 191, 36, 0.3); }
+.level-mini-badge[data-rank="Transcendent"] .level-title-mini { color: #6EE7B7; }
+.level-mini-badge[data-rank="Elite"] .level-title-mini { color: #93C5FD; }
+.level-mini-badge[data-rank="Eternal Watcher"] .level-title-mini { color: #C4B5FD; }
+.level-mini-badge[data-rank="Legend"] .level-title-mini { color: #FDA4AF; }
+.level-mini-badge[data-rank="Anime Deity"] .level-title-mini { color: #FDE047; font-weight: 700; text-shadow: 0 0 5px rgba(251, 191, 36, 0.5); }
+
+/* Hover effects with rank color */
+.level-mini-badge[data-rank="Newbie"]:hover { border-color: #9CA3AF; box-shadow: 0 0 10px rgba(107, 114, 128, 0.3); }
+.level-mini-badge[data-rank="Scout"]:hover { border-color: #C084FC; box-shadow: 0 0 10px rgba(139, 92, 246, 0.3); }
+.level-mini-badge[data-rank="Viewer"]:hover { border-color: #60A5FA; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+.level-mini-badge[data-rank="Otaku"]:hover { border-color: #34D399; box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+.level-mini-badge[data-rank="Fanatic"]:hover { border-color: #FCD34D; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+.level-mini-badge[data-rank="Binge Hunter"]:hover { border-color: #F87171; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+.level-mini-badge[data-rank="Senpai"]:hover { border-color: #F472B6; box-shadow: 0 0 10px rgba(236, 72, 153, 0.3); }
+.level-mini-badge[data-rank="Shonen Hero"]:hover { border-color: #FB923C; box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); }
+.level-mini-badge[data-rank="Elite Otaku"]:hover { border-color: #22D3EE; box-shadow: 0 0 10px rgba(6, 182, 212, 0.3); }
+.level-mini-badge[data-rank="Anime Legend"]:hover { border-color: #D8B4FE; box-shadow: 0 0 12px rgba(139, 92, 246, 0.4); }
+.level-mini-badge[data-rank="Sage"]:hover { border-color: #5EEAD4; box-shadow: 0 0 12px rgba(20, 184, 166, 0.4); }
+.level-mini-badge[data-rank="Archive Keeper"]:hover { border-color: #A5B4FC; box-shadow: 0 0 12px rgba(99, 102, 241, 0.4); }
+.level-mini-badge[data-rank="Dimension Traveler"]:hover { border-color: #E9D5FF; box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }
+.level-mini-badge[data-rank="Anime Master"]:hover { border-color: #FDA4AF; box-shadow: 0 0 12px rgba(244, 63, 94, 0.4); }
+.level-mini-badge[data-rank="Grand Senpai"]:hover { border-color: #F5D0FE; box-shadow: 0 0 12px rgba(217, 70, 239, 0.4); }
+.level-mini-badge[data-rank="Hokage"]:hover { border-color: #FEF08A; box-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
+.level-mini-badge[data-rank="Transcendent"]:hover { border-color: #A7F3D0; box-shadow: 0 0 15px rgba(52, 211, 153, 0.4); }
+.level-mini-badge[data-rank="Elite"]:hover { border-color: #BFDBFE; box-shadow: 0 0 15px rgba(96, 165, 250, 0.4); }
+.level-mini-badge[data-rank="Eternal Watcher"]:hover { border-color: #DDD6FE; box-shadow: 0 0 15px rgba(139, 92, 246, 0.5); }
+.level-mini-badge[data-rank="Legend"]:hover { border-color: #FCE7F3; box-shadow: 0 0 15px rgba(244, 114, 182, 0.5); }
+.level-mini-badge[data-rank="Anime Deity"]:hover { border-color: #FEF3C7; box-shadow: 0 0 20px rgba(251, 191, 36, 0.7); }
+
+/* Settings Page Level Card */
+.level-progress-card {
+  background: linear-gradient(135deg, #1a1f2e 0%, #0f1420 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.2) !important;
+  border-radius: 28px !important;
+  overflow: hidden;
+}
+
+.level-main-card {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 28px;
+  background: linear-gradient(135deg, rgba(15, 25, 45, 0.6), rgba(10, 18, 30, 0.4));
+  border-radius: 24px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.level-main-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.1), transparent);
+  border-radius: 50%;
+}
+
+.level-icon {
+  width: 100px;
+  height: 100px;
+  background: var(--level-current, linear-gradient(135deg, #8B5CF6, #6366F1));
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.level-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2));
+}
+
+.level-icon svg {
+  width: 48px;
+  height: 48px;
+  stroke: white;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+  position: relative;
+  z-index: 1;
+}
+
+.level-main-card:hover .level-icon {
+  transform: scale(1.05);
+}
+
+.level-info {
+  flex: 1;
+}
+
+.current-level-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.level-num {
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--level-current, linear-gradient(135deg, #FBBF24, #F59E0B));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -1px;
+}
+
+.level-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 6px 16px;
+  background: rgba(139, 92, 246, 0.15);
+  border-radius: 40px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #A78BFA;
+}
+
+.level-xp-bar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.level-xp-fill {
+  height: 100%;
+  background: var(--level-current, linear-gradient(90deg, #8B5CF6, #6366F1));
+  border-radius: 20px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.level-xp-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.level-xp-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Level Stats Grid */
+.level-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.level-stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.level-stat:hover {
+  transform: translateY(-2px);
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.level-stat svg {
+  width: 32px;
+  height: 32px;
+  stroke: #A78BFA;
+  stroke-width: 1.5;
+}
+
+.level-stat .stat-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.level-stat .stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
+}
+
+/* Next Levels Preview */
+.next-levels-preview {
+  margin-bottom: 24px;
+}
+
+.next-levels-preview h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.next-levels-preview h4 svg {
+  width: 18px;
+  height: 18px;
+  stroke: #A78BFA;
+}
+
+.next-levels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.next-level-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border-left: 3px solid;
+  border-left-color: var(--level-border, #6366F1);
+  transition: all 0.3s ease;
+}
+
+.next-level-item:hover {
+  transform: translateX(4px);
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.next-level-num {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #A78BFA;
+  min-width: 60px;
+}
+
+.next-level-title {
+  flex: 1;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: 16px;
+}
+
+.next-level-xp {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 12px;
+  border-radius: 30px;
+}
+
+/* XP Tips */
+.xp-tips {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(16, 185, 129, 0.08);
+  border-radius: 16px;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.xp-tips svg {
+  width: 20px;
+  height: 20px;
+  stroke: #10B981;
+  flex-shrink: 0;
+}
+
+/* XP Popup Notification */
+.xp-popup {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  z-index: 10000;
+  opacity: 0;
+  transform: translateX(100px) scale(0.9);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.xp-popup.show {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.xp-popup-content {
+  background: linear-gradient(135deg, #1a1f2e, #0f1420);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 24px;
+  padding: 20px;
+  min-width: 320px;
+  max-width: 380px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.xp-popup-content.level-up {
+  border: 2px solid;
+  border-image-source: var(--level-current);
+  border-image-slice: 1;
+  animation: levelUpPulse 0.5s ease-out;
+}
+
+@keyframes levelUpPulse {
+  0% { transform: scale(0.9); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.xp-popup-icon {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 48px;
+  height: 48px;
+  background: var(--level-current, linear-gradient(135deg, #8B5CF6, #6366F1));
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xp-popup-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+  stroke-width: 1.5;
+}
+
+.xp-popup-text {
+  margin-left: 68px;
+}
+
+.level-up-text {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--level-current, linear-gradient(135deg, #FBBF24, #F59E0B));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.xp-earned {
+  font-size: 1.2rem;
+  font-weight: 800;
+  background: var(--level-current, linear-gradient(135deg, #A78BFA, #8B5CF6));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+
+.xp-anime {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 12px;
+}
+
+.level-reached {
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--level-current, linear-gradient(135deg, #FBBF24, #F59E0B));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
+.xp-breakdown {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  padding: 12px;
+  margin: 12px 0;
+  font-size: 0.7rem;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  color: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+.breakdown-row:last-of-type {
+  border-bottom: none;
+}
+
+.breakdown-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0 4px;
+  margin-top: 4px;
+  font-weight: 700;
+  color: white;
+  border-top: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.xp-progress-mini {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.xp-progress-bar-mini {
+  height: 4px;
+  background: var(--level-current, linear-gradient(90deg, #8B5CF6, #6366F1));
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+.xp-progress-mini span {
+  font-size: 0.6rem;
+  display: block;
+  text-align: center;
+  padding: 6px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.xp-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.xp-popup-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: rgba(255, 255, 255, 0.6);
+}
+
+.xp-popup-close:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.xp-popup-close:hover svg {
+  stroke: #EF4444;
+}
+
+/* Level Up Celebration */
+.level-up-celebration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.level-up-celebration.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.celebration-content {
+  text-align: center;
+  animation: celebrationPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes celebrationPop {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.celebration-content svg {
+  width: 80px;
+  height: 80px;
+  stroke: #FBBF24;
+  stroke-width: 1.5;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5));
+  animation: crownFloat 1s ease-in-out infinite;
+}
+
+@keyframes crownFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.celebration-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+}
+
+.celebration-level {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.celebration-num {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Light Mode Adjustments */
+[data-theme="light"] .user-level-display {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98));
+}
+
+[data-theme="light"] .level-progress-text,
+[data-theme="light"] .level-xp-stats {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .level-stat .stat-value {
+  color: #1E293B;
+}
+
+[data-theme="light"] .next-level-title {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="light"] .xp-popup-content {
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .level-mini-badge .level-title-mini {
+    display: none;
+  }
+  
+  .level-main-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding: 24px;
+  }
+  
+  .level-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .level-stat {
+    padding: 14px;
+  }
+  
+  .xp-popup {
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+  }
+  
+  .xp-popup-content {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .celebration-title {
+    font-size: 1.8rem;
+  }
+  
+  .celebration-level {
+    font-size: 1.2rem;
+  }
+  
+  .celebration-content svg {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .xp-breakdown {
+    display: none;
+  }
+  
+  .xp-popup-text {
+    margin-left: 0;
+    margin-top: 56px;
+  }
+  
+  .xp-popup-icon {
+    top: 16px;
+    left: 16px;
+  }
+}

@@ -1928,7 +1928,7 @@ window.editAnime = editAnime;
 // DELETE ANIME FUNCTION
 // =============================================
 
-// Delete anime - Fixed version
+// Delete anime - Fixed version with XP cleanup
 function deleteAnime() {
     if (!currentEditId) return;
 
@@ -1937,6 +1937,29 @@ function deleteAnime() {
     const anime = animeData.find(a => a.id == currentEditId);
     if (anime) {
         logActivity("deleted", anime.title);
+        
+        // 🎮 Remove XP data for this anime if it exists
+        if (window.levelSystem && window.levelSystem.removeAnimeXP) {
+            window.levelSystem.removeAnimeXP(currentEditId, anime.title);
+        } else if (window.levelSystem) {
+            // Fallback: directly remove from XP data
+            if (userXPData.completedAnimeXP[currentEditId]) {
+                const removedXP = userXPData.completedAnimeXP[currentEditId];
+                delete userXPData.completedAnimeXP[currentEditId];
+                userXPData.totalXP -= removedXP;
+                // Recalculate level
+                if (typeof recalculateLevelFromXP === 'function') {
+                    recalculateLevelFromXP();
+                }
+                if (typeof saveUserXPData === 'function') {
+                    saveUserXPData();
+                }
+                if (typeof updateAllLevelDisplays === 'function') {
+                    updateAllLevelDisplays();
+                }
+                console.log(`🗑️ Removed ${removedXP} XP for deleted anime: ${anime.title}`);
+            }
+        }
     }
 
     animeData = animeData.filter(a => a.id != currentEditId);
@@ -2226,27 +2249,31 @@ function handleAddAnime(e) {
     let statusChangedToCompleted = isEditing && !wasCompletedBefore && isNowCompleted;
     let statusChangedFromCompleted = isEditing && wasCompletedBefore && !isNowCompleted;
 
-    // ============================================
-    // FIXED: Handle finish date - PRESERVE existing completed dates
-    // ============================================
+    // Debug log
+    console.log('🔍 Status Debug:', {
+        isEditing,
+        wasCompletedBefore,
+        isNowCompleted,
+        statusChangedToCompleted,
+        statusChangedFromCompleted,
+        title
+    });
+
+    // Handle finish date
     let finishDate = null;
     let actualFinishDate = null;
 
     if (status === 'Completed') {
-        // CRITICAL: If this anime already exists AND is already completed with a date, preserve it!
         if (existingAnime && existingAnime.userStatus === 'Completed' && existingAnime.finishDate) {
-            // Already completed - NEVER change the dates
             actualFinishDate = existingAnime.actualFinishDate;
             finishDate = existingAnime.finishDate;
             console.log(`📅 Preserved original completion date for ${title}: ${finishDate}`);
         } 
         else if (existingAnime && isEditing && existingAnime.actualFinishDate) {
-            // Editing existing that has a date but wasn't completed before
             actualFinishDate = existingAnime.actualFinishDate;
             finishDate = existingAnime.finishDate || actualFinishDate.substring(0, 7);
         } 
         else if (selectedYear && selectedMonth && !existingAnime) {
-            // User manually selected month/year (for new anime)
             const year = selectedYear;
             const month = String(selectedMonth).padStart(2, '0');
             const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
@@ -2254,19 +2281,12 @@ function handleAddAnime(e) {
             finishDate = `${year}-${month}`;
         } 
         else {
-            // NEW COMPLETION - Store the ACTUAL current date
             actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
             finishDate = `${currentYear}-${currentMonth}`;
         }
-    } else {
-        // If status is NOT Completed, clear any finish dates (but only for new entries)
-        if (!existingAnime) {
-            finishDate = null;
-            actualFinishDate = null;
-        }
     }
 
-    // Determine toast message
+    // Determine toast message and log action
     let toastMessage = '';
     let logAction = '';
     
@@ -2294,8 +2314,9 @@ function handleAddAnime(e) {
         }
     }
 
+    // Save the anime data
     if (existingAnime && isEditing) {
-        // Update existing - preserve original dates if already completed
+        // Update existing
         existingAnime.title = title;
         existingAnime.type = type;
         existingAnime.episodes = episodes;
@@ -2306,12 +2327,10 @@ function handleAddAnime(e) {
         existingAnime.cover = cover;
         existingAnime.genres = genres;
         
-        // Only update finish dates if they don't exist or if it's a new completion
         if (!existingAnime.finishDate && finishDate) {
             existingAnime.finishDate = finishDate;
             existingAnime.actualFinishDate = actualFinishDate;
         }
-        // If already completed, DO NOT overwrite the dates (already preserved above)
         
         existingAnime.updatedAt = nowTimestamp;
     } else {
@@ -2338,6 +2357,44 @@ function handleAddAnime(e) {
     saveData();
     logActivity(logAction, title);
 
+    // 🎮 AWARD XP IF COMPLETED - FIXED with proper check
+if (status === 'Completed') {
+    setTimeout(() => {
+        if (window.levelSystem) {
+            // Get the current anime from the updated array
+            const currentAnime = animeData.find(a => a.id == (isEditing ? currentEditId : a.id));
+            
+            if (currentAnime) {
+                // Check if this is a NEW completion (wasn't completed before)
+                const wasAlreadyCompleted = userXPData.completedAnimeXP[currentAnime.id];
+                
+                console.log('🔍 XP Award Check:', {
+                    title: currentAnime.title,
+                    currentStatus: currentAnime.userStatus,
+                    wasAlreadyCompleted: !!wasAlreadyCompleted,
+                    existingXP: wasAlreadyCompleted,
+                    statusChangedToCompleted: statusChangedToCompleted
+                });
+                
+                // Only award XP if status changed to completed AND it wasn't already recorded
+                if (statusChangedToCompleted && !wasAlreadyCompleted) {
+                    console.log('🎮 Awarding XP for new completion:', currentAnime.title);
+                    const xpEarned = window.levelSystem.awardXPForAnime(currentAnime);
+                    console.log(`✨ Awarded ${xpEarned} XP for "${title}"`);
+                } else if (wasAlreadyCompleted) {
+                    console.log('ℹ️ XP already awarded for this anime previously');
+                    // Still show a notification that it's already completed
+                    if (typeof showToast === 'function') {
+                        showToast(`"${title}" was already completed! No additional XP earned.`, 'info');
+                    }
+                } else {
+                    console.log('⚠️ No XP awarded - status did not change to completed');
+                }
+            }
+        }
+    }, 100);
+}
+
     // Close modal and reset
     const addAnimeModal = document.getElementById('addAnimeModal');
     const animeForm = document.getElementById('addAnimeForm');
@@ -2359,7 +2416,11 @@ function handleAddAnime(e) {
 
     saveData();
     updateAllComponents();
-    showToast(toastMessage, 'success');
+    
+    // Show toast message
+    if (typeof showToast === 'function') {
+        showToast(toastMessage, status === 'Completed' ? 'success' : 'info');
+    }
 }
 
 // Save data to localStorage
