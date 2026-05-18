@@ -469,10 +469,6 @@ async function checkForUserUpdates() {
 }
 
 // =============================================
-// COMPLETE ANIPULSE SYSTEM - LEVELS, XP, NOTIFICATIONS
-// =============================================
-
-// =============================================
 // LEVEL SYSTEM 
 // =============================================
 
@@ -698,7 +694,7 @@ function renderNotifications() {
             <div class="notification-icon ${getIconClass(notif.type)}"><i class="fas ${getIcon(notif.type)}"></i></div>
             <div class="notification-content">
                 <div class="notification-title">${escapeHtml(notif.title)}</div>
-                <div class="notification-message">${escapeHtml(notif.message)}</div>
+                <div class="notification-message" style="white-space: pre-line;">${escapeHtml(notif.message)}</div>
                 <div class="notification-time">${formatTimeAgo(notif.timestamp)}</div>
             </div>
         </div>
@@ -839,11 +835,12 @@ function calculateLevelProgressPercentage(xp) {
 
 function showXPGainNotification(animeTitle, gainedXP, oldXP, newXP) {
     console.log(`🎉 XP GAIN: +${gainedXP} XP | ${oldXP} → ${newXP} | From: ${animeTitle}`);
-
+    
     const currentLevel = getCurrentLevelSafe(newXP);
     const nextLevel = getNextLevelSafe(newXP);
     let xpNeeded = nextLevel ? nextLevel.xpRequired - newXP : 0;
-
+    
+    // Create toast popup
     const xpToast = document.createElement('div');
     xpToast.className = 'xp-gain-toast';
     xpToast.innerHTML = `
@@ -852,17 +849,19 @@ function showXPGainNotification(animeTitle, gainedXP, oldXP, newXP) {
             <div class="xp-gain-title">✨ +${gainedXP} XP Earned!</div>
             <div class="xp-gain-anime">From: ${animeTitle}</div>
             <div class="xp-gain-progress">
-                <span class="xp-old">${oldXP}</span>
+                <span class="xp-old">${oldXP.toLocaleString()}</span>
                 <i class="fas fa-arrow-right"></i>
-                <span class="xp-new">${newXP}</span>
+                <span class="xp-new">${newXP.toLocaleString()}</span>
                 <span class="xp-total">XP</span>
             </div>
-            ${nextLevel ? `<div class="xp-next-info"><i class="fas fa-target"></i> ${xpNeeded} more XP for ${nextLevel.title} (Lv.${nextLevel.level})</div>` : '<div class="xp-next-info">🏆 Maximum Level Reached!</div>'}
+            ${nextLevel ? `<div class="xp-next-info"><i class="fas fa-target"></i> ${xpNeeded.toLocaleString()} more XP for ${nextLevel.title} (Lv.${nextLevel.level})</div>` : '<div class="xp-next-info">🏆 Maximum Level Reached!</div>'}
         </div>
-        <div class="xp-gain-progress-bar"><div class="xp-progress-fill" style="width: ${calculateLevelProgressPercentage(newXP)}%"></div></div>
+        <div class="xp-gain-progress-bar">
+            <div class="xp-progress-fill" style="width: ${calculateLevelProgressPercentage(newXP)}%"></div>
+        </div>
     `;
     document.body.appendChild(xpToast);
-
+    
     // Animate progress bar
     setTimeout(() => {
         const fill = xpToast.querySelector('.xp-progress-fill');
@@ -871,11 +870,18 @@ function showXPGainNotification(animeTitle, gainedXP, oldXP, newXP) {
             fill.style.width = `${calculateLevelProgressPercentage(newXP)}%`;
         }
     }, 100);
-
-    // Also add to notification center
-    addNotification('xp', '⭐ XP Earned!', `You earned ${gainedXP} XP from "${animeTitle}". Total: ${newXP} XP`);
-
-    // Auto remove after 6 seconds
+    
+    // Add to notification center (bell icon) with DETAILED info
+    const nextLevelTitle = nextLevel ? nextLevel.title : 'MAX LEVEL';
+    const nextLevelNum = nextLevel ? nextLevel.level : currentLevel.level;
+    
+    addNotification('xp', '⭐ XP Earned!', 
+        `+${gainedXP} XP from "${animeTitle}"\n` +
+        `${oldXP.toLocaleString()} → ${newXP.toLocaleString()} XP\n` +
+        `${xpNeeded.toLocaleString()} more XP for ${nextLevelTitle} (Lv.${nextLevelNum})`
+    );
+    
+    // Auto remove toast after 6 seconds
     setTimeout(() => {
         xpToast.style.animation = 'slideOutRight 0.3s ease';
         setTimeout(() => xpToast.remove(), 300);
@@ -910,7 +916,7 @@ function getTodayEarnedXP() {
     // Force refresh from localStorage
     const savedLimit = JSON.parse(localStorage.getItem('xpDailyLimit')) || { date: today, total: 0 };
     console.log(`📊 getTodayEarnedXP: saved date=${savedLimit.date}, today=${today}, total=${savedLimit.total}`);
-    
+
     if (savedLimit.date === today) {
         xpDailyLimit = savedLimit;
         return savedLimit.total || 0;
@@ -1079,19 +1085,19 @@ function recordAnimeCompletion(animeId) {
 }
 
 function recordXPTransaction(animeId, amount, reason, oldXP, newXP) {
-    xpTransactionLog.unshift({ 
-        id: Date.now(), 
-        animeId, 
-        amount, 
-        reason, 
-        oldXP, 
-        newXP, 
-        timestamp: new Date().toISOString(), 
-        fingerprint: getSimpleFingerprint() 
+    xpTransactionLog.unshift({
+        id: Date.now(),
+        animeId,
+        amount,
+        reason,
+        oldXP,
+        newXP,
+        timestamp: new Date().toISOString(),
+        fingerprint: getSimpleFingerprint()
     });
     if (xpTransactionLog.length > 1000) xpTransactionLog = xpTransactionLog.slice(0, 1000);
     localStorage.setItem('xpTransactionLog', JSON.stringify(xpTransactionLog));
-    
+
     // Update daily limit - MAKE SURE THIS IS UPDATING CORRECTLY
     const today = new Date().toDateString();
     if (xpDailyLimit.date !== today) {
@@ -1100,9 +1106,9 @@ function recordXPTransaction(animeId, amount, reason, oldXP, newXP) {
     xpDailyLimit.total += amount;
     localStorage.setItem('xpDailyLimit', JSON.stringify(xpDailyLimit));
     localStorage.setItem(`last_update_${animeId}`, Date.now().toString());
-    
+
     console.log(`📊 Updating tracker: +${amount} XP, Total today: ${xpDailyLimit.total}`);
-    
+
     // Force update tracker
     updateDailyXPTracker();
 }
@@ -1439,7 +1445,12 @@ if (typeof originalHandleAddAnime === 'function') {
 
                 // Show XP gain notification
                 if (finalXP > 0) {
-                    showXPGainNotification(animeTitle, finalXP, xpBefore, newTotalXP);
+                    const actualOldXP = xpBefore;
+                    const actualNewXP = xpBefore + finalXP;
+                    showXPGainNotification(animeTitle, finalXP, actualOldXP, actualNewXP);
+                }
+                else if (xpGained > 0) {
+                    showXPGainNotification(animeTitle, xpGained, xpBefore, xpAfter);
                 }
 
                 updateSettingsLevelSafe();

@@ -11596,9 +11596,10 @@ body.modal-open {
 }
 
 .notification-message {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  line-height: 1.4;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    line-height: 1.4;
+    white-space: pre-line;
 }
 
 .notification-time {
