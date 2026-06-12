@@ -1,10 +1,170 @@
-// =============================================
-//UPDATE 1.0.0
-// =============================================
+// ============================================
+// QUEUE STATUS UI - Settings Page
+// ============================================
+
+// Safe wrapper - only runs if elements exist
+function updateQueueStatusUI() {
+    // Only run if the queue elements exist on page
+    const queuedXPEl = document.getElementById('queuedXPAmount');
+    if (!queuedXPEl) return; // Exit if elements not found
+
+    const queue = JSON.parse(localStorage.getItem('xpPendingQueue') || '[]');
+    const totalQueuedXP = queue.reduce((sum, item) => sum + (item.xp || 0), 0);
+    const queueCount = queue.length;
+
+    const today = new Date().toDateString();
+    const dailyXPKey = `dailyXP_${today}`;
+    const todayXP = parseInt(localStorage.getItem(dailyXPKey) || '0');
+
+    // Get the REAL limit from level-system.js
+    let maxDailyXP = 5000;
+    if (window.AniPulseLevelSystem && window.AniPulseLevelSystem.MAX_DAILY_XP) {
+        maxDailyXP = window.AniPulseLevelSystem.MAX_DAILY_XP;
+    } else if (typeof MAX_DAILY_XP !== 'undefined') {
+        maxDailyXP = MAX_DAILY_XP;
+    }
+
+    // Update stats
+    const queuedCountEl = document.getElementById('queuedItemsCount');
+    const todayXPEl = document.getElementById('todayXPAmount');
+    const dailyLimitEl = document.getElementById('dailyLimit');
+    const queueFillEl = document.getElementById('queueProgressFill');
+    const queuePercentEl = document.getElementById('queuePercent');
+    const queueMessageEl = document.getElementById('queueMessage');
+
+    if (queuedXPEl) {
+        const oldValue = parseInt(queuedXPEl.textContent);
+        queuedXPEl.textContent = totalQueuedXP.toLocaleString();
+        if (oldValue !== totalQueuedXP && totalQueuedXP > 0) {
+            queuedXPEl.classList.add('updated');
+            setTimeout(() => queuedXPEl.classList.remove('updated'), 400);
+        }
+    }
+
+    if (queuedCountEl) {
+        queuedCountEl.textContent = queueCount;
+    }
+
+    if (todayXPEl) {
+        todayXPEl.textContent = todayXP;
+    }
+
+    if (dailyLimitEl) {
+        dailyLimitEl.textContent = maxDailyXP.toLocaleString();
+    }
+
+    // Update progress bar (percentage of daily limit used)
+    const dailyPercent = Math.min(100, (todayXP / maxDailyXP) * 100);
+    if (queueFillEl) {
+        queueFillEl.style.width = dailyPercent + '%';
+    }
+    if (queuePercentEl) {
+        queuePercentEl.textContent = Math.floor(dailyPercent) + '%';
+    }
+
+    // Update message
+    if (queueMessageEl) {
+        if (queueCount > 0) {
+            queueMessageEl.className = 'queue-message has-queue';
+            queueMessageEl.innerHTML = `<i class="fas fa-clock"></i> ${queueCount} item(s) queued (${totalQueuedXP.toLocaleString()} XP total). Will be added when daily limit resets.`;
+        } else {
+            queueMessageEl.className = 'queue-message';
+            queueMessageEl.innerHTML = `<i class="fas fa-check-circle"></i> No pending XP in queue`;
+        }
+    }
+}
+
+// Initialize queue UI (safe - only if elements exist)
+function initQueueStatusUI() {
+    // Check if queue elements exist on page
+    const queueCard = document.querySelector('.queue-status-card');
+    if (!queueCard) return;
+
+    updateQueueStatusUI();
+
+    // Update every 30 seconds
+    setInterval(() => {
+        const settingsPage = document.getElementById('settings-page');
+        if (settingsPage && settingsPage.classList.contains('active')) {
+            updateQueueStatusUI();
+        }
+    }, 30000);
+}
+
+// Listen for XP updates
+window.addEventListener('xpUpdated', () => {
+    updateQueueStatusUI();
+});
+
+// Listen for storage events
+window.addEventListener('storage', (e) => {
+    if (e.key === 'xpPendingQueue' || (e.key && e.key.startsWith('dailyXP_'))) {
+        updateQueueStatusUI();
+    }
+});
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Wait a bit for level-system to load
+    setTimeout(() => {
+        initQueueStatusUI();
+    }, 1000);
+});
+
+// Make functions globally available
+window.updateQueueStatusUI = updateQueueStatusUI;
 
 // ============================================
-// GLOBAL VARIABLES DEFINITION - FIX LINE TOOLTIP
+// FIX PLACEHOLDER IMAGES - RUN IMMEDIATELY
 // ============================================
+
+(function fixPlaceholdersEarly() {
+    // Replace all via.placeholder.com URLs before they load
+    const originalImageSrc = Object.getOwnPropertyDescriptor(Image.prototype, 'src');
+
+    // Intercept image src setting
+    Object.defineProperty(Image.prototype, 'src', {
+        get: function () {
+            return this.getAttribute('src');
+        },
+        set: function (value) {
+            if (value && value.includes('via.placeholder.com')) {
+                const match = value.match(/(\d+)x(\d+)/);
+                if (match) {
+                    value = `https://placehold.co/${match[1]}x${match[2]}/6a5acd/white?text=No+Image`;
+                } else {
+                    value = 'https://placehold.co/50x70/6a5acd/white?text=No+Image';
+                }
+            }
+            this.setAttribute('src', value);
+            if (originalImageSrc?.set) {
+                originalImageSrc.set.call(this, value);
+            }
+        }
+    });
+
+    // Also fix existing images
+    const fixExisting = () => {
+        document.querySelectorAll('img').forEach(img => {
+            if (img.src && img.src.includes('via.placeholder.com')) {
+                const match = img.src.match(/(\d+)x(\d+)/);
+                if (match) {
+                    img.src = `https://placehold.co/${match[1]}x${match[2]}/6a5acd/white?text=No+Image`;
+                } else {
+                    img.src = 'https://placehold.co/50x70/6a5acd/white?text=No+Image';
+                }
+            }
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixExisting);
+    } else {
+        fixExisting();
+    }
+
+    console.log('✅ Placeholder image interceptor installed');
+})();
 
 // Define lineTooltip globally BEFORE any function uses it
 let lineTooltip = null;
@@ -101,6 +261,399 @@ let animeData = JSON.parse(localStorage.getItem('animeData')) || [];
 let isEditing = false;
 let currentEditId = null;
 
+
+// Save data to localStorage only
+function saveData() {
+    localStorage.setItem('animeData', JSON.stringify(animeData));
+    console.log('💾 Data saved to localStorage');
+}
+
+// Make saveData global
+window.saveData = saveData;
+
+// Logout handler (simple version)
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    window.location.href = '/login.html';
+});
+
+// Initialize sync UI
+function initSyncUI() {
+    const lastSyncSpan = document.getElementById('lastSyncTime');
+    const lastSync = localStorage.getItem('lastCloudSyncTime');
+
+    if (lastSync) {
+        lastSyncSpan.textContent = new Date(lastSync).toLocaleString();
+    }
+
+    // Sync Now button
+    document.getElementById('syncNowBtn')?.addEventListener('click', async () => {
+        if (window.dualStorage) {
+            await window.dualStorage.syncToCloud();
+            const newSync = localStorage.getItem('lastCloudSyncTime');
+            if (newSync) {
+                lastSyncSpan.textContent = new Date(newSync).toLocaleString();
+            }
+        }
+    });
+
+    // Load from Cloud button
+    document.getElementById('loadFromCloudBtn')?.addEventListener('click', async () => {
+        if (confirm('⚠️ This will replace your local data with cloud data. Continue?')) {
+            const result = await window.dualStorage?.loadFromCloud();
+            if (result?.success) {
+                location.reload();
+            }
+        }
+    });
+}
+
+// Call when settings page becomes active
+document.querySelector('.menu-item[data-page="settings"]')?.addEventListener('click', () => {
+    setTimeout(initSyncUI, 100);
+});
+// ============================================
+// AVATAR SYSTEM - Compressed & Stored in Firestore
+// ============================================
+
+// Compress image to small data URL (under 500KB)
+async function compressImage(file, maxSizeKB = 500, maxWidth = 200, maxHeight = 200) {
+    return new Promise((resolve, reject) => {
+        // Check original file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            reject(new Error('Image too large! Maximum 5MB before compression'));
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                // Resize image to max 200x200
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = (width * maxHeight) / height;
+                        height = maxHeight;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Start with quality 0.8
+                let quality = 0.8;
+                let dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+                // Reduce quality until size is under limit
+                let attempts = 0;
+                while (dataUrl.length > maxSizeKB * 1024 && quality > 0.3 && attempts < 10) {
+                    quality -= 0.1;
+                    dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    attempts++;
+                }
+
+                const finalSizeKB = Math.round(dataUrl.length / 1024);
+                console.log(`📸 Image compressed: ${finalSizeKB}KB (limit: ${maxSizeKB}KB)`);
+
+                if (dataUrl.length > maxSizeKB * 1024) {
+                    reject(new Error(`Image still too large after compression (${finalSizeKB}KB). Please try a smaller image.`));
+                } else {
+                    resolve(dataUrl);
+                }
+            };
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.src = event.target.result;
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// Generate default avatar from username (URL-based)
+function generateDefaultAvatar(username) {
+    const colors = ['6366F1', '8B5CF6', 'EC4899', 'F43F5E', 'EF4444', 'F97316', 'F59E0B', '10B981', '14B8A6', '06B6D4', '3B82F6'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    const encodedName = encodeURIComponent(username || 'User');
+    return `https://ui-avatars.com/api/?name=${encodedName}&background=${randomColor}&color=fff&bold=true&length=2&size=200&rounded=true`;
+}
+
+// Update all avatars on the page
+function updateAllAvatars(avatarUrl) {
+    const avatars = document.querySelectorAll('.user-avatar, .sidebar-avatar, .profile-preview-avatar, #avatarPreview, .profile-modal-avatar, .leaderboard-avatar, .friend-avatar, .friend-request-avatar, .search-result-avatar');
+    avatars.forEach(img => {
+        if (img) img.src = avatarUrl;
+    });
+}
+
+// Save avatar to Firestore via backend
+async function saveAvatarToCloud(avatarDataUrl) {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        throw new Error('Not logged in');
+    }
+
+    const sizeKB = Math.round(avatarDataUrl.length / 1024);
+    console.log(`📤 Uploading avatar (${sizeKB}KB) to cloud...`);
+
+    const response = await fetch('http://localhost:3000/api/user/avatar', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ avatar: avatarDataUrl })
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+    }
+
+    return await response.json();
+}
+
+// Handle custom avatar upload
+async function uploadCustomAvatar(file) {
+    if (!file) return false;
+
+    // Check file size (max 5MB before compression)
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Image too large! Maximum 5MB', 'error');
+        return false;
+    }
+
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        showToast('Please select an image file (JPEG, PNG, GIF, WebP)', 'error');
+        return false;
+    }
+
+    showToast('Processing image...', 'info');
+
+    try {
+        // Compress image to under 500KB
+        const compressedDataUrl = await compressImage(file, 500, 200, 200);
+        const finalSizeKB = Math.round(compressedDataUrl.length / 1024);
+
+        // Show preview immediately
+        updateAllAvatars(compressedDataUrl);
+
+        // Save to cloud (Firestore)
+        const result = await saveAvatarToCloud(compressedDataUrl);
+
+        // Update localStorage as backup
+        const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        userProfile.avatar = compressedDataUrl;
+        userProfile.customAvatar = true;
+        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+        showToast(`Avatar saved! (${finalSizeKB}KB)`, 'success');
+
+        // Sync other components
+        if (typeof updateSidebarUserInfo === 'function') updateSidebarUserInfo();
+        if (window.dualStorage) window.dualStorage.syncToCloud();
+
+        return true;
+
+    } catch (error) {
+        console.error('Avatar upload failed:', error);
+        showToast(error.message || 'Failed to process image', 'error');
+        return false;
+    }
+}
+
+// Reset to default avatar
+async function resetToDefaultAvatar() {
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const username = userProfile.name || user.username || 'User';
+
+    const defaultAvatar = generateDefaultAvatar(username);
+
+    try {
+        // Save default to cloud
+        await saveAvatarToCloud(defaultAvatar);
+
+        // Update localStorage
+        userProfile.avatar = defaultAvatar;
+        userProfile.customAvatar = false;
+        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+        // Update UI
+        updateAllAvatars(defaultAvatar);
+
+        showToast('Avatar reset to default', 'success');
+
+        // Sync other components
+        if (typeof updateSidebarUserInfo === 'function') updateSidebarUserInfo();
+        if (window.dualStorage) window.dualStorage.syncToCloud();
+
+    } catch (error) {
+        console.error('Reset avatar failed:', error);
+        showToast('Failed to reset avatar', 'error');
+    }
+}
+
+// Load avatar from cloud
+async function loadAvatarFromCloud() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        loadAvatarFromLocal();
+        return;
+    }
+
+    try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const userId = user.uid;
+
+        if (!userId) {
+            loadAvatarFromLocal();
+            return;
+        }
+
+        const response = await fetch(`http://localhost:3000/api/user/avatar/${userId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.avatar) {
+                updateAllAvatars(data.avatar);
+
+                // Update localStorage
+                const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                userProfile.avatar = data.avatar;
+                userProfile.customAvatar = data.hasCustom;
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                return;
+            }
+        }
+
+        // Fallback to localStorage
+        loadAvatarFromLocal();
+
+    } catch (error) {
+        console.error('Failed to load avatar from cloud:', error);
+        loadAvatarFromLocal();
+    }
+}
+
+// Load avatar from localStorage (fallback)
+function loadAvatarFromLocal() {
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const username = userProfile.name || user.username || 'User';
+
+    if (userProfile.avatar && userProfile.avatar.startsWith('data:image')) {
+        // Custom uploaded avatar
+        updateAllAvatars(userProfile.avatar);
+    } else if (userProfile.avatar && userProfile.avatar.startsWith('http')) {
+        // URL avatar
+        updateAllAvatars(userProfile.avatar);
+    } else {
+        // Generate default avatar
+        const defaultAvatar = generateDefaultAvatar(username);
+        userProfile.avatar = defaultAvatar;
+        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+        updateAllAvatars(defaultAvatar);
+    }
+}
+
+// Initialize avatar system
+function initAvatarSystem() {
+    const avatarInput = document.getElementById('avatarInput');
+    const resetAvatarBtn = document.getElementById('resetAvatar');
+    const usernameInput = document.getElementById('usernameInput');
+
+    // Load avatar from cloud
+    loadAvatarFromCloud();
+
+    // Handle file upload
+    if (avatarInput) {
+        const newAvatarInput = avatarInput.cloneNode(true);
+        avatarInput.parentNode.replaceChild(newAvatarInput, avatarInput);
+
+        newAvatarInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Show preview immediately
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    updateAllAvatars(event.target.result);
+                };
+                reader.readAsDataURL(file);
+
+                await uploadCustomAvatar(file);
+            }
+            newAvatarInput.value = '';
+        });
+    }
+
+    // Handle reset button
+    if (resetAvatarBtn) {
+        const newResetBtn = resetAvatarBtn.cloneNode(true);
+        resetAvatarBtn.parentNode.replaceChild(newResetBtn, resetAvatarBtn);
+
+        newResetBtn.addEventListener('click', resetToDefaultAvatar);
+    }
+
+    // Handle username change (update default avatar if using default)
+    if (usernameInput) {
+        usernameInput.addEventListener('change', async () => {
+            const newName = usernameInput.value.trim();
+            if (newName) {
+                const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                userProfile.name = newName;
+
+                // Only update avatar if it's a default/generated URL
+                if (!userProfile.avatar || (!userProfile.avatar.startsWith('data:image') && userProfile.avatar.includes('ui-avatars.com'))) {
+                    const newAvatar = generateDefaultAvatar(newName);
+                    userProfile.avatar = newAvatar;
+                    updateAllAvatars(newAvatar);
+
+                    // Save to cloud if logged in
+                    if (localStorage.getItem('authToken')) {
+                        await saveAvatarToCloud(newAvatar);
+                    }
+                }
+
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.username = newName;
+                user.name = newName;
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+        });
+    }
+}
+
+// Call when settings page loads
+const settingsMenuItemAvatar = document.querySelector('.menu-item[data-page="settings"]');
+if (settingsMenuItemAvatar) {
+    settingsMenuItemAvatar.addEventListener('click', () => {
+        setTimeout(initAvatarSystem, 100);
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(loadAvatarFromCloud, 500);
+});
+
 // Chart variables
 let monthlyProgressChart, genreDistributionChart, completionChart, scoreDistributionChart;
 let statusDistributionChart, typeDistributionChart, genreStatsChart;
@@ -172,6 +725,18 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function updateUserProfile(name, avatar) {
+        // Get current level data from the level system
+        let currentLevel = 1;
+        let currentTitle = 'Newbie';
+        let currentXP = 0;
+
+        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.getUserProfile === 'function') {
+            const profile = window.AniPulseLevelSystem.getUserProfile();
+            currentLevel = profile.level || 1;
+            currentTitle = profile.title || 'Newbie';
+            currentXP = profile.totalExp || 0;
+        }
+
         if (profilePreviewName) profilePreviewName.textContent = name;
         if (topUserName) topUserName.textContent = name;
         if (sidebarUsername) sidebarUsername.textContent = name;
@@ -180,7 +745,24 @@ document.addEventListener('DOMContentLoaded', function () {
         if (topUserAvatar) topUserAvatar.src = avatar;
         if (sidebarAvatar) sidebarAvatar.src = avatar;
 
-        localStorage.setItem('userProfile', JSON.stringify({ name, avatar }));
+        // Save to localStorage WITHOUT overwriting level data
+        const existingProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+        const updatedProfile = {
+            name: name,
+            avatar: avatar,
+            // Preserve existing level data
+            level: existingProfile.level || currentLevel,
+            title: existingProfile.title || currentTitle,
+            totalXP: existingProfile.totalXP || currentXP
+        };
+        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+
+        // Force refresh the level display
+        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+            setTimeout(() => {
+                window.AniPulseLevelSystem.updateAllLevelUI();
+            }, 100);
+        }
     }
 
     // Initialize
@@ -196,16 +778,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // When avatar changes
+    // When avatar changes - use URL avatar service
     if (avatarInput) {
-        avatarInput.addEventListener('change', e => {
+        avatarInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = event => {
-                updateUserProfile(usernameInput?.value || 'Unnamed', event.target.result);
-            };
-            reader.readAsDataURL(file);
+
+            // Use UI Avatars service with custom colors
+            const username = usernameInput?.value || 'User';
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=6366F1&color=fff&bold=true&length=2&size=150`;
+
+            updateUserProfile(username, avatarUrl);
+
+            showToast('Avatar updated!', 'success');
         });
     }
 
@@ -214,6 +799,13 @@ document.addEventListener('DOMContentLoaded', function () {
         resetAvatarBtn.addEventListener('click', () => {
             const defaultAvatar = 'https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff';
             updateUserProfile(usernameInput?.value || 'Unnamed', defaultAvatar);
+            // Force level UI update
+            setTimeout(() => {
+                if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+                    window.AniPulseLevelSystem.updateAllLevelUI();
+                }
+                updateSidebarUserInfo();
+            }, 100);
         });
     }
     // === PROFILE SYNC END ===
@@ -350,11 +942,6 @@ document.addEventListener('DOMContentLoaded', function () {
         sortFilter.addEventListener('change', updateAnimeDisplay);
     }
 
-    // Initialize with sample data if empty
-    if (animeData.length === 0) {
-        initializeSampleData();
-    }
-
     // Initialize user name
     initializeUserName();
     initSettings();
@@ -394,10 +981,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     console.log('mobile menu init');
-
-
-    // Check for updates periodically (every 6 hours)
-    setInterval(checkForUserUpdates, 6 * 60 * 60 * 1000);
 
     // Check for updates on app start (with delay to avoid rate limiting)
     setTimeout(checkForUserUpdates, 5000);
@@ -1515,7 +2098,7 @@ function calculateGenreDistribution() {
 // Calculate yearly completion - FIXED VERSION
 function calculateYearlyCompletion() {
     const currentYear = new Date().getFullYear();
-    
+
     // Define the years we want to display
     const years = [2024, 2025, 2026, 2027, 2028];
     const yearlyData = [0, 0, 0, 0, 0]; // Index 0=2024, 1=2025, etc.
@@ -1523,7 +2106,7 @@ function calculateYearlyCompletion() {
     animeData.forEach(anime => {
         if (anime.userStatus === 'Completed') {
             let completionYear = null;
-            
+
             // Try to get the completion year from different fields
             if (anime.actualFinishDate) {
                 completionYear = parseInt(anime.actualFinishDate.split('-')[0]);
@@ -1533,7 +2116,7 @@ function calculateYearlyCompletion() {
             } else if (anime.finishTimestamp) {
                 completionYear = parseInt(anime.finishTimestamp.split('-')[0]);
             }
-            
+
             // Find which year index this belongs to
             const yearIndex = years.indexOf(completionYear);
             if (yearIndex !== -1) {
@@ -1631,7 +2214,7 @@ function updateTopRatedAnime() {
     const topRatedAnime = animeData
         .filter(anime => anime.score && anime.score >= 8)
         .sort((a, b) => b.score - a.score)
-        .slice(0, 9);
+        .slice(0, 7);
 
     if (topRatedAnime.length === 0) {
         topRatedContainer.innerHTML = '<div class="no-anime">No highly rated anime yet. Rate some anime to see them here!</div>';
@@ -1941,6 +2524,7 @@ function deleteAnime() {
 
     animeData = animeData.filter(a => a.id != currentEditId);
     saveData();
+    try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { /* ignore */ }
 
     const addModal = document.getElementById('addAnimeModal');
     const animeFormElement = document.getElementById('addAnimeForm');
@@ -2006,7 +2590,7 @@ function updateAnimeTableView(animeList) {
         // Format completion date - Show only Month Year in table
         let completionDate = '-';
         let completionTooltip = '';
-        
+
         if (anime.userStatus === 'Completed') {
             // Use finishDate (YYYY-MM) for display in table
             if (anime.finishDate && anime.finishDate.length >= 7) {
@@ -2014,7 +2598,7 @@ function updateAnimeTableView(animeList) {
                 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 completionDate = `${monthNames[parseInt(month) - 1]} ${year}`;
             }
-            
+
             // Use actualFinishDate for tooltip (exact date)
             if (anime.actualFinishDate) {
                 const actualParts = anime.actualFinishDate.split('-');
@@ -2067,7 +2651,7 @@ function updateAnimeTableView(animeList) {
             <div class="anime-title-cell" title="${combinedTooltip.replace(/"/g, '&quot;')}">
                 <img src="${anime.cover || 'https://via.placeholder.com/50x70/6a5acd/ffffff?text=No+Image'}"
                      alt="${escapedTitle}" class="anime-cover"
-                     onerror="this.src='https://via.placeholder.com/50x70/6a5acd/ffffff?text=No+Image'">
+                     onerror="this.src='https://placehold.co/50x70/6a5acd/white?text=No+Image'">
                 <div class="anime-info">
                     <div class="anime-title" title="${escapedTitle}">${safeTitle}</div>
                     ${anime.genres && anime.genres.length > 0
@@ -2226,6 +2810,51 @@ function handleAddAnime(e) {
     let statusChangedToCompleted = isEditing && !wasCompletedBefore && isNowCompleted;
     let statusChangedFromCompleted = isEditing && wasCompletedBefore && !isNowCompleted;
 
+    // Track if this is a new anime being added
+    const isNewAnime = !existingAnime;
+    const isStartingToWatch = !isEditing && status === 'Watching';
+
+    // ============================================
+    // CREATE FEED ACTIVITY FOR STARTED WATCHING
+    // ============================================
+    if (isNewAnime && status === 'Watching') {
+        feedOnStartedWatching(title, progress || 1);
+        console.log(`📰 Feed: ${title} started watching`);
+    }
+
+    // Also handle when editing and status changes to Watching (not from Completed)
+    if (isEditing && !wasCompletedBefore && status === 'Watching' && existingAnime?.userStatus !== 'Watching') {
+        feedOnStartedWatching(title, progress || 1);
+        console.log(`📰 Feed: ${title} started watching (updated)`);
+    }
+
+    // ============================================
+    // CREATE FEED ACTIVITY WHEN ANIME IS COMPLETED
+    // ============================================
+    if (statusChangedToCompleted) {
+        // Calculate XP earned
+        let xpEarned = 0;
+        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.calculateExpFromParts === 'function') {
+            const xp = window.AniPulseLevelSystem.calculateExpFromParts({
+                episodes: episodes,
+                progress: episodes,
+                duration: duration,
+                type: type,
+                score: score,
+                hasScore: !!score
+            });
+            xpEarned = xp + 10;
+        } else {
+            const episodeBonus = Math.floor(episodes / 2);
+            const scoreBonus = score ? (score >= 9 ? 8 : score >= 8 ? 5 : score >= 7 ? 3 : 0) : 0;
+            xpEarned = episodeBonus + scoreBonus + 10;
+        }
+
+        // Create feed activity for completed anime
+        feedOnAnimeCompleted(title, episodes, score, xpEarned);
+        console.log(`📰 Feed: ${title} completed (${episodes} episodes, ${xpEarned} XP)`);
+    }
+
     // ============================================
     // FIXED: Handle finish date - PRESERVE existing completed dates
     // ============================================
@@ -2233,33 +2862,27 @@ function handleAddAnime(e) {
     let actualFinishDate = null;
 
     if (status === 'Completed') {
-        // CRITICAL: If this anime already exists AND is already completed with a date, preserve it!
         if (existingAnime && existingAnime.userStatus === 'Completed' && existingAnime.finishDate) {
-            // Already completed - NEVER change the dates
             actualFinishDate = existingAnime.actualFinishDate;
             finishDate = existingAnime.finishDate;
             console.log(`📅 Preserved original completion date for ${title}: ${finishDate}`);
-        } 
+        }
         else if (existingAnime && isEditing && existingAnime.actualFinishDate) {
-            // Editing existing that has a date but wasn't completed before
             actualFinishDate = existingAnime.actualFinishDate;
             finishDate = existingAnime.finishDate || actualFinishDate.substring(0, 7);
-        } 
+        }
         else if (selectedYear && selectedMonth && !existingAnime) {
-            // User manually selected month/year (for new anime)
             const year = selectedYear;
             const month = String(selectedMonth).padStart(2, '0');
             const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
             actualFinishDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
             finishDate = `${year}-${month}`;
-        } 
+        }
         else {
-            // NEW COMPLETION - Store the ACTUAL current date
             actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
             finishDate = `${currentYear}-${currentMonth}`;
         }
     } else {
-        // If status is NOT Completed, clear any finish dates (but only for new entries)
         if (!existingAnime) {
             finishDate = null;
             actualFinishDate = null;
@@ -2269,7 +2892,7 @@ function handleAddAnime(e) {
     // Determine toast message
     let toastMessage = '';
     let logAction = '';
-    
+
     if (!isEditing) {
         if (status === 'Completed') {
             toastMessage = ` "${title}" added and marked as completed!`;
@@ -2295,7 +2918,6 @@ function handleAddAnime(e) {
     }
 
     if (existingAnime && isEditing) {
-        // Update existing - preserve original dates if already completed
         existingAnime.title = title;
         existingAnime.type = type;
         existingAnime.episodes = episodes;
@@ -2305,17 +2927,14 @@ function handleAddAnime(e) {
         existingAnime.score = score;
         existingAnime.cover = cover;
         existingAnime.genres = genres;
-        
-        // Only update finish dates if they don't exist or if it's a new completion
+
         if (!existingAnime.finishDate && finishDate) {
             existingAnime.finishDate = finishDate;
             existingAnime.actualFinishDate = actualFinishDate;
         }
-        // If already completed, DO NOT overwrite the dates (already preserved above)
-        
+
         existingAnime.updatedAt = nowTimestamp;
     } else {
-        // Add new anime
         const newAnime = {
             id: getNextId(),
             title,
@@ -2360,6 +2979,62 @@ function handleAddAnime(e) {
     saveData();
     updateAllComponents();
     showToast(toastMessage, 'success');
+}
+
+// ============================================
+// FEED ACTIVITY FUNCTIONS
+// ============================================
+
+function createFeedActivity(type, data) {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    fetch('http://localhost:3000/api/feed/create', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type, data })
+    }).catch(error => {
+        console.error('Failed to create feed activity:', error);
+    });
+}
+
+function feedOnAnimeCompleted(animeTitle, episodes, score, xpEarned) {
+    createFeedActivity('completed_anime', {
+        animeTitle: animeTitle,
+        episodes: episodes,
+        score: score || 0,
+        xpEarned: xpEarned
+    });
+}
+
+function feedOnStartedWatching(animeTitle, episodeStart) {
+    createFeedActivity('started_watching', {
+        animeTitle: animeTitle,
+        episodeStart: episodeStart || 1
+    });
+}
+
+function feedOnAddedAnime(animeTitle, status) {
+    createFeedActivity('added_anime', {
+        animeTitle: animeTitle,
+        status: status
+    });
+}
+
+function feedOnLevelUp(level, title) {
+    createFeedActivity('level_up', {
+        level: level,
+        title: title
+    });
+}
+
+function feedOnAchievement(achievementName) {
+    createFeedActivity('achievement', {
+        achievement: achievementName
+    });
 }
 
 // Save data to localStorage
@@ -2842,25 +3517,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 100);
 });
 
-// Calculate total watch time in hours
-function calculateTotalHours() {
-    let totalMinutes = 0;
-
-    animeData.forEach(anime => {
-        if (anime.type === 'Movie') {
-            // For movies, use the duration directly
-            totalMinutes += anime.duration || 0;
-        } else {
-            // For TV series, calculate based on episodes watched
-            const episodesWatched = anime.progress || 0;
-            const episodeDuration = anime.duration || 20; // Default 20 minutes per episode
-            totalMinutes += episodesWatched * episodeDuration;
-        }
-    });
-
-    // Convert minutes to hours and round to 1 decimal place
-    return (totalMinutes / 60).toFixed(1);
-}
+// =============================================
+// COMPLETE FIXED STATISTICS CHARTS
+// =============================================
 
 // Get current month name
 function getCurrentMonth() {
@@ -2871,8 +3530,98 @@ function getCurrentMonth() {
     const now = new Date();
     return months[now.getMonth()];
 }
-// Calculate monthly stats
+
+// Update statistics tables
+function updateStatisticsTables() {
+    const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+    
+    // Calculate statistics
+    const totalAnime = animeData.length;
+    const completedAnime = animeData.filter(a => a.userStatus === 'Completed').length;
+    const totalHours = calculateTotalHours();
+    const avgScore = calculateAverageScore();
+    const completionRate = totalAnime > 0 ? Math.round((completedAnime / totalAnime) * 100) : 0;
+    
+    // Update overview cards
+    const totalAnimeStats = document.getElementById('total-anime-stats');
+    const totalHoursStats = document.getElementById('total-hours-stats');
+    const avgScoreStats = document.getElementById('avg-score-stats');
+    const completionRateEl = document.getElementById('completion-rate');
+    
+    if (totalAnimeStats) totalAnimeStats.textContent = totalAnime;
+    if (totalHoursStats) totalHoursStats.textContent = totalHours;
+    if (avgScoreStats) avgScoreStats.textContent = avgScore;
+    if (completionRateEl) completionRateEl.textContent = completionRate + '%';
+    
+    // Update yearly breakdown
+    const yearlyBreakdownEl = document.getElementById('yearlyBreakdown');
+    if (yearlyBreakdownEl) {
+        const yearlyData = {};
+        const currentYear = new Date().getFullYear();
+        for (let year = 2020; year <= currentYear; year++) yearlyData[year] = 0;
+        
+        animeData.forEach(anime => {
+            if (anime.finishDate) {
+                const finishYear = new Date(anime.finishDate).getFullYear();
+                if (yearlyData.hasOwnProperty(finishYear)) yearlyData[finishYear]++;
+            }
+        });
+        
+        const maxCount = Math.max(...Object.values(yearlyData), 1);
+        yearlyBreakdownEl.innerHTML = Object.entries(yearlyData)
+            .filter(([_, count]) => count > 0 || parseInt(_) === currentYear)
+            .map(([year, count]) => `
+                <div class="stat-row">
+                    <div class="stat-label-small">${year}</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width: ${(count / maxCount) * 100}%"></div>
+                    </div>
+                    <div class="stat-value-small">${count}</div>
+                </div>
+            `).join('');
+    }
+    
+    // Update score analysis
+    const scoreAnalysisEl = document.getElementById('scoreAnalysis');
+    if (scoreAnalysisEl) {
+        const ratedAnime = animeData.filter(a => a.score && a.score > 0);
+        const avgScoreVal = ratedAnime.length > 0 ? (ratedAnime.reduce((s, a) => s + a.score, 0) / ratedAnime.length).toFixed(1) : 0;
+        const highest = ratedAnime.sort((a, b) => b.score - a.score)[0];
+        const lowest = ratedAnime.sort((a, b) => a.score - b.score)[0];
+        
+        scoreAnalysisEl.innerHTML = `
+            <div class="stat-row">
+                <div class="stat-label-small">Rated Anime</div>
+                <div class="stat-value-small">${ratedAnime.length}</div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-label-small">Average Score</div>
+                <div class="stat-value-small">${avgScoreVal}</div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-label-small">Highest Rated</div>
+                <div class="stat-value-small">${highest ? highest.score + ' (' + highest.title + ')' : 'N/A'}</div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-label-small">Lowest Rated</div>
+                <div class="stat-value-small">${lowest ? lowest.score + ' (' + lowest.title + ')' : 'N/A'}</div>
+            </div>
+        `;
+    }
+}
+
+// Calculate average score helper
+function calculateAverageScore() {
+    const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+    const ratedAnime = animeData.filter(anime => anime.score && anime.score > 0);
+    if (ratedAnime.length === 0) return 0;
+    const totalScore = ratedAnime.reduce((sum, anime) => sum + anime.score, 0);
+    return (totalScore / ratedAnime.length).toFixed(1);
+}
+
+// Calculate monthly stats based on actualFinishDate
 function calculateMonthlyStats() {
+    const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
@@ -2882,30 +3631,34 @@ function calculateMonthlyStats() {
     let monthlyEpisodes = 0;
 
     animeData.forEach(anime => {
-        const finishDate = anime.finishDate ? new Date(anime.finishDate) : null;
-
+        // Only count completed anime
+        if (anime.userStatus !== 'Completed') return;
+        
+        // Get completion date - prioritize actualFinishDate
+        let completionDate = null;
+        if (anime.actualFinishDate) {
+            completionDate = new Date(anime.actualFinishDate);
+        } else if (anime.finishDate) {
+            completionDate = new Date(anime.finishDate);
+        }
+        
         // Check if anime was completed this month
-        if (
-            finishDate &&
-            finishDate.getMonth() === currentMonth &&
-            finishDate.getFullYear() === currentYear
+        if (completionDate && 
+            !isNaN(completionDate.getTime()) &&
+            completionDate.getMonth() === currentMonth &&
+            completionDate.getFullYear() === currentYear
         ) {
             // Calculate hours
             if (anime.type === 'Movie') {
-                monthlyHours += (anime.duration || 0) / 60;
+                monthlyHours += (anime.duration || 120) / 60;
                 monthlyMovies++;
-
-                // ✅ Count movies as 1 episode
                 monthlyEpisodes += 1;
             } else {
                 const episodeDuration = anime.duration || 20;
                 monthlyHours += ((anime.episodes || 0) * episodeDuration) / 60;
                 monthlyEpisodes += anime.episodes || 0;
             }
-
-            if (anime.userStatus === 'Completed') {
-                monthlyCompleted++;
-            }
+            monthlyCompleted++;
         }
     });
 
@@ -2917,754 +3670,332 @@ function calculateMonthlyStats() {
     };
 }
 
-// Calculate percentage changes for monthly stats based on user data
-function calculateStatChanges() {
-    const currentStats = calculateMonthlyStats();
-    const previousStats = getPreviousMonthlyStatsFromUserData();
-
-    const changes = {};
-
-    // Calculate percentage change for each metric
-    changes.completed = calculatePercentageChange(previousStats.completed, currentStats.completed);
-    changes.movies = calculatePercentageChange(previousStats.movies, currentStats.movies);
-    changes.episodes = calculatePercentageChange(previousStats.episodes, currentStats.episodes);
-    changes.hours = calculatePercentageChange(previousStats.hours, currentStats.hours);
-
-    return changes;
-}
-
-// Get previous month's stats from actual user data
-function getPreviousMonthlyStatsFromUserData() {
+// Update stat cards with percentage changes
+function updateStatCardsWithChanges() {
+    // Check if it's January (first month of year)
+    const isFirstMonth = new Date().getMonth() === 0;
+    
+    if (isFirstMonth) {
+        // January - no comparison data available
+        const stats = ['completed', 'movies', 'episodes', 'hours'];
+        stats.forEach(stat => {
+            const el = document.getElementById(`${stat}-change`);
+            if (el) {
+                el.className = 'stat-change neutral';
+                el.innerHTML = `<i class="fas fa-minus"></i> <span>No Track</span>`;
+            }
+        });
+        return;
+    }
+    
+    // Calculate changes by comparing with previous month
+    const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
     const now = new Date();
-    let prevYear = now.getFullYear();
-    let prevMonth = now.getMonth() - 1;
-
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    
+    // Get previous month and year
+    let prevYear = currentYear;
+    let prevMonth = currentMonth - 1;
     if (prevMonth < 0) {
         prevMonth = 11;
         prevYear--;
     }
-
-    return calculateStatsForMonth(prevYear, prevMonth);
-}
-
-// Calculate stats for a specific month and year
-function calculateStatsForMonth(year, month) {
-    let monthlyHours = 0;
-    let monthlyCompleted = 0;
-    let monthlyMovies = 0;
-    let monthlyEpisodes = 0;
-
+    
+    // Calculate current month stats
+    let currentCompleted = 0;
+    let currentMovies = 0;
+    let currentEpisodes = 0;
+    let currentHours = 0;
+    
+    // Calculate previous month stats
+    let prevCompleted = 0;
+    let prevMovies = 0;
+    let prevEpisodes = 0;
+    let prevHours = 0;
+    
     animeData.forEach(anime => {
-        if (anime.userStatus === 'Completed' && anime.finishDate) {
-            const finishDate = new Date(anime.finishDate);
-            const finishYear = finishDate.getFullYear();
-            const finishMonth = finishDate.getMonth();
-
-            // Check if anime was completed in the specified month and year
-            if (finishYear === year && finishMonth === month) {
-                // Calculate hours for this anime
-                if (anime.type === 'Movie') {
-                    monthlyHours += (anime.duration || 0) / 60;
-                    monthlyMovies++;
-                } else {
-                    const episodeDuration = anime.duration || 20;
-                    monthlyHours += ((anime.episodes || 0) * episodeDuration) / 60;
-                    monthlyEpisodes += anime.episodes || 0;
-                }
-                monthlyCompleted++;
+        if (anime.userStatus !== 'Completed') return;
+        
+        let completionDate = null;
+        if (anime.actualFinishDate) {
+            completionDate = new Date(anime.actualFinishDate);
+        } else if (anime.finishDate) {
+            completionDate = new Date(anime.finishDate);
+        }
+        
+        if (!completionDate || isNaN(completionDate.getTime())) return;
+        
+        const year = completionDate.getFullYear();
+        const month = completionDate.getMonth();
+        
+        // Check if current month
+        if (year === currentYear && month === currentMonth) {
+            currentCompleted++;
+            if (anime.type === 'Movie') {
+                currentMovies++;
+                currentEpisodes += 1;
+                currentHours += (anime.duration || 120) / 60;
+            } else {
+                currentEpisodes += anime.episodes || 0;
+                currentHours += ((anime.episodes || 0) * (anime.duration || 20)) / 60;
+            }
+        }
+        
+        // Check if previous month
+        if (year === prevYear && month === prevMonth) {
+            prevCompleted++;
+            if (anime.type === 'Movie') {
+                prevMovies++;
+                prevEpisodes += 1;
+                prevHours += (anime.duration || 120) / 60;
+            } else {
+                prevEpisodes += anime.episodes || 0;
+                prevHours += ((anime.episodes || 0) * (anime.duration || 20)) / 60;
             }
         }
     });
-
-    return {
-        hours: parseFloat(monthlyHours.toFixed(1)),
-        completed: monthlyCompleted,
-        movies: monthlyMovies,
-        episodes: monthlyEpisodes
-    };
-}
-function isFirstMonthOfYear() {
-    return new Date().getMonth() === 0; // 0 = January
+    
+    // Calculate and update each stat card
+    updateSingleStatCard('completed', prevCompleted, currentCompleted);
+    updateSingleStatCard('movies', prevMovies, currentMovies);
+    updateSingleStatCard('episodes', prevEpisodes, currentEpisodes);
+    updateSingleStatCard('hours', prevHours, currentHours);
 }
 
-/* Percentage change calculation (UNCHANGED, SAFE) */
-function calculatePercentageChange(previous, current) {
-    previous = Number(previous) || 0;
-    current = Number(current) || 0;
-
-    if (previous === 0 && current === 0) {
-        return {
-            percentage: 0,
-            isPositive: true,
-            isNeutral: true,
-            text: 'No data'
-        };
-    }
-
-    if (previous === 0 && current > 0) {
-        return {
-            percentage: 100,
-            isPositive: true,
-            isNeutral: false,
-            text: 'New activity'
-        };
-    }
-
-    if (previous > 0 && current === 0) {
-        return {
-            percentage: 100,
-            isPositive: false,
-            isNeutral: true,
-            text: 'No activity this month'
-        };
-    }
-
-    const percentage = ((current - previous) / previous) * 100;
-    const absPercentage = Math.abs(percentage);
-
-    if (absPercentage < 1) {
-        return {
-            percentage: 0,
-            isPositive: true,
-            isNeutral: true,
-            text: 'No change'
-        };
-    }
-
-    return {
-        percentage: absPercentage.toFixed(1),
-        isPositive: percentage > 0,
-        isNeutral: false,
-        text: `${absPercentage.toFixed(1)}% ${percentage > 0 ? 'more' : 'less'}`
-    };
-}
-
-/* Update ALL stat cards safely */
-function updateStatCardsWithChanges() {
-
-    // 🚫 JANUARY → NO COMPARISON AT ALL
-    if (isFirstMonthOfYear()) {
-        ['completed', 'movies', 'episodes', 'hours'].forEach(stat => {
-            const el = document.getElementById(`${stat}-change`);
-            if (!el) return;
-
-            el.className = 'stat-change neutral';
-            el.innerHTML = `<i class="fas fa-minus"></i> <span>No Track</span>`;
-        });
-        return;
-    }
-
-    // ✅ FEB–DEC → NORMAL MONTH-TO-MONTH COMPARISON
-    const changes = calculateStatChanges();
-
-    updateSingleStatCard('completed', changes.completed);
-    updateSingleStatCard('movies', changes.movies);
-    updateSingleStatCard('episodes', changes.episodes);
-    updateSingleStatCard('hours', changes.hours);
-}
-
-/* Update one stat card */
-function updateSingleStatCard(statName, change) {
+// Update a single stat card with percentage change
+function updateSingleStatCard(statName, previousValue, currentValue) {
     const changeElement = document.getElementById(`${statName}-change`);
-    if (!changeElement || !change) return;
-
+    if (!changeElement) return;
+    
     changeElement.innerHTML = '';
     changeElement.className = 'stat-change';
-
-    if (change.isNeutral) {
+    
+    // Calculate percentage change
+    let percentage = 0;
+    let isPositive = true;
+    let isNeutral = false;
+    let changeText = '';
+    
+    if (previousValue === 0 && currentValue === 0) {
+        isNeutral = true;
+        changeText = 'No data';
+    } else if (previousValue === 0 && currentValue > 0) {
+        isPositive = true;
+        changeText = 'New activity';
+        percentage = 100;
+    } else if (previousValue > 0 && currentValue === 0) {
+        isPositive = false;
+        changeText = 'No activity';
+        percentage = 100;
+    } else {
+        const change = ((currentValue - previousValue) / previousValue) * 100;
+        percentage = Math.abs(change);
+        isPositive = change > 0;
+        
+        if (percentage < 1) {
+            isNeutral = true;
+            changeText = 'No change';
+        } else {
+            changeText = `${percentage.toFixed(1)}% ${isPositive ? 'more' : 'less'}`;
+        }
+    }
+    
+    if (isNeutral) {
         changeElement.classList.add('neutral');
-    } else if (change.isPositive) {
+        changeElement.innerHTML = `<i class="fas fa-minus"></i> <span>${changeText}</span>`;
+    } else if (isPositive) {
         changeElement.classList.add('positive');
+        changeElement.innerHTML = `<i class="fas fa-arrow-up"></i> <span>${changeText}</span>`;
     } else {
         changeElement.classList.add('negative');
+        changeElement.innerHTML = `<i class="fas fa-arrow-down"></i> <span>${changeText}</span>`;
+    }
+}
+
+// Use namespace to avoid conflicts
+window.AniPulseCharts = window.AniPulseCharts || {};
+
+// =============================================
+// HELPER: Parse date safely
+// =============================================
+function parseDateSafely(dateString) {
+    if (!dateString) return null;
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day);
     }
 
-    let iconClass = 'fas fa-minus';
-    if (!change.isNeutral) {
-        iconClass = change.isPositive
-            ? 'fas fa-arrow-up'
-            : 'fas fa-arrow-down';
+    if (/^\d{4}-\d{2}$/.test(dateString)) {
+        const [year, month] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, 15);
     }
 
-    changeElement.innerHTML = `
-        <i class="${iconClass}"></i>
-        <span>${change.text}</span>
-    `;
+    if (dateString.includes(' ')) {
+        const datePart = dateString.split(' ')[0];
+        if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+            const [year, month, day] = datePart.split('-').map(Number);
+            return new Date(year, month - 1, day);
+        }
+    }
+
+    return null;
 }
 
-// Add these functions to calculate detailed statistics
-function calculateStatistics() {
-    return {
-        totalAnime: animeData.length,
-        totalHours: calculateTotalHours(),
-        averageScore: calculateAverageScore(),
-        completionRate: calculateCompletionRate(),
-        statusDistribution: calculateStatusDistribution(),
-        typeDistribution: calculateTypeDistribution(),
-        genreStats: calculateGenreStats(),
-        yearlyBreakdown: calculateYearlyBreakdown(),
-        scoreAnalysis: calculateScoreAnalysis()
-    };
+// =============================================
+// DATA CALCULATION FUNCTIONS (using actualFinishDate)
+// =============================================
+
+function getAnimeDataSafe() {
+    return JSON.parse(localStorage.getItem('animeData')) || [];
 }
 
-function calculateAverageScore() {
-    const ratedAnime = animeData.filter(anime => anime.score && anime.score > 0);
-    if (ratedAnime.length === 0) return 0;
-
-    const totalScore = ratedAnime.reduce((sum, anime) => sum + anime.score, 0);
-    return (totalScore / ratedAnime.length).toFixed(1);
-}
-
-function calculateCompletionRate() {
-    if (animeData.length === 0) return 0;
-    const completed = animeData.filter(anime => anime.userStatus === 'Completed').length;
-    return Math.round((completed / animeData.length) * 100);
-}
-
-function calculateStatusDistribution() {
-    const distribution = {
-        'Completed': 0,
-        'Watching': 0,
-        'Plan to Watch': 0,
-        'Dropped': 0
-    };
+function calculateYearlyCompletionFixed() {
+    const animeData = getAnimeDataSafe();
+    const years = [2024, 2025, 2026, 2027, 2028];
+    const yearlyData = [0, 0, 0, 0, 0];
 
     animeData.forEach(anime => {
-        if (distribution.hasOwnProperty(anime.userStatus)) {
-            distribution[anime.userStatus]++;
+        if (anime.userStatus === 'Completed') {
+            let completionYear = null;
+            if (anime.actualFinishDate) completionYear = parseInt(anime.actualFinishDate.split('-')[0]);
+            if (!completionYear && anime.finishDate) completionYear = parseInt(anime.finishDate.split('-')[0]);
+            const index = years.indexOf(completionYear);
+            if (index !== -1 && !isNaN(completionYear)) yearlyData[index]++;
         }
     });
-
-    return distribution;
+    return yearlyData;
 }
 
-function calculateTypeDistribution() {
-    const distribution = {};
+function calculateScoreDistributionFixed() {
+    const animeData = getAnimeDataSafe();
+    const scoreRanges = [0, 0, 0, 0, 0, 0];
+    animeData.forEach(anime => {
+        if (anime.score) {
+            if (anime.score === 10) scoreRanges[0]++;
+            else if (anime.score >= 9) scoreRanges[1]++;
+            else if (anime.score >= 8) scoreRanges[2]++;
+            else if (anime.score >= 7) scoreRanges[3]++;
+            else if (anime.score >= 6) scoreRanges[4]++;
+            else scoreRanges[5]++;
+        }
+    });
+    return scoreRanges;
+}
 
+function calculateStatusDistributionFixed() {
+    const animeData = getAnimeDataSafe();
+    return {
+        'Completed': animeData.filter(a => a.userStatus === 'Completed').length,
+        'Watching': animeData.filter(a => a.userStatus === 'Watching').length,
+        'Plan to Watch': animeData.filter(a => a.userStatus === 'Plan to Watch').length,
+        'Dropped': animeData.filter(a => a.userStatus === 'Dropped').length
+    };
+}
+
+function calculateTypeDistributionFixed() {
+    const animeData = getAnimeDataSafe();
+    const distribution = {};
     animeData.forEach(anime => {
         const type = anime.type || 'TV';
         distribution[type] = (distribution[type] || 0) + 1;
     });
-
     return distribution;
 }
 
-function calculateGenreStats() {
+function calculateGenreStatsFixed() {
+    const animeData = getAnimeDataSafe();
     const genreCount = {};
-
     animeData.forEach(anime => {
         if (anime.genres && Array.isArray(anime.genres)) {
             anime.genres.forEach(genre => {
-                genreCount[genre] = (genreCount[genre] || 0) + 1;
+                if (genre !== 'Award Winning') genreCount[genre] = (genreCount[genre] || 0) + 1;
             });
         }
     });
-
-    // Sort by count and return top 10
-    return Object.entries(genreCount)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .reduce((obj, [genre, count]) => {
-            obj[genre] = count;
-            return obj;
-        }, {});
+    return Object.entries(genreCount).sort((a, b) => b[1] - a[1]).slice(0, 10).reduce((obj, [k, v]) => {
+        obj[k] = v;
+        return obj;
+    }, {});
 }
 
-function calculateYearlyBreakdown() {
-    const yearlyData = {};
-    const currentYear = new Date().getFullYear();
-
-    for (let year = 2020; year <= currentYear; year++) {
-        yearlyData[year] = 0;
-    }
+function calculateEpisodesPerMonthFixed(year) {
+    const monthlyEpisodes = Array(12).fill(0);
+    const animeData = getAnimeDataSafe();
+    const processed = new Set();
 
     animeData.forEach(anime => {
-        if (anime.finishDate) {
-            const finishYear = new Date(anime.finishDate).getFullYear();
-            if (yearlyData.hasOwnProperty(finishYear)) {
-                yearlyData[finishYear]++;
-            }
+        if (anime.userStatus !== 'Completed') return;
+
+        const key = `${anime.id}_${year}`;
+        if (processed.has(key)) return;
+
+        let completionDate = null;
+        if (anime.actualFinishDate) completionDate = parseDateSafely(anime.actualFinishDate);
+        if (!completionDate && anime.finishDate) completionDate = parseDateSafely(anime.finishDate);
+
+        if (completionDate && completionDate.getFullYear() === year) {
+            processed.add(key);
+            const episodes = anime.type === 'Movie' ? 1 : (anime.episodes || 0);
+            monthlyEpisodes[completionDate.getMonth()] += episodes;
         }
     });
-
-    return yearlyData;
+    return monthlyEpisodes;
 }
 
-function calculateScoreAnalysis() {
-    const analysis = {
-        totalRated: 0,
-        average: 0,
-        highest: { score: 0, title: '' },
-        lowest: { score: 10, title: '' },
-        scoreCounts: { 10: 0, 9: 0, 8: 0, 7: 0, 6: 0, '5 or less': 0 }
-    };
-
-    let totalScore = 0;
-    let ratedCount = 0;
+function calculateWatchTimePerMonthFixed(year) {
+    const monthlyHours = Array(12).fill(0);
+    const animeData = getAnimeDataSafe();
+    const processed = new Set();
 
     animeData.forEach(anime => {
-        if (anime.score && anime.score > 0) {
-            ratedCount++;
-            totalScore += anime.score;
+        if (anime.userStatus !== 'Completed') return;
 
-            // Update highest score
-            if (anime.score > analysis.highest.score) {
-                analysis.highest = { score: anime.score, title: anime.title };
+        const key = `${anime.id}_${year}`;
+        if (processed.has(key)) return;
+
+        let completionDate = null;
+        if (anime.actualFinishDate) completionDate = parseDateSafely(anime.actualFinishDate);
+        if (!completionDate && anime.finishDate) completionDate = parseDateSafely(anime.finishDate);
+
+        if (completionDate && completionDate.getFullYear() === year) {
+            processed.add(key);
+            let hours = 0;
+            if (anime.type === 'Movie') {
+                hours = (anime.duration || 120) / 60;
+            } else {
+                hours = ((anime.episodes || 0) * (anime.duration || 20)) / 60;
             }
-
-            // Update lowest score
-            if (anime.score < analysis.lowest.score) {
-                analysis.lowest = { score: anime.score, title: anime.title };
-            }
-
-            // Count scores by range
-            if (anime.score === 10) analysis.scoreCounts[10]++;
-            else if (anime.score >= 9) analysis.scoreCounts[9]++;
-            else if (anime.score >= 8) analysis.scoreCounts[8]++;
-            else if (anime.score >= 7) analysis.scoreCounts[7]++;
-            else if (anime.score >= 6) analysis.scoreCounts[6]++;
-            else analysis.scoreCounts['5 or less']++;
+            monthlyHours[completionDate.getMonth()] += hours;
         }
     });
-
-    analysis.totalRated = ratedCount;
-    analysis.average = ratedCount > 0 ? (totalScore / ratedCount).toFixed(1) : 0;
-
-    return analysis;
+    return monthlyHours.map(h => Math.round(h * 10) / 10);
 }
 
-// Initialize additional charts
+// =============================================
+// CHART INITIALIZATION (All charts in one function)
+// =============================================
+
 function initStatisticsCharts() {
-    // --- Completion Chart (Safe Destroy Before Recreate) ---
-    let completionChart; // store instance globally
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#94a3b8' : '#64748b';
+    const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
 
-    function renderCompletionChart() {
-        const completionCanvas = document.getElementById('completionChart');
-        if (!completionCanvas) return;
-
-        const completionCtx = completionCanvas.getContext('2d');
-
-        // ✅ Destroy previous chart instance before reusing the canvas
-        if (completionChart) {
-            completionChart.destroy();
-        }
-
-        completionChart = new Chart(completionCtx, {
+    // 1. COMPLETION CHART
+    const completionCanvas = document.getElementById('completionChart');
+    if (completionCanvas) {
+        if (window.AniPulseCharts.completionChart) window.AniPulseCharts.completionChart.destroy();
+        const ctx = completionCanvas.getContext('2d');
+        window.AniPulseCharts.completionChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['2024', '2025', '2026', '2027', '2028'],
                 datasets: [{
                     label: 'Anime Completed',
-                    data: calculateYearlyCompletion(),
-                    backgroundColor: '#48bb78'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // ✅ Call this instead of creating the chart directly
-    renderCompletionChart();
-
-    // Score Distribution Chart
-    const scoreDistributionCtx = document.getElementById('scoreDistributionChart')?.getContext('2d');
-    if (scoreDistributionCtx) {
-        scoreDistributionChart = new Chart(scoreDistributionCtx, {
-            type: 'polarArea',
-            data: {
-                labels: ['10', '9', '8', '7', '6', '5 or less'],
-                datasets: [{
-                    data: calculateScoreDistribution(),
-                    backgroundColor: [
-                        'rgba(139, 92, 246, 0.8)',
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)',
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(156, 163, 175, 0.8)'
-                    ],
-                    borderWidth: 2,
-                    hoverBackgroundColor: [
-                        'rgba(139, 92, 246, 1)',
-                        'rgba(16, 185, 129, 1)',
-                        'rgba(245, 158, 11, 1)',
-                        'rgba(239, 68, 68, 1)',
-                        'rgba(59, 130, 246, 1)',
-                        'rgba(156, 163, 175, 1)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Status Distribution Chart
-    const statusCtx = document.getElementById('statusDistributionChart')?.getContext('2d');
-    if (statusCtx) {
-        statusDistributionChart = new Chart(statusCtx, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(calculateStatusDistribution()),
-                datasets: [{
-                    data: Object.values(calculateStatusDistribution()),
-                    backgroundColor: [
-                        '#48bb78', // Completed - green
-                        '#4299e1', // Watching - blue
-                        '#ed8936', // Plan to Watch - orange
-                        '#f56565'  // Dropped - red
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right'
-                    }
-                }
-            }
-        });
-    }
-
-    // Type Distribution Chart
-    const typeCtx = document.getElementById('typeDistributionChart')?.getContext('2d');
-    if (typeCtx) {
-        typeDistributionChart = new Chart(typeCtx, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(calculateTypeDistribution()),
-                datasets: [{
-                    data: Object.values(calculateTypeDistribution()),
-                    backgroundColor: [
-                        '#6a5acd', '#70db70ff', '#20b2aa', '#ff7f50', '#48bb78'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right'
-                    }
-                }
-            }
-        });
-    }
-
-    // Genre Stats Chart
-    const genreCtx = document.getElementById('genreStatsChart')?.getContext('2d');
-    if (genreCtx) {
-        const genreStats = calculateGenreStats();
-        genreStatsChart = new Chart(genreCtx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(genreStats),
-                datasets: [{
-                    label: 'Number of Anime',
-                    data: Object.values(genreStats),
-                    backgroundColor: 'rgba(106, 90, 205, 0.7)',
-                    borderColor: 'rgba(106, 90, 205, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: {
-                            color: getComputedStyle(document.body).getPropertyValue('--text-light')
-                        },
-                        grid: {
-                            color: getComputedStyle(document.body).getPropertyValue('--gray')
-                        }
-                    },
-                    y: {
-                        ticks: {
-                            color: getComputedStyle(document.body).getPropertyValue('--text-light')
-                        },
-                        grid: {
-                            display: false
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-    }
-
-    // Initialize new charts
-    initNewCharts();
-}
-
-// Initialize new charts
-function initNewCharts(selectedYear = new Date().getFullYear()) {
-    // === EPISODES WATCHED OVER TIME CHART ===
-    const episodesOverTimeCtx = document
-        .getElementById("episodesOverTimeChart")
-        ?.getContext("2d");
-
-    if (!episodesOverTimeCtx) return;
-
-    // 🧮 Normalize any possible date format to safe YYYY-MM-DD local date
-    function normalizeLocalDate(rawDate) {
-        if (!rawDate) return null;
-
-        // Add missing day if user saved just YYYY-MM
-        if (/^\d{4}-\d{2}$/.test(rawDate)) rawDate += "-01";
-
-        // Pad months/days if needed
-        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(rawDate)) {
-            const [yy, mm, dd] = rawDate.split("-");
-            rawDate = `${yy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
-        }
-
-        const [y, m, d] = rawDate.split("-").map(Number);
-        if (!y || !m) return null;
-
-        const date = new Date(y, m - 1, d || 1);
-        return isNaN(date) ? null : date;
-    }
-
-    // 🧮 Calculate episodes watched per month for the selected year
-    function calculateEpisodesOverTime(year = selectedYear) {
-        const monthlyEpisodes = Array(12).fill(0);
-        const seen = new Set();
-
-        animeData.forEach((anime) => {
-            if (anime.userStatus !== "Completed" || !anime.finishDate) return;
-
-            const finishDate = normalizeLocalDate(anime.finishDate);
-            if (!finishDate) return;
-
-            if (finishDate.getFullYear() !== year) return;
-            if (finishDate > new Date()) return;
-
-            const monthIndex = finishDate.getMonth();
-            if (monthIndex < 0 || monthIndex > 11) return;
-
-            // Local-safe unique key
-            const key = `${anime.title || anime.name}-${finishDate.getFullYear()}-${String(
-                finishDate.getMonth() + 1
-            ).padStart(2, "0")}-${String(finishDate.getDate()).padStart(2, "0")}`;
-            if (seen.has(key)) return;
-            seen.add(key);
-
-            const eps = Number(anime.episodes) || 0;
-            monthlyEpisodes[monthIndex] += eps;
-        });
-
-        return monthlyEpisodes.map((e) => Math.round(e));
-    }
-
-    // 🧮 Calculate total episodes watched for the selected year
-    function calculateTotalEpisodesThisYear(year = selectedYear) {
-        let totalEpisodes = 0;
-        const seen = new Set();
-
-        animeData.forEach((anime) => {
-            if (anime.userStatus !== "Completed" || !anime.finishDate) return;
-
-            const finishDate = normalizeLocalDate(anime.finishDate);
-            if (!finishDate) return;
-
-            if (finishDate.getFullYear() !== year) return;
-            if (finishDate > new Date()) return;
-
-            const key = `${anime.title || anime.name}-${finishDate.getFullYear()}-${String(
-                finishDate.getMonth() + 1
-            ).padStart(2, "0")}-${String(finishDate.getDate()).padStart(2, "0")}`;
-            if (seen.has(key)) return;
-            seen.add(key);
-
-            totalEpisodes += Number(anime.episodes) || 0;
-        });
-
-        return Math.round(totalEpisodes);
-    }
-
-    // 🎨 Create the Episodes Over Time chart
-    episodesOverTimeChart = new Chart(episodesOverTimeCtx, {
-        type: "line",
-        data: {
-            labels: [
-                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-            ],
-            datasets: [
-                {
-                    label: `Episodes Watched `,
-                    data: calculateEpisodesOverTime(),
-                    backgroundColor: "rgba(99, 102, 241, 0.1)",
-                    borderColor: "rgba(99, 102, 241, 1)",
-                    borderWidth: 3,
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: "rgba(99, 102, 241, 1)",
-                    pointBorderColor: "#ffffff",
-                    pointBorderWidth: 2,
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                },
-            ],
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: "rgba(255, 255, 255, 0.1)" },
-                },
-                x: {
-                    grid: { color: "rgba(255, 255, 255, 0.05)" },
-                },
-            },
-            plugins: { legend: { display: false } },
-        },
-    });
-
-    // 🕒 Display total episodes watched this year
-    const totalEpisodesElement = document.getElementById("yearly-total-episodes");
-    if (totalEpisodesElement) {
-        totalEpisodesElement.textContent = `Total Eps (${selectedYear}): ${calculateTotalEpisodesThisYear()}`;
-    }
-
-    // 🌀 Auto-update chart + total when data changes
-    function updateEpisodesOverTimeDisplay(year = selectedYear) {
-        if (!episodesOverTimeChart) return;
-
-        episodesOverTimeChart.data.datasets[0].data = calculateEpisodesOverTime(year);
-        episodesOverTimeChart.data.datasets[0].label = `Episodes Watched (${year})`;
-        episodesOverTimeChart.update();
-
-        const totalEpisodes = calculateTotalEpisodesThisYear(year);
-        if (totalEpisodesElement) {
-            totalEpisodesElement.textContent = `Total Eps (${year}): ${totalEpisodes}`;
-        }
-    }
-
-    // Make updater globally accessible
-    window.updateEpisodesOverTimeDisplay = updateEpisodesOverTimeDisplay;
-}
-
-// === WATCH TIME BY MONTH CHART (FIXED & MOBILE SAFE) ===
-
-const watchTimeByMonthCanvas =
-    document.getElementById('watchTimeByMonthChart');
-
-if (watchTimeByMonthCanvas && typeof Chart !== 'undefined') {
-
-    const watchTimeByMonthCtx = watchTimeByMonthCanvas.getContext('2d');
-
-    function getCurrentYearSafe() {
-        return new Date().getFullYear();
-    }
-
-    // 🧮 Calculate monthly hours (ALWAYS fresh year)
-    function calculateWatchTimeByMonth() {
-        const currentYear = getCurrentYearSafe();
-        const monthlyHours = Array(12).fill(0);
-
-        animeData.forEach(anime => {
-            if (anime.userStatus === "Completed" && anime.finishDate) {
-                const finishDate = new Date(anime.finishDate);
-                const monthIndex = finishDate.getMonth();
-
-                if (finishDate.getFullYear() === currentYear) {
-                    if (anime.type === "Movie") {
-                        monthlyHours[monthIndex] += (anime.duration || 120) / 60;
-                    } else {
-                        monthlyHours[monthIndex] += ((anime.episodes || 0) * 20) / 60;
-                    }
-                }
-            }
-        });
-
-        return monthlyHours.map(h => Math.round(h));
-    }
-
-    function calculateTotalHoursThisYear() {
-        const currentYear = getCurrentYearSafe();
-        let totalHours = 0;
-
-        animeData.forEach(anime => {
-            if (anime.userStatus === "Completed" && anime.finishDate) {
-                const finishDate = new Date(anime.finishDate);
-                if (finishDate.getFullYear() === currentYear) {
-                    if (anime.type === "Movie") {
-                        totalHours += (anime.duration || 120) / 60;
-                    } else {
-                        totalHours += ((anime.episodes || 0) * 20) / 60;
-                    }
-                }
-            }
-        });
-
-        return Math.round(totalHours);
-    }
-
-    function renderWatchTimeChart() {
-
-        if (watchTimeByMonthChart) {
-            watchTimeByMonthChart.destroy();
-        }
-
-        watchTimeByMonthChart = new Chart(watchTimeByMonthCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                datasets: [{
-                    label: `Hours Watched `,
-                    data: calculateWatchTimeByMonth(),
-                    borderColor: 'rgba(99, 241, 217, 1)',
-                    backgroundColor: 'rgba(32, 229, 206, 0.25)',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    fill: false,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
+                    data: calculateYearlyCompletionFixed(),
+                    backgroundColor: '#48bb78',
+                    borderRadius: 8
                 }]
             },
             options: {
@@ -3672,278 +4003,330 @@ if (watchTimeByMonthCanvas && typeof Chart !== 'undefined') {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true },
-                    x: {}
+                    y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 } },
+                    x: { grid: { display: false }, ticks: { color: textColor } }
                 }
             }
         });
-
-        const totalEl = document.getElementById('monthly-total-hours');
-        if (totalEl) {
-            totalEl.textContent =
-                `Total Hrs (${getCurrentYearSafe()}): ${calculateTotalHoursThisYear()}`;
-        }
     }
 
-    // Initial render
-    renderWatchTimeChart();
-
-    // Public updater
-    window.updateWatchTimeDisplay = renderWatchTimeChart;
-
-    // 📱 Mobile resize fix
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(renderWatchTimeChart, 300);
-    });
-}
-
-
-// Average Score by Genre Chart
-const avgScoreByGenreCtx = document.getElementById('avgScoreByGenreChart')?.getContext('2d');
-if (avgScoreByGenreCtx) {
-    const genreScores = {};
-
-    animeData.forEach(anime => {
-        if (anime.genres && anime.score) {
-            anime.genres.forEach(g => {
-                if (!genreScores[g]) genreScores[g] = { total: 0, count: 0 };
-                genreScores[g].total += anime.score;
-                genreScores[g].count++;
-            });
-        }
-    });
-
-    const avgScores = Object.keys(genreScores).map(g => (genreScores[g].total / genreScores[g].count).toFixed(1));
-
-    new Chart(avgScoreByGenreCtx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(genreScores),
-            datasets: [{
-                label: 'Average Score',
-                data: avgScores,
-                backgroundColor: 'rgba(106, 90, 205, 0.7)',
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y',
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    max: 10,
-                    ticks: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-light')
-                    },
-                    grid: {
-                        color: getComputedStyle(document.body).getPropertyValue('--gray')
-                    }
-                },
-                y: {
-                    ticks: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-light')
-                    }
-                }
-            }
-        }
-    });
-}
-
-// Completion Rate by Year Chart
-const completionRateCtx = document.getElementById('completionRateByYearChart')?.getContext('2d');
-if (completionRateCtx) {
-    // Collect data
-    const yearStats = {};
-
-    animeData.forEach(anime => {
-        if (anime.finishDate) {
-            const year = new Date(anime.finishDate).getFullYear();
-            if (!yearStats[year]) yearStats[year] = { completed: 0, total: 0 };
-            yearStats[year].total++;
-            if (anime.userStatus === 'Completed') {
-                yearStats[year].completed++;
-            }
-        }
-    });
-
-    const years = Object.keys(yearStats).sort();
-    const completionRates = years.map(y => {
-        const { completed, total } = yearStats[y];
-        return ((completed / total) * 100).toFixed(1);
-    });
-
-    // Create chart
-    new Chart(completionRateCtx, {
-        type: 'bar',
-        data: {
-            labels: years,
-            datasets: [{
-                label: 'Completion Rate (%)',
-                data: completionRates,
-                backgroundColor: 'rgba(106, 90, 205, 0.7)',
-                borderColor: 'rgba(106, 90, 205, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Completion Rate (%)',
-                        color: '#aaa'
-                    },
-                    ticks: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-light')
-                    },
-                    grid: {
-                        color: getComputedStyle(document.body).getPropertyValue('--gray')
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: getComputedStyle(document.body).getPropertyValue('--text-light')
-                    },
-                    grid: {
-                        display: false
-                    }
-                }
+    // 2. SCORE DISTRIBUTION CHART
+    const scoreCanvas = document.getElementById('scoreDistributionChart');
+    if (scoreCanvas) {
+        if (window.AniPulseCharts.scoreChart) window.AniPulseCharts.scoreChart.destroy();
+        const ctx = scoreCanvas.getContext('2d');
+        window.AniPulseCharts.scoreChart = new Chart(ctx, {
+            type: 'polarArea',
+            data: {
+                labels: ['10', '9', '8', '7', '6', '5 or less'],
+                datasets: [{
+                    data: calculateScoreDistributionFixed(),
+                    backgroundColor: ['rgba(139,92,246,0.8)', 'rgba(16,185,129,0.8)', 'rgba(245,158,11,0.8)', 'rgba(239,68,68,0.8)', 'rgba(59,130,246,0.8)', 'rgba(156,163,175,0.8)'],
+                    borderWidth: 0
+                }]
             },
-            plugins: {
-                legend: { display: false }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { color: textColor } } }
             }
-        }
-    });
-}
-
-// Calculate monthly labels for charts
-function calculateMonthlyLabels() {
-    const now = new Date();
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    // Return last 12 months
-    const labels = [];
-    for (let i = 11; i >= 0; i--) {
-        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        labels.push(`${months[date.getMonth()]} ${date.getFullYear()}`);
+        });
     }
 
-    return labels;
-}
-
-// Calculate episodes watched over time
-function calculateEpisodesOverTime() {
-    const now = new Date();
-    const data = Array(12).fill(0);
-
-    animeData.forEach(anime => {
-        if (anime.userStatus === 'Completed' && anime.finishDate) {
-            const finishDate = new Date(anime.finishDate);
-            const finishYear = finishDate.getFullYear();
-            const finishMonth = finishDate.getMonth();
-
-            // Check if anime was completed in the last 12 months
-            const monthsAgo = (now.getFullYear() - finishYear) * 12 + (now.getMonth() - finishMonth);
-            if (monthsAgo >= 0 && monthsAgo < 12) {
-                // For TV series, count episodes; for movies, count as 1
-                const episodeCount = anime.type === 'Movie' ? 1 : (anime.episodes || 0);
-                data[11 - monthsAgo] += episodeCount;
+    // 3. STATUS DISTRIBUTION CHART
+    const statusCanvas = document.getElementById('statusDistributionChart');
+    if (statusCanvas) {
+        if (window.AniPulseCharts.statusChart) window.AniPulseCharts.statusChart.destroy();
+        const ctx = statusCanvas.getContext('2d');
+        const statusData = calculateStatusDistributionFixed();
+        window.AniPulseCharts.statusChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(statusData),
+                datasets: [{ data: Object.values(statusData), backgroundColor: ['#48bb78', '#4299e1', '#ed8936', '#f56565'], borderWidth: 0 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { color: textColor } } }
             }
-        }
-    });
+        });
+    }
 
-    return data;
-}
+    // 4. TYPE DISTRIBUTION CHART
+    const typeCanvas = document.getElementById('typeDistributionChart');
+    if (typeCanvas) {
+        if (window.AniPulseCharts.typeChart) window.AniPulseCharts.typeChart.destroy();
+        const ctx = typeCanvas.getContext('2d');
+        const typeData = calculateTypeDistributionFixed();
+        window.AniPulseCharts.typeChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(typeData),
+                datasets: [{ data: Object.values(typeData), backgroundColor: ['#6a5acd', '#70db70', '#20b2aa', '#ff7f50', '#48bb78'], borderWidth: 0 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { color: textColor } } }
+            }
+        });
+    }
 
-// Calculate watch time by month
-function calculateWatchTimeByMonth() {
-    const now = new Date();
-    const data = Array(12).fill(0);
-
-    animeData.forEach(anime => {
-        if (anime.userStatus === 'Completed' && anime.finishDate) {
-            const finishDate = new Date(anime.finishDate);
-            const finishYear = finishDate.getFullYear();
-            const finishMonth = finishDate.getMonth();
-
-            // Check if anime was completed in the last 12 months
-            const monthsAgo = (now.getFullYear() - finishYear) * 12 + (now.getMonth() - finishMonth);
-            if (monthsAgo >= 0 && monthsAgo < 12) {
-                let watchTime = 0;
-                if (anime.type === 'Movie') {
-                    watchTime = (anime.duration || 120) / 60; // Convert minutes to hours
-                } else {
-                    const episodeDuration = anime.duration || 20;
-                    watchTime = ((anime.episodes || 0) * episodeDuration) / 60; // Convert minutes to hours
+    // 5. GENRE STATS CHART
+    const genreCanvas = document.getElementById('genreStatsChart');
+    if (genreCanvas) {
+        if (window.AniPulseCharts.genreChart) window.AniPulseCharts.genreChart.destroy();
+        const ctx = genreCanvas.getContext('2d');
+        const genreStats = calculateGenreStatsFixed();
+        window.AniPulseCharts.genreChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(genreStats),
+                datasets: [{ label: 'Number of Anime', data: Object.values(genreStats), backgroundColor: 'rgba(106,90,205,0.7)', borderRadius: 8 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 } },
+                    y: { grid: { display: false }, ticks: { color: textColor } }
                 }
-                data[11 - monthsAgo] += watchTime;
             }
+        });
+    }
+
+    // 6. AVERAGE SCORE BY GENRE CHART
+    const avgScoreCanvas = document.getElementById('avgScoreByGenreChart');
+    if (avgScoreCanvas) {
+        if (window.AniPulseCharts.avgScoreChart) window.AniPulseCharts.avgScoreChart.destroy();
+        const ctx = avgScoreCanvas.getContext('2d');
+        const animeData = getAnimeDataSafe();
+        const genreScores = {};
+        animeData.forEach(anime => {
+            if (anime.genres && anime.score) {
+                anime.genres.forEach(g => {
+                    if (!genreScores[g]) genreScores[g] = { total: 0, count: 0 };
+                    genreScores[g].total += anime.score;
+                    genreScores[g].count++;
+                });
+            }
+        });
+        const labels = Object.keys(genreScores);
+        const avgScores = labels.map(g => (genreScores[g].total / genreScores[g].count).toFixed(1));
+        window.AniPulseCharts.avgScoreChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ label: 'Average Score', data: avgScores, backgroundColor: 'rgba(106,90,205,0.7)' }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: { x: { beginAtZero: true, max: 10, grid: { color: gridColor }, ticks: { color: textColor } }, y: { ticks: { color: textColor } } }
+            }
+        });
+    }
+
+    // 7. COMPLETION RATE BY YEAR CHART
+    const completionRateCanvas = document.getElementById('completionRateByYearChart');
+    if (completionRateCanvas) {
+        if (window.AniPulseCharts.completionRateChart) window.AniPulseCharts.completionRateChart.destroy();
+        const ctx = completionRateCanvas.getContext('2d');
+        const animeData = getAnimeDataSafe();
+        const yearStats = {};
+        animeData.forEach(anime => {
+            if (anime.finishDate) {
+                const year = new Date(anime.finishDate).getFullYear();
+                if (!yearStats[year]) yearStats[year] = { completed: 0, total: 0 };
+                yearStats[year].total++;
+                if (anime.userStatus === 'Completed') yearStats[year].completed++;
+            }
+        });
+        const years = Object.keys(yearStats).sort();
+        const completionRates = years.map(y => ((yearStats[y].completed / yearStats[y].total) * 100).toFixed(1));
+        window.AniPulseCharts.completionRateChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: years, datasets: [{ label: 'Completion Rate (%)', data: completionRates, backgroundColor: 'rgba(106,90,205,0.7)' }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, max: 100, grid: { color: gridColor }, ticks: { color: textColor } }, x: { ticks: { color: textColor } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // 8. POPULATE YEAR DROPDOWNS
+    populateYearDropdownsFixed();
+
+    console.log('✅ All statistics charts initialized');
+}
+
+// =============================================
+// YEAR DROPDOWNS
+// =============================================
+
+function getAvailableYearsFromData() {
+    const animeData = getAnimeDataSafe();
+    const years = new Set();
+    const currentYear = new Date().getFullYear();
+
+    animeData.forEach(anime => {
+        if (anime.userStatus !== 'Completed') return;
+        if (anime.actualFinishDate && /^\d{4}/.test(anime.actualFinishDate)) {
+            years.add(parseInt(anime.actualFinishDate.split('-')[0]));
+        }
+        if (anime.finishDate && /^\d{4}/.test(anime.finishDate)) {
+            years.add(parseInt(anime.finishDate.split('-')[0]));
         }
     });
 
-    return data.map(hours => parseFloat(hours.toFixed(1)));
+    if (years.size === 0) years.add(currentYear);
+    return Array.from(years).sort((a, b) => b - a);
 }
 
-// Update statistics tables
-function updateStatisticsTables() {
-    const stats = calculateStatistics();
+function populateYearDropdownsFixed() {
+    const years = getAvailableYearsFromData();
+    const currentYear = new Date().getFullYear();
 
-    // Update overview cards if they exist
-    const totalAnimeStats = document.getElementById('total-anime-stats');
-    const totalHoursStats = document.getElementById('total-hours-stats');
-    const avgScoreStats = document.getElementById('avg-score-stats');
-    const completionRate = document.getElementById('completion-rate');
-
-    if (totalAnimeStats) totalAnimeStats.textContent = stats.totalAnime;
-    if (totalHoursStats) totalHoursStats.textContent = stats.totalHours;
-    if (avgScoreStats) avgScoreStats.textContent = stats.averageScore;
-    if (completionRate) completionRate.textContent = stats.completionRate + '%';
-
-    // Update yearly breakdown
-    const yearlyBreakdownEl = document.getElementById('yearlyBreakdown');
-    if (yearlyBreakdownEl) {
-        yearlyBreakdownEl.innerHTML = Object.entries(stats.yearlyBreakdown)
-            .map(([year, count]) => `
-                <div class="stat-row">
-                    <div class="stat-label-small">${year}</div>
-                    <div class="stat-progress">
-                        <div class="stat-progress-bar" style="width: ${(count / Math.max(...Object.values(stats.yearlyBreakdown))) * 100}%"></div>
-                    </div>
-                    <div class="stat-value-small">${count}</div>
-                </div>
-            `).join('');
+    const episodesSelect = document.getElementById('episodesYearSelect');
+    if (episodesSelect) {
+        episodesSelect.innerHTML = '';
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            episodesSelect.appendChild(option);
+        });
+        episodesSelect.value = years.includes(currentYear) ? currentYear : years[0];
+        episodesSelect.onchange = (e) => {
+            const year = parseInt(e.target.value);
+            if (window.AniPulseCharts.episodesChart) {
+                const newData = calculateEpisodesPerMonthFixed(year);
+                window.AniPulseCharts.episodesChart.data.datasets[0].data = newData;
+                window.AniPulseCharts.episodesChart.data.datasets[0].label = `Episodes Watched (${year})`;
+                window.AniPulseCharts.episodesChart.update();
+                const total = newData.reduce((a, b) => a + b, 0);
+                const totalEl = document.getElementById('yearly-total-episodes');
+                if (totalEl) totalEl.innerHTML = `Total Eps: ${total >= 1000 ? (total / 1000).toFixed(1) + 'k' : total}`;
+            }
+        };
     }
 
-    // Update score analysis
-    const scoreAnalysisEl = document.getElementById('scoreAnalysis');
-    if (scoreAnalysisEl) {
-        scoreAnalysisEl.innerHTML = `
-            <div class="stat-row">
-                <div class="stat-label-small">Rated Anime</div>
-                <div class="stat-value-small">${stats.scoreAnalysis.totalRated}</div>
-            </div>
-            <div class="stat-row">
-                <div class="stat-label-small">Average Score</div>
-                <div class="stat-value-small">${stats.scoreAnalysis.average}</div>
-            </div>
-            <div class="stat-row">
-                <div class="stat-label-small">Highest Rated</div>
-                <div class="stat-value-small">${stats.scoreAnalysis.highest.score} (${stats.scoreAnalysis.highest.title})</div>
-            </div>
-            <div class="stat-row">
-                <div class="stat-label-small">Lowest Rated</div>
-                <div class="stat-value-small">${stats.scoreAnalysis.lowest.score} (${stats.scoreAnalysis.lowest.title})</div>
-            </div>
-        `;
+    const watchTimeSelect = document.getElementById('watchTimeYearSelect');
+    if (watchTimeSelect) {
+        watchTimeSelect.innerHTML = '';
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            watchTimeSelect.appendChild(option);
+        });
+        watchTimeSelect.value = years.includes(currentYear) ? currentYear : years[0];
+        watchTimeSelect.onchange = (e) => {
+            const year = parseInt(e.target.value);
+            if (window.AniPulseCharts.watchTimeChart) {
+                const newData = calculateWatchTimePerMonthFixed(year);
+                window.AniPulseCharts.watchTimeChart.data.datasets[0].data = newData;
+                window.AniPulseCharts.watchTimeChart.update();
+                const total = Math.round(newData.reduce((a, b) => a + b, 0));
+                const totalEl = document.getElementById('monthly-total-hours');
+                if (totalEl) totalEl.innerHTML = `Total Hrs: ${total >= 1000 ? (total / 1000).toFixed(1) + 'k' : total}`;
+            }
+        };
     }
 }
+
+// =============================================
+// REFRESH FUNCTION
+// =============================================
+
+function refreshAllChartsFixed() {
+    const currentYear = new Date().getFullYear();
+
+    if (window.AniPulseCharts.completionChart) {
+        window.AniPulseCharts.completionChart.data.datasets[0].data = calculateYearlyCompletionFixed();
+        window.AniPulseCharts.completionChart.update();
+    }
+    if (window.AniPulseCharts.scoreChart) {
+        window.AniPulseCharts.scoreChart.data.datasets[0].data = calculateScoreDistributionFixed();
+        window.AniPulseCharts.scoreChart.update();
+    }
+    if (window.AniPulseCharts.statusChart) {
+        const statusData = calculateStatusDistributionFixed();
+        window.AniPulseCharts.statusChart.data.datasets[0].data = Object.values(statusData);
+        window.AniPulseCharts.statusChart.update();
+    }
+    if (window.AniPulseCharts.typeChart) {
+        const typeData = calculateTypeDistributionFixed();
+        window.AniPulseCharts.typeChart.data.datasets[0].data = Object.values(typeData);
+        window.AniPulseCharts.typeChart.update();
+    }
+    if (window.AniPulseCharts.genreChart) {
+        const genreStats = calculateGenreStatsFixed();
+        window.AniPulseCharts.genreChart.data.labels = Object.keys(genreStats);
+        window.AniPulseCharts.genreChart.data.datasets[0].data = Object.values(genreStats);
+        window.AniPulseCharts.genreChart.update();
+    }
+    if (window.AniPulseCharts.episodesChart) {
+        const newData = calculateEpisodesPerMonthFixed(currentYear);
+        window.AniPulseCharts.episodesChart.data.datasets[0].data = newData;
+        window.AniPulseCharts.episodesChart.update();
+        const total = newData.reduce((a, b) => a + b, 0);
+        const totalEl = document.getElementById('yearly-total-episodes');
+        if (totalEl) totalEl.innerHTML = `Total Eps: ${total >= 1000 ? (total / 1000).toFixed(1) + 'k' : total}`;
+    }
+    if (window.AniPulseCharts.watchTimeChart) {
+        const newData = calculateWatchTimePerMonthFixed(currentYear);
+        window.AniPulseCharts.watchTimeChart.data.datasets[0].data = newData;
+        window.AniPulseCharts.watchTimeChart.update();
+        const total = Math.round(newData.reduce((a, b) => a + b, 0));
+        const totalEl = document.getElementById('monthly-total-hours');
+        if (totalEl) totalEl.innerHTML = `Total Hrs: ${total >= 1000 ? (total / 1000).toFixed(1) + 'k' : total}`;
+    }
+
+    populateYearDropdownsFixed();
+}
+
+// =============================================
+// INITIALIZATION
+// =============================================
+
+// Override the existing initStatisticsCharts
+window.initStatisticsCharts = initStatisticsCharts;
+window.refreshAllCharts = refreshAllChartsFixed;
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    const statisticsPage = document.getElementById('statistics-page');
+    if (statisticsPage && statisticsPage.classList.contains('active')) {
+        setTimeout(initStatisticsCharts, 500);
+    }
+
+    const statsMenuItem = document.querySelector('.menu-item[data-page="statistics"]');
+    if (statsMenuItem) {
+        statsMenuItem.addEventListener('click', () => {
+            setTimeout(initStatisticsCharts, 300);
+        });
+    }
+
+    // Listen for data changes
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'animeData') setTimeout(refreshAllChartsFixed, 300);
+    });
+
+    // Listen for theme changes
+    const observer = new MutationObserver(() => {
+        if (document.getElementById('statistics-page')?.classList.contains('active')) {
+            refreshAllChartsFixed();
+        }
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+});
+
+console.log('✅ Fixed statistics charts loaded - all charts will display data correctly');
+
 // === ACHIEVEMENTS SYSTEM ===
 
 // Update achievements grid dynamically
@@ -4314,13 +4697,12 @@ function initSettings() {
     updateSidebarUserInfo();
 }
 
-// Update sidebar user info with data from localStorage
 function updateSidebarUserInfo() {
     const sidebarAvatar = document.querySelector('.sidebar-avatar');
     const sidebarUsername = document.querySelector('.sidebar-username');
     const sidebarUserStats = document.querySelector('.sidebar-user-stats');
 
-    // ✅ Get saved profile from correct localStorage key
+    // Get saved profile
     const savedProfile = JSON.parse(localStorage.getItem('userProfile')) || {
         name: 'AnimeFan',
         avatar: 'https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff'
@@ -4329,12 +4711,30 @@ function updateSidebarUserInfo() {
     const savedName = savedProfile.name;
     const savedAvatar = savedProfile.avatar;
 
-    // 🧮 Calculate totals
-    const totalAnime = animeData.length;
+    // ✅ Get level data from level-system.js (NOT from localStorage userProfile)
+    let currentLevel = 1;
+    let currentTitle = 'Newbie';
+    let currentXP = 0;
+
+    if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.getUserProfile === 'function') {
+        const levelProfile = window.AniPulseLevelSystem.getUserProfile();
+        currentLevel = levelProfile.level || 1;
+        currentTitle = levelProfile.title || 'Newbie';
+        currentXP = levelProfile.totalExp || 0;
+    } else {
+        // Fallback to localStorage
+        const savedLevel = localStorage.getItem('userLevel');
+        const savedTitle = localStorage.getItem('userLevelTitle');
+        if (savedLevel) currentLevel = parseInt(savedLevel);
+        if (savedTitle) currentTitle = savedTitle;
+    }
+
+    // Calculate totals
+    const totalAnime = animeData?.length || 0;
     const totalHours = calculateTotalHours();
     const totalEpisodes = calculateTotalEpisodes();
 
-    // 🖼️ Update sidebar info
+    // Update sidebar visuals
     if (sidebarAvatar) {
         sidebarAvatar.src = savedAvatar;
         sidebarAvatar.alt = savedName;
@@ -4344,15 +4744,26 @@ function updateSidebarUserInfo() {
         sidebarUsername.textContent = savedName;
     }
 
+    // Update level display in sidebar
+    const levelBadge = document.querySelector('.level-badge, #levelBadgeText');
+    const levelTitle = document.querySelector('.level-title, #levelTitleText');
+
+    if (levelBadge) {
+        levelBadge.textContent = `Lv.${currentLevel}`;
+    }
+    if (levelTitle) {
+        levelTitle.textContent = currentTitle;
+    }
+
     if (sidebarUserStats) {
         sidebarUserStats.innerHTML = `
             <div class="stat-item">
-                <span class="stat-number">${totalAnime}</span>
+                <span class="stat-number" id="animeCountSidebar">${totalAnime}</span>
                 <span class="stat-label">Anime</span>
             </div>
             <div class="stat-divider"></div>
             <div class="stat-item" id="toggleStat">
-                <span class="stat-number" id="toggleNumber" title="${totalHours.toLocaleString()}">
+                <span class="stat-number" id="toggleNumber" title="${totalHours.toLocaleString()} Hours">
                     ${formatNumberShort(totalHours)}
                 </span>
                 <span class="stat-label" id="toggleLabel">Hrs</span>
@@ -4360,43 +4771,16 @@ function updateSidebarUserInfo() {
         `;
     }
 
-    // 🌀 Animate + hover reveal
-    const numberEl = document.getElementById('toggleNumber');
-    const labelEl = document.getElementById('toggleLabel');
-    let showing = 'hours';
+    // Update level display in settings page if visible
+    const settingsLevelNumber = document.getElementById('settingsLevelNumber');
+    const settingsLevelTitle = document.getElementById('settingsLevelTitle');
+    const settingsCurrentXP = document.getElementById('settingsCurrentXP');
+    const settingsNextXP = document.getElementById('settingsNextXP');
 
-    if (numberEl && labelEl) {
-        setInterval(() => {
-            numberEl.classList.add('fade-out');
-            labelEl.classList.add('fade-out');
+    if (settingsLevelNumber) settingsLevelNumber.textContent = `Level ${currentLevel}`;
+    if (settingsLevelTitle) settingsLevelTitle.textContent = currentTitle;
 
-            setTimeout(() => {
-                if (showing === 'hours') {
-                    numberEl.textContent = formatNumberShort(totalEpisodes);
-                    numberEl.title = totalEpisodes.toLocaleString();
-                    labelEl.textContent = 'Eps';
-                    showing = 'episodes';
-                } else {
-                    numberEl.textContent = formatNumberShort(totalHours);
-                    numberEl.title = totalHours.toLocaleString();
-                    labelEl.textContent = 'Hrs';
-                    showing = 'hours';
-                }
-
-                numberEl.classList.remove('fade-out');
-                labelEl.classList.remove('fade-out');
-                numberEl.classList.add('fade-in');
-                labelEl.classList.add('fade-in');
-
-                setTimeout(() => {
-                    numberEl.classList.remove('fade-in');
-                    labelEl.classList.remove('fade-in');
-                }, 400);
-            }, 400);
-        }, 15000);
-    }
-
-    // ✅ Also update top bar for consistency
+    // Update top bar
     const topUserAvatar = document.querySelector('.user-profile .user-avatar');
     const topUserName = document.querySelector('.user-profile span');
     if (topUserAvatar) topUserAvatar.src = savedAvatar;
@@ -5422,10 +5806,10 @@ window.updateAnimeDisplay = function () {
         window.updateCurrentlyWatching = updateCurrentlyWatching;
     });
 })();
-
 // =============================================
-// COMPLETE ACTIVITY HEATMAP - WORKING WITH YOUR DATA STRUCTURE
-// GitHub-style heatmap that tracks anime completions
+// COMPLETE ACTIVITY HEATMAP - FULLY FIXED
+// Handles all date formats (ISO, YYYY-MM, YYYY-MM-DD, timestamps)
+// Shows correct completion dates, no duplication, no cross-year contamination
 // =============================================
 
 class ActivityHeatmap {
@@ -5442,28 +5826,100 @@ class ActivityHeatmap {
         this.render();
         this.attachEventListeners();
         this.startAutoRefresh();
+        this.setupThemeObserver();
     }
 
     createTooltip() {
         this.tooltip = document.createElement('div');
         this.tooltip.className = 'heatmap-tooltip';
         this.tooltip.style.position = 'fixed';
-        this.tooltip.style.background = '#1a1f2e';
+        this.tooltip.style.background = 'linear-gradient(135deg, #1a1f2e, #0f1420)';
         this.tooltip.style.color = 'white';
-        this.tooltip.style.padding = '8px 14px';
+        this.tooltip.style.padding = '10px 16px';
         this.tooltip.style.borderRadius = '12px';
         this.tooltip.style.fontSize = '0.75rem';
         this.tooltip.style.fontWeight = '500';
         this.tooltip.style.border = '1px solid rgba(139, 92, 246, 0.4)';
         this.tooltip.style.backdropFilter = 'blur(8px)';
         this.tooltip.style.pointerEvents = 'none';
-        this.tooltip.style.zIndex = '1000';
+        this.tooltip.style.zIndex = '10000';
         this.tooltip.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
         this.tooltip.style.whiteSpace = 'nowrap';
         this.tooltip.style.display = 'none';
+        this.tooltip.style.transition = 'opacity 0.2s ease';
         document.body.appendChild(this.tooltip);
     }
 
+    // ============================================
+    // DATE PARSING - Handles ALL formats
+    // ============================================
+    
+    parseDateSafely(dateValue) {
+        if (!dateValue) return null;
+        
+        // Case 1: Number timestamp (e.g., 1776371330194)
+        if (typeof dateValue === 'number') {
+            const date = new Date(dateValue);
+            if (!isNaN(date.getTime()) && date.getFullYear() > 2000) {
+                return date;
+            }
+        }
+        
+        // Case 2: String date
+        if (typeof dateValue === 'string') {
+            // Format: YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+                const [year, month, day] = dateValue.split('-').map(Number);
+                const date = new Date(year, month - 1, day);
+                if (!isNaN(date.getTime())) return date;
+            }
+            
+            // Format: YYYY-MM
+            if (/^\d{4}-\d{2}$/.test(dateValue)) {
+                const [year, month] = dateValue.split('-').map(Number);
+                const date = new Date(year, month - 1, 15);
+                if (!isNaN(date.getTime())) return date;
+            }
+            
+            // Format: ISO with timezone (2024-04-01T00:00:00.000Z)
+            if (dateValue.includes('T')) {
+                const datePart = dateValue.split('T')[0];
+                if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+                    const [year, month, day] = datePart.split('-').map(Number);
+                    const date = new Date(year, month - 1, day);
+                    if (!isNaN(date.getTime())) return date;
+                }
+            }
+            
+            // Format: Datetime with space (2026-04-16 19:54:40)
+            if (dateValue.includes(' ')) {
+                const datePart = dateValue.split(' ')[0];
+                if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+                    const [year, month, day] = datePart.split('-').map(Number);
+                    const date = new Date(year, month - 1, day);
+                    if (!isNaN(date.getTime())) return date;
+                }
+            }
+            
+            // Format: Just year (rare)
+            if (/^\d{4}$/.test(dateValue)) {
+                const year = parseInt(dateValue);
+                const date = new Date(year, 0, 1);
+                if (!isNaN(date.getTime())) return date;
+            }
+        }
+        
+        return null;
+    }
+
+    formatDateKey(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    // ============================================
+    // LOAD & GENERATE CONTRIBUTIONS
+    // ============================================
+    
     loadContributions() {
         const saved = localStorage.getItem('animeContributions');
         if (saved && Object.keys(JSON.parse(saved)).length > 0) {
@@ -5472,43 +5928,51 @@ class ActivityHeatmap {
         return this.generateFromAnimeData();
     }
 
-    // Generate contributions from actual anime data
     generateFromAnimeData() {
         const contributions = {};
         const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+        const processedAnime = new Set();
 
         animeData.forEach(anime => {
-            // Track completions based on finishDate
-            if (anime.userStatus === 'Completed' && anime.finishDate) {
-                const finishDate = new Date(anime.finishDate);
-                if (!isNaN(finishDate.getTime())) {
-                    const key = this.formatDateKey(finishDate);
-                    contributions[key] = (contributions[key] || 0) + 1;
+            // ONLY track completed anime
+            if (anime.userStatus !== 'Completed') return;
+            
+            let completionDate = null;
+            
+            // PRIORITY 1: Use actualFinishDate (exact day - most accurate)
+            if (anime.actualFinishDate) {
+                completionDate = this.parseDateSafely(anime.actualFinishDate);
+            }
+            
+            // PRIORITY 2: Use finishDate
+            if (!completionDate && anime.finishDate) {
+                completionDate = this.parseDateSafely(anime.finishDate);
+            }
+            
+            // PRIORITY 3: Use completedTimestamp
+            if (!completionDate && anime.completedTimestamp) {
+                completionDate = this.parseDateSafely(anime.completedTimestamp);
+            }
+            
+            // PRIORITY 4: Use updatedAt as last resort
+            if (!completionDate && anime.updatedAt) {
+                completionDate = this.parseDateSafely(anime.updatedAt);
+            }
+            
+            // PRIORITY 5: Use createdAt
+            if (!completionDate && anime.createdAt) {
+                completionDate = this.parseDateSafely(anime.createdAt);
+            }
+            
+            if (completionDate && !isNaN(completionDate.getTime())) {
+                const dateKey = this.formatDateKey(completionDate);
+                const uniqueKey = `${anime.id || anime.title}_${dateKey}`;
+                
+                if (!processedAnime.has(uniqueKey)) {
+                    processedAnime.add(uniqueKey);
+                    contributions[dateKey] = (contributions[dateKey] || 0) + 1;
                 }
             }
-
-            // Also track updates (progress changes, edits)
-            if (anime.updatedAt) {
-                let updateDate;
-                if (typeof anime.updatedAt === 'string' && anime.updatedAt.includes(' ')) {
-                    // Handle format like "2026-04-15 14:13"
-                    const [datePart] = anime.updatedAt.split(' ');
-                    updateDate = new Date(datePart);
-                } else {
-                    updateDate = new Date(anime.updatedAt);
-                }
-
-                if (!isNaN(updateDate.getTime())) {
-                    const key = this.formatDateKey(updateDate);
-                    // Add 0.5 for updates (will be rounded)
-                    contributions[key] = (contributions[key] || 0) + 0.5;
-                }
-            }
-        });
-
-        // Round all values
-        Object.keys(contributions).forEach(key => {
-            contributions[key] = Math.round(contributions[key]);
         });
 
         return contributions;
@@ -5518,37 +5982,33 @@ class ActivityHeatmap {
         localStorage.setItem('animeContributions', JSON.stringify(this.contributions));
     }
 
-    formatDateKey(date) {
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    }
-
-    // Add contribution when anime is added/updated/completed
+    // ============================================
+    // ADD CONTRIBUTION (when anime is added/completed)
+    // ============================================
+    
     addContribution(amount = 1, anime = null, action = null) {
-        const today = this.formatDateKey(this.currentDay);
-
-        let finalAmount = amount;
-
-        // Bonus for completing an anime
+        // For completed anime, just refresh from data to prevent duplication
         if (action === 'completed') {
-            finalAmount = 2;
+            setTimeout(() => {
+                this.refreshFromAnimeData();
+                this.showToast(`✓ Completed anime recorded!`, '#10b981');
+            }, 500);
+            return;
         }
-
-        if (finalAmount > 0) {
-            this.contributions[today] = (this.contributions[today] || 0) + finalAmount;
+        
+        const today = this.formatDateKey(this.currentDay);
+        if (amount > 0) {
+            this.contributions[today] = (this.contributions[today] || 0) + amount;
             this.saveContributions();
             this.render();
-
-            // Only show toast for user actions (not on refresh)
+            
             if (action) {
-                this.showToast(`+${finalAmount} contribution${finalAmount !== 1 ? 's' : ''} added!`);
+                this.showToast(`+${amount} contribution${amount !== 1 ? 's' : ''} added!`, '#6366f1');
             }
         }
-
-        return finalAmount;
     }
 
-    showToast(message) {
-        // Remove existing toasts
+    showToast(message, color = '#6366f1') {
         const existingToasts = document.querySelectorAll('.heatmap-toast');
         existingToasts.forEach(toast => toast.remove());
 
@@ -5558,7 +6018,7 @@ class ActivityHeatmap {
         toast.style.position = 'fixed';
         toast.style.bottom = '20px';
         toast.style.right = '20px';
-        toast.style.background = 'linear-gradient(135deg, #8b5cf6, #6366f1)';
+        toast.style.background = `linear-gradient(135deg, ${color}, ${color === '#10b981' ? '#059669' : '#4f46e5'})`;
         toast.style.color = 'white';
         toast.style.padding = '10px 20px';
         toast.style.borderRadius = '30px';
@@ -5569,12 +6029,13 @@ class ActivityHeatmap {
         toast.style.animation = 'fadeInOut 2s ease';
 
         document.body.appendChild(toast);
-
-        setTimeout(() => {
-            toast.remove();
-        }, 2000);
+        setTimeout(() => toast.remove(), 2000);
     }
 
+    // ============================================
+    // GET DATA
+    // ============================================
+    
     getContribution(date) {
         const key = this.formatDateKey(date);
         return this.contributions[key] || 0;
@@ -5583,7 +6044,7 @@ class ActivityHeatmap {
     getTotalForYear(year) {
         let total = 0;
         for (const [date, count] of Object.entries(this.contributions)) {
-            if (date.startsWith(year)) {
+            if (date.startsWith(year.toString())) {
                 total += count;
             }
         }
@@ -5598,6 +6059,21 @@ class ActivityHeatmap {
         return 4;
     }
 
+    getColorForLevel(level) {
+        const colors = {
+            0: '#2d3748',  // No activity - dark gray
+            1: '#9be9a8',  // 1 anime - light green
+            2: '#40c463',  // 2 anime - medium green
+            3: '#30a14e',  // 3 anime - dark green
+            4: '#216e39'   // 4+ anime - darkest green
+        };
+        return colors[level] || colors[0];
+    }
+
+    // ============================================
+    // WEEKS DATA GENERATION
+    // ============================================
+    
     getWeeksData(year) {
         const weeks = [];
         const today = new Date();
@@ -5626,7 +6102,8 @@ class ActivityHeatmap {
                     days.push({
                         date: new Date(currentDate),
                         count: count,
-                        dateStr: this.formatDateKey(currentDate)
+                        dateStr: this.formatDateKey(currentDate),
+                        level: this.getColorLevel(count)
                     });
                 } else {
                     days.push(null);
@@ -5641,15 +6118,29 @@ class ActivityHeatmap {
         return weeks;
     }
 
+    // ============================================
+    // RENDER HEATMAP
+    // ============================================
+    
     renderMonthLabels(weeks) {
-        const container = document.getElementById('heatmapMonths');
+        let container = document.getElementById('heatmapMonths');
+        if (!container) {
+            const wrapper = document.querySelector('.heatmap-wrapper');
+            if (wrapper) {
+                container = document.createElement('div');
+                container.id = 'heatmapMonths';
+                container.className = 'heatmap-months';
+                wrapper.insertBefore(container, wrapper.firstChild);
+            }
+        }
+        
         if (!container) return;
 
         const monthPositions = {};
         let currentMonth = -1;
 
         weeks.forEach((week, weekIndex) => {
-            week.forEach((day, dayIndex) => {
+            week.forEach((day) => {
                 if (day && day.date.getDate() <= 7 && day.date.getMonth() !== currentMonth) {
                     currentMonth = day.date.getMonth();
                     const position = weekIndex * 15 + 10;
@@ -5693,8 +6184,8 @@ class ActivityHeatmap {
                     col.appendChild(emptyCell);
                 } else {
                     const cell = document.createElement('div');
-                    const level = this.getColorLevel(day.count);
-                    cell.className = `heatmap-cell level-${level}`;
+                    const color = this.getColorForLevel(day.level);
+                    cell.className = `heatmap-cell level-${day.level}`;
                     cell.setAttribute('data-date', day.dateStr);
                     cell.setAttribute('data-count', day.count);
                     cell.style.width = '12px';
@@ -5702,6 +6193,7 @@ class ActivityHeatmap {
                     cell.style.borderRadius = '3px';
                     cell.style.cursor = 'pointer';
                     cell.style.transition = 'all 0.15s ease';
+                    cell.style.backgroundColor = color;
 
                     cell.addEventListener('mouseenter', (e) => this.showTooltip(e, day));
                     cell.addEventListener('mouseleave', () => this.hideTooltip());
@@ -5716,9 +6208,41 @@ class ActivityHeatmap {
         this.renderMonthLabels(weeks);
     }
 
-    renderYearButtons() {
+    // ============================================
+    // YEAR BUTTONS (Dynamic from data)
+    // ============================================
+    
+    getAvailableYears() {
+        const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+        const years = new Set();
         const currentYear = new Date().getFullYear();
-        const years = [currentYear - 2, currentYear - 1, currentYear];
+        
+        animeData.forEach(anime => {
+            if (anime.userStatus === 'Completed') {
+                // Check actualFinishDate
+                if (anime.actualFinishDate) {
+                    const yearMatch = anime.actualFinishDate.match(/^\d{4}/);
+                    if (yearMatch) years.add(parseInt(yearMatch[0]));
+                }
+                // Check finishDate
+                if (anime.finishDate) {
+                    const yearMatch = anime.finishDate.match(/^\d{4}/);
+                    if (yearMatch) years.add(parseInt(yearMatch[0]));
+                }
+                // Check completedTimestamp
+                if (anime.completedTimestamp) {
+                    const date = this.parseDateSafely(anime.completedTimestamp);
+                    if (date) years.add(date.getFullYear());
+                }
+            }
+        });
+        
+        if (years.size === 0) years.add(currentYear);
+        return Array.from(years).sort((a, b) => b - a);
+    }
+
+    renderYearButtons() {
+        const years = this.getAvailableYears();
         const container = document.getElementById('heatmapYears');
         if (!container) return;
 
@@ -5746,6 +6270,10 @@ class ActivityHeatmap {
         if (yearSpan) yearSpan.textContent = this.currentYear;
     }
 
+    // ============================================
+    // TOOLTIP
+    // ============================================
+    
     showTooltip(event, day) {
         if (!day) return;
 
@@ -5775,22 +6303,20 @@ class ActivityHeatmap {
         this.tooltip.style.display = 'none';
     }
 
+    // ============================================
+    // EVENT LISTENERS & AUTO REFRESH
+    // ============================================
+    
     attachEventListeners() {
-        // Listen for anime updates
-        window.addEventListener('animeUpdate', (event) => {
-            const amount = event.detail?.count || 1;
-            const anime = event.detail?.anime || null;
-            const action = event.detail?.action || null;
-            this.addContribution(amount, anime, action);
+        window.addEventListener('animeUpdate', () => {
+            setTimeout(() => this.refreshFromAnimeData(), 300);
         });
 
-        // Sync across tabs
         window.addEventListener('storage', (e) => {
             if (e.key === 'animeContributions') {
                 this.contributions = JSON.parse(e.newValue) || {};
                 this.render();
             } else if (e.key === 'animeData') {
-                // Refresh when anime data changes from another tab
                 this.refreshFromAnimeData();
             }
         });
@@ -5801,12 +6327,28 @@ class ActivityHeatmap {
             const newDay = new Date();
             if (newDay.getDate() !== this.currentDay.getDate()) {
                 this.currentDay = newDay;
-                this.render();
+                if (this.currentYear === newDay.getFullYear()) {
+                    this.refreshFromAnimeData();
+                } else {
+                    this.render();
+                }
             }
         }, 60000);
     }
 
-    // Force refresh heatmap from actual anime data
+    setupThemeObserver() {
+        const observer = new MutationObserver(() => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const tooltipBg = isDark ? '#1a1f2e' : '#ffffff';
+            const tooltipText = isDark ? 'white' : '#1a1f2e';
+            if (this.tooltip) {
+                this.tooltip.style.background = tooltipBg;
+                this.tooltip.style.color = tooltipText;
+            }
+        });
+        observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
     refreshFromAnimeData() {
         this.contributions = this.generateFromAnimeData();
         this.saveContributions();
@@ -5824,7 +6366,6 @@ class ActivityHeatmap {
 // INTEGRATION FUNCTIONS
 // =============================================
 
-// Function to trigger when anime is added
 function onAnimeAdded(anime) {
     if (window.heatmap) {
         window.heatmap.addContribution(1, anime, 'add');
@@ -5834,7 +6375,6 @@ function onAnimeAdded(anime) {
     }
 }
 
-// Function to trigger when anime is completed
 function onAnimeCompleted(anime) {
     if (window.heatmap) {
         window.heatmap.addContribution(2, anime, 'completed');
@@ -5844,7 +6384,6 @@ function onAnimeCompleted(anime) {
     }
 }
 
-// Function to trigger when anime is updated
 function onAnimeUpdated(anime) {
     if (window.heatmap) {
         window.heatmap.addContribution(1, anime, 'update');
@@ -5854,9 +6393,7 @@ function onAnimeUpdated(anime) {
     }
 }
 
-// Hook into your existing handleAddAnime function
 function hookHeatmapToAnimeFunctions() {
-    // Store reference to original function
     const originalHandleAddAnime = window.handleAddAnime;
 
     if (typeof originalHandleAddAnime === 'function') {
@@ -5866,13 +6403,12 @@ function hookHeatmapToAnimeFunctions() {
             const status = document.getElementById('animeStatus')?.value;
             const anime = {
                 title: title,
-                episodes: parseInt(document.getElementById('animeEpisodes')?.value) || 0
+                episodes: parseInt(document.getElementById('animeEpisodes')?.value) || 0,
+                id: document.getElementById('animeId')?.value
             };
 
-            // Call original function
             originalHandleAddAnime(e);
 
-            // Trigger heatmap update after a short delay
             setTimeout(() => {
                 if (window.heatmap) {
                     if (wasEditing) {
@@ -5884,14 +6420,12 @@ function hookHeatmapToAnimeFunctions() {
                     } else {
                         onAnimeAdded(anime);
                     }
-                    // Always refresh from data to ensure accuracy
                     window.heatmap.refreshFromAnimeData();
                 }
             }, 300);
         };
     }
 
-    // Hook delete function
     const originalDeleteAnime = window.deleteAnime;
     if (typeof originalDeleteAnime === 'function') {
         window.deleteAnime = function () {
@@ -5904,7 +6438,6 @@ function hookHeatmapToAnimeFunctions() {
         };
     }
 
-    // Refresh on any data change
     const originalUpdateAllComponents = window.updateAllComponents;
     if (typeof originalUpdateAllComponents === 'function') {
         window.updateAllComponents = function () {
@@ -5923,20 +6456,16 @@ function hookHeatmapToAnimeFunctions() {
 // =============================================
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize heatmap
     window.heatmap = new ActivityHeatmap();
 
-    // Refresh from actual data after a short delay
     setTimeout(() => {
         if (window.heatmap) {
             window.heatmap.refreshFromAnimeData();
         }
     }, 500);
 
-    // Hook into anime functions
     setTimeout(hookHeatmapToAnimeFunctions, 1000);
 
-    // Add CSS animation
     const style = document.createElement('style');
     style.textContent = `
         @keyframes fadeInOut {
@@ -5948,7 +6477,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
         .heatmap-cell:hover {
             transform: scale(1.2);
-            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
             z-index: 10;
         }
         
@@ -5961,10 +6490,50 @@ document.addEventListener('DOMContentLoaded', function () {
         .heatmap-toast {
             animation: fadeInOut 2s ease;
         }
+        
+        .heatmap-months {
+            position: relative;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .month-label {
+            position: absolute;
+            font-size: 11px;
+            color: #888;
+        }
+        
+        .heatmap-years {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .year-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 5px 12px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+        
+        .year-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .year-btn.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: transparent;
+            color: white;
+        }
     `;
     document.head.appendChild(style);
 
-    console.log('Activity Heatmap initialized successfully!');
+    console.log('✅ Activity Heatmap initialized successfully!');
 });
 
 // =============================================
@@ -8629,7 +9198,1208 @@ function safeApplyEmptyStates() {
     } catch (e) { }
 }
 
+// ============================================
+// COMMUNITY PAGE - COMPLETE WORKING VERSION
+// ============================================
 
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+function formatNumberShort(num) {
+    if (num === undefined || num === null) return '0';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toString();
+}
+
+function formatNumber(num) {
+    if (num === undefined || num === null) return '0';
+    return num.toLocaleString();
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ============================================
+// TAB SWITCHING
+// ============================================
+
+function initCommunityTabs() {
+    const tabs = document.querySelectorAll('.community-tab');
+    const contents = document.querySelectorAll('.community-tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabName = tab.dataset.tab;
+
+            // Update active tab
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Update active content
+            contents.forEach(content => content.classList.remove('active'));
+            const activeContent = document.getElementById(`community-${tabName}-tab`);
+            if (activeContent) {
+                activeContent.classList.add('active');
+            }
+
+            // Load data based on tab
+            if (tabName === 'friends') {
+                loadFriends();
+                loadFriendRequests();
+            } else if (tabName === 'leaderboard') {
+                initLeaderboard();
+            }
+        });
+    });
+}
+// ============================================
+// FRIENDS LIST
+// ============================================
+
+async function loadFriends() {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    const friendsList = document.getElementById('friendsList');
+    const friendsCount = document.getElementById('friendsCount');
+    if (!friendsList) return;
+
+    friendsList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading friends...</div>';
+
+    try {
+        const response = await fetch('http://localhost:3000/api/friends/list', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load friends');
+
+        const friends = await response.json();
+        console.log('Friends data from API:', friends);
+
+        if (friendsCount) friendsCount.textContent = friends.length;
+
+        if (friends.length === 0) {
+            friendsList.innerHTML = '<div class="empty-state">No friends yet. Search for users to add!</div>';
+            return;
+        }
+
+        friendsList.innerHTML = friends.map(friend => {
+            // Get the correct display name - prioritize name field
+            let displayName = friend.name || friend.username;
+
+            // Fallback to extracting from avatar if needed
+            if (!displayName || displayName === 'User' || displayName === 'Anime Fan') {
+                const avatarMatch = friend.avatar?.match(/name=([^&]+)/);
+                if (avatarMatch) {
+                    displayName = decodeURIComponent(avatarMatch[1]);
+                } else {
+                    displayName = 'User';
+                }
+            }
+
+            const avatarUrl = friend.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff`;
+            const totalAnime = friend.totalAnime || 0;
+            const totalHoursFormatted = formatNumberShort(friend.totalHours || 0);
+            const title = friend.title || 'Newbie';
+            const level = friend.level || 1;
+
+            console.log(`Friend display: ${displayName}, Title: ${title}, Level: ${level}`);
+
+            return `
+                <div class="friend-card" onclick="openUserProfile('${friend.uid}')">
+                    <img src="${avatarUrl}" class="friend-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff'">
+                    <div class="friend-info">
+                        <div class="friend-name">${escapeHtml(displayName)}</div>
+                        <div class="friend-level">${escapeHtml(title)} • Lv.${level}</div>
+                    </div>
+                    <button class="remove-friend-btn" onclick="event.stopPropagation(); removeFriend('${friend.uid}')">
+                        <i class="fas fa-user-minus"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('Failed to load friends:', error);
+        friendsList.innerHTML = '<div class="empty-state">Failed to load friends. Please refresh.</div>';
+    }
+}
+
+// ============================================
+// FRIEND REQUESTS
+// ============================================
+
+async function loadFriendRequests() {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+        const response = await fetch('http://localhost:3000/api/friends/requests', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const requests = await response.json();
+
+        const requestsSection = document.getElementById('friendRequestsSection');
+        const requestsList = document.getElementById('friendRequestsList');
+        if (!requestsList) return;
+
+        if (requests.length === 0) {
+            if (requestsSection) requestsSection.style.display = 'none';
+            return;
+        }
+
+        if (requestsSection) requestsSection.style.display = 'block';
+
+        requestsList.innerHTML = requests.map(req => {
+            let displayName = req.fromName || req.fromUsername;
+
+            // Fallback to extracting from avatar if needed
+            if (!displayName || displayName === 'User' || displayName === 'Anime Fan') {
+                const avatarMatch = req.fromAvatar?.match(/name=([^&]+)/);
+                if (avatarMatch) {
+                    displayName = decodeURIComponent(avatarMatch[1]);
+                } else {
+                    displayName = 'User';
+                }
+            }
+
+            const avatarUrl = req.fromAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff`;
+
+            return `
+                <div class="friend-request-item">
+                    <div class="friend-request-info">
+                        <img src="${avatarUrl}" class="friend-request-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff'">
+                        <div>
+                            <div class="friend-request-name">${escapeHtml(displayName)}</div>
+                            <div class="friend-request-level">Lv.${req.fromLevel || 1}</div>
+                        </div>
+                    </div>
+                    <div class="friend-request-actions">
+                        <button class="btn-accept" onclick="acceptFriendRequest('${req.id}')"><i class="fas fa-check"></i> Accept</button>
+                        <button class="btn-decline" onclick="declineFriendRequest('${req.id}')"><i class="fas fa-times"></i> Decline</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('Failed to load friend requests:', error);
+    }
+}
+
+// ============================================
+// SEARCH USERS
+// ============================================
+
+async function searchUsers() {
+    const query = document.getElementById('searchUsersInput')?.value.trim();
+    if (!query || query.length < 2) {
+        showToast('Please enter at least 2 characters', 'info');
+        return;
+    }
+
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showToast('Please login first', 'error');
+        return;
+    }
+
+    const resultsList = document.getElementById('searchResultsList');
+    if (!resultsList) return;
+
+    resultsList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/user/search?q=${encodeURIComponent(query)}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Search failed');
+
+        const users = await response.json();
+
+        if (users.length === 0) {
+            resultsList.innerHTML = '<div class="empty-state">No users found. Try a different name.</div>';
+            return;
+        }
+
+        resultsList.innerHTML = users.map(user => {
+            const displayName = user.name || user.username || 'User';
+            const avatarUrl = user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff`;
+
+            return `
+                <div class="search-result-item" onclick="openUserProfile('${user.uid}')">
+                    <div class="search-result-info">
+                        <img src="${avatarUrl}" class="search-result-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff'">
+                        <div>
+                            <div class="friend-request-name">${escapeHtml(displayName)}</div>
+                            <div class="friend-request-level">${user.title || 'Newbie'} • Lv.${user.level || 1}</div>
+                        </div>
+                    </div>
+                    <button class="btn-add-friend" onclick="event.stopPropagation(); sendFriendRequest('${user.uid}')">
+                        <i class="fas fa-user-plus"></i> Add Friend
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('Search failed:', error);
+        resultsList.innerHTML = '<div class="empty-state">Failed to search users. Please try again.</div>';
+        showToast('Search failed. Please try again.', 'error');
+    }
+}
+
+// ============================================
+// FRIEND ACTIONS
+// ============================================
+
+async function sendFriendRequest(userId) {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/friends/request/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showToast('Friend request sent!', 'success');
+            document.getElementById('searchUsersInput').value = '';
+            document.getElementById('searchResultsList').innerHTML = '';
+        } else {
+            showToast(result.error, 'error');
+        }
+    } catch (error) {
+        console.error('Failed to send friend request:', error);
+        showToast('Failed to send friend request', 'error');
+    }
+}
+
+async function acceptFriendRequest(requestId) {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/friends/accept/${requestId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            showToast('Friend request accepted!', 'success');
+            loadFriendRequests();
+            loadFriends();
+        }
+    } catch (error) {
+        console.error('Failed to accept request:', error);
+    }
+}
+
+async function declineFriendRequest(requestId) {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/friends/decline/${requestId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            showToast('Friend request declined', 'info');
+            loadFriendRequests();
+        }
+    } catch (error) {
+        console.error('Failed to decline request:', error);
+    }
+}
+
+async function removeFriend(friendId) {
+    if (!confirm('Remove this friend?')) return;
+
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/friends/remove/${friendId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            showToast('Friend removed', 'info');
+            loadFriends();
+        }
+    } catch (error) {
+        console.error('Failed to remove friend:', error);
+    }
+}
+
+// ============================================
+// OPEN USER PROFILE (New Modal)
+// ============================================
+
+async function openUserProfile(userId) {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showToast('Please login first', 'error');
+        return;
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    if (currentUser.uid === userId) {
+        showToast('This is you!', 'info');
+        return;
+    }
+
+    const modal = document.getElementById('userProfileModal');
+    if (!modal) {
+        console.error('User profile modal not found');
+        showToast('Profile modal not available', 'error');
+        return;
+    }
+
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+
+    // Show loading state
+    document.getElementById('profileName').textContent = 'Loading...';
+    document.getElementById('profileCompletedList').innerHTML = '<div class="loading-spinner">Loading anime list...</div>';
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/user/full-profile/${userId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load profile');
+
+        const profile = await response.json();
+        renderUserProfile(profile);
+
+    } catch (error) {
+        console.error('Failed to load profile:', error);
+        showToast('Failed to load user profile', 'error');
+        closeUserProfileModal();
+    }
+}
+
+function closeUserProfileModal() {
+    const modal = document.getElementById('userProfileModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }
+}
+
+function renderUserProfile(profile) {
+    // Header info
+    document.getElementById('profileName').textContent = profile.name;
+    document.getElementById('profileLevel').textContent = `Lv.${profile.level}`;
+    document.getElementById('profileTitle').textContent = profile.levelTitle;
+    document.getElementById('profileXpFill').style.width = `${profile.xpProgress}%`;
+    document.getElementById('profileXpText').textContent = `${profile.totalXP.toLocaleString()} / ${(profile.totalXP + profile.xpToNextLevel).toLocaleString()} XP`;
+
+    const avatarImg = document.getElementById('profileAvatar');
+    avatarImg.src = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=6366F1&color=fff`;
+    avatarImg.onerror = function () {
+        this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=6366F1&color=fff`;
+    };
+
+    // Stats
+    document.getElementById('profileTotalAnime').textContent = profile.stats.totalAnime;
+    document.getElementById('profileCompleted').textContent = profile.stats.completed;
+    document.getElementById('profileWatching').textContent = profile.stats.watching;
+    document.getElementById('profilePlanToWatch').textContent = profile.stats.planToWatch;
+    document.getElementById('profileEpisodes').textContent = profile.stats.totalEpisodes.toLocaleString();
+    document.getElementById('profileHours').textContent = profile.stats.totalHours.toLocaleString();
+
+    // Friend button
+    const friendBtn = document.getElementById('profileFriendBtn');
+    if (!profile.isCurrentUser) {
+        friendBtn.style.display = 'block';
+        if (profile.isFriend) {
+            friendBtn.innerHTML = '<i class="fas fa-user-check"></i> Friends';
+            friendBtn.disabled = true;
+            friendBtn.style.opacity = '0.6';
+        } else {
+            friendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+            friendBtn.disabled = false;
+            friendBtn.style.opacity = '1';
+            friendBtn.onclick = () => sendFriendRequest(profile.uid);
+        }
+    } else {
+        friendBtn.style.display = 'none';
+    }
+
+    // Anime Lists
+    renderProfileAnimeList('completed', profile.animeList.completed);
+    renderProfileAnimeList('watching', profile.animeList.watching);
+    renderProfileAnimeList('plan', profile.animeList.planToWatch);
+
+    // Achievements
+    renderProfileAchievements(profile.achievements);
+
+    // Activity
+    renderProfileActivity(profile.recentActivity);
+}
+
+function renderProfileAnimeList(type, animeList) {
+    const container = document.getElementById(`profile${type.charAt(0).toUpperCase() + type.slice(1)}List`);
+    if (!container) return;
+
+    if (!animeList || animeList.length === 0) {
+        container.innerHTML = '<div class="empty-state">No anime found</div>';
+        return;
+    }
+
+    container.innerHTML = animeList.map(anime => `
+        <div class="profile-anime-card">
+            <img src="${anime.cover || 'https://via.placeholder.com/60x85/6a5acd/ffffff?text=No+Image'}" 
+                 class="profile-anime-cover" 
+                 onerror="this.src='https://placehold.co/60x85/6a5acd/white?text=No+Image'">
+            <div class="profile-anime-info">
+                <div class="profile-anime-title">${escapeHtml(anime.title)}</div>
+                ${anime.score ? `<div class="profile-anime-score">⭐ ${anime.score}</div>` : ''}
+                <div class="profile-anime-episodes">${anime.episodes || 0} episodes</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderProfileAchievements(achievements) {
+    const container = document.getElementById('profileAchievementsList');
+    if (!container) return;
+
+    if (!achievements || achievements.length === 0) {
+        container.innerHTML = '<div class="empty-state">No achievements unlocked yet</div>';
+        return;
+    }
+
+    container.innerHTML = achievements.map(achievement => `
+        <div class="profile-achievement-card">
+            <div class="profile-achievement-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="profile-achievement-info">
+                <div class="profile-achievement-name">${escapeHtml(achievement)}</div>
+                <div class="profile-achievement-desc">Unlocked achievement</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderProfileActivity(activities) {
+    const container = document.getElementById('profileActivityList');
+    if (!container) return;
+
+    if (!activities || activities.length === 0) {
+        container.innerHTML = '<div class="empty-state">No recent activity</div>';
+        return;
+    }
+
+    container.innerHTML = activities.map(activity => {
+        let iconClass = 'added';
+        let iconName = 'plus-circle';
+
+        switch (activity.action) {
+            case 'completed': iconClass = 'completed'; iconName = 'check-circle'; break;
+            case 'added': iconClass = 'added'; iconName = 'plus-circle'; break;
+            case 'edited': iconClass = 'edited'; iconName = 'edit'; break;
+            default: iconClass = 'added'; iconName = 'plus-circle';
+        }
+
+        return `
+            <div class="profile-activity-item">
+                <div class="profile-activity-icon ${iconClass}">
+                    <i class="fas fa-${iconName}"></i>
+                </div>
+                <div class="profile-activity-content">
+                    <div class="profile-activity-text">
+                        ${activity.action === 'completed' ? 'Completed' : activity.action === 'added' ? 'Added' : 'Updated'} 
+                        <strong>${escapeHtml(activity.animeTitle)}</strong>
+                    </div>
+                    <div class="profile-activity-time">${formatTimeAgo(activity.timestamp)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Profile tab switching
+document.addEventListener('click', function (e) {
+    const tab = e.target.closest('.profile-tab');
+    if (!tab) return;
+
+    const tabName = tab.dataset.tab;
+    const container = tab.closest('.profile-modal-body');
+    if (!container) return;
+
+    // Update active tab
+    container.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    // Update active content
+    const contentMap = {
+        'completed': 'profileTabCompleted',
+        'watching': 'profileTabWatching',
+        'plan': 'profileTabPlan',
+        'achievements': 'profileTabAchievements',
+        'activity': 'profileTabActivity'
+    };
+
+    Object.values(contentMap).forEach(contentId => {
+        const content = document.getElementById(contentId);
+        if (content) content.classList.remove('active');
+    });
+
+    const activeContent = document.getElementById(contentMap[tabName]);
+    if (activeContent) activeContent.classList.add('active');
+});
+
+// ============================================
+// LEADERBOARD 
+// ============================================
+
+let currentLeaderboardStat = 'level';
+let currentTimePeriod = localStorage.getItem('leaderboardTimePeriod') || 'all';
+let isLoadingLeaderboard = false;
+let lastLoadedTime = 0;
+let yourStatsCache = null;
+
+function saveTimePeriod(period) {
+    currentTimePeriod = period;
+    localStorage.setItem('leaderboardTimePeriod', period);
+}
+
+function formatNumber(num) {
+    if (num === undefined || num === null) return '0';
+    return num.toLocaleString();
+}
+
+function formatNumberShort(num) {
+    if (num === undefined || num === null) return '0';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toString();
+}
+
+// Load your stats using full-stats endpoint
+async function loadYourStats(force = false) {
+    if (!force && yourStatsCache) {
+        return yourStatsCache;
+    }
+
+    const token = localStorage.getItem('authToken');
+    if (!token) return null;
+
+    try {
+        let userId = null;
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.uid) {
+            userId = user.uid;
+        } else if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                userId = payload.uid;
+            } catch (e) { }
+        }
+
+        if (!userId) return null;
+
+        const response = await fetch(`http://localhost:3000/api/user/full-stats/${userId}?period=${currentTimePeriod}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load stats');
+
+        const stats = await response.json();
+
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        const storedTotalXP = userData.totalXP || 20015;
+        stats.totalXP = storedTotalXP;
+
+        yourStatsCache = stats;
+
+        // Update DOM elements
+        const totalXPEl = document.getElementById('yourTotalXP');
+        const totalAnimeEl = document.getElementById('yourTotalAnime');
+        const totalEpisodesEl = document.getElementById('yourTotalEpisodes');
+        const totalHoursEl = document.getElementById('yourTotalHours');
+        const avatarEl = document.getElementById('yourAvatar');
+        const usernameEl = document.getElementById('yourUsername');
+        const levelEl = document.getElementById('yourLevel');
+        const topGenresEl = document.getElementById('yourTopGenres');
+
+        if (totalXPEl) totalXPEl.textContent = formatNumberShort(stats.totalXP);
+        if (totalAnimeEl) totalAnimeEl.textContent = formatNumber(stats.totalAnime);
+        if (totalEpisodesEl) totalEpisodesEl.textContent = formatNumberShort(stats.totalEpisodes);
+        if (totalHoursEl) totalHoursEl.textContent = formatNumberShort(stats.totalHours);
+
+        if (avatarEl) avatarEl.src = stats.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(stats.name || 'User')}&background=6366F1&color=fff`;
+        if (usernameEl) usernameEl.textContent = stats.name || 'You';
+        if (levelEl) levelEl.textContent = `${stats.title || 'Newbie'} • Lv.${stats.level || 1}`;
+
+        if (topGenresEl) {
+            if (stats.topGenres && stats.topGenres.length > 0) {
+                topGenresEl.innerHTML = stats.topGenres.map(g => `<span class="genre-tag">${escapeHtml(g)}</span>`).join('');
+            } else {
+                topGenresEl.innerHTML = '<span class="genre-tag">No data yet</span>';
+            }
+        }
+
+        return stats;
+
+    } catch (error) {
+        console.error('Failed to load your stats:', error);
+        return null;
+    }
+}
+
+// Load friend leaderboard
+async function loadFriendLeaderboard() {
+    if (isLoadingLeaderboard) return;
+
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    const leaderboardList = document.getElementById('friendLeaderboardList');
+    if (!leaderboardList) return;
+
+    isLoadingLeaderboard = true;
+    leaderboardList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading leaderboard...</div>';
+
+    try {
+        let currentUserId = null;
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.uid) {
+            currentUserId = user.uid;
+        } else if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                currentUserId = payload.uid;
+            } catch (e) { }
+        }
+
+        const yourStats = await loadYourStats(true);
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        const storedTotalXP = userData.totalXP || 20015;
+
+        const friendsResponse = await fetch('http://localhost:3000/api/friends/list', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const friends = await friendsResponse.json();
+
+        if (!friends || friends.length === 0) {
+            leaderboardList.innerHTML = '<div class="empty-state">Add friends to see leaderboard!</div>';
+            isLoadingLeaderboard = false;
+            return;
+        }
+
+        const friendsWithStats = [];
+        for (const friend of friends) {
+            try {
+                const statsResponse = await fetch(`http://localhost:3000/api/user/full-stats/${friend.uid}?period=${currentTimePeriod}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (statsResponse.ok) {
+                    const stats = await statsResponse.json();
+                    friendsWithStats.push({
+                        uid: friend.uid,
+                        name: stats.name || friend.name,
+                        avatar: stats.avatar || friend.avatar,
+                        level: stats.level || 1,
+                        title: stats.title || 'Newbie',
+                        totalXP: stats.totalXP || 0,
+                        totalAnime: stats.totalAnime || 0,
+                        totalEpisodes: stats.totalEpisodes || 0,
+                        totalHours: stats.totalHours || 0,
+                        topGenres: stats.topGenres || []
+                    });
+                }
+            } catch (error) {
+                console.error(`Failed to get stats for ${friend.name}:`, error);
+            }
+        }
+
+        const currentUserStats = {
+            uid: 'current',
+            name: yourStats?.name || 'You',
+            avatar: yourStats?.avatar,
+            level: yourStats?.level || 1,
+            title: yourStats?.title || 'Newbie',
+            totalXP: storedTotalXP,
+            totalAnime: yourStats?.totalAnime || 0,
+            totalEpisodes: yourStats?.totalEpisodes || 0,
+            totalHours: yourStats?.totalHours || 0,
+            topGenres: yourStats?.topGenres || [],
+            isCurrentUser: true
+        };
+
+        let allUsers = [currentUserStats, ...friendsWithStats];
+        allUsers = allUsers.filter(user => user.name && user.name !== 'User');
+
+        allUsers.sort((a, b) => {
+            if (currentLeaderboardStat === 'level') return (b.level || 0) - (a.level || 0);
+            if (currentLeaderboardStat === 'xp') return (b.totalXP || 0) - (a.totalXP || 0);
+            if (currentLeaderboardStat === 'anime') return (b.totalAnime || 0) - (a.totalAnime || 0);
+            if (currentLeaderboardStat === 'episodes') return (b.totalEpisodes || 0) - (a.totalEpisodes || 0);
+            if (currentLeaderboardStat === 'hours') return (b.totalHours || 0) - (a.totalHours || 0);
+            return 0;
+        });
+
+        if (allUsers.length === 0) {
+            leaderboardList.innerHTML = '<div class="empty-state">No friends with data available</div>';
+            isLoadingLeaderboard = false;
+            return;
+        }
+
+        leaderboardList.innerHTML = allUsers.map((user, index) => {
+            let rankClass = index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : '';
+
+            let valueDisplay = '';
+            if (currentLeaderboardStat === 'level') valueDisplay = `Lv.${user.level}`;
+            else if (currentLeaderboardStat === 'xp') valueDisplay = `${formatNumberShort(user.totalXP)} XP`;
+            else if (currentLeaderboardStat === 'anime') valueDisplay = `${formatNumber(user.totalAnime)} anime`;
+            else if (currentLeaderboardStat === 'episodes') valueDisplay = `${formatNumberShort(user.totalEpisodes)} eps`;
+            else if (currentLeaderboardStat === 'hours') valueDisplay = `${formatNumberShort(user.totalHours)} hrs`;
+
+            const username = user.name || 'User';
+            const avatarUrl = user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=6366F1&color=fff`;
+            const topGenres = (user.topGenres || []).slice(0, 3);
+
+            return `
+                <div class="leaderboard-item ${user.isCurrentUser ? 'current-user' : ''}" onclick="openUserProfile('${user.uid === 'current' ? currentUserId : user.uid}')">
+                    <div class="leaderboard-rank ${rankClass}">#${index + 1}</div>
+                    <div class="leaderboard-user">
+                        <img src="${avatarUrl}" class="leaderboard-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=6366F1&color=fff'">
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${escapeHtml(username)}</div>
+                            <div class="leaderboard-level">${user.title || 'Newbie'}</div>
+                            <div class="leaderboard-stats">
+                                <span title="Episodes">🎬 ${formatNumberShort(user.totalEpisodes || 0)} eps</span>
+                                <span title="Anime">📺 ${formatNumber(user.totalAnime || 0)} anime</span>
+                                <span title="Hours">⏱️ ${formatNumberShort(user.totalHours || 0)} hrs</span>
+                            </div>
+                            ${topGenres.length ? `<div class="leaderboard-genres">${topGenres.map(g => `<span class="genre-tag">${escapeHtml(g)}</span>`).join('')}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="leaderboard-value">${valueDisplay}</div>
+                </div>
+            `;
+        }).join('');
+
+        lastLoadedTime = Date.now();
+
+    } catch (error) {
+        console.error('Failed to load leaderboard:', error);
+        leaderboardList.innerHTML = '<div class="empty-state">Failed to load leaderboard</div>';
+    } finally {
+        isLoadingLeaderboard = false;
+    }
+}
+
+function initLeaderboard() {
+    currentTimePeriod = localStorage.getItem('leaderboardTimePeriod') || 'all';
+
+    document.querySelectorAll('.time-period-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.period === currentTimePeriod) btn.classList.add('active');
+    });
+
+    document.querySelectorAll('.leaderboard-filter-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.leaderboard-filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentLeaderboardStat = btn.dataset.stat;
+            loadFriendLeaderboard();
+        };
+    });
+
+    document.querySelectorAll('.time-period-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.time-period-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            saveTimePeriod(btn.dataset.period);
+            yourStatsCache = null;
+            loadFriendLeaderboard();
+        };
+    });
+
+    loadFriendLeaderboard();
+}
+
+// ============================================
+// INITIALIZE COMMUNITY PAGE
+// ============================================
+
+function initCommunityPage() {
+    initCommunityTabs();
+    loadFriends();
+    loadFriendRequests();
+
+    const searchBtn = document.getElementById('searchUsersBtn');
+    if (searchBtn) searchBtn.addEventListener('click', searchUsers);
+
+    const searchInput = document.getElementById('searchUsersInput');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchUsers();
+        });
+    }
+
+    const leaderboardTab = document.querySelector('.community-tab[data-tab="leaderboard"]');
+    if (leaderboardTab) {
+        leaderboardTab.addEventListener('click', () => setTimeout(initLeaderboard, 100));
+    }
+}
+
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
+const communityMenuItemFinal = document.querySelector('.menu-item[data-page="community"]');
+if (communityMenuItemFinal) {
+    communityMenuItemFinal.addEventListener('click', () => {
+        setTimeout(initCommunityPage, 100);
+    });
+}
+
+// ============================================
+// STATE PERSISTENCE & AUTO-REFRESH SYSTEM
+// ============================================
+
+class StateManager {
+    constructor() {
+        this.currentPage = localStorage.getItem('lastActivePage') || 'dashboard';
+        this.lastScrollPosition = parseInt(localStorage.getItem('lastScrollPosition')) || 0;
+        this.filters = {
+            status: localStorage.getItem('animeFilterStatus') || 'all',
+            month: localStorage.getItem('animeFilterMonth') || 'all',
+            year: localStorage.getItem('animeFilterYear') || 'all',
+            sort: localStorage.getItem('animeSortFilter') || 'id'
+        };
+        this.refreshInterval = null;
+        this.init();
+    }
+
+    init() {
+        // Restore last active page
+        this.restoreLastPage();
+
+        // Restore scroll position
+        this.restoreScrollPosition();
+
+        // Start auto-refresh every 30 seconds
+        this.startAutoRefresh();
+
+        // Save state on page unload
+        window.addEventListener('beforeunload', () => this.saveCurrentState());
+
+        // Save scroll position on scroll
+        window.addEventListener('scroll', () => {
+            localStorage.setItem('lastScrollPosition', window.scrollY);
+        });
+
+        console.log('📌 State Manager initialized - Last page:', this.currentPage);
+    }
+
+    restoreLastPage() {
+        // Find and click the menu item for the last active page
+        const menuItem = document.querySelector(`.menu-item[data-page="${this.currentPage}"]`);
+        if (menuItem && !menuItem.classList.contains('active')) {
+            setTimeout(() => {
+                menuItem.click();
+            }, 100);
+        }
+    }
+
+    restoreScrollPosition() {
+        setTimeout(() => {
+            window.scrollTo({ top: this.lastScrollPosition, behavior: 'auto' });
+        }, 200);
+    }
+
+    saveCurrentState() {
+        // Save current page
+        const activeMenuItem = document.querySelector('.menu-item.active');
+        if (activeMenuItem) {
+            const page = activeMenuItem.getAttribute('data-page');
+            if (page) localStorage.setItem('lastActivePage', page);
+        }
+
+        // Save scroll position
+        localStorage.setItem('lastScrollPosition', window.scrollY);
+
+        // Save filters
+        const statusFilter = document.getElementById('statusFilter');
+        const monthFilter = document.getElementById('monthFilter');
+        const yearFilter = document.getElementById('yearFilter');
+        const sortFilter = document.getElementById('sortFilter');
+
+        if (statusFilter) localStorage.setItem('animeFilterStatus', statusFilter.value);
+        if (monthFilter) localStorage.setItem('animeFilterMonth', monthFilter.value);
+        if (yearFilter) localStorage.setItem('animeFilterYear', yearFilter.value);
+        if (sortFilter) localStorage.setItem('animeSortFilter', sortFilter.value);
+    }
+
+    startAutoRefresh() {
+        // Refresh data every 30 seconds (only if page is visible)
+        this.refreshInterval = setInterval(() => {
+            if (!document.hidden) {
+                this.refreshCurrentPageData();
+            }
+        }, 30000);
+    }
+
+    stopAutoRefresh() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+            this.refreshInterval = null;
+        }
+    }
+
+    async refreshCurrentPageData() {
+        const activePage = document.querySelector('.page.active');
+        if (!activePage) return;
+
+        const pageId = activePage.id;
+        console.log(`🔄 Auto-refreshing data for: ${pageId}`);
+
+        try {
+            // Refresh based on current page
+            if (pageId === 'dashboard-page') {
+                await this.refreshDashboard();
+            } else if (pageId === 'anime-list-page') {
+                await this.refreshAnimeList();
+            } else if (pageId === 'watchlist-page') {
+                await this.refreshWatchlist();
+            } else if (pageId === 'statistics-page') {
+                await this.refreshStatistics();
+            } else if (pageId === 'achievements-page') {
+                await this.refreshAchievements();
+            } else if (pageId === 'ranking-page') {
+                await this.refreshRanking();
+            } else if (pageId === 'community-page') {
+                await this.refreshCommunity();
+            } else if (pageId === 'settings-page') {
+                await this.refreshSettings();
+            }
+
+            // Show subtle notification
+            this.showRefreshNotification();
+
+        } catch (error) {
+            console.error('Auto-refresh failed:', error);
+        }
+    }
+
+    async refreshDashboard() {
+        if (typeof updateStats === 'function') updateStats();
+        if (typeof updateTopRatedAnime === 'function') updateTopRatedAnime();
+        if (typeof updateCurrentMonthAnime === 'function') updateCurrentMonthAnime();
+        if (typeof updateRecentActivity === 'function') updateRecentActivity();
+        if (typeof updateCurrentlyWatching === 'function') updateCurrentlyWatching();
+        if (typeof renderAnimeDNA === 'function') renderAnimeDNA();
+        if (typeof updateCharts === 'function') updateCharts();
+    }
+
+    async refreshAnimeList() {
+        if (typeof updateAnimeDisplay === 'function') updateAnimeDisplay();
+    }
+
+    async refreshWatchlist() {
+        const activeStatus = document.querySelector('.filter-btn.active')?.getAttribute('data-status') || 'all';
+        if (typeof updateWatchlist === 'function') updateWatchlist(activeStatus, 1);
+    }
+
+    async refreshStatistics() {
+        if (typeof initStatisticsCharts === 'function') initStatisticsCharts();
+        if (typeof updateStatisticsTables === 'function') updateStatisticsTables();
+        if (typeof refreshAllCharts === 'function') refreshAllCharts();
+    }
+
+    async refreshAchievements() {
+        if (typeof updateAchievements === 'function') updateAchievements();
+    }
+
+    async refreshRanking() {
+        if (typeof loadRankings === 'function') loadRankings(currentRankType || 'level', true);
+        if (typeof loadMyRank === 'function') loadMyRank();
+    }
+
+    async refreshCommunity() {
+        if (typeof loadFriends === 'function') loadFriends();
+        if (typeof loadFriendRequests === 'function') loadFriendRequests();
+        if (document.querySelector('.community-tab.active')?.dataset.tab === 'leaderboard') {
+            if (typeof loadFriendLeaderboard === 'function') loadFriendLeaderboard();
+        }
+    }
+
+    async refreshSettings() {
+        if (typeof updateSidebarUserInfo === 'function') updateSidebarUserInfo();
+        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+            window.AniPulseLevelSystem.updateAllLevelUI();
+        }
+    }
+
+    showRefreshNotification() {
+        // Create temporary notification
+        let notification = document.querySelector('.auto-refresh-toast');
+        if (notification) notification.remove();
+
+        notification = document.createElement('div');
+        notification.className = 'auto-refresh-toast';
+        notification.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Data refreshed';
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
+    }
+}
+
+// Initialize State Manager
+const stateManager = new StateManager();
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+    
+    .auto-refresh-toast {
+        animation: slideInRight 0.3s ease;
+    }
+`;
+document.head.appendChild(style);
+
+// ============================================
+// ANIME LIST MANAGEMENT
+// ============================================
+
+// Save anime list (triggers notifications for completed anime)
+async function saveAnimeList(animeList) {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        console.warn('No auth token, cannot save');
+        return false;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/api/anime/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ animeList })
+        });
+
+        if (response.ok) {
+            console.log('✅ Anime list saved successfully');
+
+            // Refresh notifications to show any newly created ones
+            if (typeof notificationManager !== 'undefined') {
+                await notificationManager.refresh();
+            }
+
+            return true;
+        } else {
+            console.error('Save failed:', await response.text());
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Save error:', error);
+        return false;
+    }
+}
+
+// Example: Call this when user marks an anime as completed
+async function markAnimeAsCompleted(anime) {
+    // Get current anime list
+    let animeList = getCurrentAnimeList(); // Your function to get current list
+
+    // Find or add anime
+    const existingIndex = animeList.findIndex(a => a.id === anime.id);
+
+    if (existingIndex !== -1) {
+        // Update existing
+        animeList[existingIndex] = {
+            ...animeList[existingIndex],
+            userStatus: 'Completed',
+            finishDate: new Date().toISOString()
+        };
+    } else {
+        // Add new
+        animeList.push({
+            ...anime,
+            userStatus: 'Completed',
+            finishDate: new Date().toISOString()
+        });
+    }
+
+    // Save - this triggers backend notification
+    await saveAnimeList(animeList);
+
+    // Show local feedback
+    showToast(`"${anime.title}" marked as completed!`, 'anime_complete');
+}
+
+// Helper toast function if not already defined
+function showToast(message, type = 'info') {
+    if (typeof notificationManager !== 'undefined') {
+        notificationManager.showToast(message, type);
+    } else {
+        console.log(`[${type}] ${message}`);
+    }
+}
 
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();

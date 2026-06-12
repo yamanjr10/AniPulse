@@ -2,52 +2,75 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO -->
     <meta name="description"
         content="AniPulse is a modern anime tracker to manage watchlists, track progress, view monthly stats, and analyze your anime journey in one clean dashboard.">
+
     <meta name="keywords"
         content="AniPulse, anime tracker, anime watchlist, anime stats, anime dashboard, track anime, anime analytics, otaku">
+
     <title>AniPulse | Anime Tracker & Stats Dashboard</title>
-    <link rel="shortcut icon" href="https://www.pngall.com/wp-content/uploads/13/Anime-Logo-PNG-Cutout.png"
-        type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        crossorigin="anonymous">
+
+    <!-- Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Poppins:wght@300;500;700&display=swap"
         rel="stylesheet" crossorigin="anonymous">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous">
+
+    <!-- Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"
         crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="Frontend/Css/dashboard.css">
-    <link rel="stylesheet" href="Frontend/Css/responsive.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/Frontend/Css/dashboard.css">
+    <link rel="stylesheet" href="/Frontend/Css/responsive.css">
+    <link rel="stylesheet" href="/Frontend/Css/level-system.css">
+
+    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
-    <!-- Update the favicon and theme colors -->
-    <link rel="icon" type="image/png" href="/icon.png">
-    <link rel="apple-touch-icon" href="/icon/icon-192x192.png">
-    <link rel="shortcut icon" href="/icon/icon.png" type="image/png">
 
-    <!-- Update theme colors for PWA -->
-    <meta name="theme-color" content="#1a1f2e">
-    <meta name="msapplication-TileImage" content="/icon.png">
-
-    <!-- Force no caching of HTML -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <meta name="mobile-web-app-capable" content="yes">
-
-    <!-- Add dark mode preference -->
+    <!-- Theme -->
+    <meta name="theme-color" content="#0b1120">
     <meta name="color-scheme" content="dark light">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#6366F1">
+
+    <!-- Mobile PWA -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AniPulse">
-    <link rel="apple-touch-icon" href="/icon/icon-192x192.png">
-    <link rel="shortcut icon" href="/icon/icon.png" type="image/png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icon/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icon/icon-512x512.png">
+
+    <!-- Main Browser Icon -->
+    <link rel="shortcut icon" href="/Frontend/icon/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/Frontend/icon/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/Frontend/icon/icon-72x72.png">
+
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" sizes="72x72" href="/Frontend/icon/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="96x96" href="/Frontend/icon/icon-96x96.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="/Frontend/icon/icon-128x128.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/Frontend/icon/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/Frontend/icon/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/Frontend/icon/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="384x384" href="/Frontend/icon/icon-384x384.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/Frontend/icon/icon-512x512.png">
+
+    <!-- Windows Tile -->
+    <meta name="msapplication-TileColor" content="#6366F1">
+    <meta name="msapplication-TileImage" content="/Frontend/icon/icon-192x192.png">
+
+    <!-- Disable Cache -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
 </head>
 
@@ -112,6 +135,27 @@
                     <i class="fas fa-sun"></i>
                 </button>
 
+                <!-- NOTIFICATION BELL -->
+                <div class="notification-container">
+                    <button class="notification-bell" id="notificationBell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                    </button>
+
+                    <div class="notification-dropdown" id="notificationDropdown" style="display: none;">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                            <button class="mark-all-read" id="markAllReadBtn">Mark all read</button>
+                        </div>
+                        <div class="notification-list" id="notificationList">
+                            <div class="notification-loading">Loading...</div>
+                        </div>
+                        <div class="notification-footer">
+                            <button class="view-all-notifications">View all</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- User Profile -->
                 <div class="user-profile" id="profileMenuToggle">
                     <img loading="lazy" src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
@@ -130,6 +174,11 @@
                             </div>
                             <div class="sidebar-user-info">
                                 <div class="sidebar-username">Loading...</div>
+                                <!--Level Badge -->
+                                <div class="sidebar-level" id="sidebarLevel">
+                                    <span class="level-badge" id="levelBadgeText">Lv.16</span>
+                                    <span class="level-title" id="levelTitleText">Anime God</span>
+                                </div>
                                 <div class="sidebar-user-stats">
                                     <div class="stat-item">
                                         <span class="stat-number" id="statNumber">0</span>
@@ -161,6 +210,9 @@
                             </div>
                             <div class="menu-item" data-page="settings">
                                 <i class="fas fa-cog"></i><span>Settings</span>
+                            </div>
+                            <div class="menu-item" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
                             </div>
 
                         </div>
@@ -531,21 +583,6 @@
             <div class="dashboard-section">
                 <h2 class="section-title"><i class="fas fa-chart-bar"></i> Detailed Statistics</h2>
                 <div class="statistics-grid">
-                    <!-- Watch Time by Month Chart -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Hours By Month</div>
-                            <div class="anime-counter">
-                                <div class="stat-with-filter">
-                                    <span id="monthly-total-hours">Total Hrs: 0</span>
-                                    <select id="watchTimeYearSelect" class="year-dropdown"></select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="watchTimeByMonthChart"></canvas>
-                        </div>
-                    </div>
 
                     <div class="chart-card fade-in">
                         <div class="chart-header">
@@ -553,22 +590,6 @@
                         </div>
                         <div class="chart-container">
                             <canvas id="completionChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Episodes By Month Chart -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Episodes By Month</div>
-                            <div class="anime-counter">
-                                <div class="stat-with-filter">
-                                    <span id="yearly-total-episodes">Total Eps: 0</span>
-                                    <select id="episodesYearSelect" class="year-dropdown"></select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="episodesOverTimeChart"></canvas>
                         </div>
                     </div>
 
@@ -698,11 +719,159 @@
 
         <!-- Community Page -->
         <div id="community-page" class="page">
-            <div class="coming-soon-container">
-                <i class="fas fa-users coming-icon"></i>
-                <h2>Community</h2>
-                <p>Community chat & discussions are under construction.</p>
-                <span class="coming-badge">Coming Soon</span>
+            <div class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-users"></i>
+                    Community
+                </h2>
+
+                <!-- Community Tabs -->
+                <div class="community-tabs">
+                    <button class="community-tab active" data-tab="friends">
+                        <i class="fas fa-user-friends"></i> Friends
+                    </button>
+                    <button class="community-tab" data-tab="feed">
+                        <i class="fas fa-newspaper"></i> Feed
+                    </button>
+                    <button class="community-tab" data-tab="discussions">
+                        <i class="fas fa-comments"></i> Discussions
+                    </button>
+                    <button class="community-tab" data-tab="leaderboard">
+                        <i class="fas fa-trophy"></i> Leaderboard
+                    </button>
+                </div>
+
+                <!-- Tab Content: Friends -->
+                <div id="community-friends-tab" class="community-tab-content active">
+                    <!-- Friend Requests Section -->
+                    <div class="friend-requests-section" id="friendRequestsSection" style="display: none;">
+                        <h3><i class="fas fa-user-plus"></i> Friend Requests</h3>
+                        <div id="friendRequestsList" class="friend-requests-list"></div>
+                    </div>
+
+                    <!-- Search Users -->
+                    <div class="search-users-section">
+                        <h3><i class="fas fa-search"></i> Find Friends</h3>
+                        <div class="search-users-input">
+                            <input type="text" id="searchUsersInput" placeholder="Search by username...">
+                            <button id="searchUsersBtn" class="btn btn-primary">Search</button>
+                        </div>
+                        <div id="searchResultsList" class="search-results-list"></div>
+                    </div>
+
+                    <!-- Friends List -->
+                    <div class="friends-list-section">
+                        <h3><i class="fas fa-users"></i> Your Friends (<span id="friendsCount">0</span>)</h3>
+                        <div id="friendsList" class="friends-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Feed (Coming Soon) -->
+                <div id="community-feed-tab" class="community-tab-content">
+                    <div class="coming-soon-card">
+                        <i class="fas fa-newspaper"></i>
+                        <h3>Activity Feed</h3>
+                        <p>See what your friends are watching and achieving!</p>
+                        <span class="coming-badge-small">Coming Soon</span>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Discussions (Coming Soon) -->
+                <div id="community-discussions-tab" class="community-tab-content">
+                    <div class="coming-soon-card">
+                        <i class="fas fa-comments"></i>
+                        <h3>Discussions</h3>
+                        <p>Join conversations about your favorite anime!</p>
+                        <span class="coming-badge-small">Coming Soon</span>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Leaderboard (FULLY FUNCTIONAL) -->
+                <div id="community-leaderboard-tab" class="community-tab-content">
+                    <div class="friend-leaderboard">
+                        <h3><i class="fas fa-chart-line"></i> Friend Leaderboard</h3>
+                        <p class="leaderboard-subtitle">Compare your stats with friends!</p>
+
+                        <!-- Leaderboard Filters -->
+                        <div class="leaderboard-filters">
+                            <button class="leaderboard-filter-btn active" data-stat="level">
+                                <i class="fas fa-chart-line"></i> Level
+                            </button>
+                            <button class="leaderboard-filter-btn" data-stat="xp">
+                                <i class="fas fa-star"></i> Total XP
+                            </button>
+                            <button class="leaderboard-filter-btn" data-stat="anime">
+                                <i class="fas fa-tv"></i> Anime
+                            </button>
+                            <button class="leaderboard-filter-btn" data-stat="hours">
+                                <i class="fas fa-clock"></i> Hours
+                            </button>
+                            <button class="leaderboard-filter-btn" data-stat="episodes">
+                                <i class="fas fa-film"></i> Episodes
+                            </button>
+                        </div>
+
+                        <!-- Time Period Filter -->
+                        <div class="time-period-filter">
+                            <label><i class="fas fa-calendar-alt"></i> Show data from:</label>
+                            <div class="time-period-buttons">
+                                <button class="time-period-btn" data-period="week">
+                                    <i class="fas fa-calendar-week"></i> This Week
+                                </button>
+                                <button class="time-period-btn" data-period="month">
+                                    <i class="fas fa-calendar-month"></i> This Month
+                                </button>
+                                <button class="time-period-btn" data-period="year">
+                                    <i class="fas fa-calendar-year"></i> This Year
+                                </button>
+                                <button class="time-period-btn active" data-period="all">
+                                    <i class="fas fa-infinity"></i> All Time
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Your Stats Card (Enhanced) -->
+                        <div class="your-stats-card" id="yourStatsCard">
+                            <div class="your-stats-header">
+                                <img id="yourAvatar" class="your-avatar" src="" alt="">
+                                <div>
+                                    <h4 id="yourUsername">You</h4>
+                                    <span id="yourLevel" class="your-level">Lv.1</span>
+                                </div>
+                            </div>
+                            <div class="your-stats-grid">
+                                <div class="your-stat">
+                                    <span class="stat-value" id="yourTotalXP">0</span>
+                                    <span class="stat-label">Total XP</span>
+                                </div>
+                                <div class="your-stat">
+                                    <span class="stat-value" id="yourTotalAnime">0</span>
+                                    <span class="stat-label">Anime</span>
+                                </div>
+                                <div class="your-stat">
+                                    <span class="stat-value" id="yourTotalEpisodes">0</span>
+                                    <span class="stat-label">Episodes</span>
+                                </div>
+                                <div class="your-stat">
+                                    <span class="stat-value" id="yourTotalHours">0</span>
+                                    <span class="stat-label">Hours</span>
+                                </div>
+                            </div>
+                            <!-- Top Genres Section -->
+                            <div class="your-top-genres">
+                                <span class="genres-label"><i class="fas fa-music"></i> Top Genres:</span>
+                                <div id="yourTopGenres" class="genre-tags"></div>
+                            </div>
+                        </div>
+
+                        <!-- Friends Leaderboard List -->
+                        <div id="friendLeaderboardList" class="friend-leaderboard-list">
+                            <div class="loading-spinner">
+                                <i class="fas fa-spinner fa-spin"></i> Loading leaderboard...
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -722,6 +891,75 @@
                             <div class="profile-preview-join-date">
                                 <i class="fas fa-calendar-plus"></i>
                                 <span id="memberSinceText">Member since May 2026</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level Progress Card - Upgraded -->
+                    <div class="level-card settings-level-card">
+                        <div class="level-card-header">
+                            <div class="level-rank">
+                                <div class="level-badge-image" id="settingsLevelBadge">
+                                    <i class="fas fa-user-astronaut"></i>
+                                </div>
+                                <div class="level-title-wrap">
+                                    <div class="level-title" id="settingsLevelTitle">Anime God</div>
+                                    <div class="level-subtitle" id="settingsLevelSubtitle">Seasoned Binger</div>
+                                </div>
+                            </div>
+                            <div class="level-number" id="settingsLevelNumber">Level 16</div>
+                        </div>
+                        <div class="level-progress">
+                            <div class="progress-track">
+                                <div class="progress-fill" id="settingsProgressFill" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-row">
+                                <div class="progress-stats">
+                                    <span class="current" id="settingsCurrentXP">2464</span>
+                                    <span>/</span>
+                                    <span class="next" id="settingsNextXP">3000</span>
+                                    <span>XP</span>
+                                </div>
+                                <div class="progress-percent" id="settingsProgressPercent">0%</div>
+                            </div>
+                            <div class="xp-delta" id="settingsXpDelta" aria-hidden="true" style="display:none;">+0 XP
+                            </div>
+                        </div>
+                        <div class="level-next">
+                            <div>
+                                <i class="fas fa-arrow-up"></i>
+                                <span id="settingsNextInfo">Next: Transcendent at 18000 XP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- XP Queue Status Card -->
+                    <div class="settings-group queue-status-card">
+                        <h3><i class="fas fa-clock"></i> XP Queue Status</h3>
+                        <div class="queue-info" id="queueInfoContainer">
+                            <div class="queue-stats">
+                                <div class="queue-stat-item">
+                                    <span class="queue-label">Queued XP:</span>
+                                    <span class="queue-value" id="queuedXPAmount">0</span>
+                                </div>
+                                <div class="queue-stat-item">
+                                    <span class="queue-label">Queue Items:</span>
+                                    <span class="queue-value" id="queuedItemsCount">0</span>
+                                </div>
+                                <div class="queue-stat-item">
+                                    <span class="queue-label">Today's XP:</span>
+                                    <span class="queue-value" id="todayXPAmount">0</span>
+                                    <span class="queue-max">/ <span id="dailyLimit">--</span></span>
+                                </div>
+                            </div>
+                            <div class="queue-progress">
+                                <div class="progress-track">
+                                    <div class="progress-fill" id="queueProgressFill" style="width: 0%"></div>
+                                </div>
+                                <span class="queue-percent" id="queuePercent">0%</span>
+                            </div>
+                            <div class="queue-message" id="queueMessage">
+                                <i class="fas fa-check-circle"></i> No pending XP in queue
                             </div>
                         </div>
                     </div>
@@ -773,6 +1011,33 @@
                                         <span class="theme-label">System</span>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Cloud Sync Section -->
+                        <div class="settings-group">
+                            <h3><i class="fas fa-cloud-upload-alt"></i> Cloud Sync</h3>
+
+                            <div class="settings-item">
+                                <div class="sync-status" id="syncStatus">
+                                    <i class="fas fa-cloud"></i>
+                                    <span id="syncStatusText">Cloud sync active</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-item">
+                                <button id="syncNowBtn" class="btn btn-primary">
+                                    <i class="fas fa-sync-alt"></i> Sync Now
+                                </button>
+                                <button id="loadFromCloudBtn" class="btn btn-secondary">
+                                    <i class="fas fa-cloud-download-alt"></i> Load from Cloud
+                                </button>
+                            </div>
+
+                            <div class="settings-item">
+                                <small class="sync-info">
+                                    Last sync: <span id="lastSyncTime">Never</span>
+                                </small>
                             </div>
                         </div>
 
@@ -896,8 +1161,8 @@
                             <option value="02">February</option>
                             <option value="03">March</option>
                             <option value="04">April</option>
-                            <option value="05" selected>May</option>
-                            <option value="06">June</option>
+                            <option value="05">May</option>
+                            <option value="06" selected>June</option>
                             <option value="07">July</option>
                             <option value="08">August</option>
                             <option value="09">September</option>
@@ -953,7 +1218,7 @@
         <!-- Toast Container -->
         <div class="toast-container" id="toastContainer"></div>
 
-        <!-- Empty State Component (Add to CSS) -->
+        <!-- Empty State Component -->
         <div class="empty-state" id="emptyStateTemplate" style="display: none;">
             <div class="empty-state-icon">
                 <i class="fas"></i>
@@ -969,7 +1234,7 @@
                 <div class="modal-header">
                     <div class="modal-title">
                         <i class="fas fa-user-astronaut"></i>
-                        Welcome to AnimeTracker Pro!
+                        Welcome to AniPulse!
                     </div>
                     <button class="close-modal" onclick="hideNameEntryModal()">&times;</button>
                 </div>
@@ -1029,14 +1294,6 @@
             </div>
         </div>
 
-        <!-- Floating Scroll to Top Button -->
-        <div class="floating-scroll-top">
-            <button class="scroll-top-btn" id="scrollToTop" title="Scroll to top">
-                <i class="fas fa-arrow-up"></i>
-                <span class="btn-label">Top</span>
-            </button>
-        </div>
-
         <!-- FULLSCREEN RECAP MODAL -->
         <div id="recap-modal" class="recap-modal hidden">
             <div class="recap-container">
@@ -1062,20 +1319,144 @@
             </div>
         </div>
 
+        <!-- User Profile Modal (Enhanced) -->
+        <div id="userProfileModal" class="modal" style="display: none;">
+            <div class="modal-content profile-modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">
+                        <i class="fas fa-user-circle"></i> User Profile
+                    </h2>
+                    <button class="close-modal" onclick="closeUserProfileModal()">&times;</button>
+                </div>
+                <div class="profile-modal-body">
+                    <!-- Profile Header -->
+                    <div class="profile-header-section">
+                        <div class="profile-avatar-large">
+                            <img id="profileAvatar" src="" alt="">
+                            <div class="profile-status-dot"></div>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="profileName">Loading...</h2>
+                            <div class="profile-badges">
+                                <span class="profile-level-badge" id="profileLevel">Lv.1</span>
+                                <span class="profile-title-badge" id="profileTitle">Newbie</span>
+                            </div>
+                            <div class="profile-xp-bar">
+                                <div class="xp-bar-container">
+                                    <div class="xp-bar-fill" id="profileXpFill" style="width: 0%"></div>
+                                </div>
+                                <div class="xp-text" id="profileXpText">0 / 0 XP</div>
+                            </div>
+                            <button class="friend-action-btn" id="profileFriendBtn" style="display: none;">
+                                <i class="fas fa-user-plus"></i> Add Friend
+                            </button>
+                        </div>
+                    </div>
 
-        <script defer src="Frontend/Js/main.js"></script>
-        <script defer src="Frontend/Js/extras.js"></script>
-        <script defer src="Frontend/Js/level-system.js"></script>
+                    <!-- Stats Grid -->
+                    <div class="profile-stats-grid">
+                        <div class="profile-stat-item">
+                            <div class="stat-value" id="profileTotalAnime">0</div>
+                            <div class="stat-label">Total Anime</div>
+                        </div>
+                        <div class="profile-stat-item">
+                            <div class="stat-value" id="profileCompleted">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="profile-stat-item">
+                            <div class="stat-value" id="profileEpisodes">0</div>
+                            <div class="stat-label">Eps</div>
+                        </div>
+                        <div class="profile-stat-item">
+                            <div class="stat-value" id="profileHours">0</div>
+                            <div class="stat-label">Hrs</div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs for Anime Lists -->
+                    <div class="profile-tabs">
+                        <button class="profile-tab active" data-tab="completed">
+                            <i class="fas fa-check-circle"></i> Completed
+                        </button>
+                        <button class="profile-tab" data-tab="watching">
+                            <i class="fas fa-play-circle"></i> Watching
+                        </button>
+                        <button class="profile-tab" data-tab="plan">
+                            <i class="fas fa-clock"></i> Plan to Watch
+                        </button>
+                        <button class="profile-tab" data-tab="achievements">
+                            <i class="fas fa-trophy"></i> Achievements
+                        </button>
+                        <button class="profile-tab" data-tab="activity">
+                            <i class="fas fa-history"></i> Activity
+                        </button>
+                    </div>
+
+                    <!-- Tab Content: Completed Anime -->
+                    <div id="profileTabCompleted" class="profile-tab-content active">
+                        <div class="profile-anime-grid" id="profileCompletedList">
+                            <div class="loading-spinner">Loading...</div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Watching Anime -->
+                    <div id="profileTabWatching" class="profile-tab-content">
+                        <div class="profile-anime-grid" id="profileWatchingList">
+                            <div class="loading-spinner">Loading...</div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Plan to Watch -->
+                    <div id="profileTabPlan" class="profile-tab-content">
+                        <div class="profile-anime-grid" id="profilePlanList">
+                            <div class="loading-spinner">Loading...</div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Achievements -->
+                    <div id="profileTabAchievements" class="profile-tab-content">
+                        <div class="profile-achievements-grid" id="profileAchievementsList">
+                            <div class="loading-spinner">Loading...</div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Activity -->
+                    <div id="profileTabActivity" class="profile-tab-content">
+                        <div class="profile-activity-list" id="profileActivityList">
+                            <div class="loading-spinner">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <script defer src="/Frontend/Js/config.js"></script>
+        <script src="Frontend/Js/main.js"></script>
+        <script src="Frontend/Js/extras.js"></script>
+        <script src="Frontend/Js/level-system.js"></script>
+        <script defer src="Frontend/Js/dual-storage.js"></script>
 
         <script>
-            // Page Navigation 
+            // ============================================
+            // PAGE NAVIGATION - COMPLETE WITH ALL FUNCTIONS
+            // ============================================
+
+            // Page Navigation - MODIFIED to save state
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.addEventListener('click', function (e) {
-                    // Don't trigger for logout button
                     if (this.id === 'logoutBtn') return;
 
                     const pageId = this.getAttribute('data-page');
                     if (!pageId) return;
+
+                    // Save current page to localStorage
+                    localStorage.setItem('lastActivePage', pageId);
+
+                    // Save current scroll position
+                    localStorage.setItem('lastScrollPosition', window.scrollY);
 
                     // Remove active class from all menu items
                     document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
@@ -1092,16 +1473,23 @@
                     if (activePage) {
                         activePage.classList.add('active');
                         activePage.style.display = 'block';
+
+                        // Refresh level UI
+                        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+                            window.AniPulseLevelSystem.updateAllLevelUI();
+                        }
                     }
 
-                    // Scroll to top
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Scroll to saved position or top
+                    const savedScroll = parseInt(localStorage.getItem('lastScrollPosition')) || 0;
+                    window.scrollTo({ top: savedScroll, behavior: 'smooth' });
 
                     // Initialize page-specific content
                     if (pageId === 'statistics') {
                         setTimeout(() => {
                             if (typeof initStatisticsCharts === 'function') initStatisticsCharts();
                             if (typeof updateStatisticsTables === 'function') updateStatisticsTables();
+                            if (typeof refreshAllCharts === 'function') refreshAllCharts();
                         }, 100);
                     } else if (pageId === 'watchlist') {
                         setTimeout(() => {
@@ -1114,10 +1502,44 @@
                     } else if (pageId === 'ranking') {
                         setTimeout(() => {
                             if (typeof initRankingPage === 'function') initRankingPage();
+                            if (typeof loadRankings === 'function') loadRankings('level', true);
+                            if (typeof loadMyRank === 'function') loadMyRank();
+                        }, 100);
+                    } else if (pageId === 'community') {
+                        setTimeout(() => {
+                            if (typeof initCommunityPage === 'function') initCommunityPage();
+                            if (typeof loadFriends === 'function') loadFriends();
+                            if (typeof loadFriendRequests === 'function') loadFriendRequests();
+                        }, 100);
+                    } else if (pageId === 'anime-list') {
+                        setTimeout(() => {
+                            if (typeof updateAnimeDisplay === 'function') updateAnimeDisplay();
+                        }, 100);
+                    } else if (pageId === 'settings') {
+                        setTimeout(() => {
+                            if (typeof initSettings === 'function') initSettings();
+                            if (typeof initSyncUI === 'function') initSyncUI();
+                            if (typeof initAvatarSystem === 'function') initAvatarSystem();
+                            if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+                                window.AniPulseLevelSystem.updateAllLevelUI();
+                            }
+                        }, 100);
+                    } else if (pageId === 'dashboard') {
+                        setTimeout(() => {
+                            if (typeof updateStats === 'function') updateStats();
+                            if (typeof updateTopRatedAnime === 'function') updateTopRatedAnime();
+                            if (typeof updateCurrentMonthAnime === 'function') updateCurrentMonthAnime();
+                            if (typeof updateRecentActivity === 'function') updateRecentActivity();
+                            if (typeof updateCurrentlyWatching === 'function') updateCurrentlyWatching();
+                            if (typeof renderAnimeDNA === 'function') renderAnimeDNA();
                         }, 100);
                     }
                 });
             });
+
+            // ============================================
+            // INITIAL DASHBOARD LOAD
+            // ============================================
 
             // Make sure dashboard is visible on load
             document.addEventListener('DOMContentLoaded', function () {
@@ -1133,12 +1555,44 @@
                     dashboardPage.classList.add('active');
                 }
 
+                // Ensure level UI is in sync on initial load
+                if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+                    window.AniPulseLevelSystem.updateAllLevelUI();
+                }
+
                 // Set active menu item
                 const dashboardMenuItem = document.querySelector('.menu-item[data-page="dashboard"]');
                 if (dashboardMenuItem) {
                     dashboardMenuItem.classList.add('active');
                 }
+
+                // Initialize dashboard data
+                setTimeout(() => {
+                    if (typeof updateStats === 'function') updateStats();
+                    if (typeof updateTopRatedAnime === 'function') updateTopRatedAnime();
+                    if (typeof updateCurrentMonthAnime === 'function') updateCurrentMonthAnime();
+                    if (typeof updateRecentActivity === 'function') updateRecentActivity();
+                    if (typeof updateCurrentlyWatching === 'function') updateCurrentlyWatching();
+                    if (typeof renderAnimeDNA === 'function') renderAnimeDNA();
+                    if (typeof updateAnimeDisplay === 'function') updateAnimeDisplay();
+                    if (typeof updateSidebarUserInfo === 'function') updateSidebarUserInfo();
+                    if (typeof updateCurrentDate === 'function') updateCurrentDate();
+                }, 200);
             });
+
+            // ============================================
+            // SERVICE WORKER REGISTRATION
+            // ============================================
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                        console.log('✅ ServiceWorker registered successfully:', registration.scope);
+                    }).catch(error => {
+                        console.log('❌ ServiceWorker registration failed:', error);
+                    });
+                });
+            }
         </script>
 </body>
 
