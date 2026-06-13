@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="AniPulse - The ultimate anime tracking and analytics dashboard. Track your watchlist, analyze viewing habits, and connect with the anime community.">
+    <meta name="keywords"
+        content="anime tracker, anime dashboard, watchlist, anime stats, anime analytics, anime community, anime statistics">
+    <title>AniPulse | Ultimate Anime Tracker & Analytics Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="shortcut icon" href="https://www.pngall.com/wp-content/uploads/13/Anime-Logo-PNG-Cutout.png"
+        type="image/x-icon">
+    <link rel="stylesheet" href="Frontend/Css/landingpage.css">
+</head>
+
+<body>
+
+    <div class="bg-glow">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <header class="landing-header" id="header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><i class="fas fa-heartbeat" style="color: white;"></i></div>
+                <span class="logo-text">AniPulse</span>
+                <span class="logo-beta">BETA</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#stats" class="nav-link">Stats</a>
+                <a href="#community" class="nav-link">Community</a>
+                <a href="dashboard.html" class="cta-button">Launch App</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <div class="hero-tag"><i class="fas fa-rocket"></i> VERSION 2.0.0 LAUNCHED</div>
+                <h1 class="hero-title">Your Anime Journey,<br><span style="color: var(--primary);">Visualized &
+                        Analyzed</span></h1>
+                <p class="hero-subtitle">AniPulse is more than an anime tracker—it's your personal anime analytics
+                    dashboard. Track every episode, analyze habits, discover patterns, and connect with a community that
+                    shares your passion.</p>
+                <div class="hero-features">
+                    <div class="feature-item"><i class="fas fa-check-circle feature-check"></i><span>Real-time
+                            Progress</span></div>
+                    <div class="feature-item"><i class="fas fa-check-circle feature-check"></i><span>Advanced
+                            Analytics</span></div>
+                    <div class="feature-item"><i class="fas fa-check-circle feature-check"></i><span>AI
+                            Recommendations</span></div>
+                </div>
+                <div class="hero-buttons">
+                    <button onclick="window.location.href='/login.html?register=true'" class="btn-primary">
+                        <i class="fas fa-play-circle"></i> Start Free Trial
+                    </button>
+                    <button onclick="window.location.href='#features'" class="btn-secondary"><i
+                            class="fas fa-chart-line"></i> Explore Features</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="dashboard-preview floating">
+                    <div class="preview-header">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 32px; height: 32px; background: var(--gradient); border-radius: 10px;">
+                            </div><span style="font-weight: 700;">AniPulse</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <div
+                                style="width: 30px; height: 30px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 30px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preview-stats">
+                        <div class="stats-grid-preview">
+                            <div class="stat-preview">
+                                <div style="color:#aaa;">Completed</div>
+                                <div style="font-size:1.7rem; font-weight:800;">42</div>
+                            </div>
+                            <div class="stat-preview">
+                                <div style="color:#aaa;">Hours</div>
+                                <div style="font-size:1.7rem; font-weight:800;">328</div>
+                            </div>
+                            <div class="stat-preview">
+                                <div style="color:#aaa;">Episodes</div>
+                                <div style="font-size:1.7rem; font-weight:800;">1,240</div>
+                            </div>
+                            <div class="stat-preview">
+                                <div style="color:#aaa;">Score Avg</div>
+                                <div style="font-size:1.7rem; font-weight:800;">8.2</div>
+                            </div>
+                        </div>
+                        <div class="preview-chart">
+                            <div class="chart-bar" style="height: 75%; --h:75%"></div>
+                            <div class="chart-bar" style="height: 60%; --h:60%"></div>
+                            <div class="chart-bar" style="height: 90%; --h:90%"></div>
+                            <div class="chart-bar" style="height: 45%; --h:45%"></div>
+                            <div class="chart-bar" style="height: 80%; --h:80%"></div>
+                            <div class="chart-bar" style="height: 70%; --h:70%"></div>
+                            <div class="chart-bar" style="height: 55%; --h:55%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">POWERFUL FEATURES</span>
+                <h2 class="section-title">Everything You Need in One Dashboard</h2>
+                <p class="section-subtitle">Tracking, analytics, and community features combined for anime lovers.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">Deep insights into watching habits, genre preferences, interactive
+                        charts.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Monthly progress</li>
+                        <li><i class="fas fa-check"></i> Genre distribution</li>
+                        <li><i class="fas fa-check"></i> Watch time stats</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-heart-circle-check"></i></div>
+                    <h3 class="feature-title">Smart Watchlist</h3>
+                    <p class="feature-description">Organize anime with custom status, priority, episode tracking.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Custom categories</li>
+                        <li><i class="fas fa-check"></i> Priority sorting</li>
+                        <li><i class="fas fa-check"></i> Seasonal planning</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-trophy"></i></div>
+                    <h3 class="feature-title">Achievements</h3>
+                    <p class="feature-description">Unlock badges, celebrate milestones, join seasonal challenges.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> 50+ badges</li>
+                        <li><i class="fas fa-check"></i> Progress milestones</li>
+                        <li><i class="fas fa-check"></i> Achievement showcase</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-calendar-day"></i></div>
+                    <h3 class="feature-title">Activity Heatmaps</h3>
+                    <p class="feature-description">Yearly activity visualization, daily patterns, seasonal trends.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Heatmap calendar</li>
+                        <li><i class="fas fa-check"></i> Watching patterns</li>
+                        <li><i class="fas fa-check"></i> Custom ranges</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                    <h3 class="feature-title">AI Recommendations</h3>
+                    <p class="feature-description">Personalized anime suggestions based on your taste and ratings.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Smart matching</li>
+                        <li><i class="fas fa-check"></i> Hidden gems</li>
+                        <li><i class="fas fa-check"></i> Seasonal picks</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <h3 class="feature-title">Community Hub</h3>
+                    <p class="feature-description">Connect with fans, share progress, join discussions and challenges.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> User profiles</li>
+                        <li><i class="fas fa-check"></i> Discussion forums</li>
+                        <li><i class="fas fa-check"></i> Shared watchlists</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="stats" class="stats-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">BY THE NUMBERS</span>
+                <h2 class="section-title">Trusted by Anime Enthusiasts</h2>
+                <p class="section-subtitle">Join thousands who transformed their tracking experience.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">1K+</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1K+</div>
+                    <div class="stat-label">Anime Entries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">User Satisfaction</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4.8★</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="community" class="cta-section">
+        <div class="container">
+            <div class="cta-card">
+                <h2 class="cta-title">Ready to Transform Your Anime Experience?</h2>
+                <p class="cta-subtitle">Join AniPulse today and start tracking, analyzing, and celebrating your anime
+                    journey.</p>
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="window.location.href='/login.html?register=true'" class="btn-primary"
+                        style="background: white; color: #8B5CF6;">
+                        <i class="fas fa-user-plus"></i> Create Free Account
+                    </button>
+                    <button onclick="window.location.href='login.html'" class="btn-secondary"
+                        style="background: rgba(0,0,0,0.3); border-color:white;"><i class="fas fa-sign-in-alt"></i> Sign
+                        In to Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3><i class="fas fa-heartbeat" style="color:var(--primary);"></i> AniPulse</h3>
+                    <p style="color:#9CA3AF;">Ultimate anime tracking & analytics platform.</p>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/yamanjrexe"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                        <a href="https://github.com/yamanjr10"><i class="fab fa-github"></i></a>
+                        <a href="https://www.instagram.com/yamanjr.exe"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Features</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Anime Tracking</a></li>
+                        <li><a href="#">Analytics</a></li>
+                        <li><a href="#">Watchlist</a></li>
+                        <li><a href="#">Achievements</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Access</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Community</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Discord</a></li>
+                        <li><a href="#">Forums</a></li>
+                        <li><a href="#">Challenges</a></li>
+                        <li><a href="#">Top Users</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AniPulse. All rights reserved. Anime data via Jikan API • fan-made project</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.landing-header');
+            if (window.scrollY > 50) {
+                header.style.padding = '12px 0';
+                header.style.background = 'rgba(9, 11, 16, 0.95)';
+                header.style.backdropFilter = 'blur(20px)';
+            } else {
+                header.style.padding = '20px 0';
+                header.style.background = 'rgba(9, 11, 16, 0.85)';
+            }
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Reveal animations on scroll
+        const revealElements = document.querySelectorAll('.feature-card, .stat-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        revealElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s cubic-bezier(0.2,0.9,0.4,1.1), transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // immediate tiny fix for visible ones
+        setTimeout(() => {
+            revealElements.forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }
+            });
+        }, 200);
+    </script>
+</body>
+
+</html>

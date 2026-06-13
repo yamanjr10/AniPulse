@@ -1,0 +1,84 @@
+{
+  "name": "AniPulse",
+  "short_name": "AniPulse",
+  "description": "Track your anime watchlist and manage your anime journey",
+  "start_url": "/dashboard.html",
+  "display": "standalone",
+  "theme_color": "#6366F1",
+  "background_color": "#0B1120",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Watchlist",
+      "short_name": "Watchlist",
+      "description": "View your anime watchlist",
+      "url": "/dashboard.html?page=watchlist",
+      "icons": [{ "src": "/icon/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Statistics",
+      "short_name": "Stats",
+      "description": "View your anime statistics",
+      "url": "/dashboard.html?page=statistics",
+      "icons": [{ "src": "/icon/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Add Anime",
+      "short_name": "Add",
+      "description": "Add a new anime to your list",
+      "url": "/dashboard.html?action=add",
+      "icons": [{ "src": "/icon/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ]
+}
