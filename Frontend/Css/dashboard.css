@@ -5194,6 +5194,16 @@ h6 {
   clear: both;
 }
 
+/* Allow hiding of currently watching section when no anime */
+#currently-watching-section[style*="display: none"],
+#currently-watching-section.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 /* Ensure proper separation between heatmap and currently watching */
 .chart-card+.dashboard-section,
 .chart-card+#currently-watching-section {
@@ -7484,20 +7494,102 @@ h6 {
 }
 
 /* ------------------------------------
-   ACTIVITY HEATMAP 
+   ACTIVITY HEATMAP
    ------------------------------------ */
 
-/* Heatmap Card Container */
-.chart-card:has(#activityHeatmapChart) {
+/* Force the heatmap card to have exactly the same margins as stats-grid */
+.chart-card:has(#activityHeatmapChart),
+.chart-card.fade-in:has(.heatmap-header) {
+  margin: 0 24px 24px 24px !important;
+  width: auto !important;
+  max-width: calc(100% - 48px) !important;
   background: linear-gradient(145deg, #1e293b, #0f172a) !important;
   border-radius: 32px !important;
-  padding: 28px !important;
-  margin-bottom: 32px;
+  padding: 24px !important;
   border: none !important;
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(139, 92, 246, 0.1) inset !important;
   position: relative;
   overflow: hidden;
 }
+
+/* If the above doesn't work, target by class directly */
+.chart-card {
+  margin: 0 24px 24px 24px !important;
+  width: auto !important;
+}
+
+/* Remove any existing margin-bottom that might be causing issues */
+.chart-card:has(#activityHeatmapChart) {
+  margin-bottom: 48px !important;
+  margin-top: 0 !important;
+}
+
+/* ============================================
+   STATS GRID - Reference (Keep as is)
+   ============================================ */
+
+.stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 24px !important;
+  margin: 0 24px 48px 24px !important;
+  width: auto !important;
+}
+
+/* ============================================
+   ENSURE PARENT CONTAINER DOESN'T BREAK MARGINS
+   ============================================ */
+
+#dashboard-page,
+.page.active {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.main-content {
+  padding: 0 !important;
+  padding-top: 120px !important;
+}
+
+/* ============================================
+   RESPONSIVE - SAME MARGINS AS STATS-GRID
+   ============================================ */
+
+@media (max-width: 1100px) {
+
+  .chart-card:has(#activityHeatmapChart),
+  .stats-grid {
+    margin: 0 20px 40px 20px !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .chart-card:has(#activityHeatmapChart),
+  .stats-grid {
+    margin: 0 16px 32px 16px !important;
+  }
+}
+
+@media (max-width: 640px) {
+
+  .chart-card:has(#activityHeatmapChart),
+  .stats-grid {
+    margin: 0 12px 28px 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .chart-card:has(#activityHeatmapChart),
+  .stats-grid {
+    margin: 0 10px 24px 10px !important;
+  }
+}
+
+/* ============================================
+   HEATMAP INTERNAL STYLES (Keep as is)
+   ============================================ */
 
 /* Animated gradient border */
 .chart-card:has(#activityHeatmapChart)::before {
@@ -7564,7 +7656,7 @@ h6 {
   letter-spacing: 0.3px;
 }
 
-/* Year Filter - Modern Toggle */
+/* Year Filter */
 .heatmap-years {
   display: flex;
   gap: 8px;
@@ -7599,11 +7691,7 @@ h6 {
   box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
 }
 
-/* ============================================
-   ACTIVITY HEATMAP - COMPLETE FIX
-   ============================================ */
-
-/* Heatmap Container */
+/* Heatmap Wrapper */
 .heatmap-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -7612,65 +7700,14 @@ h6 {
   position: relative;
 }
 
-/* Month Labels Row */
-.heatmap-months {
-  position: relative;
-  height: 28px;
-  margin-bottom: 8px;
-  margin-left: 45px;
-  min-width: 600px;
-}
-
-.month-label {
-  position: absolute;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  transform: translateX(-50%);
-}
-
-/* Grid Container - Flex row for weekday labels + grid */
-.heatmap-grid-container {
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-  min-width: 600px;
-}
-
-/* Weekday Labels (Left side) */
-.heatmap-weekdays {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding-top: 0;
-  width: 35px;
-  flex-shrink: 0;
-}
-
-.weekday-label {
-  font-size: 0.65rem;
-  font-weight: 500;
-  color: var(--color-text-tertiary);
-  height: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
 /* Heatmap Grid */
 .heatmap-grid {
   display: flex;
   flex-direction: row;
   gap: 3px;
-  flex: 1;
+  min-width: 600px;
 }
 
-/* Heatmap Column */
 .heatmap-col {
   display: flex;
   flex-direction: column;
@@ -7698,32 +7735,27 @@ h6 {
   position: relative;
 }
 
-/* Color Levels - GitHub Style */
+/* Color Levels */
 .heatmap-cell.level-0 {
   background: rgba(51, 65, 85, 0.5);
 }
 
 .heatmap-cell.level-1 {
   background: #9be9a8;
-  box-shadow: 0 0 2px rgba(155, 233, 168, 0.3);
 }
 
 .heatmap-cell.level-2 {
   background: #40c463;
-  box-shadow: 0 0 3px rgba(64, 196, 99, 0.4);
 }
 
 .heatmap-cell.level-3 {
   background: #30a14e;
-  box-shadow: 0 0 4px rgba(48, 161, 78, 0.5);
 }
 
 .heatmap-cell.level-4 {
   background: #216e39;
-  box-shadow: 0 0 5px rgba(33, 110, 57, 0.6);
 }
 
-/* Light Mode Colors */
 [data-theme="light"] .heatmap-cell.level-0 {
   background: #e2e8f0;
 }
@@ -7742,40 +7774,6 @@ h6 {
 
 [data-theme="light"] .heatmap-cell.level-4 {
   background: #3da63d;
-}
-
-/* Year Filter Buttons */
-.heatmap-years {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  padding: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 40px;
-  width: fit-content;
-}
-
-.year-btn {
-  padding: 6px 20px;
-  background: transparent;
-  border: none;
-  border-radius: 30px;
-  color: var(--color-text-secondary);
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.year-btn:hover {
-  background: rgba(139, 92, 246, 0.2);
-  color: var(--color-text-primary);
-}
-
-.year-btn.active {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 /* Legend */
@@ -7805,68 +7803,96 @@ h6 {
   border-radius: 3px;
 }
 
-.legend-color.level-0 {
-  background: rgba(51, 65, 85, 0.5);
+/* ============================================
+   CURRENTLY WATCHING SECTION - PROPER SPACING
+   ============================================ */
+
+#currently-watching-section {
+  margin: 0 24px 48px 24px !important;
+  width: auto !important;
+  clear: both;
+  position: relative;
 }
 
-.legend-color.level-1 {
-  background: #9be9a8;
+/* Hide when no anime */
+#currently-watching-grid:empty {
+  display: none !important;
 }
 
-.legend-color.level-2 {
-  background: #40c463;
+/* Section Title */
+#currently-watching-section .section-title {
+  font-size: 1.6rem !important;
+  font-weight: 800 !important;
+  margin-bottom: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  position: relative !important;
+  padding-bottom: 16px !important;
+  letter-spacing: -0.3px !important;
+  width: auto !important;
+  background: linear-gradient(135deg,
+      #8B5CF6 0%,
+      #6366F1 25%,
+      #A78BFA 50%,
+      #F59E0B 75%,
+      #8B5CF6 100%) !important;
+  background-size: 300% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: titleGradient 5s ease infinite !important;
 }
 
-.legend-color.level-3 {
-  background: #30a14e;
+@keyframes titleGradient {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
-.legend-color.level-4 {
-  background: #216e39;
+#currently-watching-section .section-title::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 80px !important;
+  height: 4px !important;
+  background: linear-gradient(90deg, #8B5CF6, #6366F1, #A78BFA, #F59E0B) !important;
+  border-radius: 4px !important;
+  animation: underlineGlow 3s ease infinite !important;
+  background-size: 300% 100% !important;
 }
 
-[data-theme="light"] .legend-color.level-0 {
-  background: #e2e8f0;
+@keyframes underlineGlow {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+    width: 80px;
+    opacity: 1;
+  }
+
+  50% {
+    background-position: 100% 50%;
+    width: 110px;
+    opacity: 0.8;
+  }
 }
 
-[data-theme="light"] .legend-color.level-1 {
-  background: #c6e9c6;
-}
-
-[data-theme="light"] .legend-color.level-2 {
-  background: #9bd89b;
-}
-
-[data-theme="light"] .legend-color.level-3 {
-  background: #68c268;
-}
-
-[data-theme="light"] .legend-color.level-4 {
-  background: #3da63d;
-}
-
-/* Tooltip */
-.heatmap-tooltip {
-  position: fixed;
-  background: linear-gradient(135deg, #1a1f2e, #0f1420);
-  color: white;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  backdrop-filter: blur(8px);
-  pointer-events: none;
-  z-index: 10000;
-  white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  font-family: 'Inter', monospace;
-}
-
-[data-theme="light"] .heatmap-tooltip {
-  background: linear-gradient(135deg, #ffffff, #f8fafc);
-  color: #1e293b;
-  border-color: rgba(99, 102, 241, 0.3);
+/* Anime Grid */
+#currently-watching-grid,
+.top-anime-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+  gap: 24px !important;
+  margin: 0 !important;
+  width: 100% !important;
 }
 
 /* Responsive */
@@ -7876,21 +7902,23 @@ h6 {
     max-width: 11px;
   }
 
-  .weekday-label {
-    font-size: 0.55rem;
-    height: 10px;
+  .heatmap-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .month-label {
-    font-size: 0.6rem;
+  .total-contributions {
+    font-size: 0.75rem;
+    padding: 6px 14px;
   }
 
-  .heatmap-months {
-    margin-left: 40px;
+  .year-btn {
+    padding: 4px 14px;
+    font-size: 0.7rem;
   }
 
-  .heatmap-grid-container {
-    min-width: 500px;
+  .chart-card:has(#activityHeatmapChart) {
+    padding: 20px !important;
   }
 }
 
@@ -7900,19 +7928,48 @@ h6 {
     max-width: 9px;
   }
 
-  .weekday-label {
-    font-size: 0.5rem;
-    height: 8px;
-  }
-
-  .month-label {
-    font-size: 0.55rem;
-  }
-
   .year-btn {
-    padding: 4px 14px;
-    font-size: 0.7rem;
+    padding: 3px 10px;
+    font-size: 0.6rem;
   }
+
+  #currently-watching-grid,
+  .top-anime-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .chart-card:has(#activityHeatmapChart) {
+    padding: 16px !important;
+  }
+}
+
+/* Light Mode */
+[data-theme="light"] .chart-card:has(#activityHeatmapChart) {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98)) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ============================================
+   CURRENTLY WATCHING SECTION - PROPER SPACING
+   ============================================ */
+
+#currently-watching-section {
+    margin: 0 24px 48px 24px !important;
+    width: auto !important;
+    clear: both;
+    position: relative;
+    /* No display: none rules here - JavaScript controls visibility */
+}
+/* Anime Grid */
+#currently-watching-grid,
+.top-anime-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: 24px !important;
+    margin: 0 !important;
+    width: 100% !important;
 }
 
 /* ------------------------------------
@@ -21077,4 +21134,3 @@ body.modal-open {
     transition: none !important;
   }
 }
-

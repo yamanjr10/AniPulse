@@ -2,6 +2,25 @@
 // QUEUE STATUS UI - Settings Page
 // ============================================
 
+function checkAndHideEmptySections() {
+    const watchingGrid = document.getElementById('currently-watching-grid');
+    const watchingSection = document.getElementById('currently-watching-section');
+    
+    if (!watchingGrid || !watchingSection) return;
+    
+    const animeCards = watchingGrid.querySelectorAll('.anime-card');
+    const hasAnimeCards = animeCards.length > 0;
+    
+    // Use CSS custom property instead of direct style
+    if (hasAnimeCards) {
+        watchingSection.style.setProperty('--watching-section-display', 'block');
+    } else {
+        watchingSection.style.setProperty('--watching-section-display', 'none');
+    }
+    
+    console.log('Section visibility set to:', hasAnimeCards ? 'block' : 'none');
+}
+
 // Safe wrapper - only runs if elements exist
 function updateQueueStatusUI() {
     // Only run if the queue elements exist on page
@@ -902,7 +921,12 @@ document.addEventListener('DOMContentLoaded', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             // Initialize specific page content
-            if (pageId === 'statistics-page') {
+            if (pageId === 'dashboard-page') {
+                // Update currently watching section when dashboard loads
+                if (typeof updateCurrentlyWatching === 'function') {
+                    updateCurrentlyWatching();
+                }
+            } else if (pageId === 'statistics-page') {
                 setTimeout(() => {
                     initStatisticsCharts();
                     updateStatisticsTables();
@@ -984,6 +1008,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Check for updates on app start (with delay to avoid rate limiting)
     setTimeout(checkForUserUpdates, 5000);
+
+    // Initialize Currently Watching section visibility on page load
+    setTimeout(() => {
+        if (typeof updateCurrentlyWatching === 'function') {
+            updateCurrentlyWatching();
+            console.log('✅ Currently Watching section initialized on page load');
+            
+            // Debug: Show current state
+            const section = document.getElementById('currently-watching-section');
+            const dataToUse = Array.isArray(animeData) ? animeData : 
+                JSON.parse(localStorage.getItem('animeData')) || [];
+            console.log('DEBUG: animeData loaded:', dataToUse.length, 'items');
+            console.log('DEBUG: Watching count:', dataToUse.filter(a => a.userStatus === 'Watching').length);
+            console.log('DEBUG: Section hidden?', window.getComputedStyle(section).display === 'none');
+        }
+    }, 300);
+
+    // Add periodic check to maintain section visibility (every 2 seconds)
+    setInterval(() => {
+        if (typeof updateCurrentlyWatching === 'function') {
+            const section = document.getElementById('currently-watching-section');
+            if (section && section.offsetHeight > 0) {
+                // Section is visible - double-check if it should be
+                const dataToUse = Array.isArray(animeData) ? animeData : 
+                    JSON.parse(localStorage.getItem('animeData')) || [];
+                const hasWatching = dataToUse.some(a => a.userStatus === 'Watching');
+                if (!hasWatching) {
+                    console.log('⚠️ Section is visible but has no watching anime - hiding it');
+                    updateCurrentlyWatching();
+                }
+            }
+        }
+    }, 2000);
+
+    // Listen for visibility changes and update section
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && typeof updateCurrentlyWatching === 'function') {
+            console.log('📱 Page became visible - updating Currently Watching section');
+            updateCurrentlyWatching();
+        }
+    });
 });
 
 // =============================================
@@ -5759,18 +5824,46 @@ window.updateAnimeDisplay = function () {
         function updateCurrentlyWatching() {
             const section = document.getElementById('currently-watching-section');
             const container = document.getElementById('currently-watching-grid');
-            if (!section || !container) return;
+            if (!section || !container) {
+                console.warn('❌ Currently Watching: Elements not found');
+                return;
+            }
 
-            const watchingList = (typeof animeData !== "undefined" && Array.isArray(animeData))
-                ? animeData.filter(a => a.userStatus?.toLowerCase() === 'watching')
-                : [];
+            // Get anime data from global variable or localStorage
+            let dataToUse = animeData;
+            if (!Array.isArray(dataToUse)) {
+                const stored = localStorage.getItem('animeData');
+                dataToUse = stored ? JSON.parse(stored) : [];
+            }
+
+            console.log('📊 Currently Watching - Total anime in data:', dataToUse.length);
+            console.log('📊 Anime data sample:', dataToUse.slice(0, 3).map(a => ({ title: a.title, status: a.userStatus })));
+
+            // Filter for "Watching" status (exact match on userStatus property)
+            const watchingList = dataToUse.filter(a => {
+                const status = a.userStatus;
+                const isWatching = status === 'Watching';
+                if (isWatching) {
+                    console.log(`✅ Found watching anime: ${a.title} (status: "${status}")`);
+                }
+                return isWatching;
+            });
+
+            console.log(`🎬 Currently Watching - Found ${watchingList.length} anime with "Watching" status`);
 
             // 🟢 Hide or show the whole section
             if (watchingList.length === 0) {
                 section.style.display = 'none';
+                section.style.visibility = 'hidden';
+                section.classList.add('hidden');
+                container.innerHTML = '';
+                console.log('✅ Currently Watching section HIDDEN (no anime in Watching status)');
                 return;
             } else {
-                section.style.display = '';
+                section.style.display = 'block';
+                section.style.visibility = 'visible';
+                section.classList.remove('hidden');
+                console.log(`✅ Currently Watching section SHOWN (${watchingList.length} anime)`);
             }
 
             // 🟡 Populate the grid
@@ -7851,7 +7944,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // Finish loader
-window.addEventListener("load", hideLoader);
+window.addEventListener("load", () => {
+    hideLoader();
+    // Ensure Currently Watching section is properly set after all resources load
+    if (typeof updateCurrentlyWatching === 'function') {
+        updateCurrentlyWatching();
+    }
+});
 
 
 // Emergency safety
