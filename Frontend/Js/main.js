@@ -6924,7 +6924,7 @@ function isRecapWindowOpen() {
     // TEST MODE: Only January 1-21
     if (TEST_MODE) {
         const d = new Date();
-        return d.getMonth() === 3 && d.getDate() <= 21;
+        return d.getMonth() === 5 && d.getDate() <= 21;
     }
 
     // PRODUCTION: First 7 days of ANY month
