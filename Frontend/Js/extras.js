@@ -280,10 +280,10 @@ function getAnimeDataSafe() {
 function calculateAnimeDNA() {
     // Use safe function to get data
     const animeList = getAnimeDataSafe();
-    
+
     // Filter only completed anime
     const completedAnime = animeList.filter(anime => anime.userStatus === 'Completed');
-    
+
     if (completedAnime.length === 0) {
         return {
             topGenre: '—',
@@ -291,7 +291,7 @@ function calculateAnimeDNA() {
             topFormat: '—'
         };
     }
-    
+
     // 1. Calculate favorite genre (most common)
     const genreCount = {};
     completedAnime.forEach(anime => {
@@ -303,7 +303,7 @@ function calculateAnimeDNA() {
             });
         }
     });
-    
+
     let topGenre = '—';
     let maxCount = 0;
     for (const [genre, count] of Object.entries(genreCount)) {
@@ -312,7 +312,7 @@ function calculateAnimeDNA() {
             topGenre = genre;
         }
     }
-    
+
     // 2. Calculate average score
     const scoredAnime = completedAnime.filter(anime => anime.score && anime.score > 0);
     let avgScore = '—';
@@ -321,14 +321,14 @@ function calculateAnimeDNA() {
         const average = totalScore / scoredAnime.length;
         avgScore = average.toFixed(1);
     }
-    
+
     // 3. Calculate preferred format (most common type)
     const typeCount = {};
     completedAnime.forEach(anime => {
         const type = anime.type || 'TV';
         typeCount[type] = (typeCount[type] || 0) + 1;
     });
-    
+
     let topFormat = '—';
     let maxTypeCount = 0;
     for (const [type, count] of Object.entries(typeCount)) {
@@ -337,7 +337,7 @@ function calculateAnimeDNA() {
             topFormat = type;
         }
     }
-    
+
     return {
         topGenre: topGenre,
         avgScore: avgScore,
@@ -350,16 +350,16 @@ function renderAnimeDNA() {
     const dnaGenre = document.getElementById('dna-genre');
     const dnaScore = document.getElementById('dna-score');
     const dnaFormat = document.getElementById('dna-format');
-    
+
     if (!dnaGenre || !dnaScore || !dnaFormat) return;
-    
+
     const dna = calculateAnimeDNA();
-    
+
     // Update with animation
     dnaGenre.textContent = dna.topGenre;
     dnaScore.textContent = dna.avgScore;
     dnaFormat.textContent = dna.topFormat;
-    
+
     // Add animation classes
     [dnaGenre, dnaScore, dnaFormat].forEach(el => {
         el.classList.add('dna-updated');
@@ -385,17 +385,17 @@ if (typeof window !== 'undefined') {
             updateAnimeDNA();
         }
     });
-    
+
     // Listen for custom anime update event
     window.addEventListener('animeUpdate', () => {
         updateAnimeDNA();
     });
-    
+
     // Also try to hook into updateAllComponents if available
     setTimeout(() => {
         if (typeof window.updateAllComponents === 'function') {
             const originalUpdateAll = window.updateAllComponents;
-            window.updateAllComponents = function() {
+            window.updateAllComponents = function () {
                 originalUpdateAll();
                 updateAnimeDNA();
             };
@@ -581,29 +581,29 @@ async function openUserProfile(userId) {
         showToast('Please login first', 'error');
         return;
     }
-    
+
     currentProfileUserId = userId;
-    
+
     const modal = document.getElementById('userProfileModal');
     if (!modal) return;
-    
+
     modal.style.display = 'flex';
     document.body.classList.add('modal-open');
-    
+
     // Show loading state
     document.getElementById('profileName').textContent = 'Loading...';
     document.getElementById('profileCompletedList').innerHTML = '<div class="loading-spinner">Loading anime list...</div>';
-    
+
     try {
         const response = await fetch(`http://localhost:3000/api/user/full-profile/${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         if (!response.ok) throw new Error('Failed to load profile');
-        
+
         const profile = await response.json();
         renderUserProfile(profile);
-        
+
     } catch (error) {
         console.error('Failed to load profile:', error);
         showToast('Failed to load user profile', 'error');
@@ -617,7 +617,7 @@ function renderUserProfile(profile) {
     document.getElementById('profileLevel').textContent = `Lv.${profile.level}`;
     document.getElementById('profileTitle').textContent = profile.levelTitle;
     document.getElementById('profileXpFill').style.width = `${profile.xpProgress}%`;
-    
+
     // XP with compact formatting
     const currentXP = profile.totalXP || 0;
     const nextXP = (profile.totalXP + profile.xpToNextLevel) || 0;
@@ -625,13 +625,13 @@ function renderUserProfile(profile) {
         <span class="xp-current" data-full="${currentXP.toLocaleString()}">${formatCompactNumber(currentXP)}</span> / 
         <span class="xp-next" data-full="${nextXP.toLocaleString()}">${formatCompactNumber(nextXP)}</span> XP
     `;
-    
+
     const avatarImg = document.getElementById('profileAvatar');
     avatarImg.src = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=6366F1&color=fff`;
-    avatarImg.onerror = function() {
+    avatarImg.onerror = function () {
         this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=6366F1&color=fff`;
     };
-    
+
     // Stats with compact formatting
     const totalAnimeElem = document.getElementById('profileTotalAnime');
     const completedElem = document.getElementById('profileCompleted');
@@ -639,7 +639,7 @@ function renderUserProfile(profile) {
     const planToWatchElem = document.getElementById('profilePlanToWatch');
     const episodesElem = document.getElementById('profileEpisodes');
     const hoursElem = document.getElementById('profileHours');
-    
+
     if (totalAnimeElem) {
         const value = profile.stats.totalAnime || 0;
         totalAnimeElem.setAttribute('data-full', value.toLocaleString());
@@ -647,7 +647,7 @@ function renderUserProfile(profile) {
         totalAnimeElem.setAttribute('title', value.toLocaleString());
         totalAnimeElem.style.cursor = 'help';
     }
-    
+
     if (completedElem) {
         const value = profile.stats.completed || 0;
         completedElem.setAttribute('data-full', value.toLocaleString());
@@ -655,7 +655,7 @@ function renderUserProfile(profile) {
         completedElem.setAttribute('title', value.toLocaleString());
         completedElem.style.cursor = 'help';
     }
-    
+
     if (watchingElem) {
         const value = profile.stats.watching || 0;
         watchingElem.setAttribute('data-full', value.toLocaleString());
@@ -663,7 +663,7 @@ function renderUserProfile(profile) {
         watchingElem.setAttribute('title', value.toLocaleString());
         watchingElem.style.cursor = 'help';
     }
-    
+
     if (planToWatchElem) {
         const value = profile.stats.planToWatch || 0;
         planToWatchElem.setAttribute('data-full', value.toLocaleString());
@@ -671,7 +671,7 @@ function renderUserProfile(profile) {
         planToWatchElem.setAttribute('title', value.toLocaleString());
         planToWatchElem.style.cursor = 'help';
     }
-    
+
     if (episodesElem) {
         const value = profile.stats.totalEpisodes || 0;
         episodesElem.setAttribute('data-full', value.toLocaleString());
@@ -679,7 +679,7 @@ function renderUserProfile(profile) {
         episodesElem.setAttribute('title', value.toLocaleString());
         episodesElem.style.cursor = 'help';
     }
-    
+
     if (hoursElem) {
         const value = profile.stats.totalHours || 0;
         hoursElem.setAttribute('data-full', value.toLocaleString());
@@ -687,7 +687,7 @@ function renderUserProfile(profile) {
         hoursElem.setAttribute('title', value.toLocaleString());
         hoursElem.style.cursor = 'help';
     }
-    
+
     // Friend button
     const friendBtn = document.getElementById('profileFriendBtn');
     if (!profile.isCurrentUser) {
@@ -706,15 +706,15 @@ function renderUserProfile(profile) {
     } else {
         friendBtn.style.display = 'none';
     }
-    
+
     // Anime Lists
     renderProfileAnimeList('completed', profile.animeList.completed);
     renderProfileAnimeList('watching', profile.animeList.watching);
     renderProfileAnimeList('plan', profile.animeList.planToWatch);
-    
+
     // Achievements
     renderProfileAchievements(profile.achievements);
-    
+
     // Activity
     renderProfileActivity(profile.recentActivity);
 }
@@ -722,12 +722,12 @@ function renderUserProfile(profile) {
 function renderProfileAnimeList(type, animeList) {
     const container = document.getElementById(`profile${type.charAt(0).toUpperCase() + type.slice(1)}List`);
     if (!container) return;
-    
+
     if (!animeList || animeList.length === 0) {
         container.innerHTML = '<div class="empty-state">No anime found</div>';
         return;
     }
-    
+
     container.innerHTML = animeList.map(anime => `
         <div class="profile-anime-card">
             <img src="${anime.cover || 'https://via.placeholder.com/60x85/6a5acd/ffffff?text=No+Image'}" 
@@ -745,12 +745,12 @@ function renderProfileAnimeList(type, animeList) {
 function renderProfileAchievements(achievements) {
     const container = document.getElementById('profileAchievementsList');
     if (!container) return;
-    
+
     if (!achievements || achievements.length === 0) {
         container.innerHTML = '<div class="empty-state">No achievements unlocked yet</div>';
         return;
     }
-    
+
     // Achievement icons mapping
     const achievementIcons = {
         'First Completion': 'fa-check-circle',
@@ -763,7 +763,7 @@ function renderProfileAchievements(achievements) {
         'Power Watcher': 'fa-bolt',
         'Series Slayer': 'fa-meteor'
     };
-    
+
     container.innerHTML = achievements.map(achievement => `
         <div class="profile-achievement-card">
             <div class="profile-achievement-icon">
@@ -780,23 +780,23 @@ function renderProfileAchievements(achievements) {
 function renderProfileActivity(activities) {
     const container = document.getElementById('profileActivityList');
     if (!container) return;
-    
+
     if (!activities || activities.length === 0) {
         container.innerHTML = '<div class="empty-state">No recent activity</div>';
         return;
     }
-    
+
     container.innerHTML = activities.map(activity => {
         let iconClass = 'added';
         let iconName = 'plus';
-        
-        switch(activity.action) {
+
+        switch (activity.action) {
             case 'completed': iconClass = 'completed'; iconName = 'check-circle'; break;
             case 'added': iconClass = 'added'; iconName = 'plus-circle'; break;
             case 'edited': iconClass = 'edited'; iconName = 'edit'; break;
             default: iconClass = 'added'; iconName = 'plus-circle';
         }
-        
+
         return `
             <div class="profile-activity-item">
                 <div class="profile-activity-icon ${iconClass}">
@@ -824,18 +824,18 @@ function closeUserProfileModal() {
 }
 
 // Profile tab switching
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     const tab = e.target.closest('.profile-tab');
     if (!tab) return;
-    
+
     const tabName = tab.dataset.tab;
     const container = tab.closest('.profile-modal-body');
     if (!container) return;
-    
+
     // Update active tab
     container.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
-    
+
     // Update active content
     const contentMap = {
         'completed': 'profileTabCompleted',
@@ -844,12 +844,12 @@ document.addEventListener('click', function(e) {
         'achievements': 'profileTabAchievements',
         'activity': 'profileTabActivity'
     };
-    
+
     Object.values(contentMap).forEach(contentId => {
         const content = document.getElementById(contentId);
         if (content) content.classList.remove('active');
     });
-    
+
     const activeContent = document.getElementById(contentMap[tabName]);
     if (activeContent) activeContent.classList.add('active');
 });
@@ -869,41 +869,41 @@ class RealTimeNotificationManager {
         this.isDropdownOpen = false;
         this.init();
     }
-    
+
     init() {
         this.loadAllNotifications();
         this.setupEventListeners();
         this.startPolling();
         this.requestPermission();
     }
-    
+
     async loadAllNotifications() {
         await this.loadSystemNotifications();
         await this.loadFriendRequests();
     }
-    
+
     async loadSystemNotifications() {
         const token = localStorage.getItem('authToken');
         if (!token) return;
-        
+
         try {
             const response = await fetch('http://localhost:3000/api/user/notifications', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 const systemNotifs = data.notifications || [];
-                
+
                 // Keep friend requests from existing notifications
                 const existingFriendReqs = this.notifications.filter(n => n.type === 'friend_request');
-                
+
                 // Merge and remove duplicates
                 const allNotifs = [...systemNotifs, ...existingFriendReqs];
-                this.notifications = allNotifs.filter((n, i, arr) => 
+                this.notifications = allNotifs.filter((n, i, arr) =>
                     arr.findIndex(x => x.id === n.id) === i
                 );
-                
+
                 this.unreadCount = this.notifications.filter(n => !n.read).length;
                 this.renderNotifications();
                 this.updateBadge();
@@ -912,20 +912,20 @@ class RealTimeNotificationManager {
             console.error('Load system notifications error:', error);
         }
     }
-    
+
     async loadFriendRequests() {
         const token = localStorage.getItem('authToken');
         if (!token) return;
-        
+
         try {
             const response = await fetch('http://localhost:3000/api/friends/requests', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
+
             if (response.ok) {
                 const requests = await response.json();
                 console.log('📬 Pending friend requests:', requests.length);
-                
+
                 const requestNotifications = requests.map(req => ({
                     id: req.id,
                     type: 'friend_request',
@@ -939,20 +939,20 @@ class RealTimeNotificationManager {
                         requestId: req.id
                     }
                 }));
-                
+
                 // Keep notifications that are not friend requests
                 const otherNotifications = this.notifications.filter(n => n.type !== 'friend_request');
-                
+
                 // Check for new requests
                 const existingIds = new Set(otherNotifications.map(n => n.id));
                 const newRequests = requestNotifications.filter(r => !existingIds.has(r.id));
-                
+
                 if (newRequests.length > 0) {
                     this.notifications = [...newRequests, ...otherNotifications];
                     this.unreadCount += newRequests.length;
                     this.renderNotifications();
                     this.updateBadge();
-                    
+
                     // Show toast for each new request
                     newRequests.forEach(req => {
                         this.showToast(req.message, 'friend_request');
@@ -966,11 +966,11 @@ class RealTimeNotificationManager {
             console.error('Load friend requests error:', error);
         }
     }
-    
+
     setupEventListeners() {
         const bell = document.getElementById('notificationBell');
         const dropdown = document.getElementById('notificationDropdown');
-        
+
         if (bell) {
             bell.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -978,24 +978,24 @@ class RealTimeNotificationManager {
                 dropdown.style.display = this.isDropdownOpen ? 'block' : 'none';
             });
         }
-        
+
         document.addEventListener('click', (e) => {
             if (dropdown && !dropdown.contains(e.target) && !bell.contains(e.target)) {
                 dropdown.style.display = 'none';
                 this.isDropdownOpen = false;
             }
         });
-        
+
         const markAllBtn = document.getElementById('markAllReadBtn');
         if (markAllBtn) {
             markAllBtn.addEventListener('click', () => this.markAllAsRead());
         }
     }
-    
+
     renderNotifications() {
         const container = document.getElementById('notificationList');
         if (!container) return;
-        
+
         if (this.notifications.length === 0) {
             container.innerHTML = `
                 <div class="notification-empty">
@@ -1005,11 +1005,11 @@ class RealTimeNotificationManager {
             `;
             return;
         }
-        
+
         container.innerHTML = this.notifications.map(notif => {
             const isAccepted = notif.type === 'friend_accepted';
             const acceptedClass = isAccepted ? 'notification-accepted' : '';
-            
+
             return `
                 <div class="notification-item ${notif.read ? '' : 'unread'} ${acceptedClass}" data-id="${notif.id}" data-type="${notif.type}" data-data='${JSON.stringify(notif.data || {})}'>
                     <div class="notification-icon ${notif.type}">
@@ -1034,7 +1034,7 @@ class RealTimeNotificationManager {
                 </div>
             `;
         }).join('');
-        
+
         // Add click handlers
         document.querySelectorAll('.notification-item').forEach(item => {
             item.addEventListener('click', (e) => {
@@ -1045,32 +1045,32 @@ class RealTimeNotificationManager {
             });
         });
     }
-    
+
     getIcon(type) {
         const icons = {
             'friend_request': 'fa-user-plus',
-            'friend_accepted': 'fa-user-check', 
+            'friend_accepted': 'fa-user-check',
             'achievement': 'fa-trophy',
             'anime_complete': 'fa-check-circle'
         };
         return icons[type] || 'fa-bell';
     }
-    
+
     formatTime(timestamp) {
         if (!timestamp) return 'Just now';
-        
+
         const date = new Date(timestamp);
         const now = new Date();
         const diff = Math.floor((now - date) / 1000);
-        
+
         if (diff < 60) return 'Just now';
         if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
         if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
         if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
-        
+
         return date.toLocaleDateString();
     }
-    
+
     escapeHtml(str) {
         if (!str) return '';
         return str
@@ -1080,7 +1080,7 @@ class RealTimeNotificationManager {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
     }
-    
+
     updateBadge() {
         const badge = document.getElementById('notificationBadge');
         if (this.unreadCount > 0) {
@@ -1095,11 +1095,11 @@ class RealTimeNotificationManager {
             badge.style.display = 'none';
         }
     }
-    
+
     async markAllAsRead() {
         const token = localStorage.getItem('authToken');
         if (!token) return;
-        
+
         try {
             await fetch('http://localhost:3000/api/user/notifications/mark-read', {
                 method: 'POST',
@@ -1109,7 +1109,7 @@ class RealTimeNotificationManager {
                 },
                 body: JSON.stringify({ markAll: true })
             });
-            
+
             this.notifications.forEach(n => n.read = true);
             this.unreadCount = 0;
             this.renderNotifications();
@@ -1118,29 +1118,29 @@ class RealTimeNotificationManager {
             console.error('Mark all read error:', error);
         }
     }
-    
+
     async acceptFriendRequest(notificationId, requestId) {
         const token = localStorage.getItem('authToken');
         if (!token) return;
-        
+
         // Show loading state
         const acceptBtn = document.querySelector(`.notification-item[data-id="${notificationId}"] .accept`);
         if (acceptBtn) {
             acceptBtn.textContent = 'Accepting...';
             acceptBtn.disabled = true;
         }
-        
+
         try {
             const response = await fetch(`http://localhost:3000/api/friends/accept/${requestId}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
+
             if (response.ok) {
                 // Get the friend's name
                 const notification = this.notifications.find(n => n.id === notificationId);
                 const friendName = notification?.data?.fromName || 'your new friend';
-                
+
                 // Replace with accepted notification
                 const updatedNotification = {
                     id: notificationId + '_accepted',
@@ -1154,29 +1154,29 @@ class RealTimeNotificationManager {
                         status: 'accepted'
                     }
                 };
-                
+
                 // Replace the old notification
                 const index = this.notifications.findIndex(n => n.id === notificationId);
                 if (index !== -1) {
                     this.notifications[index] = updatedNotification;
                 }
-                
+
                 this.showToast(`You are now friends with ${friendName}! 🎉`, 'friend_accepted');
                 this.renderNotifications();
                 this.updateBadge();
-                
+
                 // Refresh friends list
                 if (typeof loadFriends === 'function') {
                     await loadFriends();
                 }
-                
+
                 // Close dropdown after 2 seconds
                 setTimeout(() => {
                     const dropdown = document.getElementById('notificationDropdown');
                     if (dropdown) dropdown.style.display = 'none';
                     this.isDropdownOpen = false;
                 }, 2000);
-                
+
                 console.log('✅ Friend request accepted!');
             } else {
                 this.showToast('Failed to accept friend request', 'error');
@@ -1194,23 +1194,23 @@ class RealTimeNotificationManager {
             }
         }
     }
-    
+
     async declineFriendRequest(notificationId, requestId) {
         const token = localStorage.getItem('authToken');
         if (!token) return;
-        
+
         const declineBtn = document.querySelector(`.notification-item[data-id="${notificationId}"] .decline`);
         if (declineBtn) {
             declineBtn.textContent = 'Declining...';
             declineBtn.disabled = true;
         }
-        
+
         try {
             const response = await fetch(`http://localhost:3000/api/friends/decline/${requestId}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
+
             if (response.ok) {
                 // Remove the notification
                 this.notifications = this.notifications.filter(n => n.id !== notificationId);
@@ -1218,7 +1218,7 @@ class RealTimeNotificationManager {
                 this.showToast('Friend request declined', 'info');
                 this.renderNotifications();
                 this.updateBadge();
-                
+
                 setTimeout(() => {
                     const dropdown = document.getElementById('notificationDropdown');
                     if (dropdown) dropdown.style.display = 'none';
@@ -1240,7 +1240,7 @@ class RealTimeNotificationManager {
             }
         }
     }
-    
+
     viewFriendProfile(userId) {
         if (userId && typeof openUserProfile === 'function') {
             openUserProfile(userId);
@@ -1249,9 +1249,9 @@ class RealTimeNotificationManager {
         if (dropdown) dropdown.style.display = 'none';
         this.isDropdownOpen = false;
     }
-    
+
     handleNotificationClick(type, data) {
-        switch(type) {
+        switch (type) {
             case 'anime_complete':
                 if (data?.animeId) {
                     window.location.href = `/anime/${data.animeId}`;
@@ -1262,19 +1262,19 @@ class RealTimeNotificationManager {
                 if (typeof loadFriends === 'function') loadFriends();
                 break;
         }
-        
+
         const dropdown = document.getElementById('notificationDropdown');
         if (dropdown) dropdown.style.display = 'none';
         this.isDropdownOpen = false;
     }
-    
+
     showToast(message, type = 'info') {
         const container = document.getElementById('toastContainer');
         if (!container) return;
-        
+
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        
+
         const icons = {
             friend_request: 'fa-user-plus',
             friend_accepted: 'fa-user-check',
@@ -1284,7 +1284,7 @@ class RealTimeNotificationManager {
             error: 'fa-exclamation-circle',
             info: 'fa-info-circle'
         };
-        
+
         const titles = {
             friend_request: 'Friend Request',
             friend_accepted: 'Friend Added',
@@ -1294,7 +1294,7 @@ class RealTimeNotificationManager {
             error: 'Error',
             info: 'Notification'
         };
-        
+
         toast.innerHTML = `
             <div class="toast-icon">
                 <i class="fas ${icons[type] || 'fa-bell'}"></i>
@@ -1305,19 +1305,19 @@ class RealTimeNotificationManager {
             </div>
             <button class="toast-close">&times;</button>
         `;
-        
+
         container.appendChild(toast);
-        
+
         setTimeout(() => {
             toast.style.animation = 'toastSlideOut 0.3s ease';
             setTimeout(() => toast.remove(), 300);
         }, 5000);
-        
+
         toast.querySelector('.toast-close').addEventListener('click', () => {
             toast.style.animation = 'toastSlideOut 0.3s ease';
             setTimeout(() => toast.remove(), 300);
         });
-        
+
         toast.addEventListener('click', () => {
             if (type === 'friend_request') {
                 document.getElementById('notificationBell').click();
@@ -1325,20 +1325,20 @@ class RealTimeNotificationManager {
             toast.remove();
         });
     }
-    
+
     startPolling() {
         this.pollingInterval = setInterval(() => {
             this.loadFriendRequests();
             this.loadSystemNotifications();
         }, 10000);
     }
-    
+
     requestPermission() {
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
     }
-    
+
     async refresh() {
         await this.loadAllNotifications();
         console.log('✅ Notifications refreshed');
@@ -1356,3 +1356,153 @@ window.addEventListener('focus', () => {
         notificationManager.refresh();
     }
 });
+
+// ============================================
+// FLOATING ADD ANIME BUTTON - GLOBAL FOR ALL PAGES
+// ============================================
+
+(function initFloatingAddButton() {
+    // Wait for DOM to be fully loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupFloatingButton);
+    } else {
+        setupFloatingButton();
+    }
+
+    function setupFloatingButton() {
+        // Get the floating button element
+        const floatBtn = document.getElementById('floatingAddAnimeBtn');
+        if (!floatBtn) return;
+
+        // Remove any existing listeners to avoid duplicates
+        const newFloatBtn = floatBtn.cloneNode(true);
+        floatBtn.parentNode?.replaceChild(newFloatBtn, floatBtn);
+
+        // Add click handler
+        newFloatBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openAddAnimeModal();
+        });
+
+        console.log('✅ Floating Add Anime button initialized');
+    }
+
+    // Global function to open the add anime modal (can be called from anywhere)
+    window.openAddAnimeModal = function () {
+        const addModal = document.getElementById('addAnimeModal');
+        const originalAddBtn = document.getElementById('addAnimeBtn');
+
+        // Reset editing state
+        if (typeof window.isEditing !== 'undefined') {
+            window.isEditing = false;
+            window.currentEditId = null;
+        }
+
+        // Reset form fields
+        const animeForm = document.getElementById('addAnimeForm');
+        if (animeForm) animeForm.reset();
+
+        // Reset submit button text and hide delete button
+        const submitBtn = document.getElementById('submitBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+        if (submitBtn) submitBtn.textContent = 'Add Anime';
+        if (deleteBtn) deleteBtn.style.display = 'none';
+
+        // Clear search results
+        const searchResults = document.getElementById('searchResults');
+        if (searchResults) {
+            searchResults.style.display = 'none';
+            searchResults.innerHTML = '';
+        }
+
+        // Clear anime ID
+        const animeIdField = document.getElementById('animeId');
+        if (animeIdField) animeIdField.value = '';
+
+        // Reset cover and genres
+        const coverInput = document.getElementById('animeCover');
+        const genresInput = document.getElementById('animeGenres');
+        if (coverInput) coverInput.value = '';
+        if (genresInput) genresInput.value = '';
+
+        // Reset progress to 0
+        const progressField = document.getElementById('animeProgress');
+        if (progressField) progressField.value = 0;
+
+        // Set default type duration
+        const typeSelect = document.getElementById('animeType');
+        const durationField = document.getElementById('animeDuration');
+        if (typeSelect && durationField) {
+            if (typeSelect.value === 'Movie') {
+                durationField.value = '120';
+                durationField.readOnly = false;
+            } else {
+                durationField.value = '20';
+                durationField.readOnly = true;
+            }
+        }
+
+        // Show modal
+        if (addModal) {
+            addModal.style.display = 'flex';
+
+            // Prevent background scroll
+            document.body.classList.add('modal-open');
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.height = '100%';
+
+            // Focus on title input for better UX
+            setTimeout(() => {
+                const titleInput = document.getElementById('animeTitle');
+                if (titleInput) titleInput.focus();
+            }, 100);
+        } else if (originalAddBtn && typeof originalAddBtn.click === 'function') {
+            // Fallback: click the original button
+            originalAddBtn.click();
+        } else {
+            console.warn('Could not open Add Anime modal');
+            showToast('Add Anime feature unavailable', 'error');
+        }
+
+        // Haptic feedback for mobile
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(50);
+        }
+    };
+
+    // Helper function for toast if needed
+    function showToast(message, type) {
+        const toastContainer = document.getElementById('toastContainer');
+        if (toastContainer) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i><span>${message}</span>`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        } else {
+            console.log(`[${type}] ${message}`);
+        }
+    }
+
+    // Ensure modal close restores body scroll (safety)
+    const modal = document.getElementById('addAnimeModal');
+    if (modal) {
+        const observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.attributeName === 'style') {
+                    if (modal.style.display === 'none') {
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.position = '';
+                        document.body.style.width = '';
+                        document.body.style.height = '';
+                    }
+                }
+            });
+        });
+        observer.observe(modal, { attributes: true });
+    }
+})();
