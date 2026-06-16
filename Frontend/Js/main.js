@@ -2279,7 +2279,7 @@ function updateTopRatedAnime() {
     const topRatedAnime = animeData
         .filter(anime => anime.score && anime.score >= 8)
         .sort((a, b) => b.score - a.score)
-        .slice(0, 6);
+        .slice(0, 7);
 
     if (topRatedAnime.length === 0) {
         topRatedContainer.innerHTML = '<div class="no-anime">No highly rated anime yet. Rate some anime to see them here!</div>';
