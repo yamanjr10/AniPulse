@@ -7324,6 +7324,8 @@ h6 {
   animation: titleGradient 5s ease infinite !important;
 }
 
+
+
 @keyframes titleGradient {
 
   0%,
@@ -20777,4 +20779,696 @@ body.modal-open {
 .floating-add-anime {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================
+   TOP RATED ANIME CARDS - REFERENCE STYLE
+   ============================================ */
+
+/* Top Rated - Grid */
+#top-rated-anime {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: 20px !important;
+    width: 100% !important;
+}
+
+/* Top Rated - Card Style */
+#top-rated-anime .anime-card {
+    background: linear-gradient(145deg, #1E293B, #0F172A) !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    position: relative;
+    cursor: pointer;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(139, 92, 246, 0.15) !important;
+    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Top Rated - Glow Effect */
+#top-rated-anime .anime-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.12), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 18px;
+}
+
+#top-rated-anime .anime-card:hover::before {
+    opacity: 1;
+}
+
+/* Top Rated - Hover */
+#top-rated-anime .anime-card:hover {
+    transform: translateY(-6px) !important;
+    border-color: rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 20px 35px -12px rgba(99, 102, 241, 0.3) !important;
+}
+
+/* Top Rated - Cover */
+#top-rated-anime .anime-cover {
+    width: 100%;
+    height: 300px !important;
+    object-fit: cover;
+    transition: all 0.5s ease !important;
+}
+
+#top-rated-anime .anime-card:hover .anime-cover {
+    transform: scale(1.05);
+    filter: brightness(1.05);
+}
+
+/* Top Rated - Info */
+#top-rated-anime .anime-info {
+    padding: 14px 16px 16px !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: linear-gradient(135deg, #1E293B, #0F172A) !important;
+}
+
+/* Top Rated - Title (1 Line) */
+#top-rated-anime .anime-title {
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    line-height: 1.3 !important;
+    letter-spacing: -0.2px !important;
+    transition: all 0.3s ease !important;
+    
+    /* ===== 1 LINE TRUNCATION ===== */
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+#top-rated-anime .anime-card:hover .anime-title {
+    background: linear-gradient(135deg, #FFFFFF, #A78BFA);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Top Rated - Title Tooltip */
+#top-rated-anime .anime-title[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.92);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 100;
+    pointer-events: none;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Top Rated - Meta */
+#top-rated-anime .anime-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem !important;
+    color: rgba(255, 255, 255, 0.5);
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: auto;
+}
+
+/* Top Rated - Type Badge */
+#top-rated-anime .anime-type {
+    background: rgba(139, 92, 246, 0.15) !important;
+    padding: 3px 12px !important;
+    border-radius: 20px !important;
+    font-size: 0.6rem !important;
+    font-weight: 600 !important;
+    color: #C4B5FD !important;
+    border: 1px solid rgba(139, 92, 246, 0.25) !important;
+    transition: all 0.2s ease !important;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+#top-rated-anime .anime-card:hover .anime-type {
+    background: rgba(139, 92, 246, 0.25) !important;
+    border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+/* Top Rated - Score */
+#top-rated-anime .anime-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: #FBBF24 !important;
+    font-weight: 700 !important;
+    font-size: 0.7rem !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    padding: 2px 10px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(251, 191, 36, 0.1);
+}
+
+#top-rated-anime .anime-score i {
+    font-size: 0.55rem;
+}
+
+/* Top Rated - Rating Badge */
+#top-rated-anime .rating-badge {
+    position: absolute;
+    top: 10px !important;
+    right: 10px !important;
+    background: linear-gradient(135deg, #F59E0B, #FBBF24) !important;
+    color: #1E293B !important;
+    padding: 3px 10px !important;
+    border-radius: 20px !important;
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    backdrop-filter: blur(4px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    z-index: 3 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.3s ease !important;
+}
+
+#top-rated-anime .anime-card:hover .rating-badge {
+    transform: scale(1.06);
+    box-shadow: 0 3px 12px rgba(251, 191, 36, 0.25);
+}
+
+/* Top Rated - Status Badge */
+#top-rated-anime .anime-badge {
+    position: absolute;
+    top: 10px !important;
+    left: 10px !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(8px) !important;
+    color: white !important;
+    padding: 3px 10px !important;
+    border-radius: 20px !important;
+    font-size: 0.55rem !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    z-index: 3 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+    transition: all 0.3s ease !important;
+}
+
+#top-rated-anime .anime-card:hover .anime-badge {
+    transform: scale(1.04);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+#top-rated-anime .anime-badge[data-status="Watching"] {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+}
+#top-rated-anime .anime-badge[data-status="Completed"] {
+    background: linear-gradient(135deg, #10B981, #34D399) !important;
+}
+#top-rated-anime .anime-badge[data-status="Plan to Watch"] {
+    background: linear-gradient(135deg, #F59E0B, #FBBF24) !important;
+}
+#top-rated-anime .anime-badge[data-status="Dropped"] {
+    background: linear-gradient(135deg, #EF4444, #F87171) !important;
+}
+#top-rated-anime .anime-badge[data-status="On-Hold"] {
+    background: linear-gradient(135deg, #8B5CF6, #A78BFA) !important;
+}
+
+/* ============================================
+   WATCHLIST - EXACTLY SAME AS TOP RATED
+   ============================================ */
+
+/* Watchlist - 6 Columns */
+#watchlist-container {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 16px !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+/* Watchlist - Same Card Style as Top Rated */
+#watchlist-container .anime-card {
+    background: linear-gradient(145deg, #1E293B, #0F172A) !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    position: relative !important;
+    cursor: pointer !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    border: 1px solid rgba(139, 92, 246, 0.15) !important;
+    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Watchlist - Same Glow Effect */
+#watchlist-container .anime-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.12), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 18px;
+}
+
+#watchlist-container .anime-card:hover::before {
+    opacity: 1;
+}
+
+/* Watchlist - Same Hover */
+#watchlist-container .anime-card:hover {
+    transform: translateY(-6px) !important;
+    border-color: rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 20px 35px -12px rgba(99, 102, 241, 0.3) !important;
+}
+
+/* Watchlist - Same Cover */
+#watchlist-container .anime-cover {
+    width: 100%;
+    height: 200px !important;
+    object-fit: cover !important;
+    transition: all 0.5s ease !important;
+}
+
+#watchlist-container .anime-card:hover .anime-cover {
+    transform: scale(1.05);
+    filter: brightness(1.05);
+}
+
+/* Watchlist - Same Info */
+#watchlist-container .anime-info {
+    padding: 12px 14px 14px !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    background: linear-gradient(135deg, #1E293B, #0F172A) !important;
+}
+
+/* Watchlist - Same Title (1 Line) */
+#watchlist-container .anime-title {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    line-height: 1.3 !important;
+    letter-spacing: -0.2px !important;
+    transition: all 0.3s ease !important;
+    
+    /* ===== 1 LINE TRUNCATION ===== */
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+#watchlist-container .anime-card:hover .anime-title {
+    background: linear-gradient(135deg, #FFFFFF, #A78BFA);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Watchlist - Same Title Tooltip */
+#watchlist-container .anime-title[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.92);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 100;
+    pointer-events: none;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Watchlist - Same Meta */
+#watchlist-container .anime-meta {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 0.65rem !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    margin-top: auto !important;
+}
+
+/* Watchlist - Same Type Badge */
+#watchlist-container .anime-type {
+    background: rgba(139, 92, 246, 0.15) !important;
+    padding: 3px 12px !important;
+    border-radius: 20px !important;
+    font-size: 0.6rem !important;
+    font-weight: 600 !important;
+    color: #C4B5FD !important;
+    border: 1px solid rgba(139, 92, 246, 0.25) !important;
+    transition: all 0.2s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+}
+
+#watchlist-container .anime-card:hover .anime-type {
+    background: rgba(139, 92, 246, 0.25) !important;
+    border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+/* Watchlist - Same Score */
+#watchlist-container .anime-score {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    color: #FBBF24 !important;
+    font-weight: 700 !important;
+    font-size: 0.7rem !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    padding: 2px 10px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(251, 191, 36, 0.1) !important;
+}
+
+#watchlist-container .anime-score i {
+    font-size: 0.55rem;
+}
+
+/* Watchlist - Same Progress Bar */
+#watchlist-container .progress-container {
+    width: 100% !important;
+    height: 4px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    margin: 4px 0 2px !important;
+}
+
+#watchlist-container .progress-bar {
+    height: 100% !important;
+    background: linear-gradient(90deg, #6366F1, #8B5CF6) !important;
+    border-radius: 10px !important;
+    transition: width 0.5s ease !important;
+}
+
+/* Watchlist - Same Rating Badge */
+#watchlist-container .rating-badge {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    background: linear-gradient(135deg, #F59E0B, #FBBF24) !important;
+    color: #1E293B !important;
+    padding: 3px 10px !important;
+    border-radius: 20px !important;
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    backdrop-filter: blur(4px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    z-index: 3 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.3s ease !important;
+}
+
+#watchlist-container .anime-card:hover .rating-badge {
+    transform: scale(1.06);
+    box-shadow: 0 3px 12px rgba(251, 191, 36, 0.25);
+}
+
+/* Watchlist - Same Status Badge */
+#watchlist-container .anime-badge {
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(8px) !important;
+    color: white !important;
+    padding: 3px 10px !important;
+    border-radius: 20px !important;
+    font-size: 0.55rem !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    z-index: 3 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+    transition: all 0.3s ease !important;
+}
+
+#watchlist-container .anime-card:hover .anime-badge {
+    transform: scale(1.04);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+#watchlist-container .anime-badge[data-status="Watching"] {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+}
+#watchlist-container .anime-badge[data-status="Completed"] {
+    background: linear-gradient(135deg, #10B981, #34D399) !important;
+}
+#watchlist-container .anime-badge[data-status="Plan to Watch"] {
+    background: linear-gradient(135deg, #F59E0B, #FBBF24) !important;
+}
+#watchlist-container .anime-badge[data-status="Dropped"] {
+    background: linear-gradient(135deg, #EF4444, #F87171) !important;
+}
+#watchlist-container .anime-badge[data-status="On-Hold"] {
+    background: linear-gradient(135deg, #8B5CF6, #A78BFA) !important;
+}
+
+/* ============================================
+   WATCHLIST RESPONSIVE - 6x5 GRID
+   ============================================ */
+
+/* 6 Columns - Default */
+@media (min-width: 1400px) {
+    #watchlist-container {
+        grid-template-columns: repeat(6, 1fr) !important;
+        gap: 16px !important;
+    }
+    #watchlist-container .anime-cover {
+        height: 380px !important;
+    }
+    #watchlist-container .anime-title {
+        font-size: 0.85rem !important;
+    }
+}
+
+/* 5 Columns */
+@media (max-width: 1399px) and (min-width: 1200px) {
+    #watchlist-container {
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 14px !important;
+    }
+    #watchlist-container .anime-cover {
+        height: 190px !important;
+    }
+    #watchlist-container .anime-title {
+        font-size: 0.82rem !important;
+    }
+}
+
+/* 4 Columns */
+@media (max-width: 1199px) and (min-width: 992px) {
+    #watchlist-container {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 14px !important;
+    }
+    #watchlist-container .anime-cover {
+        height: 200px !important;
+    }
+    #watchlist-container .anime-title {
+        font-size: 0.85rem !important;
+    }
+}
+
+/* 3 Columns */
+@media (max-width: 991px) and (min-width: 768px) {
+    #watchlist-container {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 14px !important;
+    }
+    #watchlist-container .anime-cover {
+        height: 210px !important;
+    }
+    #watchlist-container .anime-title {
+        font-size: 0.85rem !important;
+    }
+}
+
+/* 2 Columns */
+@media (max-width: 767px) and (min-width: 480px) {
+    #watchlist-container {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    #watchlist-container .anime-cover {
+        height: 180px !important;
+    }
+    #watchlist-container .anime-info {
+        padding: 10px 12px !important;
+    }
+    #watchlist-container .anime-title {
+        font-size: 0.8rem !important;
+    }
+}
+
+/* 2 Columns - Mobile */
+@media (max-width: 479px) {
+    #watchlist-container {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+    #watchlist-container .anime-cover {
+        height: 130px !important;
+    }
+    #watchlist-container .anime-info {
+        padding: 8px 10px !important;
+        gap: 4px !important;
+    }
+    #watchlist-container .anime-title {
+        font-size: 0.65rem !important;
+    }
+    #watchlist-container .anime-meta {
+        font-size: 0.55rem !important;
+    }
+    #watchlist-container .anime-type {
+        font-size: 0.5rem !important;
+        padding: 2px 8px !important;
+    }
+    #watchlist-container .anime-score {
+        font-size: 0.55rem !important;
+        padding: 2px 6px !important;
+    }
+    #watchlist-container .rating-badge {
+        font-size: 0.5rem !important;
+        padding: 2px 6px !important;
+        top: 6px !important;
+        right: 6px !important;
+    }
+    #watchlist-container .anime-badge {
+        font-size: 0.45rem !important;
+        padding: 2px 6px !important;
+        top: 6px !important;
+        left: 6px !important;
+    }
+    #watchlist-container .progress-container {
+        height: 3px !important;
+    }
+}
+
+/* ============================================
+   LIGHT MODE - BOTH TOP RATED & WATCHLIST
+   ============================================ */
+
+[data-theme="light"] #top-rated-anime .anime-card,
+[data-theme="light"] #watchlist-container .anime-card {
+    background: linear-gradient(145deg, #FFFFFF, #F8FAFC) !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] #top-rated-anime .anime-info,
+[data-theme="light"] #watchlist-container .anime-info {
+    background: linear-gradient(135deg, #FFFFFF, #F8FAFC) !important;
+}
+
+[data-theme="light"] #top-rated-anime .anime-title,
+[data-theme="light"] #watchlist-container .anime-title {
+    color: #1E293B !important;
+    text-shadow: none !important;
+}
+
+[data-theme="light"] #top-rated-anime .anime-card:hover .anime-title,
+[data-theme="light"] #watchlist-container .anime-card:hover .anime-title {
+    background: linear-gradient(135deg, #1E293B, #8B5CF6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] #top-rated-anime .anime-type,
+[data-theme="light"] #watchlist-container .anime-type {
+    background: rgba(99, 102, 241, 0.08) !important;
+    color: #6366F1 !important;
+    border-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+[data-theme="light"] #top-rated-anime .anime-badge,
+[data-theme="light"] #watchlist-container .anime-badge {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #1E293B !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] #top-rated-anime .anime-badge[data-status="Watching"],
+[data-theme="light"] #watchlist-container .anime-badge[data-status="Watching"] {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+    color: white !important;
+}
+[data-theme="light"] #top-rated-anime .anime-badge[data-status="Completed"],
+[data-theme="light"] #watchlist-container .anime-badge[data-status="Completed"] {
+    background: linear-gradient(135deg, #10B981, #34D399) !important;
+    color: white !important;
+}
+[data-theme="light"] #top-rated-anime .anime-badge[data-status="Plan to Watch"],
+[data-theme="light"] #watchlist-container .anime-badge[data-status="Plan to Watch"] {
+    background: linear-gradient(135deg, #F59E0B, #FBBF24) !important;
+    color: white !important;
+}
+[data-theme="light"] #top-rated-anime .anime-badge[data-status="Dropped"],
+[data-theme="light"] #watchlist-container .anime-badge[data-status="Dropped"] {
+    background: linear-gradient(135deg, #EF4444, #F87171) !important;
+    color: white !important;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    #top-rated-anime .anime-card,
+    #top-rated-anime .anime-card .anime-cover,
+    #watchlist-container .anime-card,
+    #watchlist-container .anime-card .anime-cover {
+        animation: none !important;
+        transition: none !important;
+    }
+    #top-rated-anime .anime-card:hover,
+    #watchlist-container .anime-card:hover {
+        transform: translateY(-3px) !important;
+    }
 }
