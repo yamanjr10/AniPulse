@@ -10501,7 +10501,7 @@ function showToast(message, type = 'info') {
 }
 
 // ============================================
-//  SEARCH SYSTEM - WITH FALLBACK API
+//  SEARCH SYSTEM - WITH FALLBACK API & GENRE FIX
 // ============================================
 
 (function() {
@@ -10516,11 +10516,8 @@ function showToast(message, type = 'info') {
         DEBOUNCE_DELAY: 600,
         MIN_QUERY_LENGTH: 2,
         MAX_RESULTS: 10,
-        // Primary API: Jikan (MyAnimeList)
         JIKAN_API: 'https://api.jikan.moe/v4/anime',
-        // Fallback API: AniList GraphQL
         ANILIST_API: 'https://graphql.anilist.co',
-        // Alternative fallback: Kitsu API
         KITSU_API: 'https://kitsu.io/api/edge/anime',
     };
 
@@ -10647,7 +10644,6 @@ function showToast(message, type = 'info') {
                 return null;
             }
 
-            // Convert AniList format to Jikan-like format
             return {
                 data: data.data.Page.media.map(media => ({
                     title: media.title.english || media.title.romaji || media.title.native || 'Unknown',
@@ -10706,7 +10702,6 @@ function showToast(message, type = 'info') {
                 return null;
             }
 
-            // Convert Kitsu format to Jikan-like format
             return {
                 data: data.data.map(item => {
                     const attrs = item.attributes;
@@ -10777,7 +10772,6 @@ function showToast(message, type = 'info') {
     // MAIN SEARCH FUNCTION - WITH FALLBACK
     // ============================================
     async function performSearch(query) {
-        // Check cache first
         const cacheKey = query.toLowerCase().trim();
         const cached = searchCache.get(cacheKey);
         if (cached && (Date.now() - cached.timestamp < SEARCH_CONFIG.CACHE_DURATION)) {
@@ -10785,7 +10779,6 @@ function showToast(message, type = 'info') {
             return cached.data;
         }
 
-        // Try Jikan first
         try {
             await checkApiAvailability();
             
@@ -10793,11 +10786,7 @@ function showToast(message, type = 'info') {
                 try {
                     const data = await searchJikan(query);
                     if (data && data.data && data.data.length > 0) {
-                        // Cache results
-                        searchCache.set(cacheKey, {
-                            data: data,
-                            timestamp: Date.now()
-                        });
+                        searchCache.set(cacheKey, { data: data, timestamp: Date.now() });
                         return data;
                     }
                 } catch (jikanError) {
@@ -10807,37 +10796,26 @@ function showToast(message, type = 'info') {
                 }
             }
 
-            // Try AniList (Fallback 1)
             try {
                 const anilistData = await searchAnilist(query);
                 if (anilistData && anilistData.data && anilistData.data.length > 0) {
-                    // Cache results
-                    searchCache.set(cacheKey, {
-                        data: anilistData,
-                        timestamp: Date.now()
-                    });
+                    searchCache.set(cacheKey, { data: anilistData, timestamp: Date.now() });
                     return anilistData;
                 }
             } catch (anilistError) {
                 console.warn('AniList failed, trying Kitsu...');
             }
 
-            // Try Kitsu (Fallback 2)
             try {
                 const kitsuData = await searchKitsu(query);
                 if (kitsuData && kitsuData.data && kitsuData.data.length > 0) {
-                    // Cache results
-                    searchCache.set(cacheKey, {
-                        data: kitsuData,
-                        timestamp: Date.now()
-                    });
+                    searchCache.set(cacheKey, { data: kitsuData, timestamp: Date.now() });
                     return kitsuData;
                 }
             } catch (kitsuError) {
                 console.warn('Kitsu failed too');
             }
 
-            // All APIs failed
             return null;
 
         } catch (error) {
@@ -10847,7 +10825,17 @@ function showToast(message, type = 'info') {
     }
 
     // ============================================
-    // DISPLAY SEARCH RESULTS
+    // ESCAPE HTML
+    // ============================================
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================
+    // DISPLAY SEARCH RESULTS - WITH GENRES
     // ============================================
     function displaySearchResults(data, searchResults, source = '') {
         if (!searchResults) return;
@@ -10866,7 +10854,6 @@ function showToast(message, type = 'info') {
             return;
         }
 
-        // Show source indicator if using fallback
         if (source) {
             const sourceIndicator = document.createElement('div');
             sourceIndicator.style.cssText = `
@@ -10884,6 +10871,19 @@ function showToast(message, type = 'info') {
         data.data.forEach(anime => {
             const title = anime.title_english || anime.title_romaji || anime.title || 'Unknown';
             
+            // Extract genres for display
+            let genreDisplay = '';
+            if (anime.genres) {
+                if (Array.isArray(anime.genres)) {
+                    if (anime.genres.length > 0 && typeof anime.genres[0] === 'object') {
+                        const genreNames = anime.genres.slice(0, 3).map(g => g.name);
+                        genreDisplay = genreNames.join(', ');
+                    } else {
+                        genreDisplay = anime.genres.slice(0, 3).join(', ');
+                    }
+                }
+            }
+            
             const item = document.createElement('div');
             item.className = 'search-result-item';
             item.style.cssText = `
@@ -10896,7 +10896,10 @@ function showToast(message, type = 'info') {
                 transition: all 0.2s ease;
             `;
 
-            const coverUrl = anime.images?.jpg?.image_url || 'https://placehold.co/45x65/6a5acd/white?text=No+Image';
+            const coverUrl = anime.images?.jpg?.image_url || 
+                            anime.images?.large || 
+                            anime.coverImage?.large ||
+                            'https://placehold.co/45x65/6a5acd/white?text=No+Image';
 
             item.innerHTML = `
                 <img src="${coverUrl}" 
@@ -10908,6 +10911,7 @@ function showToast(message, type = 'info') {
                         <span style="font-size: 0.7rem; color: #94A3B8;">${anime.type || 'TV'}</span>
                         <span style="font-size: 0.7rem; color: #94A3B8;">${anime.episodes || '?'} eps</span>
                         ${anime.score ? `<span style="font-size: 0.7rem; color: #FBBF24;">⭐ ${anime.score}</span>` : ''}
+                        ${genreDisplay ? `<span style="font-size: 0.6rem; color: #94A3B8; background: rgba(139,92,246,0.08); padding: 1px 8px; border-radius: 10px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(genreDisplay)}">${escapeHtml(genreDisplay)}</span>` : ''}
                         ${anime.source ? `<span style="font-size: 0.55rem; color: #64748B; background: rgba(139,92,246,0.1); padding: 1px 6px; border-radius: 10px;">${anime.source}</span>` : ''}
                     </div>
                 </div>
@@ -10915,13 +10919,20 @@ function showToast(message, type = 'info') {
 
             const animeData = {
                 title: title,
+                title_english: anime.title_english || '',
+                title_romaji: anime.title_romaji || '',
                 type: anime.type || 'TV',
                 episodes: anime.episodes || 1,
                 score: anime.score || null,
-                images: anime.images,
+                images: {
+                    jpg: {
+                        image_url: coverUrl
+                    }
+                },
                 genres: anime.genres || [],
                 synopsis: anime.synopsis || '',
                 duration: anime.duration || 20,
+                source: anime.source || source || 'unknown'
             };
 
             item.onclick = function(e) {
@@ -10939,14 +10950,118 @@ function showToast(message, type = 'info') {
     }
 
     // ============================================
-    // ESCAPE HTML
+    // SELECT ANIME FUNCTION - WITH GENRE FIX
     // ============================================
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+    window.selectAnimeFromSearch = function(anime) {
+        console.log('🎯 Selecting anime:', anime.title);
+        console.log('📋 Genres from API:', anime.genres);
+        
+        const titleInput = document.getElementById('animeTitle');
+        const typeSelect = document.getElementById('animeType');
+        const episodesInput = document.getElementById('animeEpisodes');
+        const durationInput = document.getElementById('animeDuration');
+        const coverInput = document.getElementById('animeCover');
+        const genresInput = document.getElementById('animeGenres');
+        const scoreInput = document.getElementById('animeScore');
+        const searchResults = document.getElementById('searchResults');
+
+        // 1. SET TITLE
+        if (titleInput) {
+            titleInput.value = anime.title || '';
+            titleInput.style.border = '2px solid #10B981';
+            setTimeout(() => { titleInput.style.border = ''; }, 1000);
+        }
+
+        // 2. SET TYPE
+        if (typeSelect) {
+            const animeType = anime.type || 'TV';
+            typeSelect.value = animeType;
+            const changeEvent = new Event('change');
+            typeSelect.dispatchEvent(changeEvent);
+        }
+
+        // 3. SET EPISODES
+        if (episodesInput) {
+            episodesInput.value = anime.episodes || 1;
+        }
+
+        // 4. SET DURATION
+        if (durationInput) {
+            if (anime.type === 'Movie') {
+                durationInput.value = anime.duration ? Math.round(parseInt(anime.duration) || 120) : '120';
+                durationInput.readOnly = false;
+            } else {
+                durationInput.value = anime.duration || '20';
+                durationInput.readOnly = true;
+            }
+        }
+
+        // 5. SET COVER IMAGE
+        if (coverInput && anime.images) {
+            const coverUrl = anime.images?.jpg?.image_url || 
+                            anime.images?.large || 
+                            anime.coverImage?.large ||
+                            anime.coverImage?.medium ||
+                            '';
+            if (coverUrl) {
+                coverInput.value = coverUrl;
+                console.log('📸 Cover URL set:', coverUrl);
+            }
+        }
+
+        // 6. SET GENRES - FIXED!
+        if (genresInput && anime.genres) {
+            let genreString = '';
+            
+            if (Array.isArray(anime.genres)) {
+                if (anime.genres.length > 0 && typeof anime.genres[0] === 'object') {
+                    // Jikan format (objects with name property)
+                    const unwantedGenres = ['Award Winning'];
+                    genreString = anime.genres
+                        .filter(g => !unwantedGenres.includes(g.name))
+                        .map(g => g.name)
+                        .join(', ');
+                } else {
+                    // String array (AniList or Kitsu)
+                    genreString = anime.genres.join(', ');
+                }
+            } else if (typeof anime.genres === 'string') {
+                genreString = anime.genres;
+            }
+            
+            genresInput.value = genreString;
+            console.log('🎭 Genres set:', genreString);
+        } else {
+            console.warn('⚠️ No genres available for:', anime.title);
+        }
+
+        // 7. SET SCORE
+        if (scoreInput && anime.score) {
+            const score = typeof anime.score === 'number' ? anime.score : parseFloat(anime.score);
+            if (!isNaN(score)) {
+                scoreInput.value = score;
+            }
+        }
+
+        // 8. CLOSE SEARCH RESULTS
+        if (searchResults) {
+            searchResults.style.display = 'none';
+            searchResults.innerHTML = '';
+        }
+
+        // 9. SHOW SUCCESS
+        const genreCount = Array.isArray(anime.genres) ? anime.genres.length : 0;
+        showToast(`✓ Selected: ${anime.title} (${genreCount} genres)`, 'success');
+        
+        console.log('✅ Anime selected successfully:', {
+            title: anime.title,
+            type: anime.type,
+            episodes: anime.episodes,
+            score: anime.score,
+            genres: anime.genres,
+            cover: anime.images?.jpg?.image_url
+        });
+    };
 
     // ============================================
     // SHOW LOADING / ERROR
@@ -11098,39 +11213,21 @@ function showToast(message, type = 'info') {
     };
 
     // ============================================
-    // OVERRIDE SELECT ANIME FUNCTION
+    // TOAST NOTIFICATION
     // ============================================
-    const originalSelectAnime = window.selectAnimeFromSearch;
-    window.selectAnimeFromSearch = function(anime) {
-        if (typeof originalSelectAnime === 'function') {
-            originalSelectAnime(anime);
-        } else {
-            // Fallback selection
-            const titleInput = document.getElementById('animeTitle');
-            const typeSelect = document.getElementById('animeType');
-            const episodesInput = document.getElementById('animeEpisodes');
-            const scoreInput = document.getElementById('animeScore');
-            const coverInput = document.getElementById('animeCover');
-            const genresInput = document.getElementById('animeGenres');
-            const durationInput = document.getElementById('animeDuration');
-            const searchResults = document.getElementById('searchResults');
-
-            if (titleInput) titleInput.value = anime.title;
-            if (typeSelect) typeSelect.value = anime.type || 'TV';
-            if (episodesInput) episodesInput.value = anime.episodes || 1;
-            if (scoreInput && anime.score) scoreInput.value = anime.score;
-            if (coverInput && anime.images?.jpg?.image_url) coverInput.value = anime.images.jpg.image_url;
-            if (genresInput && anime.genres) genresInput.value = anime.genres.join(', ');
-            if (durationInput) durationInput.value = anime.duration || 20;
-
-            if (searchResults) {
-                searchResults.style.display = 'none';
-                searchResults.innerHTML = '';
-            }
-
-            showToast(`✓ Selected: ${anime.title}`, 'success');
-        }
-    };
+    if (typeof showToast !== 'function') {
+        window.showToast = function(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        };
+    }
 
     // ============================================
     // INITIALIZE SEARCH SYSTEM
@@ -11173,28 +11270,9 @@ function showToast(message, type = 'info') {
             }
         });
 
-        // Check API status
         checkApiAvailability();
-
         console.log('✅ Search system initialized with fallback APIs');
         console.log('📡 Jikan API:', isJikanAvailable ? '🟢 Available' : '🔴 Using Fallback');
-    }
-
-    // ============================================
-    // TOAST NOTIFICATION (if not already defined)
-    // ============================================
-    if (typeof showToast !== 'function') {
-        window.showToast = function(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            if (!container) return;
-            
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<span>${message}</span>`;
-            container.appendChild(toast);
-            
-            setTimeout(() => toast.remove(), 3000);
-        };
     }
 
     // ============================================
@@ -11218,7 +11296,7 @@ function showToast(message, type = 'info') {
         }
     }, 10 * 60 * 1000);
 
-    console.log('✅ Multi-API search system loaded!');
+    console.log('✅ Multi-API search system loaded with genre fix!');
 })();
 
 // Initialize the app with saved theme (theme loads before loader)
