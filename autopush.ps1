@@ -2,7 +2,7 @@
 # Auto Push Script for GitHub
 # ============================
 
-$repoPath = "C:\Users\Acer\webdevlopement\Animes\Anime-Tracker\AniPulse"
+$repoPath = "C:\Users\Acer\webdevlopement\Animes\Tracker\Anime\AniPulse"
 Set-Location $repoPath
 
 # Switch to main
