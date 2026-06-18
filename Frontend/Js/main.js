@@ -10500,5 +10500,726 @@ function showToast(message, type = 'info') {
     }
 }
 
+// ============================================
+//  SEARCH SYSTEM - WITH FALLBACK API
+// ============================================
+
+(function() {
+    console.log('🔧 Loading search system with dual API support...');
+
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const SEARCH_CONFIG = {
+        CACHE_DURATION: 10 * 60 * 1000, // 10 minutes
+        TIMEOUT: 8000, // 8 seconds
+        DEBOUNCE_DELAY: 600,
+        MIN_QUERY_LENGTH: 2,
+        MAX_RESULTS: 10,
+        // Primary API: Jikan (MyAnimeList)
+        JIKAN_API: 'https://api.jikan.moe/v4/anime',
+        // Fallback API: AniList GraphQL
+        ANILIST_API: 'https://graphql.anilist.co',
+        // Alternative fallback: Kitsu API
+        KITSU_API: 'https://kitsu.io/api/edge/anime',
+    };
+
+    // ============================================
+    // SEARCH CACHE
+    // ============================================
+    const searchCache = new Map();
+
+    // ============================================
+    // API STATUS
+    // ============================================
+    let isJikanAvailable = true;
+    let apiCheckInProgress = false;
+    let lastApiCheck = 0;
+    let usingFallback = false;
+
+    // ============================================
+    // CHECK API STATUS
+    // ============================================
+    async function checkApiAvailability() {
+        const now = Date.now();
+        if (now - lastApiCheck < 30000) return isJikanAvailable;
+        if (apiCheckInProgress) return isJikanAvailable;
+
+        apiCheckInProgress = true;
+        lastApiCheck = now;
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            const response = await fetch('https://api.jikan.moe/v4/status', {
+                signal: controller.signal,
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                const data = await response.json();
+                isJikanAvailable = data.myanimelist_heartbeat?.status === 'HEALTHY' && !data.myanimelist_heartbeat?.down;
+            } else {
+                isJikanAvailable = false;
+            }
+        } catch (error) {
+            isJikanAvailable = false;
+            console.warn('⚠️ Jikan API not reachable, will use fallback');
+        }
+
+        apiCheckInProgress = false;
+        usingFallback = !isJikanAvailable;
+        return isJikanAvailable;
+    }
+
+    // ============================================
+    // SEARCH WITH ANILIST (FALLBACK)
+    // ============================================
+    async function searchAnilist(query) {
+        console.log('🔍 Searching AniList for:', query);
+        
+        const graphqlQuery = `
+            query ($search: String) {
+                Page(page: 1, perPage: 10) {
+                    media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
+                        id
+                        title {
+                            romaji
+                            english
+                            native
+                        }
+                        coverImage {
+                            large
+                            medium
+                        }
+                        episodes
+                        format
+                        averageScore
+                        genres
+                        status
+                        startDate {
+                            year
+                            month
+                            day
+                        }
+                        endDate {
+                            year
+                            month
+                            day
+                        }
+                        description
+                        duration
+                        season
+                        seasonYear
+                        studios {
+                            nodes {
+                                name
+                            }
+                        }
+                    }
+                }
+            }
+        `;
+
+        try {
+            const response = await fetch(SEARCH_CONFIG.ANILIST_API, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: graphqlQuery,
+                    variables: { search: query }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`AniList API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.data?.Page?.media) {
+                return null;
+            }
+
+            // Convert AniList format to Jikan-like format
+            return {
+                data: data.data.Page.media.map(media => ({
+                    title: media.title.english || media.title.romaji || media.title.native || 'Unknown',
+                    title_english: media.title.english || '',
+                    title_romaji: media.title.romaji || '',
+                    title_japanese: media.title.native || '',
+                    type: media.format || 'TV',
+                    episodes: media.episodes || 0,
+                    score: media.averageScore ? media.averageScore / 10 : null,
+                    images: {
+                        jpg: {
+                            image_url: media.coverImage?.large || media.coverImage?.medium || null
+                        }
+                    },
+                    genres: media.genres || [],
+                    synopsis: media.description || '',
+                    duration: media.duration || 20,
+                    status: media.status || 'Finished',
+                    season: media.season || '',
+                    seasonYear: media.seasonYear || null,
+                    studios: media.studios?.nodes?.map(s => s.name) || [],
+                    source: 'anilist'
+                }))
+            };
+
+        } catch (error) {
+            console.error('AniList search failed:', error);
+            return null;
+        }
+    }
+
+    // ============================================
+    // SEARCH WITH KITSU (ALTERNATIVE FALLBACK)
+    // ============================================
+    async function searchKitsu(query) {
+        console.log('🔍 Searching Kitsu for:', query);
+        
+        try {
+            const response = await fetch(
+                `${SEARCH_CONFIG.KITSU_API}?filter[text]=${encodeURIComponent(query)}&page[limit]=10&sort=-averageRating`,
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Kitsu API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.data || data.data.length === 0) {
+                return null;
+            }
+
+            // Convert Kitsu format to Jikan-like format
+            return {
+                data: data.data.map(item => {
+                    const attrs = item.attributes;
+                    return {
+                        title: attrs.titles?.en || attrs.titles?.en_jp || attrs.canonicalTitle || 'Unknown',
+                        title_english: attrs.titles?.en || '',
+                        title_romaji: attrs.titles?.en_jp || '',
+                        title_japanese: attrs.titles?.ja_jp || '',
+                        type: attrs.showType || 'TV',
+                        episodes: attrs.episodeCount || 0,
+                        score: attrs.averageRating ? parseFloat(attrs.averageRating) / 10 : null,
+                        images: {
+                            jpg: {
+                                image_url: attrs.posterImage?.original || attrs.posterImage?.large || null
+                            }
+                        },
+                        genres: attrs.genres?.map(g => g.name) || [],
+                        synopsis: attrs.synopsis || '',
+                        duration: attrs.episodeLength || 20,
+                        status: attrs.status || 'Finished',
+                        source: 'kitsu'
+                    };
+                })
+            };
+
+        } catch (error) {
+            console.error('Kitsu search failed:', error);
+            return null;
+        }
+    }
+
+    // ============================================
+    // SEARCH WITH JIKAN (PRIMARY)
+    // ============================================
+    async function searchJikan(query) {
+        console.log('🔍 Searching Jikan for:', query);
+        
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const url = `${SEARCH_CONFIG.JIKAN_API}?q=${encodeURIComponent(query)}&limit=10`;
+            const response = await fetch(url, {
+                signal: controller.signal,
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            clearTimeout(timeoutId);
+
+            if (response.status === 504 || response.status === 429) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+
+        } catch (error) {
+            console.warn('Jikan search failed:', error.message);
+            throw error;
+        }
+    }
+
+    // ============================================
+    // MAIN SEARCH FUNCTION - WITH FALLBACK
+    // ============================================
+    async function performSearch(query) {
+        // Check cache first
+        const cacheKey = query.toLowerCase().trim();
+        const cached = searchCache.get(cacheKey);
+        if (cached && (Date.now() - cached.timestamp < SEARCH_CONFIG.CACHE_DURATION)) {
+            console.log('📦 Using cached results for:', query);
+            return cached.data;
+        }
+
+        // Try Jikan first
+        try {
+            await checkApiAvailability();
+            
+            if (isJikanAvailable) {
+                try {
+                    const data = await searchJikan(query);
+                    if (data && data.data && data.data.length > 0) {
+                        // Cache results
+                        searchCache.set(cacheKey, {
+                            data: data,
+                            timestamp: Date.now()
+                        });
+                        return data;
+                    }
+                } catch (jikanError) {
+                    console.warn('Jikan failed, trying fallback...');
+                    isJikanAvailable = false;
+                    usingFallback = true;
+                }
+            }
+
+            // Try AniList (Fallback 1)
+            try {
+                const anilistData = await searchAnilist(query);
+                if (anilistData && anilistData.data && anilistData.data.length > 0) {
+                    // Cache results
+                    searchCache.set(cacheKey, {
+                        data: anilistData,
+                        timestamp: Date.now()
+                    });
+                    return anilistData;
+                }
+            } catch (anilistError) {
+                console.warn('AniList failed, trying Kitsu...');
+            }
+
+            // Try Kitsu (Fallback 2)
+            try {
+                const kitsuData = await searchKitsu(query);
+                if (kitsuData && kitsuData.data && kitsuData.data.length > 0) {
+                    // Cache results
+                    searchCache.set(cacheKey, {
+                        data: kitsuData,
+                        timestamp: Date.now()
+                    });
+                    return kitsuData;
+                }
+            } catch (kitsuError) {
+                console.warn('Kitsu failed too');
+            }
+
+            // All APIs failed
+            return null;
+
+        } catch (error) {
+            console.error('All search methods failed:', error);
+            return null;
+        }
+    }
+
+    // ============================================
+    // DISPLAY SEARCH RESULTS
+    // ============================================
+    function displaySearchResults(data, searchResults, source = '') {
+        if (!searchResults) return;
+        searchResults.innerHTML = '';
+
+        if (!data || !data.data || data.data.length === 0) {
+            searchResults.innerHTML = `
+                <div style="padding: 20px; text-align: center; color: #94A3B8;">
+                    <i class="fas fa-search" style="font-size: 28px; display: block; margin-bottom: 12px; color: #6366F1;"></i>
+                    <div style="font-weight: 600; margin-bottom: 4px;">No results found</div>
+                    <small>Try using different keywords</small>
+                    ${source ? `<div style="margin-top: 8px; font-size: 0.7rem; color: #64748B;">Searched via: ${source}</div>` : ''}
+                </div>
+            `;
+            searchResults.style.display = 'block';
+            return;
+        }
+
+        // Show source indicator if using fallback
+        if (source) {
+            const sourceIndicator = document.createElement('div');
+            sourceIndicator.style.cssText = `
+                padding: 8px 16px;
+                background: rgba(139, 92, 246, 0.1);
+                border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+                font-size: 0.7rem;
+                color: #A78BFA;
+                text-align: center;
+            `;
+            sourceIndicator.innerHTML = `<i class="fas fa-info-circle"></i> Results from: ${source}`;
+            searchResults.appendChild(sourceIndicator);
+        }
+
+        data.data.forEach(anime => {
+            const title = anime.title_english || anime.title_romaji || anime.title || 'Unknown';
+            
+            const item = document.createElement('div');
+            item.className = 'search-result-item';
+            item.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 12px 16px;
+                cursor: pointer;
+                border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+                transition: all 0.2s ease;
+            `;
+
+            const coverUrl = anime.images?.jpg?.image_url || 'https://placehold.co/45x65/6a5acd/white?text=No+Image';
+
+            item.innerHTML = `
+                <img src="${coverUrl}" 
+                     style="width: 45px; height: 65px; object-fit: cover; border-radius: 8px;"
+                     onerror="this.src='https://placehold.co/45x65/6a5acd/white?text=No+Image'">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 600; color: var(--color-text-primary, white); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(title)}</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span style="font-size: 0.7rem; color: #94A3B8;">${anime.type || 'TV'}</span>
+                        <span style="font-size: 0.7rem; color: #94A3B8;">${anime.episodes || '?'} eps</span>
+                        ${anime.score ? `<span style="font-size: 0.7rem; color: #FBBF24;">⭐ ${anime.score}</span>` : ''}
+                        ${anime.source ? `<span style="font-size: 0.55rem; color: #64748B; background: rgba(139,92,246,0.1); padding: 1px 6px; border-radius: 10px;">${anime.source}</span>` : ''}
+                    </div>
+                </div>
+            `;
+
+            const animeData = {
+                title: title,
+                type: anime.type || 'TV',
+                episodes: anime.episodes || 1,
+                score: anime.score || null,
+                images: anime.images,
+                genres: anime.genres || [],
+                synopsis: anime.synopsis || '',
+                duration: anime.duration || 20,
+            };
+
+            item.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof window.selectAnimeFromSearch === 'function') {
+                    window.selectAnimeFromSearch(animeData);
+                }
+            };
+
+            searchResults.appendChild(item);
+        });
+
+        searchResults.style.display = 'block';
+    }
+
+    // ============================================
+    // ESCAPE HTML
+    // ============================================
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================
+    // SHOW LOADING / ERROR
+    // ============================================
+    function showSearchLoading(query) {
+        const searchLoading = document.getElementById('searchLoading');
+        if (searchLoading) {
+            searchLoading.style.display = 'block';
+            searchLoading.innerHTML = `
+                <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>
+                Searching for "${escapeHtml(query)}"...
+            `;
+        }
+    }
+
+    function hideSearchLoading() {
+        const searchLoading = document.getElementById('searchLoading');
+        if (searchLoading) {
+            searchLoading.style.display = 'none';
+            searchLoading.innerHTML = 'Searching...';
+        }
+    }
+
+    function showSearchError(message, details = '') {
+        const searchResults = document.getElementById('searchResults');
+        if (!searchResults) return;
+        
+        searchResults.innerHTML = `
+            <div style="padding: 24px 20px; text-align: center;">
+                <i class="fas fa-exclamation-circle" style="font-size: 36px; color: #F87171; display: block; margin-bottom: 12px;"></i>
+                <div style="font-weight: 600; color: #F87171; margin-bottom: 8px; font-size: 1rem;">${message}</div>
+                ${details ? `<div style="color: #94A3B8; font-size: 0.8rem; margin-bottom: 12px;">${details}</div>` : ''}
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px;">
+                    <button onclick="window.retrySearch()" style="
+                        padding: 8px 24px;
+                        background: linear-gradient(135deg, #6366F1, #8B5CF6);
+                        color: white;
+                        border: none;
+                        border-radius: 30px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        font-size: 0.85rem;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                        <i class="fas fa-sync-alt"></i> Try Again
+                    </button>
+                    <button onclick="window.closeSearchResults()" style="
+                        padding: 8px 24px;
+                        background: rgba(255, 255, 255, 0.05);
+                        color: #94A3B8;
+                        border: 1px solid rgba(139, 92, 246, 0.15);
+                        border-radius: 30px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        font-size: 0.85rem;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background=''">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        `;
+        searchResults.style.display = 'block';
+    }
+
+    window.closeSearchResults = function() {
+        const searchResults = document.getElementById('searchResults');
+        if (searchResults) {
+            searchResults.style.display = 'none';
+            searchResults.innerHTML = '';
+        }
+        hideSearchLoading();
+    };
+
+    // ============================================
+    // MAIN SEARCH FUNCTION
+    // ============================================
+    let searchTimeout = null;
+    let isSearching = false;
+
+    window.searchAnime = async function() {
+        const searchInput = document.getElementById('animeTitle');
+        if (!searchInput) return;
+        
+        const query = searchInput.value.trim();
+        const searchResults = document.getElementById('searchResults');
+
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+
+        if (!query || query.length < SEARCH_CONFIG.MIN_QUERY_LENGTH) {
+            if (searchResults) {
+                searchResults.style.display = 'none';
+                searchResults.innerHTML = '';
+            }
+            hideSearchLoading();
+            return;
+        }
+
+        searchTimeout = setTimeout(async () => {
+            if (isSearching) return;
+            isSearching = true;
+
+            showSearchLoading(query);
+
+            if (searchResults) {
+                searchResults.style.display = 'none';
+                searchResults.innerHTML = '';
+            }
+
+            try {
+                const result = await performSearch(query);
+                
+                if (result) {
+                    const source = result.data?.[0]?.source || 
+                                  (usingFallback ? 'AniList/Kitsu' : 'Jikan');
+                    displaySearchResults(result, searchResults, source);
+                } else {
+                    showSearchError('No results found', 'Try using different keywords or check your spelling');
+                }
+
+            } catch (error) {
+                console.error('Search error:', error);
+                showSearchError('Search failed', 'Please try again later');
+            } finally {
+                hideSearchLoading();
+                isSearching = false;
+            }
+        }, SEARCH_CONFIG.DEBOUNCE_DELAY);
+    };
+
+    // ============================================
+    // RETRY SEARCH
+    // ============================================
+    window.retrySearch = function() {
+        const searchInput = document.getElementById('animeTitle');
+        if (searchInput) {
+            const query = searchInput.value.trim();
+            if (query) {
+                const cacheKey = query.toLowerCase().trim();
+                searchCache.delete(cacheKey);
+            }
+            isJikanAvailable = true;
+            usingFallback = false;
+            lastApiCheck = 0;
+            window.searchAnime();
+        }
+    };
+
+    // ============================================
+    // OVERRIDE SELECT ANIME FUNCTION
+    // ============================================
+    const originalSelectAnime = window.selectAnimeFromSearch;
+    window.selectAnimeFromSearch = function(anime) {
+        if (typeof originalSelectAnime === 'function') {
+            originalSelectAnime(anime);
+        } else {
+            // Fallback selection
+            const titleInput = document.getElementById('animeTitle');
+            const typeSelect = document.getElementById('animeType');
+            const episodesInput = document.getElementById('animeEpisodes');
+            const scoreInput = document.getElementById('animeScore');
+            const coverInput = document.getElementById('animeCover');
+            const genresInput = document.getElementById('animeGenres');
+            const durationInput = document.getElementById('animeDuration');
+            const searchResults = document.getElementById('searchResults');
+
+            if (titleInput) titleInput.value = anime.title;
+            if (typeSelect) typeSelect.value = anime.type || 'TV';
+            if (episodesInput) episodesInput.value = anime.episodes || 1;
+            if (scoreInput && anime.score) scoreInput.value = anime.score;
+            if (coverInput && anime.images?.jpg?.image_url) coverInput.value = anime.images.jpg.image_url;
+            if (genresInput && anime.genres) genresInput.value = anime.genres.join(', ');
+            if (durationInput) durationInput.value = anime.duration || 20;
+
+            if (searchResults) {
+                searchResults.style.display = 'none';
+                searchResults.innerHTML = '';
+            }
+
+            showToast(`✓ Selected: ${anime.title}`, 'success');
+        }
+    };
+
+    // ============================================
+    // INITIALIZE SEARCH SYSTEM
+    // ============================================
+    function initSearchSystem() {
+        const searchInput = document.getElementById('animeTitle');
+        if (!searchInput) {
+            setTimeout(initSearchSystem, 500);
+            return;
+        }
+
+        const newInput = searchInput.cloneNode(true);
+        searchInput.parentNode.replaceChild(newInput, searchInput);
+
+        newInput.addEventListener('input', window.searchAnime);
+        newInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = null;
+                }
+                window.searchAnime();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                window.closeSearchResults();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            const searchResults = document.getElementById('searchResults');
+            const searchInput = document.getElementById('animeTitle');
+            if (searchResults && searchInput) {
+                if (!searchResults.contains(e.target) && e.target !== searchInput) {
+                    searchResults.style.display = 'none';
+                }
+            }
+        });
+
+        // Check API status
+        checkApiAvailability();
+
+        console.log('✅ Search system initialized with fallback APIs');
+        console.log('📡 Jikan API:', isJikanAvailable ? '🟢 Available' : '🔴 Using Fallback');
+    }
+
+    // ============================================
+    // TOAST NOTIFICATION (if not already defined)
+    // ============================================
+    if (typeof showToast !== 'function') {
+        window.showToast = function(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        };
+    }
+
+    // ============================================
+    // START
+    // ============================================
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSearchSystem);
+    } else {
+        initSearchSystem();
+    }
+
+    // ============================================
+    // CACHE CLEANUP
+    // ============================================
+    setInterval(() => {
+        const now = Date.now();
+        for (const [key, value] of searchCache) {
+            if (now - value.timestamp > SEARCH_CONFIG.CACHE_DURATION) {
+                searchCache.delete(key);
+            }
+        }
+    }, 10 * 60 * 1000);
+
+    console.log('✅ Multi-API search system loaded!');
+})();
+
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();
