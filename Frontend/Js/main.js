@@ -11910,673 +11910,399 @@ function showToast(message, type = 'info') {
 })();
 
 // ============================================
-// COMPLETE DATA SYNC SYSTEM - FINAL VERSION
+// FIX: USER PROFILE MODAL - SAFE RENDER
 // ============================================
 
-(function() {
+(function fixUserProfile() {
     'use strict';
 
-    console.log('🔧 Loading data sync system...');
+    console.log('🔧 Fixing user profile modal...');
 
     // ============================================
-    // DATA STATUS BAR (Visible on Mobile)
+    // SAFE RENDER USER PROFILE
     // ============================================
 
-    function showDataStatus(message, type = 'loading') {
-        let bar = document.getElementById('dataStatusBar');
-        
-        if (!bar) {
-            bar = document.createElement('div');
-            bar.id = 'dataStatusBar';
-            bar.style.cssText = `
-                display: none;
-                position: fixed;
-                bottom: 80px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(15, 23, 42, 0.95);
-                backdrop-filter: blur(12px);
-                padding: 10px 20px;
-                border-radius: 30px;
-                border: 1px solid rgba(139, 92, 246, 0.3);
-                color: white;
-                font-size: 0.8rem;
-                z-index: 9999;
-                box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-                text-align: center;
-                max-width: 90%;
-                transition: all 0.3s ease;
-            `;
-            bar.innerHTML = `
-                <span id="dataStatusText">Loading data...</span>
-                <span id="dataStatusSpinner" style="margin-left: 8px;">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </span>
-            `;
-            document.body.appendChild(bar);
-        }
-
-        const text = document.getElementById('dataStatusText');
-        const spinner = document.getElementById('dataStatusSpinner');
-        
-        bar.style.display = 'block';
-        if (text) text.textContent = message;
-        
-        if (spinner) {
-            if (type === 'loading') {
-                spinner.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                bar.style.borderColor = 'rgba(139, 92, 246, 0.3)';
-            } else if (type === 'success') {
-                spinner.innerHTML = '<i class="fas fa-check-circle" style="color: #34D399;"></i>';
-                bar.style.borderColor = 'rgba(52, 211, 153, 0.5)';
-            } else if (type === 'error') {
-                spinner.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #F87171;"></i>';
-                bar.style.borderColor = 'rgba(248, 113, 113, 0.5)';
-            } else {
-                spinner.innerHTML = '';
-            }
-        }
-    }
-
-    function hideDataStatus() {
-        const bar = document.getElementById('dataStatusBar');
-        if (bar) {
-            bar.style.display = 'none';
-        }
-    }
-
-    // ============================================
-    // CALCULATE TOTAL HOURS
-    // ============================================
-
-    function calculateTotalHours(animeData) {
-        let totalHours = 0;
-        animeData.forEach(a => {
-            if (a.userStatus === 'Completed') {
-                if (a.type === 'Movie') {
-                    totalHours += (a.duration || 120) / 60;
-                } else {
-                    totalHours += ((a.episodes || 0) * (a.duration || 20)) / 60;
-                }
-            }
-        });
-        return Math.round(totalHours);
-    }
-
-    // ============================================
-    // REFRESH ALL UI
-    // ============================================
-
-    function refreshAllUI() {
-        console.log('🔄 Refreshing UI...');
-        
-        const functions = [
-            'updateSidebarUserInfo',
-            'updateStats', 
-            'updateGreetingMessage',
-            'initCharts',
-            'initStatisticsCharts',
-            'refreshAllCharts',
-            'updateCurrentlyWatching',
-            'updateTopRatedAnime',
-            'updateRecentActivity',
-            'updateAnimeDisplay',
-            'updateWatchlist',
-            'updateAchievements',
-            'updateStatsHero',
-            'updateOverviewMetrics',
-            'updateLibraryAnalytics',
-            'updateRatingAnalytics',
-            'updateCompletionJourney',
-            'updateStudioSeasonal'
-        ];
-
-        functions.forEach(fnName => {
-            if (typeof window[fnName] === 'function') {
-                try { window[fnName](); } catch (e) {}
-            }
-        });
-
-        if (window.AniPulseLevelSystem?.updateAllLevelUI) {
-            window.AniPulseLevelSystem.updateAllLevelUI();
-        }
-
-        const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-        const userName = userProfile.name || 'AnimeFan';
-        const avatar = userProfile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=6366F1&color=fff`;
-        
-        document.querySelectorAll('.sidebar-username, .user-profile span, #profilePreviewName, #heroUsername').forEach(el => {
-            if (el) el.textContent = userName;
-        });
-
-        document.querySelectorAll('.user-avatar, .sidebar-avatar, #profilePreviewAvatar').forEach(el => {
-            if (el) el.src = avatar;
-        });
-    }
-
-    // ============================================
-    // LOAD DATA FROM DATABASE
-    // ============================================
-
-    async function loadAllDataFromDatabase() {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-            showDataStatus('Not logged in', 'error');
-            setTimeout(hideDataStatus, 3000);
-            return false;
-        }
-
-        showDataStatus('Loading your data...', 'loading');
-
-        try {
-            const response = await fetch('http://localhost:3000/api/sync/load-all', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const result = await response.json();
-            
-            if (!result.success) {
-                throw new Error('Failed to load data');
-            }
-
-            const { data } = result;
-            let loadedCount = 0;
-            
-            if (data.animeData && Array.isArray(data.animeData)) {
-                localStorage.setItem('animeData', JSON.stringify(data.animeData));
-                window.animeData = data.animeData;
-                loadedCount = data.animeData.length;
-                console.log(`✅ Loaded ${data.animeData.length} anime`);
-            }
-
-            if (data.userProfile) {
-                const userProfile = {
-                    name: data.userProfile.name || data.userProfile.username || 'AnimeFan',
-                    avatar: data.userProfile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.userProfile.name || 'User')}&background=6366F1&color=fff`,
-                    level: data.userProfile.level || 1,
-                    title: data.userProfile.title || 'Newbie',
-                    totalXP: data.userProfile.totalXP || 0
-                };
-                localStorage.setItem('userProfile', JSON.stringify(userProfile));
-                console.log(`✅ Loaded user: ${userProfile.name}`);
-            }
-
-            if (data.levelData) {
-                localStorage.setItem('userLevel', String(data.levelData.level || 1));
-                localStorage.setItem('userLevelTitle', data.levelData.title || 'Newbie');
-                localStorage.setItem('userTotalXP', String(data.levelData.totalXP || 0));
-                console.log(`✅ Level: ${data.levelData.level} (${data.levelData.totalXP} XP)`);
-            }
-
-            if (data.activityLog && Array.isArray(data.activityLog)) {
-                localStorage.setItem('activityLog', JSON.stringify(data.activityLog));
-                window.activityLog = data.activityLog;
-            }
-
-            if (data.unlockedAchievements && Array.isArray(data.unlockedAchievements)) {
-                localStorage.setItem('unlockedAchievements', JSON.stringify(data.unlockedAchievements));
-            }
-
-            showDataStatus(`✅ Loaded ${loadedCount} anime`, 'success');
-            
-            setTimeout(() => {
-                refreshAllUI();
-                hideDataStatus();
-                if (typeof showToast === 'function') {
-                    showToast('Data loaded successfully! 🎉', 'success');
-                }
-            }, 1000);
-
-            return true;
-
-        } catch (error) {
-            console.error('Load error:', error);
-            showDataStatus(`❌ ${error.message}`, 'error');
-            setTimeout(hideDataStatus, 4000);
-            
-            // Try local data as fallback
-            const localData = localStorage.getItem('animeData');
-            if (localData) {
-                window.animeData = JSON.parse(localData);
-                showDataStatus('📦 Using local data', 'info');
-                setTimeout(() => {
-                    refreshAllUI();
-                    hideDataStatus();
-                }, 1000);
-                return false;
-            }
-            return false;
-        }
-    }
-
-    // ============================================
-    // SAVE DATA TO DATABASE
-    // ============================================
-
-    async function saveAllDataToDatabase() {
-        const token = localStorage.getItem('authToken');
-        if (!token) return false;
-
-        try {
-            const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
-            const activityLog = JSON.parse(localStorage.getItem('activityLog') || '[]');
-            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-            const unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements') || '[]');
-            const userXpHistory = JSON.parse(localStorage.getItem('userXpHistory') || '[]');
-            const animeContributions = JSON.parse(localStorage.getItem('animeContributions') || '{}');
-            const appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}');
-
-            const level = parseInt(localStorage.getItem('userLevel') || '1');
-            const title = localStorage.getItem('userLevelTitle') || 'Newbie';
-            const totalXP = parseInt(localStorage.getItem('userTotalXP') || '0');
-
-            const levelData = {
-                level: level,
-                title: title,
-                totalXP: totalXP,
-                totalAnime: animeData.filter(a => a.userStatus === 'Completed').length,
-                totalHours: calculateTotalHours(animeData)
-            };
-
-            const response = await fetch('http://localhost:3000/api/sync/sync-all', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    animeData,
-                    activityLog,
-                    userProfile,
-                    unlockedAchievements,
-                    userXpHistory,
-                    animeContributions,
-                    appSettings,
-                    levelData
-                })
-            });
-
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
-            console.log('✅ Data saved to database');
-            return true;
-
-        } catch (error) {
-            console.error('Save error:', error);
-            return false;
-        }
-    }
-
-    // ============================================
-    // CHECK LOGIN ON LOAD
-    // ============================================
-
-    async function checkLoginAndLoadData() {
-        const token = localStorage.getItem('authToken');
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-        if (!token || !user.uid) {
-            console.log('👤 Not logged in');
-            return;
-        }
-
-        console.log(`👤 Logged in as: ${user.name || user.username}`);
-        await loadAllDataFromDatabase();
-    }
-
-    // ============================================
-    // OVERRIDE LOGIN
-    // ============================================
-
-    window.loginUser = async function(email, password) {
-        try {
-            showDataStatus('🔐 Logging in...', 'loading');
-            
-            const response = await fetch('http://localhost:3000/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Login failed');
-            }
-
-            const data = await response.json();
-            
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            
-            const userProfile = {
-                name: data.user.name || data.user.username || 'AnimeFan',
-                avatar: data.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.name || 'User')}&background=6366F1&color=fff`,
-                level: data.user.level || 1,
-                title: data.user.title || 'Newbie',
-                totalXP: data.user.totalXP || 0
-            };
-            localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            
-            showDataStatus('✅ Logged in! Loading data...', 'success');
-            
-            await loadAllDataFromDatabase();
-            
-            setTimeout(() => {
-                window.location.href = '/dashboard.html';
-            }, 1500);
-            
-            return true;
-            
-        } catch (error) {
-            console.error('Login error:', error);
-            showDataStatus(`❌ ${error.message}`, 'error');
-            setTimeout(hideDataStatus, 4000);
-            return false;
-        }
-    };
-
-    // ============================================
-    // AUTO-SAVE ON DATA CHANGE
-    // ============================================
-
-    const originalSaveData = window.saveData;
-    if (typeof originalSaveData === 'function') {
-        window.saveData = function() {
-            originalSaveData();
-            clearTimeout(window._saveTimeout);
-            window._saveTimeout = setTimeout(() => {
-                saveAllDataToDatabase();
-            }, 3000);
-        };
-    }
-
-    // ============================================
-    // INITIALIZE
-    // ============================================
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(checkLoginAndLoadData, 800);
-        });
-    } else {
-        setTimeout(checkLoginAndLoadData, 800);
-    }
-
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            setTimeout(checkLoginAndLoadData, 500);
-        }
-    });
-
-    // ============================================
-    // EXPOSE
-    // ============================================
-
-    window.loadAllDataFromDatabase = loadAllDataFromDatabase;
-    window.saveAllDataToDatabase = saveAllDataToDatabase;
-    window.refreshAllUI = refreshAllUI;
-    window.showDataStatus = showDataStatus;
-    window.hideDataStatus = hideDataStatus;
-
-    console.log('✅ Data sync system loaded!');
-
-})();
-
-// ============================================
-// FIX: CHART INITIALIZATION - ONLY RUN ON STATISTICS PAGE
-// ============================================
-
-(function fixChartInitialization() {
-    'use strict';
-
-    console.log('🔧 Fixing chart initialization...');
-
-    // ============================================
-    // SAFE CHART INITIALIZATION
-    // ============================================
-
-    // Store the original init function
-    const originalInitCharts = window.initStatisticsCharts;
+    // Store the original function
+    const originalRenderUserProfile = window.renderUserProfile;
 
     // Override with safe version
-    window.initStatisticsCharts = function() {
-        console.log('📊 Initializing statistics charts (safe version)...');
+    window.renderUserProfile = function(profile) {
+        console.log('📝 Rendering user profile...', profile);
 
-        // Check if we're on the statistics page
-        const statsPage = document.getElementById('statistics-page');
-        if (!statsPage || !statsPage.classList.contains('active')) {
-            console.log('⏳ Statistics page not active, skipping chart init');
-            return;
-        }
-
-        // Check if chart elements exist
-        const chartIds = [
-            'completionChart',
-            'scoreDistributionChart',
-            'statusDistributionChart',
-            'typeDistributionChart',
-            'genreStatsChart',
-            'avgScoreByGenreChart',
-            'watchByWeekdayChart',
-            'longestAnimeChart',
-            'shortestAnimeChart',
-            'seasonalPreferenceChart'
-        ];
-
-        const missingCharts = chartIds.filter(id => !document.getElementById(id));
-        
-        if (missingCharts.length > 0) {
-            console.log('⏳ Chart elements not ready, retrying in 500ms...');
-            console.log('⚠️ Missing:', missingCharts);
-            setTimeout(() => {
-                if (window.initStatisticsCharts) {
-                    window.initStatisticsCharts();
-                }
-            }, 500);
-            return;
-        }
-
-        // All elements exist, call original
-        if (typeof originalInitCharts === 'function') {
-            try {
-                originalInitCharts();
-                console.log('✅ Charts initialized successfully');
-            } catch (error) {
-                console.warn('⚠️ Chart initialization error:', error.message);
+        // Helper to safely set text content
+        function safeSetText(id, value, defaultValue = '—') {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value || defaultValue;
+            } else {
+                console.warn(`⚠️ Element "${id}" not found`);
             }
         }
+
+        // Helper to safely set style
+        function safeSetStyle(id, property, value) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style[property] = value;
+            } else {
+                console.warn(`⚠️ Element "${id}" not found`);
+            }
+        }
+
+        // Helper to safely set src
+        function safeSetSrc(id, value, fallback) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.src = value || fallback || 'https://ui-avatars.com/api/?name=User&background=6366F1&color=fff';
+                el.onerror = function() {
+                    this.src = fallback || 'https://ui-avatars.com/api/?name=User&background=6366F1&color=fff';
+                };
+            } else {
+                console.warn(`⚠️ Element "${id}" not found`);
+            }
+        }
+
+        // ============================================
+        // HEADER INFO
+        // ============================================
+
+        // Profile name
+        const nameEl = document.getElementById('profileName');
+        if (nameEl) {
+            nameEl.textContent = profile.name || profile.username || 'User';
+        }
+
+        // Profile level
+        const levelEl = document.getElementById('profileLevel');
+        if (levelEl) {
+            levelEl.textContent = `Lv.${profile.level || 1}`;
+        }
+
+        // Profile title
+        const titleEl = document.getElementById('profileTitle');
+        if (titleEl) {
+            titleEl.textContent = profile.levelTitle || profile.title || 'Newbie';
+        }
+
+        // XP fill - SAFE
+        const xpFillEl = document.getElementById('profileXpFill');
+        if (xpFillEl) {
+            xpFillEl.style.width = `${profile.xpProgress || 0}%`;
+        }
+
+        // XP text
+        const xpTextEl = document.getElementById('profileXpText');
+        if (xpTextEl) {
+            const totalXP = profile.totalXP || 0;
+            const xpToNext = profile.xpToNextLevel || 0;
+            xpTextEl.textContent = `${totalXP.toLocaleString()} / ${(totalXP + xpToNext).toLocaleString()} XP`;
+        }
+
+        // Avatar
+        const avatarImg = document.getElementById('profileAvatar');
+        if (avatarImg) {
+            const avatarUrl = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
+            avatarImg.src = avatarUrl;
+            avatarImg.onerror = function() {
+                this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
+            };
+        }
+
+        // ============================================
+        // STATS
+        // ============================================
+
+        safeSetText('profileTotalAnime', profile.stats?.totalAnime || 0);
+        safeSetText('profileCompleted', profile.stats?.completed || 0);
+        safeSetText('profileWatching', profile.stats?.watching || 0);
+        safeSetText('profilePlanToWatch', profile.stats?.planToWatch || 0);
+        safeSetText('profileEpisodes', (profile.stats?.totalEpisodes || 0).toLocaleString());
+        safeSetText('profileHours', (profile.stats?.totalHours || 0).toLocaleString());
+
+        // ============================================
+        // FRIEND BUTTON
+        // ============================================
+
+        const friendBtn = document.getElementById('profileFriendBtn');
+        if (friendBtn) {
+            if (!profile.isCurrentUser) {
+                friendBtn.style.display = 'block';
+                if (profile.isFriend) {
+                    friendBtn.innerHTML = '<i class="fas fa-user-check"></i> Friends';
+                    friendBtn.disabled = true;
+                    friendBtn.style.opacity = '0.6';
+                } else {
+                    friendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+                    friendBtn.disabled = false;
+                    friendBtn.style.opacity = '1';
+                    friendBtn.onclick = () => {
+                        if (typeof sendFriendRequest === 'function') {
+                            sendFriendRequest(profile.uid);
+                        }
+                    };
+                }
+            } else {
+                friendBtn.style.display = 'none';
+            }
+        }
+
+        // ============================================
+        // ANIME LISTS
+        // ============================================
+
+        // Completed Anime
+        const completedList = document.getElementById('profileCompletedList');
+        if (completedList) {
+            if (profile.animeList?.completed && profile.animeList.completed.length > 0) {
+                completedList.innerHTML = profile.animeList.completed.map(anime => `
+                    <div class="profile-anime-card">
+                        <img src="${anime.cover || 'https://placehold.co/60x85/6a5acd/white?text=No+Image'}" 
+                             class="profile-anime-cover" 
+                             onerror="this.src='https://placehold.co/60x85/6a5acd/white?text=No+Image'">
+                        <div class="profile-anime-info">
+                            <div class="profile-anime-title">${escapeHtml(anime.title)}</div>
+                            ${anime.score ? `<div class="profile-anime-score">⭐ ${anime.score}</div>` : ''}
+                            <div class="profile-anime-episodes">${anime.episodes || 0} episodes</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                completedList.innerHTML = '<div class="empty-state">No completed anime</div>';
+            }
+        }
+
+        // Watching Anime
+        const watchingList = document.getElementById('profileWatchingList');
+        if (watchingList) {
+            if (profile.animeList?.watching && profile.animeList.watching.length > 0) {
+                watchingList.innerHTML = profile.animeList.watching.map(anime => `
+                    <div class="profile-anime-card">
+                        <img src="${anime.cover || 'https://placehold.co/60x85/6a5acd/white?text=No+Image'}" 
+                             class="profile-anime-cover" 
+                             onerror="this.src='https://placehold.co/60x85/6a5acd/white?text=No+Image'">
+                        <div class="profile-anime-info">
+                            <div class="profile-anime-title">${escapeHtml(anime.title)}</div>
+                            ${anime.score ? `<div class="profile-anime-score">⭐ ${anime.score}</div>` : ''}
+                            <div class="profile-anime-episodes">${anime.episodes || 0} episodes</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                watchingList.innerHTML = '<div class="empty-state">No watching anime</div>';
+            }
+        }
+
+        // Plan to Watch Anime
+        const planList = document.getElementById('profilePlanList');
+        if (planList) {
+            if (profile.animeList?.planToWatch && profile.animeList.planToWatch.length > 0) {
+                planList.innerHTML = profile.animeList.planToWatch.map(anime => `
+                    <div class="profile-anime-card">
+                        <img src="${anime.cover || 'https://placehold.co/60x85/6a5acd/white?text=No+Image'}" 
+                             class="profile-anime-cover" 
+                             onerror="this.src='https://placehold.co/60x85/6a5acd/white?text=No+Image'">
+                        <div class="profile-anime-info">
+                            <div class="profile-anime-title">${escapeHtml(anime.title)}</div>
+                            ${anime.score ? `<div class="profile-anime-score">⭐ ${anime.score}</div>` : ''}
+                            <div class="profile-anime-episodes">${anime.episodes || 0} episodes</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                planList.innerHTML = '<div class="empty-state">No plan to watch anime</div>';
+            }
+        }
+
+        // ============================================
+        // ACHIEVEMENTS
+        // ============================================
+
+        const achievementsList = document.getElementById('profileAchievementsList');
+        if (achievementsList) {
+            if (profile.achievements && profile.achievements.length > 0) {
+                achievementsList.innerHTML = profile.achievements.map(achievement => `
+                    <div class="profile-achievement-card">
+                        <div class="profile-achievement-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="profile-achievement-info">
+                            <div class="profile-achievement-name">${escapeHtml(achievement)}</div>
+                            <div class="profile-achievement-desc">Unlocked achievement</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                achievementsList.innerHTML = '<div class="empty-state">No achievements unlocked yet</div>';
+            }
+        }
+
+        // ============================================
+        // ACTIVITY
+        // ============================================
+
+        const activityList = document.getElementById('profileActivityList');
+        if (activityList) {
+            if (profile.recentActivity && profile.recentActivity.length > 0) {
+                activityList.innerHTML = profile.recentActivity.map(activity => {
+                    let iconClass = 'added';
+                    let iconName = 'plus-circle';
+
+                    switch (activity.action) {
+                        case 'completed': iconClass = 'completed'; iconName = 'check-circle'; break;
+                        case 'added': iconClass = 'added'; iconName = 'plus-circle'; break;
+                        case 'edited': iconClass = 'edited'; iconName = 'edit'; break;
+                        case 'deleted': iconClass = 'deleted'; iconName = 'trash'; break;
+                        default: iconClass = 'added'; iconName = 'plus-circle';
+                    }
+
+                    return `
+                        <div class="profile-activity-item">
+                            <div class="profile-activity-icon ${iconClass}">
+                                <i class="fas fa-${iconName}"></i>
+                            </div>
+                            <div class="profile-activity-content">
+                                <div class="profile-activity-text">
+                                    ${activity.action === 'completed' ? 'Completed' : 
+                                      activity.action === 'added' ? 'Added' : 
+                                      activity.action === 'deleted' ? 'Removed' : 'Updated'} 
+                                    <strong>${escapeHtml(activity.animeTitle || 'anime')}</strong>
+                                </div>
+                                <div class="profile-activity-time">${formatTimeAgo(activity.timestamp)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                activityList.innerHTML = '<div class="empty-state">No recent activity</div>';
+            }
+        }
+
+        console.log('✅ User profile rendered successfully');
     };
 
     // ============================================
-    // FIX: animeLengthCharts
+    // SAFE OPEN USER PROFILE
     // ============================================
 
-    const originalAnimeLengthCharts = window.animeLengthCharts;
+    const originalOpenUserProfile = window.openUserProfile;
 
-    window.animeLengthCharts = function() {
-        const longestCanvas = document.getElementById('longestAnimeChart');
-        const shortestCanvas = document.getElementById('shortestAnimeChart');
-
-        if (!longestCanvas || !shortestCanvas) {
-            console.log('⏳ Anime length chart elements not ready');
+    window.openUserProfile = async function(userId) {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            if (typeof showToast === 'function') {
+                showToast('Please login first', 'error');
+            }
             return;
         }
 
-        if (typeof originalAnimeLengthCharts === 'function') {
-            try {
-                originalAnimeLengthCharts();
-            } catch (error) {
-                console.warn('⚠️ Anime length chart error:', error.message);
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (currentUser.uid === userId) {
+            if (typeof showToast === 'function') {
+                showToast('This is you!', 'info');
             }
-        }
-    };
-
-    // ============================================
-    // FIX: watchByWeekdayChart
-    // ============================================
-
-    const originalWatchByWeekday = window.watchByWeekdayChart;
-
-    window.watchByWeekdayChart = function() {
-        const canvas = document.getElementById('watchByWeekdayChart');
-        if (!canvas) {
-            console.log('⏳ Watch by weekday chart element not ready');
             return;
         }
 
-        if (typeof originalWatchByWeekday === 'function') {
-            try {
-                originalWatchByWeekday();
-            } catch (error) {
-                console.warn('⚠️ Watch by weekday chart error:', error.message);
+        const modal = document.getElementById('userProfileModal');
+        if (!modal) {
+            console.error('User profile modal not found');
+            if (typeof showToast === 'function') {
+                showToast('Profile modal not available', 'error');
             }
-        }
-    };
-
-    // ============================================
-    // FIX: seasonalPreferenceChart
-    // ============================================
-
-    const originalSeasonalPreference = window.seasonalPreferenceChart;
-
-    window.seasonalPreferenceChart = function() {
-        const canvas = document.getElementById('seasonalPreferenceChart');
-        if (!canvas) {
-            console.log('⏳ Seasonal preference chart element not ready');
             return;
         }
 
-        if (typeof originalSeasonalPreference === 'function') {
-            try {
-                originalSeasonalPreference();
-            } catch (error) {
-                console.warn('⚠️ Seasonal preference chart error:', error.message);
-            }
+        // Show modal
+        modal.style.display = 'flex';
+        document.body.classList.add('modal-open');
+
+        // Show loading state - safely
+        const nameEl = document.getElementById('profileName');
+        if (nameEl) nameEl.textContent = 'Loading...';
+
+        const completedList = document.getElementById('profileCompletedList');
+        if (completedList) {
+            completedList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading anime list...</div>';
         }
-    };
 
-    // ============================================
-    // INITIALIZE CHARTS WHEN STATISTICS PAGE IS ACTIVATED
-    // ============================================
-
-    // Watch for Statistics page activation
-    const statsMenuItem = document.querySelector('.menu-item[data-page="statistics"]');
-    if (statsMenuItem) {
-        statsMenuItem.addEventListener('click', function() {
-            console.log('📊 Statistics page clicked, initializing charts...');
-            setTimeout(() => {
-                if (window.initStatisticsCharts) {
-                    window.initStatisticsCharts();
-                }
-                if (window.animeLengthCharts) {
-                    window.animeLengthCharts();
-                }
-                if (window.watchByWeekdayChart) {
-                    window.watchByWeekdayChart();
-                }
-                if (window.seasonalPreferenceChart) {
-                    window.seasonalPreferenceChart();
-                }
-            }, 300);
-        });
-    }
-
-    // Also watch for when Statistics page becomes visible
-    const observer = new MutationObserver(() => {
-        const statsPage = document.getElementById('statistics-page');
-        if (statsPage && statsPage.classList.contains('active')) {
-            console.log('📊 Statistics page became active, initializing charts...');
-            setTimeout(() => {
-                if (window.initStatisticsCharts) {
-                    window.initStatisticsCharts();
-                }
-                if (window.animeLengthCharts) {
-                    window.animeLengthCharts();
-                }
-                if (window.watchByWeekdayChart) {
-                    window.watchByWeekdayChart();
-                }
-                if (window.seasonalPreferenceChart) {
-                    window.seasonalPreferenceChart();
-                }
-            }, 300);
-        }
-    });
-
-    observer.observe(document.body, {
-        attributes: true,
-        attributeFilter: ['class'],
-        subtree: true
-    });
-
-    // ============================================
-    // SAFE GET CONTEXT FUNCTION
-    // ============================================
-
-    window.safeGetContext = function(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) {
-            console.warn(`⚠️ Canvas "${canvasId}" not found`);
-            return null;
-        }
         try {
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                console.warn(`⚠️ Cannot get 2D context for "${canvasId}"`);
-                return null;
+            const response = await fetch(`http://localhost:3000/api/user/full-profile/${userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load profile');
             }
-            return ctx;
+
+            const profile = await response.json();
+            
+            // Make sure required fields exist
+            profile.stats = profile.stats || {};
+            profile.animeList = profile.animeList || {};
+            profile.achievements = profile.achievements || [];
+            profile.recentActivity = profile.recentActivity || [];
+
+            renderUserProfile(profile);
+
         } catch (error) {
-            console.warn(`⚠️ Error getting context for "${canvasId}":`, error);
-            return null;
-        }
-    };
-
-    // ============================================
-    // SAFE DESTROY CHART
-    // ============================================
-
-    window.safeDestroyChart = function(chartInstance) {
-        if (chartInstance && typeof chartInstance.destroy === 'function') {
-            try {
-                chartInstance.destroy();
-            } catch (e) {
-                // Ignore
+            console.error('Failed to load profile:', error);
+            if (typeof showToast === 'function') {
+                showToast('Failed to load user profile', 'error');
             }
-        }
-        return null;
-    };
-
-    // ============================================
-    // OVERRIDE refreshAllCharts to be safe
-    // ============================================
-
-    const originalRefreshAll = window.refreshAllCharts;
-
-    window.refreshAllCharts = function() {
-        const statsPage = document.getElementById('statistics-page');
-        if (!statsPage || !statsPage.classList.contains('active')) {
-            console.log('⏳ Statistics page not active, skipping chart refresh');
-            return;
-        }
-
-        if (typeof originalRefreshAll === 'function') {
-            try {
-                originalRefreshAll();
-            } catch (error) {
-                console.warn('⚠️ Chart refresh error:', error.message);
-            }
+            closeUserProfileModal();
         }
     };
 
-    console.log('✅ Chart initialization fix applied!');
+    // ============================================
+    // SAFE CLOSE USER PROFILE
+    // ============================================
+
+    window.closeUserProfileModal = function() {
+        const modal = document.getElementById('userProfileModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+    };
+
+    // ============================================
+    // PROFILE TAB SWITCHING (safely)
+    // ============================================
+
+    document.addEventListener('click', function(e) {
+        const tab = e.target.closest('.profile-tab');
+        if (!tab) return;
+
+        const tabName = tab.dataset.tab;
+        const container = tab.closest('.profile-modal-body');
+        if (!container) return;
+
+        // Update active tab
+        container.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Update active content
+        const contentMap = {
+            'completed': 'profileTabCompleted',
+            'watching': 'profileTabWatching',
+            'plan': 'profileTabPlan',
+            'achievements': 'profileTabAchievements',
+            'activity': 'profileTabActivity'
+        };
+
+        Object.values(contentMap).forEach(contentId => {
+            const content = document.getElementById(contentId);
+            if (content) content.classList.remove('active');
+        });
+
+        const activeContentId = contentMap[tabName];
+        if (activeContentId) {
+            const activeContent = document.getElementById(activeContentId);
+            if (activeContent) activeContent.classList.add('active');
+        }
+    });
+
+    console.log('✅ User profile fix applied!');
 
 })();
 
