@@ -4098,6 +4098,101 @@ function initStatisticsCharts() {
         });
     }
 
+    // 3. STATUS DISTRIBUTION CHART
+    const statusCanvas = document.getElementById('statusDistributionChart');
+    if (statusCanvas) {
+        if (window.AniPulseCharts.statusChart) window.AniPulseCharts.statusChart.destroy();
+        const ctx = statusCanvas.getContext('2d');
+        const statusData = calculateStatusDistributionFixed();
+        window.AniPulseCharts.statusChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(statusData),
+                datasets: [{ data: Object.values(statusData), backgroundColor: ['#48bb78', '#4299e1', '#ed8936', '#f56565'], borderWidth: 0 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { color: textColor } } }
+            }
+        });
+    }
+
+    // 4. TYPE DISTRIBUTION CHART
+    const typeCanvas = document.getElementById('typeDistributionChart');
+    if (typeCanvas) {
+        if (window.AniPulseCharts.typeChart) window.AniPulseCharts.typeChart.destroy();
+        const ctx = typeCanvas.getContext('2d');
+        const typeData = calculateTypeDistributionFixed();
+        window.AniPulseCharts.typeChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(typeData),
+                datasets: [{ data: Object.values(typeData), backgroundColor: ['#6a5acd', '#70db70', '#20b2aa', '#ff7f50', '#48bb78'], borderWidth: 0 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { color: textColor } } }
+            }
+        });
+    }
+
+    // 5. GENRE STATS CHART
+    const genreCanvas = document.getElementById('genreStatsChart');
+    if (genreCanvas) {
+        if (window.AniPulseCharts.genreChart) window.AniPulseCharts.genreChart.destroy();
+        const ctx = genreCanvas.getContext('2d');
+        const genreStats = calculateGenreStatsFixed();
+        window.AniPulseCharts.genreChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(genreStats),
+                datasets: [{ label: 'Number of Anime', data: Object.values(genreStats), backgroundColor: 'rgba(106,90,205,0.7)', borderRadius: 8 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 } },
+                    y: { grid: { display: false }, ticks: { color: textColor } }
+                }
+            }
+        });
+    }
+
+    // 6. AVERAGE SCORE BY GENRE CHART
+    const avgScoreCanvas = document.getElementById('avgScoreByGenreChart');
+    if (avgScoreCanvas) {
+        if (window.AniPulseCharts.avgScoreChart) window.AniPulseCharts.avgScoreChart.destroy();
+        const ctx = avgScoreCanvas.getContext('2d');
+        const animeData = getAnimeDataSafe();
+        const genreScores = {};
+        animeData.forEach(anime => {
+            if (anime.genres && anime.score) {
+                anime.genres.forEach(g => {
+                    if (!genreScores[g]) genreScores[g] = { total: 0, count: 0 };
+                    genreScores[g].total += anime.score;
+                    genreScores[g].count++;
+                });
+            }
+        });
+        const labels = Object.keys(genreScores);
+        const avgScores = labels.map(g => (genreScores[g].total / genreScores[g].count).toFixed(1));
+        window.AniPulseCharts.avgScoreChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: labels, datasets: [{ label: 'Average Score', data: avgScores, backgroundColor: 'rgba(106,90,205,0.7)' }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: { x: { beginAtZero: true, max: 10, grid: { color: gridColor }, ticks: { color: textColor } }, y: { ticks: { color: textColor } } }
+            }
+        });
+    }
+
     // 7. COMPLETION RATE BY YEAR CHART
     const completionRateCanvas = document.getElementById('completionRateByYearChart');
     if (completionRateCanvas) {
@@ -12484,8 +12579,6 @@ function showToast(message, type = 'info') {
     console.log('✅ Chart initialization fix applied!');
 
 })();
-
-
 
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();

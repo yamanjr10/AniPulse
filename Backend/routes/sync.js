@@ -2,7 +2,6 @@ const express = require('express');
 const { db, COLLECTIONS } = require('../services/firebase');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const { verifyToken } = require('./auth');
 
 // Increase payload limit for this route
 router.use(express.json({ limit: '50mb' }));

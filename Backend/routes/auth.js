@@ -2,7 +2,6 @@
 const { auth, db, COLLECTIONS } = require('../services/firebase');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const { verifyToken } = require('./auth');
 
 // Generate JWT token
 function generateToken(uid) {

@@ -5,7 +5,6 @@ const { bucket, db, COLLECTIONS } = require('../services/firebase');
 const jwt = require('jsonwebtoken');
 const sharp = require('sharp');
 const router = express.Router();
-const { verifyToken } = require('./auth');
 
 // Configure multer for memory storage
 const upload = multer({
