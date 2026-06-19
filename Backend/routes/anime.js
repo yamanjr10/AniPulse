@@ -2,6 +2,7 @@
 const { db, COLLECTIONS } = require('../services/firebase');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
+const { verifyToken } = require('./auth');
 
 function verifyToken(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];

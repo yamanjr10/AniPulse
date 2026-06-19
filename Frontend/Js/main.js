@@ -4098,101 +4098,6 @@ function initStatisticsCharts() {
         });
     }
 
-    // 3. STATUS DISTRIBUTION CHART
-    const statusCanvas = document.getElementById('statusDistributionChart');
-    if (statusCanvas) {
-        if (window.AniPulseCharts.statusChart) window.AniPulseCharts.statusChart.destroy();
-        const ctx = statusCanvas.getContext('2d');
-        const statusData = calculateStatusDistributionFixed();
-        window.AniPulseCharts.statusChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(statusData),
-                datasets: [{ data: Object.values(statusData), backgroundColor: ['#48bb78', '#4299e1', '#ed8936', '#f56565'], borderWidth: 0 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'right', labels: { color: textColor } } }
-            }
-        });
-    }
-
-    // 4. TYPE DISTRIBUTION CHART
-    const typeCanvas = document.getElementById('typeDistributionChart');
-    if (typeCanvas) {
-        if (window.AniPulseCharts.typeChart) window.AniPulseCharts.typeChart.destroy();
-        const ctx = typeCanvas.getContext('2d');
-        const typeData = calculateTypeDistributionFixed();
-        window.AniPulseCharts.typeChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(typeData),
-                datasets: [{ data: Object.values(typeData), backgroundColor: ['#6a5acd', '#70db70', '#20b2aa', '#ff7f50', '#48bb78'], borderWidth: 0 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'right', labels: { color: textColor } } }
-            }
-        });
-    }
-
-    // 5. GENRE STATS CHART
-    const genreCanvas = document.getElementById('genreStatsChart');
-    if (genreCanvas) {
-        if (window.AniPulseCharts.genreChart) window.AniPulseCharts.genreChart.destroy();
-        const ctx = genreCanvas.getContext('2d');
-        const genreStats = calculateGenreStatsFixed();
-        window.AniPulseCharts.genreChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(genreStats),
-                datasets: [{ label: 'Number of Anime', data: Object.values(genreStats), backgroundColor: 'rgba(106,90,205,0.7)', borderRadius: 8 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 } },
-                    y: { grid: { display: false }, ticks: { color: textColor } }
-                }
-            }
-        });
-    }
-
-    // 6. AVERAGE SCORE BY GENRE CHART
-    const avgScoreCanvas = document.getElementById('avgScoreByGenreChart');
-    if (avgScoreCanvas) {
-        if (window.AniPulseCharts.avgScoreChart) window.AniPulseCharts.avgScoreChart.destroy();
-        const ctx = avgScoreCanvas.getContext('2d');
-        const animeData = getAnimeDataSafe();
-        const genreScores = {};
-        animeData.forEach(anime => {
-            if (anime.genres && anime.score) {
-                anime.genres.forEach(g => {
-                    if (!genreScores[g]) genreScores[g] = { total: 0, count: 0 };
-                    genreScores[g].total += anime.score;
-                    genreScores[g].count++;
-                });
-            }
-        });
-        const labels = Object.keys(genreScores);
-        const avgScores = labels.map(g => (genreScores[g].total / genreScores[g].count).toFixed(1));
-        window.AniPulseCharts.avgScoreChart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: labels, datasets: [{ label: 'Average Score', data: avgScores, backgroundColor: 'rgba(106,90,205,0.7)' }] },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                scales: { x: { beginAtZero: true, max: 10, grid: { color: gridColor }, ticks: { color: textColor } }, y: { ticks: { color: textColor } } }
-            }
-        });
-    }
-
     // 7. COMPLETION RATE BY YEAR CHART
     const completionRateCanvas = document.getElementById('completionRateByYearChart');
     if (completionRateCanvas) {
@@ -11298,6 +11203,1289 @@ function showToast(message, type = 'info') {
 
     console.log('✅ Multi-API search system loaded with genre fix!');
 })();
+
+// ============================================
+// FIX: CHART INITIALIZATION - SAFE CHECK
+// ============================================
+
+(function fixChartInitialization() {
+    'use strict';
+
+    console.log('🔧 Applying chart initialization fix...');
+
+    // ============================================
+    // SAFE GET CONTEXT FUNCTION
+    // ============================================
+
+    function safeGetContext(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.warn(`⚠️ Canvas "${canvasId}" not found in DOM`);
+            return null;
+        }
+        
+        try {
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.warn(`⚠️ Cannot get 2D context for "${canvasId}"`);
+                return null;
+            }
+            return ctx;
+        } catch (error) {
+            console.warn(`⚠️ Error getting context for "${canvasId}":`, error);
+            return null;
+        }
+    }
+
+    // ============================================
+    // SAFE DESTROY CHART
+    // ============================================
+
+    function safeDestroyChart(chartInstance) {
+        if (chartInstance && typeof chartInstance.destroy === 'function') {
+            try {
+                chartInstance.destroy();
+            } catch (e) {
+                // Ignore destroy errors
+            }
+        }
+        return null;
+    }
+
+    // ============================================
+    // CHECK IF ELEMENTS EXIST BEFORE INIT
+    // ============================================
+
+    function checkChartElements() {
+        const chartIds = [
+            'completionChart',
+            'scoreDistributionChart',
+            'statusDistributionChart',
+            'typeDistributionChart',
+            'genreStatsChart',
+            'avgScoreByGenreChart',
+            'watchByWeekdayChart',
+            'longestAnimeChart',
+            'shortestAnimeChart',
+            'seasonalPreferenceChart'
+        ];
+
+        const missing = chartIds.filter(id => !document.getElementById(id));
+        
+        if (missing.length > 0) {
+            console.warn('⚠️ Missing chart elements:', missing);
+            return false;
+        }
+        return true;
+    }
+
+    // ============================================
+    // OVERRIDE initStatisticsCharts WITH SAFE CHECKS
+    // ============================================
+
+    const originalInit = window.initStatisticsCharts;
+
+    window.initStatisticsCharts = function() {
+        console.log('📊 Initializing statistics charts (safe version)...');
+
+        // Check if we're on the statistics page
+        const statsPage = document.getElementById('statistics-page');
+        if (!statsPage || !statsPage.classList.contains('active')) {
+            console.log('⏳ Statistics page not active, skipping chart init');
+            return;
+        }
+
+        // Check if chart elements exist
+        if (!checkChartElements()) {
+            console.log('⏳ Chart elements not ready, retrying...');
+            setTimeout(() => {
+                if (window.initStatisticsCharts) {
+                    window.initStatisticsCharts();
+                }
+            }, 500);
+            return;
+        }
+
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+        const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+
+        // ============================================
+        // 1. COMPLETION CHART
+        // ============================================
+
+        const completionCanvas = document.getElementById('completionChart');
+        if (completionCanvas) {
+            const ctx = safeGetContext('completionChart');
+            if (ctx) {
+                if (window.AniPulseCharts && window.AniPulseCharts.completionChart) {
+                    window.AniPulseCharts.completionChart = safeDestroyChart(window.AniPulseCharts.completionChart);
+                }
+                
+                window.AniPulseCharts = window.AniPulseCharts || {};
+                window.AniPulseCharts.completionChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['2024', '2025', '2026', '2027', '2028'],
+                        datasets: [{
+                            label: 'Anime Completed',
+                            data: calculateYearlyCompletionFixed ? calculateYearlyCompletionFixed() : [0, 0, 0, 0, 0],
+                            backgroundColor: '#48bb78',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 } },
+                            x: { grid: { display: false }, ticks: { color: textColor } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // 2. SCORE DISTRIBUTION CHART
+        // ============================================
+
+        const scoreCanvas = document.getElementById('scoreDistributionChart');
+        if (scoreCanvas) {
+            const ctx = safeGetContext('scoreDistributionChart');
+            if (ctx) {
+                if (window.AniPulseCharts && window.AniPulseCharts.scoreChart) {
+                    window.AniPulseCharts.scoreChart = safeDestroyChart(window.AniPulseCharts.scoreChart);
+                }
+                
+                window.AniPulseCharts = window.AniPulseCharts || {};
+                window.AniPulseCharts.scoreChart = new Chart(ctx, {
+                    type: 'polarArea',
+                    data: {
+                        labels: ['10', '9', '8', '7', '6', '5 or less'],
+                        datasets: [{
+                            data: calculateScoreDistributionFixed ? calculateScoreDistributionFixed() : [0, 0, 0, 0, 0, 0],
+                            backgroundColor: ['rgba(139,92,246,0.8)', 'rgba(16,185,129,0.8)', 'rgba(245,158,11,0.8)', 'rgba(239,68,68,0.8)', 'rgba(59,130,246,0.8)', 'rgba(156,163,175,0.8)'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { color: textColor } } }
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // 3. STATUS DISTRIBUTION CHART
+        // ============================================
+
+        const statusCanvas = document.getElementById('statusDistributionChart');
+        if (statusCanvas) {
+            const ctx = safeGetContext('statusDistributionChart');
+            if (ctx) {
+                if (window.AniPulseCharts && window.AniPulseCharts.statusChart) {
+                    window.AniPulseCharts.statusChart = safeDestroyChart(window.AniPulseCharts.statusChart);
+                }
+                
+                const statusData = calculateStatusDistributionFixed ? calculateStatusDistributionFixed() : {};
+                window.AniPulseCharts = window.AniPulseCharts || {};
+                window.AniPulseCharts.statusChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(statusData),
+                        datasets: [{ 
+                            data: Object.values(statusData), 
+                            backgroundColor: ['#48bb78', '#4299e1', '#ed8936', '#f56565'], 
+                            borderWidth: 0 
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { color: textColor } } }
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // 4. TYPE DISTRIBUTION CHART
+        // ============================================
+
+        const typeCanvas = document.getElementById('typeDistributionChart');
+        if (typeCanvas) {
+            const ctx = safeGetContext('typeDistributionChart');
+            if (ctx) {
+                if (window.AniPulseCharts && window.AniPulseCharts.typeChart) {
+                    window.AniPulseCharts.typeChart = safeDestroyChart(window.AniPulseCharts.typeChart);
+                }
+                
+                const typeData = calculateTypeDistributionFixed ? calculateTypeDistributionFixed() : {};
+                window.AniPulseCharts = window.AniPulseCharts || {};
+                window.AniPulseCharts.typeChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(typeData),
+                        datasets: [{ 
+                            data: Object.values(typeData), 
+                            backgroundColor: ['#6a5acd', '#70db70', '#20b2aa', '#ff7f50', '#48bb78'], 
+                            borderWidth: 0 
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { color: textColor } } }
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // 5. GENRE STATS CHART
+        // ============================================
+
+        const genreCanvas = document.getElementById('genreStatsChart');
+        if (genreCanvas) {
+            const ctx = safeGetContext('genreStatsChart');
+            if (ctx) {
+                if (window.AniPulseCharts && window.AniPulseCharts.genreChart) {
+                    window.AniPulseCharts.genreChart = safeDestroyChart(window.AniPulseCharts.genreChart);
+                }
+                
+                const genreStats = calculateGenreStatsFixed ? calculateGenreStatsFixed() : {};
+                window.AniPulseCharts = window.AniPulseCharts || {};
+                window.AniPulseCharts.genreChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(genreStats),
+                        datasets: [{ 
+                            label: 'Number of Anime', 
+                            data: Object.values(genreStats), 
+                            backgroundColor: 'rgba(106,90,205,0.7)', 
+                            borderRadius: 8 
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, stepSize: 1 } },
+                            y: { grid: { display: false }, ticks: { color: textColor } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // 6. AVERAGE SCORE BY GENRE CHART
+        // ============================================
+
+        const avgScoreCanvas = document.getElementById('avgScoreByGenreChart');
+        if (avgScoreCanvas) {
+            const ctx = safeGetContext('avgScoreByGenreChart');
+            if (ctx) {
+                if (window.AniPulseCharts && window.AniPulseCharts.avgScoreChart) {
+                    window.AniPulseCharts.avgScoreChart = safeDestroyChart(window.AniPulseCharts.avgScoreChart);
+                }
+                
+                const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+                const genreScores = {};
+                animeData.forEach(anime => {
+                    if (anime.genres && anime.score) {
+                        anime.genres.forEach(g => {
+                            const genreName = typeof g === 'object' ? g.name : g;
+                            if (!genreScores[genreName]) {
+                                genreScores[genreName] = { total: 0, count: 0 };
+                            }
+                            genreScores[genreName].total += anime.score;
+                            genreScores[genreName].count++;
+                        });
+                    }
+                });
+                const labels = Object.keys(genreScores);
+                const avgScores = labels.map(g => (genreScores[g].total / genreScores[g].count).toFixed(1));
+                
+                window.AniPulseCharts = window.AniPulseCharts || {};
+                window.AniPulseCharts.avgScoreChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { 
+                        labels: labels, 
+                        datasets: [{ 
+                            label: 'Average Score', 
+                            data: avgScores, 
+                            backgroundColor: 'rgba(106,90,205,0.7)' 
+                        }] 
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: { 
+                            x: { beginAtZero: true, max: 10, grid: { color: gridColor }, ticks: { color: textColor } }, 
+                            y: { ticks: { color: textColor } } 
+                        }
+                    }
+                });
+            }
+        }
+
+        console.log('✅ All statistics charts initialized safely');
+    };
+
+    // ============================================
+    // FIX animeLengthCharts
+    // ============================================
+
+    const originalAnimeLengthCharts = window.animeLengthCharts;
+
+    window.animeLengthCharts = function() {
+        console.log('📊 Initializing anime length charts (safe version)...');
+
+        const longestCanvas = document.getElementById('longestAnimeChart');
+        const shortestCanvas = document.getElementById('shortestAnimeChart');
+
+        // Check if canvases exist
+        if (!longestCanvas || !shortestCanvas) {
+            console.log('⏳ Anime length chart elements not ready');
+            return;
+        }
+
+        const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+        const completed = animeData.filter(a => a.userStatus?.toLowerCase() === 'completed');
+
+        // Longest
+        const sorted = [...completed].sort((a, b) => b.episodes - a.episodes);
+        const longest = sorted.slice(0, 5);
+
+        const nonMovies = sorted.filter(a => a.type?.toLowerCase() !== "movie");
+        const shortest = nonMovies.slice(-5).reverse();
+
+        // === Longest Chart ===
+        const longestCtx = safeGetContext('longestAnimeChart');
+        if (longestCtx) {
+            if (window.AniPulseCharts && window.AniPulseCharts.longestChart) {
+                window.AniPulseCharts.longestChart = safeDestroyChart(window.AniPulseCharts.longestChart);
+            }
+            
+            window.AniPulseCharts = window.AniPulseCharts || {};
+            window.AniPulseCharts.longestChart = new Chart(longestCtx, {
+                type: 'bar',
+                data: {
+                    labels: longest.map(a => `${a.title.slice(0, 15)}`),
+                    datasets: [{
+                        label: 'Episodes',
+                        data: longest.map(a => a.episodes),
+                        backgroundColor: 'rgba(46, 204, 113,0.7)',
+                        borderColor: 'rgba(0,0,0,0.1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#9ca3af', maxRotation: 0 } }
+                    }
+                }
+            });
+        }
+
+        // === Shortest Chart ===
+        const shortestCtx = safeGetContext('shortestAnimeChart');
+        if (shortestCtx) {
+            if (window.AniPulseCharts && window.AniPulseCharts.shortestChart) {
+                window.AniPulseCharts.shortestChart = safeDestroyChart(window.AniPulseCharts.shortestChart);
+            }
+            
+            window.AniPulseCharts = window.AniPulseCharts || {};
+            window.AniPulseCharts.shortestChart = new Chart(shortestCtx, {
+                type: 'bar',
+                data: {
+                    labels: shortest.map(a => `${a.title.slice(0, 15)}`),
+                    datasets: [{
+                        label: 'Episodes',
+                        data: shortest.map(a => a.episodes),
+                        backgroundColor: 'rgba(241, 196, 15,0.7)',
+                        borderColor: 'rgba(0,0,0,0.1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#9ca3af', maxRotation: 0 } }
+                    }
+                }
+            });
+        }
+
+        console.log('✅ Anime length charts initialized safely');
+    };
+
+    // ============================================
+    // FIX seasonalPreferenceChart
+    // ============================================
+
+    window.seasonalPreferenceChart = function() {
+        const canvas = document.getElementById('seasonalPreferenceChart');
+        if (!canvas) {
+            console.log('⏳ Seasonal preference chart element not ready');
+            return;
+        }
+
+        const ctx = safeGetContext('seasonalPreferenceChart');
+        if (!ctx) return;
+
+        const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+        const completed = animeData.filter(a => a.userStatus?.toLowerCase() === 'completed');
+
+        const seasonMap = { Winter: 0, Spring: 0, Summer: 0, Fall: 0 };
+        completed.forEach(a => {
+            if (!a.finishDate) return;
+            const [, month] = a.finishDate.split('-');
+            const m = parseInt(month, 10);
+            const season =
+                m <= 2 ? 'Winter' :
+                m <= 5 ? 'Spring' :
+                m <= 8 ? 'Summer' :
+                'Fall';
+            seasonMap[season]++;
+        });
+
+        if (window.AniPulseCharts && window.AniPulseCharts.seasonalChart) {
+            window.AniPulseCharts.seasonalChart = safeDestroyChart(window.AniPulseCharts.seasonalChart);
+        }
+
+        window.AniPulseCharts = window.AniPulseCharts || {};
+        window.AniPulseCharts.seasonalChart = new Chart(ctx, {
+            type: 'polarArea',
+            data: {
+                labels: Object.keys(seasonMap),
+                datasets: [{
+                    data: Object.values(seasonMap),
+                    backgroundColor: [
+                        'rgba(52,152,219,0.7)',
+                        'rgba(46,204,113,0.7)',
+                        'rgba(241,196,15,0.7)',
+                        'rgba(231,76,60,0.7)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { color: '#b5b8ff' } }
+                }
+            }
+        });
+
+        console.log('✅ Seasonal preference chart initialized safely');
+    };
+
+    // ============================================
+    // OVERRIDE watchByWeekdayChart
+    // ============================================
+
+    window.watchByWeekdayChart = function() {
+        const canvas = document.getElementById('watchByWeekdayChart');
+        if (!canvas) {
+            console.log('⏳ Watch by weekday chart element not ready');
+            return;
+        }
+
+        const ctx = safeGetContext('watchByWeekdayChart');
+        if (!ctx) return;
+
+        const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+        const completed = animeData.filter(a => a.userStatus?.toLowerCase() === 'completed');
+
+        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const totals = Array(7).fill(0);
+
+        completed.forEach(a => {
+            if (!a.finishDate || !a.episodes || !a.duration) return;
+            const d = new Date(a.finishDate);
+            const day = isNaN(d.getDay()) ? Math.floor(Math.random() * 7) : d.getDay();
+            const hours = (a.episodes * a.duration) / 60;
+            totals[day] += hours;
+        });
+
+        if (window.AniPulseCharts && window.AniPulseCharts.watchWeekdayChart) {
+            window.AniPulseCharts.watchWeekdayChart = safeDestroyChart(window.AniPulseCharts.watchWeekdayChart);
+        }
+
+        window.AniPulseCharts = window.AniPulseCharts || {};
+        window.AniPulseCharts.watchWeekdayChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: weekdays,
+                datasets: [{
+                    label: 'Total Hours Watched',
+                    data: totals,
+                    borderColor: 'rgba(231,76,60,1)',
+                    backgroundColor: 'rgba(231,76,60,0.3)',
+                    tension: 0.3,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#9ca3af" } },
+                    x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#9ca3af" } }
+                }
+            }
+        });
+
+        console.log('✅ Watch by weekday chart initialized safely');
+    };
+
+    // ============================================
+    // HOOK INTO PAGE NAVIGATION
+    // ============================================
+
+    const statsMenuItem = document.querySelector('.menu-item[data-page="statistics"]');
+    if (statsMenuItem) {
+        statsMenuItem.addEventListener('click', () => {
+            setTimeout(() => {
+                if (window.initStatisticsCharts) {
+                    window.initStatisticsCharts();
+                }
+                if (window.animeLengthCharts) {
+                    window.animeLengthCharts();
+                }
+                if (window.watchByWeekdayChart) {
+                    window.watchByWeekdayChart();
+                }
+                if (window.seasonalPreferenceChart) {
+                    window.seasonalPreferenceChart();
+                }
+            }, 300);
+        });
+    }
+
+    // ============================================
+    // WATCH FOR STATISTICS PAGE ACTIVATION
+    // ============================================
+
+    const observer = new MutationObserver(() => {
+        const statsPage = document.getElementById('statistics-page');
+        if (statsPage && statsPage.classList.contains('active')) {
+            setTimeout(() => {
+                if (window.initStatisticsCharts) {
+                    window.initStatisticsCharts();
+                }
+                if (window.animeLengthCharts) {
+                    window.animeLengthCharts();
+                }
+                if (window.watchByWeekdayChart) {
+                    window.watchByWeekdayChart();
+                }
+                if (window.seasonalPreferenceChart) {
+                    window.seasonalPreferenceChart();
+                }
+            }, 300);
+        }
+    });
+
+    observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class'],
+        subtree: true
+    });
+
+    console.log('✅ Chart initialization fix applied!');
+
+})();
+
+// ============================================
+// COMPLETE DATA SYNC SYSTEM - FINAL VERSION
+// ============================================
+
+(function() {
+    'use strict';
+
+    console.log('🔧 Loading data sync system...');
+
+    // ============================================
+    // DATA STATUS BAR (Visible on Mobile)
+    // ============================================
+
+    function showDataStatus(message, type = 'loading') {
+        let bar = document.getElementById('dataStatusBar');
+        
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.id = 'dataStatusBar';
+            bar.style.cssText = `
+                display: none;
+                position: fixed;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(12px);
+                padding: 10px 20px;
+                border-radius: 30px;
+                border: 1px solid rgba(139, 92, 246, 0.3);
+                color: white;
+                font-size: 0.8rem;
+                z-index: 9999;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                text-align: center;
+                max-width: 90%;
+                transition: all 0.3s ease;
+            `;
+            bar.innerHTML = `
+                <span id="dataStatusText">Loading data...</span>
+                <span id="dataStatusSpinner" style="margin-left: 8px;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+            `;
+            document.body.appendChild(bar);
+        }
+
+        const text = document.getElementById('dataStatusText');
+        const spinner = document.getElementById('dataStatusSpinner');
+        
+        bar.style.display = 'block';
+        if (text) text.textContent = message;
+        
+        if (spinner) {
+            if (type === 'loading') {
+                spinner.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                bar.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+            } else if (type === 'success') {
+                spinner.innerHTML = '<i class="fas fa-check-circle" style="color: #34D399;"></i>';
+                bar.style.borderColor = 'rgba(52, 211, 153, 0.5)';
+            } else if (type === 'error') {
+                spinner.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #F87171;"></i>';
+                bar.style.borderColor = 'rgba(248, 113, 113, 0.5)';
+            } else {
+                spinner.innerHTML = '';
+            }
+        }
+    }
+
+    function hideDataStatus() {
+        const bar = document.getElementById('dataStatusBar');
+        if (bar) {
+            bar.style.display = 'none';
+        }
+    }
+
+    // ============================================
+    // CALCULATE TOTAL HOURS
+    // ============================================
+
+    function calculateTotalHours(animeData) {
+        let totalHours = 0;
+        animeData.forEach(a => {
+            if (a.userStatus === 'Completed') {
+                if (a.type === 'Movie') {
+                    totalHours += (a.duration || 120) / 60;
+                } else {
+                    totalHours += ((a.episodes || 0) * (a.duration || 20)) / 60;
+                }
+            }
+        });
+        return Math.round(totalHours);
+    }
+
+    // ============================================
+    // REFRESH ALL UI
+    // ============================================
+
+    function refreshAllUI() {
+        console.log('🔄 Refreshing UI...');
+        
+        const functions = [
+            'updateSidebarUserInfo',
+            'updateStats', 
+            'updateGreetingMessage',
+            'initCharts',
+            'initStatisticsCharts',
+            'refreshAllCharts',
+            'updateCurrentlyWatching',
+            'updateTopRatedAnime',
+            'updateRecentActivity',
+            'updateAnimeDisplay',
+            'updateWatchlist',
+            'updateAchievements',
+            'updateStatsHero',
+            'updateOverviewMetrics',
+            'updateLibraryAnalytics',
+            'updateRatingAnalytics',
+            'updateCompletionJourney',
+            'updateStudioSeasonal'
+        ];
+
+        functions.forEach(fnName => {
+            if (typeof window[fnName] === 'function') {
+                try { window[fnName](); } catch (e) {}
+            }
+        });
+
+        if (window.AniPulseLevelSystem?.updateAllLevelUI) {
+            window.AniPulseLevelSystem.updateAllLevelUI();
+        }
+
+        const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const userName = userProfile.name || 'AnimeFan';
+        const avatar = userProfile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=6366F1&color=fff`;
+        
+        document.querySelectorAll('.sidebar-username, .user-profile span, #profilePreviewName, #heroUsername').forEach(el => {
+            if (el) el.textContent = userName;
+        });
+
+        document.querySelectorAll('.user-avatar, .sidebar-avatar, #profilePreviewAvatar').forEach(el => {
+            if (el) el.src = avatar;
+        });
+    }
+
+    // ============================================
+    // LOAD DATA FROM DATABASE
+    // ============================================
+
+    async function loadAllDataFromDatabase() {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            showDataStatus('Not logged in', 'error');
+            setTimeout(hideDataStatus, 3000);
+            return false;
+        }
+
+        showDataStatus('Loading your data...', 'loading');
+
+        try {
+            const response = await fetch('http://localhost:3000/api/sync/load-all', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error('Failed to load data');
+            }
+
+            const { data } = result;
+            let loadedCount = 0;
+            
+            if (data.animeData && Array.isArray(data.animeData)) {
+                localStorage.setItem('animeData', JSON.stringify(data.animeData));
+                window.animeData = data.animeData;
+                loadedCount = data.animeData.length;
+                console.log(`✅ Loaded ${data.animeData.length} anime`);
+            }
+
+            if (data.userProfile) {
+                const userProfile = {
+                    name: data.userProfile.name || data.userProfile.username || 'AnimeFan',
+                    avatar: data.userProfile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.userProfile.name || 'User')}&background=6366F1&color=fff`,
+                    level: data.userProfile.level || 1,
+                    title: data.userProfile.title || 'Newbie',
+                    totalXP: data.userProfile.totalXP || 0
+                };
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                console.log(`✅ Loaded user: ${userProfile.name}`);
+            }
+
+            if (data.levelData) {
+                localStorage.setItem('userLevel', String(data.levelData.level || 1));
+                localStorage.setItem('userLevelTitle', data.levelData.title || 'Newbie');
+                localStorage.setItem('userTotalXP', String(data.levelData.totalXP || 0));
+                console.log(`✅ Level: ${data.levelData.level} (${data.levelData.totalXP} XP)`);
+            }
+
+            if (data.activityLog && Array.isArray(data.activityLog)) {
+                localStorage.setItem('activityLog', JSON.stringify(data.activityLog));
+                window.activityLog = data.activityLog;
+            }
+
+            if (data.unlockedAchievements && Array.isArray(data.unlockedAchievements)) {
+                localStorage.setItem('unlockedAchievements', JSON.stringify(data.unlockedAchievements));
+            }
+
+            showDataStatus(`✅ Loaded ${loadedCount} anime`, 'success');
+            
+            setTimeout(() => {
+                refreshAllUI();
+                hideDataStatus();
+                if (typeof showToast === 'function') {
+                    showToast('Data loaded successfully! 🎉', 'success');
+                }
+            }, 1000);
+
+            return true;
+
+        } catch (error) {
+            console.error('Load error:', error);
+            showDataStatus(`❌ ${error.message}`, 'error');
+            setTimeout(hideDataStatus, 4000);
+            
+            // Try local data as fallback
+            const localData = localStorage.getItem('animeData');
+            if (localData) {
+                window.animeData = JSON.parse(localData);
+                showDataStatus('📦 Using local data', 'info');
+                setTimeout(() => {
+                    refreshAllUI();
+                    hideDataStatus();
+                }, 1000);
+                return false;
+            }
+            return false;
+        }
+    }
+
+    // ============================================
+    // SAVE DATA TO DATABASE
+    // ============================================
+
+    async function saveAllDataToDatabase() {
+        const token = localStorage.getItem('authToken');
+        if (!token) return false;
+
+        try {
+            const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
+            const activityLog = JSON.parse(localStorage.getItem('activityLog') || '[]');
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements') || '[]');
+            const userXpHistory = JSON.parse(localStorage.getItem('userXpHistory') || '[]');
+            const animeContributions = JSON.parse(localStorage.getItem('animeContributions') || '{}');
+            const appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}');
+
+            const level = parseInt(localStorage.getItem('userLevel') || '1');
+            const title = localStorage.getItem('userLevelTitle') || 'Newbie';
+            const totalXP = parseInt(localStorage.getItem('userTotalXP') || '0');
+
+            const levelData = {
+                level: level,
+                title: title,
+                totalXP: totalXP,
+                totalAnime: animeData.filter(a => a.userStatus === 'Completed').length,
+                totalHours: calculateTotalHours(animeData)
+            };
+
+            const response = await fetch('http://localhost:3000/api/sync/sync-all', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    animeData,
+                    activityLog,
+                    userProfile,
+                    unlockedAchievements,
+                    userXpHistory,
+                    animeContributions,
+                    appSettings,
+                    levelData
+                })
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            console.log('✅ Data saved to database');
+            return true;
+
+        } catch (error) {
+            console.error('Save error:', error);
+            return false;
+        }
+    }
+
+    // ============================================
+    // CHECK LOGIN ON LOAD
+    // ============================================
+
+    async function checkLoginAndLoadData() {
+        const token = localStorage.getItem('authToken');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!token || !user.uid) {
+            console.log('👤 Not logged in');
+            return;
+        }
+
+        console.log(`👤 Logged in as: ${user.name || user.username}`);
+        await loadAllDataFromDatabase();
+    }
+
+    // ============================================
+    // OVERRIDE LOGIN
+    // ============================================
+
+    window.loginUser = async function(email, password) {
+        try {
+            showDataStatus('🔐 Logging in...', 'loading');
+            
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Login failed');
+            }
+
+            const data = await response.json();
+            
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            
+            const userProfile = {
+                name: data.user.name || data.user.username || 'AnimeFan',
+                avatar: data.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.name || 'User')}&background=6366F1&color=fff`,
+                level: data.user.level || 1,
+                title: data.user.title || 'Newbie',
+                totalXP: data.user.totalXP || 0
+            };
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            
+            showDataStatus('✅ Logged in! Loading data...', 'success');
+            
+            await loadAllDataFromDatabase();
+            
+            setTimeout(() => {
+                window.location.href = '/dashboard.html';
+            }, 1500);
+            
+            return true;
+            
+        } catch (error) {
+            console.error('Login error:', error);
+            showDataStatus(`❌ ${error.message}`, 'error');
+            setTimeout(hideDataStatus, 4000);
+            return false;
+        }
+    };
+
+    // ============================================
+    // AUTO-SAVE ON DATA CHANGE
+    // ============================================
+
+    const originalSaveData = window.saveData;
+    if (typeof originalSaveData === 'function') {
+        window.saveData = function() {
+            originalSaveData();
+            clearTimeout(window._saveTimeout);
+            window._saveTimeout = setTimeout(() => {
+                saveAllDataToDatabase();
+            }, 3000);
+        };
+    }
+
+    // ============================================
+    // INITIALIZE
+    // ============================================
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(checkLoginAndLoadData, 800);
+        });
+    } else {
+        setTimeout(checkLoginAndLoadData, 800);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            setTimeout(checkLoginAndLoadData, 500);
+        }
+    });
+
+    // ============================================
+    // EXPOSE
+    // ============================================
+
+    window.loadAllDataFromDatabase = loadAllDataFromDatabase;
+    window.saveAllDataToDatabase = saveAllDataToDatabase;
+    window.refreshAllUI = refreshAllUI;
+    window.showDataStatus = showDataStatus;
+    window.hideDataStatus = hideDataStatus;
+
+    console.log('✅ Data sync system loaded!');
+
+})();
+
+// ============================================
+// FIX: CHART INITIALIZATION - ONLY RUN ON STATISTICS PAGE
+// ============================================
+
+(function fixChartInitialization() {
+    'use strict';
+
+    console.log('🔧 Fixing chart initialization...');
+
+    // ============================================
+    // SAFE CHART INITIALIZATION
+    // ============================================
+
+    // Store the original init function
+    const originalInitCharts = window.initStatisticsCharts;
+
+    // Override with safe version
+    window.initStatisticsCharts = function() {
+        console.log('📊 Initializing statistics charts (safe version)...');
+
+        // Check if we're on the statistics page
+        const statsPage = document.getElementById('statistics-page');
+        if (!statsPage || !statsPage.classList.contains('active')) {
+            console.log('⏳ Statistics page not active, skipping chart init');
+            return;
+        }
+
+        // Check if chart elements exist
+        const chartIds = [
+            'completionChart',
+            'scoreDistributionChart',
+            'statusDistributionChart',
+            'typeDistributionChart',
+            'genreStatsChart',
+            'avgScoreByGenreChart',
+            'watchByWeekdayChart',
+            'longestAnimeChart',
+            'shortestAnimeChart',
+            'seasonalPreferenceChart'
+        ];
+
+        const missingCharts = chartIds.filter(id => !document.getElementById(id));
+        
+        if (missingCharts.length > 0) {
+            console.log('⏳ Chart elements not ready, retrying in 500ms...');
+            console.log('⚠️ Missing:', missingCharts);
+            setTimeout(() => {
+                if (window.initStatisticsCharts) {
+                    window.initStatisticsCharts();
+                }
+            }, 500);
+            return;
+        }
+
+        // All elements exist, call original
+        if (typeof originalInitCharts === 'function') {
+            try {
+                originalInitCharts();
+                console.log('✅ Charts initialized successfully');
+            } catch (error) {
+                console.warn('⚠️ Chart initialization error:', error.message);
+            }
+        }
+    };
+
+    // ============================================
+    // FIX: animeLengthCharts
+    // ============================================
+
+    const originalAnimeLengthCharts = window.animeLengthCharts;
+
+    window.animeLengthCharts = function() {
+        const longestCanvas = document.getElementById('longestAnimeChart');
+        const shortestCanvas = document.getElementById('shortestAnimeChart');
+
+        if (!longestCanvas || !shortestCanvas) {
+            console.log('⏳ Anime length chart elements not ready');
+            return;
+        }
+
+        if (typeof originalAnimeLengthCharts === 'function') {
+            try {
+                originalAnimeLengthCharts();
+            } catch (error) {
+                console.warn('⚠️ Anime length chart error:', error.message);
+            }
+        }
+    };
+
+    // ============================================
+    // FIX: watchByWeekdayChart
+    // ============================================
+
+    const originalWatchByWeekday = window.watchByWeekdayChart;
+
+    window.watchByWeekdayChart = function() {
+        const canvas = document.getElementById('watchByWeekdayChart');
+        if (!canvas) {
+            console.log('⏳ Watch by weekday chart element not ready');
+            return;
+        }
+
+        if (typeof originalWatchByWeekday === 'function') {
+            try {
+                originalWatchByWeekday();
+            } catch (error) {
+                console.warn('⚠️ Watch by weekday chart error:', error.message);
+            }
+        }
+    };
+
+    // ============================================
+    // FIX: seasonalPreferenceChart
+    // ============================================
+
+    const originalSeasonalPreference = window.seasonalPreferenceChart;
+
+    window.seasonalPreferenceChart = function() {
+        const canvas = document.getElementById('seasonalPreferenceChart');
+        if (!canvas) {
+            console.log('⏳ Seasonal preference chart element not ready');
+            return;
+        }
+
+        if (typeof originalSeasonalPreference === 'function') {
+            try {
+                originalSeasonalPreference();
+            } catch (error) {
+                console.warn('⚠️ Seasonal preference chart error:', error.message);
+            }
+        }
+    };
+
+    // ============================================
+    // INITIALIZE CHARTS WHEN STATISTICS PAGE IS ACTIVATED
+    // ============================================
+
+    // Watch for Statistics page activation
+    const statsMenuItem = document.querySelector('.menu-item[data-page="statistics"]');
+    if (statsMenuItem) {
+        statsMenuItem.addEventListener('click', function() {
+            console.log('📊 Statistics page clicked, initializing charts...');
+            setTimeout(() => {
+                if (window.initStatisticsCharts) {
+                    window.initStatisticsCharts();
+                }
+                if (window.animeLengthCharts) {
+                    window.animeLengthCharts();
+                }
+                if (window.watchByWeekdayChart) {
+                    window.watchByWeekdayChart();
+                }
+                if (window.seasonalPreferenceChart) {
+                    window.seasonalPreferenceChart();
+                }
+            }, 300);
+        });
+    }
+
+    // Also watch for when Statistics page becomes visible
+    const observer = new MutationObserver(() => {
+        const statsPage = document.getElementById('statistics-page');
+        if (statsPage && statsPage.classList.contains('active')) {
+            console.log('📊 Statistics page became active, initializing charts...');
+            setTimeout(() => {
+                if (window.initStatisticsCharts) {
+                    window.initStatisticsCharts();
+                }
+                if (window.animeLengthCharts) {
+                    window.animeLengthCharts();
+                }
+                if (window.watchByWeekdayChart) {
+                    window.watchByWeekdayChart();
+                }
+                if (window.seasonalPreferenceChart) {
+                    window.seasonalPreferenceChart();
+                }
+            }, 300);
+        }
+    });
+
+    observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class'],
+        subtree: true
+    });
+
+    // ============================================
+    // SAFE GET CONTEXT FUNCTION
+    // ============================================
+
+    window.safeGetContext = function(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.warn(`⚠️ Canvas "${canvasId}" not found`);
+            return null;
+        }
+        try {
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.warn(`⚠️ Cannot get 2D context for "${canvasId}"`);
+                return null;
+            }
+            return ctx;
+        } catch (error) {
+            console.warn(`⚠️ Error getting context for "${canvasId}":`, error);
+            return null;
+        }
+    };
+
+    // ============================================
+    // SAFE DESTROY CHART
+    // ============================================
+
+    window.safeDestroyChart = function(chartInstance) {
+        if (chartInstance && typeof chartInstance.destroy === 'function') {
+            try {
+                chartInstance.destroy();
+            } catch (e) {
+                // Ignore
+            }
+        }
+        return null;
+    };
+
+    // ============================================
+    // OVERRIDE refreshAllCharts to be safe
+    // ============================================
+
+    const originalRefreshAll = window.refreshAllCharts;
+
+    window.refreshAllCharts = function() {
+        const statsPage = document.getElementById('statistics-page');
+        if (!statsPage || !statsPage.classList.contains('active')) {
+            console.log('⏳ Statistics page not active, skipping chart refresh');
+            return;
+        }
+
+        if (typeof originalRefreshAll === 'function') {
+            try {
+                originalRefreshAll();
+            } catch (error) {
+                console.warn('⚠️ Chart refresh error:', error.message);
+            }
+        }
+    };
+
+    console.log('✅ Chart initialization fix applied!');
+
+})();
+
+
 
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();

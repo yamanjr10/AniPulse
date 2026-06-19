@@ -34,6 +34,7 @@
     <link rel="stylesheet" href="/Frontend/Css/dashboard.css">
     <link rel="stylesheet" href="/Frontend/Css/responsive.css">
     <link rel="stylesheet" href="/Frontend/Css/level-system.css">
+    <link rel="stylesheet" href="/Frontend/Css/Stats.css">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -71,6 +72,30 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <!-- Data Status Bar - Visible on Mobile -->
+<div id="dataStatusBar" style="
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: white;
+    font-size: 0.8rem;
+    z-index: 9999;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    text-align: center;
+    max-width: 90%;
+">
+    <span id="dataStatusText">Loading data...</span>
+    <span id="dataStatusSpinner" style="margin-left: 8px;">
+        <i class="fas fa-spinner fa-spin"></i>
+    </span>
+</div>
 
 </head>
 
@@ -578,116 +603,641 @@
             </div>
         </div>
 
-        <!-- Statistics page -->
-        <div id="statistics-page" class="page">
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Detailed Statistics</h2>
-                <div class="statistics-grid">
-
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Anime Completion Over Time</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="completionChart"></canvas>
-                        </div>
+       <!-- Statistics page -->
+<div id="statistics-page" class="page">
+    <div class="dashboard-section">
+        
+        <!-- ============================================
+     STATISTICS HERO SECTION - PREMIUM DESIGN
+     ============================================ -->
+<div class="stats-hero" id="statsHero">
+    <!-- Background Pattern -->
+    <div class="hero-bg-pattern"></div>
+    
+    <div class="stats-hero-content">
+        <!-- Left Side: Greeting & Insights -->
+        <div class="stats-hero-left">
+            <div class="hero-badge">
+                <span class="hero-badge-icon">✨</span>
+                <span class="hero-badge-text">Your Anime Journey</span>
+            </div>
+            
+            <div class="hero-greeting">
+                <h1 class="hero-title">
+                    <span class="hero-greeting-text">Welcome back,</span>
+                    <span class="hero-username" id="heroUsername">AnimeFan</span>
+                </h1>
+                <p class="hero-subtitle" id="heroSubtitle">You're on an incredible anime journey!</p>
+            </div>
+            
+            <div class="hero-insights">
+                <div class="hero-insight-item">
+                    <div class="hero-insight-icon trophy">
+                        <i class="fas fa-trophy"></i>
                     </div>
-
-                    <!-- Status Distribution Chart -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Status Distribution</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="statusDistributionChart"></canvas>
-                        </div>
+                    <div class="hero-insight-info">
+                        <span class="hero-insight-label">Top Genre</span>
+                        <span class="hero-insight-text" id="heroInsight1">Loading...</span>
                     </div>
-
-                    <!-- Type Distribution Chart -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Type Distribution</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="typeDistributionChart"></canvas>
-                        </div>
+                </div>
+                <div class="hero-insight-item">
+                    <div class="hero-insight-icon streak">
+                        <i class="fas fa-fire"></i>
                     </div>
-
-                    <!-- Genre Stats Chart -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Top Genres</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="genreStatsChart"></canvas>
-                        </div>
+                    <div class="hero-insight-info">
+                        <span class="hero-insight-label">Watch Streak</span>
+                        <span class="hero-insight-text" id="heroInsight2">Loading...</span>
                     </div>
-
-                    <!-- Score Distribution Chart -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Score Distribution</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="scoreDistributionChart"></canvas>
-                        </div>
+                </div>
+                <div class="hero-insight-item">
+                    <div class="hero-insight-icon rating">
+                        <i class="fas fa-star"></i>
                     </div>
-
-                    <!-- Average Score by Genre Chart -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Average Score per Genre</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="avgScoreByGenreChart"></canvas>
-                        </div>
+                    <div class="hero-insight-info">
+                        <span class="hero-insight-label">Avg Rating</span>
+                        <span class="hero-insight-text" id="heroInsight3">Loading...</span>
                     </div>
-
-                    <!-- Watch Time by Day of Week Chart -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Watch Time by Day of Week</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="watchByWeekdayChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Longest Anime -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Top 5 Longest Anime</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="longestAnimeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Shortest Anime -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Top 5 Shortest Anime</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="shortestAnimeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Seasonal Preference -->
-                    <div class="chart-card fade-in">
-                        <div class="chart-header">
-                            <div class="chart-title">Favorite Seasons</div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="seasonalPreferenceChart"></canvas>
-                        </div>
-                    </div>
-
-
-
                 </div>
             </div>
         </div>
+
+        <!-- Right Side: Key Stats Cards -->
+        <div class="stats-hero-right">
+            <div class="hero-stat-card">
+                <div class="hero-stat-icon completed">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="hero-stat-info">
+                    <span class="hero-stat-value" id="heroCompleted">0</span>
+                    <span class="hero-stat-label">Completed</span>
+                </div>
+            </div>
+
+            <div class="hero-stat-card">
+                <div class="hero-stat-icon episodes">
+                    <i class="fas fa-film"></i>
+                </div>
+                <div class="hero-stat-info">
+                    <span class="hero-stat-value" id="heroEpisodes">0</span>
+                    <span class="hero-stat-label">Episodes</span>
+                </div>
+            </div>
+
+            <div class="hero-stat-card">
+                <div class="hero-stat-icon time">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="hero-stat-info">
+                    <span class="hero-stat-value" id="heroTime">0h</span>
+                    <span class="hero-stat-label">Watch Time</span>
+                </div>
+            </div>
+
+            <div class="hero-stat-card">
+                <div class="hero-stat-icon rating-star">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="hero-stat-info">
+                    <span class="hero-stat-value" id="heroRating">0.0</span>
+                    <span class="hero-stat-label">Avg Rating</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decorative Elements -->
+    <div class="hero-decoration">
+        <div class="hero-glow-orb hero-glow-1"></div>
+        <div class="hero-glow-orb hero-glow-2"></div>
+        <div class="hero-glow-orb hero-glow-3"></div>
+        <div class="hero-glow-orb hero-glow-4"></div>
+    </div>
+</div>
+
+<!-- ============================================
+     OVERVIEW METRICS SECTION
+     ============================================ -->
+<div class="overview-metrics" id="overviewMetrics">
+    <div class="overview-header">
+        <h2 class="overview-title">
+            <i class="fas fa-chart-simple"></i>
+            Library Overview
+        </h2>
+        <span class="overview-subtitle">Your anime stats at a glance</span>
+    </div>
+
+    <div class="overview-grid">
+        <!-- Card 1: Anime Completed -->
+        <div class="metric-card" data-delay="0">
+            <div class="metric-icon completed">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-value" id="metricCompleted">0</span>
+                <span class="metric-label">Anime Completed</span>
+                <span class="metric-change" id="metricCompletedChange">+0 this month</span>
+            </div>
+        </div>
+
+        <!-- Card 2: Episodes Watched -->
+        <div class="metric-card" data-delay="1">
+            <div class="metric-icon episodes">
+                <i class="fas fa-film"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-value" id="metricEpisodes">0</span>
+                <span class="metric-label">Episodes Watched</span>
+                <span class="metric-change" id="metricEpisodesChange">+0 this month</span>
+            </div>
+        </div>
+
+        <!-- Card 3: Watch Time -->
+        <div class="metric-card" data-delay="2">
+            <div class="metric-icon time">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-value" id="metricTime">0h</span>
+                <span class="metric-label">Watch Time</span>
+                <span class="metric-change" id="metricTimeChange">+0h this month</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Average Score -->
+        <div class="metric-card" data-delay="3">
+            <div class="metric-icon rating">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-value" id="metricRating">0.0</span>
+                <span class="metric-label">Average Rating</span>
+                <span class="metric-change" id="metricRatingChange">★ from 0 ratings</span>
+            </div>
+        </div>
+
+        <!-- Card 5: Completion Rate -->
+        <div class="metric-card" data-delay="4">
+            <div class="metric-icon rate">
+                <i class="fas fa-percent"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-value" id="metricRate">0%</span>
+                <span class="metric-label">Completion Rate</span>
+                <span class="metric-change" id="metricRateChange">of total entries</span>
+            </div>
+        </div>
+
+        <!-- Card 6: Currently Watching -->
+        <div class="metric-card" data-delay="5">
+            <div class="metric-icon watching">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-value" id="metricWatching">0</span>
+                <span class="metric-label">Currently Watching</span>
+                <span class="metric-change" id="metricWatchingChange">active now</span>
+            </div>
+        </div>
+
+        <!-- Card 7: Plan to Watch -->
+        <div class="metric-card" data-delay="6">
+            <div class="metric-icon plan">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-value" id="metricPlan">0</span>
+                <span class="metric-label">Plan to Watch</span>
+                <span class="metric-change" id="metricPlanChange">in your queue</span>
+            </div>
+        </div>
+
+        <!-- Card 8: Current Streak -->
+        <div class="metric-card" data-delay="7">
+            <div class="metric-icon streak">
+                <i class="fas fa-fire"></i>
+            </div>
+            <div class="metric-content">
+                <span class="metric-value" id="metricStreak">0</span>
+                <span class="metric-label">Current Streak</span>
+                <span class="metric-change" id="metricStreakChange">months watching</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================
+     LIBRARY ANALYTICS SECTION
+     ============================================ -->
+<div class="library-analytics" id="libraryAnalytics">
+    <!-- Section Header -->
+    <div class="analytics-header">
+        <div class="analytics-header-left">
+            <h2 class="analytics-title">
+                <i class="fas fa-layer-group"></i>
+                Library Analytics
+            </h2>
+        </div>
+        <div class="analytics-header-right">
+            <span class="analytics-total" id="analyticsTotal">0</span>
+            <span class="analytics-total-label">Total Entries</span>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="analytics-grid">
+        <!-- Genre Distribution -->
+        <div class="analytics-card chart-card">
+            <div class="analytics-card-header">
+                <div class="analytics-card-title">
+                    <i class="fas fa-tags"></i>
+                    Genre Distribution
+                </div>
+                <span class="analytics-card-badge">Top 10</span>
+            </div>
+            <div class="analytics-chart-container" id="genreDistribution">
+                <!-- Bars will be rendered by JS -->
+            </div>
+        </div>
+
+        <!-- Format Distribution -->
+        <div class="analytics-card chart-card">
+            <div class="analytics-card-header">
+                <div class="analytics-card-title">
+                    <i class="fas fa-film"></i>
+                    Format Distribution
+                </div>
+                <span class="analytics-card-badge">Overview</span>
+            </div>
+            <div class="analytics-chart-container" id="formatDistribution">
+                <!-- Bars will be rendered by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights Panel -->
+    <div class="insights-panel">
+        <div class="insights-header">
+            <h3 class="insights-title">
+                <i class="fas fa-lightbulb"></i>
+                Library Insights
+            </h3>
+            <span class="insights-subtitle">Key takeaways from your collection</span>
+        </div>
+
+        <div class="insights-grid">
+            <!-- Insight 1: Most Watched Genre -->
+            <div class="insight-card" data-delay="0">
+                <div class="insight-icon genre">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="insight-content">
+                    <span class="insight-value" id="insightTopGenre">—</span>
+                    <span class="insight-label">Most Watched Genre</span>
+                    <span class="insight-detail" id="insightTopGenreCount">0 anime</span>
+                </div>
+            </div>
+
+            <!-- Insight 2: Second Favorite Genre -->
+            <div class="insight-card" data-delay="1">
+                <div class="insight-icon second">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <div class="insight-content">
+                    <span class="insight-value" id="insightSecondGenre">—</span>
+                    <span class="insight-label">Second Favorite Genre</span>
+                    <span class="insight-detail" id="insightSecondGenreCount">0 anime</span>
+                </div>
+            </div>
+
+            <!-- Insight 3: Preferred Format -->
+            <div class="insight-card" data-delay="2">
+                <div class="insight-icon format">
+                    <i class="fas fa-tv"></i>
+                </div>
+                <div class="insight-content">
+                    <span class="insight-value" id="insightPreferredFormat">—</span>
+                    <span class="insight-label">Preferred Format</span>
+                    <span class="insight-detail" id="insightPreferredFormatCount">0 anime</span>
+                </div>
+            </div>
+
+            <!-- Insight 4: Library Diversity -->
+            <div class="insight-card" data-delay="3">
+                <div class="insight-icon diversity">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="insight-content">
+                    <span class="insight-value" id="insightDiversity">—</span>
+                    <span class="insight-label">Library Diversity</span>
+                    <span class="insight-detail" id="insightDiversityDetail">0 genres</span>
+                </div>
+            </div>
+
+            <!-- Insight 5: Completion Rate -->
+            <div class="insight-card" data-delay="4">
+                <div class="insight-icon completion">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="insight-content">
+                    <span class="insight-value" id="insightCompletion">0%</span>
+                    <span class="insight-label">Completion Rate</span>
+                    <span class="insight-detail" id="insightCompletionDetail">0 completed</span>
+                </div>
+            </div>
+
+            <!-- Insight 6: Total Genres -->
+            <div class="insight-card" data-delay="5">
+                <div class="insight-icon genres">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <div class="insight-content">
+                    <span class="insight-value" id="insightTotalGenres">0</span>
+                    <span class="insight-label">Unique Genres</span>
+                    <span class="insight-detail">in your library</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Smart Insights -->
+        <div class="smart-insights" id="smartInsights">
+            <!-- Generated by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- ============================================
+     RATING ANALYTICS SECTION
+     ============================================ -->
+<div class="rating-analytics" id="ratingAnalytics">
+    <!-- Section Header -->
+    <div class="rating-header">
+        <div class="rating-header-left">
+            <h2 class="rating-title">
+                <i class="fas fa-star"></i>
+                Rating Analytics
+            </h2>
+        </div>
+        <div class="rating-header-right">
+            <span class="rating-total" id="ratingTotal">0</span>
+            <span class="rating-total-label">Total Ratings</span>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="rating-grid">
+        <!-- Score Distribution Chart -->
+        <div class="rating-card chart-card">
+            <div class="rating-card-header">
+                <div class="rating-card-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Score Distribution
+                </div>
+                <span class="rating-card-badge">Histogram</span>
+            </div>
+            <div class="rating-chart-container" id="scoreDistributionChart">
+                <!-- Bars rendered by JS -->
+            </div>
+        </div>
+
+        <!-- Rating Behavior Insights -->
+        <div class="rating-card insights-card">
+            <div class="rating-card-header">
+                <div class="rating-card-title">
+                    <i class="fas fa-brain"></i>
+                    Rating Behavior
+                </div>
+                <span class="rating-card-badge">Insights</span>
+            </div>
+            <div class="rating-behavior-grid">
+                <div class="behavior-card">
+                    <div class="behavior-value" id="behaviorAvgScore">0.0</div>
+                    <div class="behavior-label">Average Rating</div>
+                    <div class="behavior-detail" id="behaviorAvgDetail">from 0 ratings</div>
+                </div>
+                <div class="behavior-card">
+                    <div class="behavior-value" id="behaviorMostCommon">—</div>
+                    <div class="behavior-label">Most Common Rating</div>
+                    <div class="behavior-detail" id="behaviorCommonCount">0 times</div>
+                </div>
+                <div class="behavior-card">
+                    <div class="behavior-value" id="behaviorHighestGenre">—</div>
+                    <div class="behavior-label">Highest Rated Genre</div>
+                    <div class="behavior-detail" id="behaviorHighestDetail">0.0★ from 0 anime</div>
+                </div>
+                <div class="behavior-card">
+                    <div class="behavior-value" id="behaviorLowestGenre">—</div>
+                    <div class="behavior-label">Lowest Rated Genre</div>
+                    <div class="behavior-detail" id="behaviorLowestDetail">0.0★ from 0 anime</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Personality -->
+    <div class="rating-personality">
+        <div class="personality-card">
+            <div class="personality-icon" id="personalityIcon">
+                <i class="fas fa-user-astronaut"></i>
+            </div>
+            <div class="personality-content">
+                <div class="personality-label">Your Rating Personality</div>
+                <div class="personality-value" id="personalityName">Loading...</div>
+                <div class="personality-description" id="personalityDescription">Analyzing your rating patterns...</div>
+            </div>
+            <div class="personality-stats">
+                <div class="personality-stat">
+                    <span class="personality-stat-value" id="personalityAvg">0.0</span>
+                    <span class="personality-stat-label">Average</span>
+                </div>
+                <div class="personality-stat">
+                    <span class="personality-stat-value" id="personalityMedian">0.0</span>
+                    <span class="personality-stat-label">Median</span>
+                </div>
+                <div class="personality-stat">
+                    <span class="personality-stat-value" id="personalitySpread">0.0</span>
+                    <span class="personality-stat-label">Spread</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Average Score by Genre -->
+    <div class="rating-genre-section">
+        <div class="rating-card">
+            <div class="rating-card-header">
+                <div class="rating-card-title">
+                    <i class="fas fa-tags"></i>
+                    Average Score by Genre
+                </div>
+                <span class="rating-card-badge">Ranking</span>
+            </div>
+            <div class="rating-chart-container" id="genreScoreChart">
+                <!-- Bars rendered by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Rating Insights -->
+    <div class="rating-advanced">
+        <div class="advanced-header">
+            <h3 class="advanced-title">
+                <i class="fas fa-lightbulb"></i>
+                Advanced Rating Insights
+            </h3>
+            <span class="advanced-subtitle">Deeper analysis of your scoring behavior</span>
+        </div>
+        <div class="advanced-grid" id="advancedInsights">
+            <!-- Generated by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- ============================================
+     COMPLETION JOURNEY SECTION
+     ============================================ -->
+<div class="completion-journey" id="completionJourney">
+    <!-- Section Header -->
+    <div class="journey-header">
+        <div class="journey-header-left">
+            <h2 class="journey-title">
+                <i class="fas fa-road"></i>
+                Completion Journey
+            </h2>
+        </div>
+        <div class="journey-header-right">
+            <div class="journey-time-filters">
+                <button class="journey-filter-btn active" data-range="all">All Time</button>
+                <button class="journey-filter-btn" data-range="year">Last Year</button>
+                <button class="journey-filter-btn" data-range="90d">90 Days</button>
+                <button class="journey-filter-btn" data-range="30d">30 Days</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Primary Chart -->
+    <div class="journey-chart-card">
+        <div class="journey-chart-header">
+            <div class="journey-chart-title">
+                <i class="fas fa-chart-line"></i>
+                Cumulative Completions
+            </div>
+            <div class="journey-chart-stats">
+                <span class="journey-stat" id="journeyTotalCompleted">0</span>
+                <span class="journey-stat-label">Total Completed</span>
+            </div>
+        </div>
+        <div class="journey-chart-container">
+            <canvas id="completionJourneyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Monthly Completion Bar Chart -->
+    <div class="journey-secondary-chart">
+        <div class="journey-chart-header">
+            <div class="journey-chart-title">
+                <i class="fas fa-calendar-alt"></i>
+                Monthly Completions
+            </div>
+            <div class="journey-chart-stats">
+                <span class="journey-stat" id="journeyMonthlyAvg">0</span>
+                <span class="journey-stat-label">Avg / Month</span>
+            </div>
+        </div>
+        <div class="journey-chart-container">
+            <canvas id="monthlyCompletionChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Journey Insights -->
+    <div class="journey-insights">
+        <div class="journey-insights-header">
+            <h3 class="journey-insights-title">
+                <i class="fas fa-lightbulb"></i>
+                Journey Insights
+            </h3>
+            <span class="journey-insights-subtitle">Key milestones and statistics</span>
+        </div>
+
+        <div class="journey-insights-grid">
+            <div class="journey-insight-card" data-delay="0">
+                <div class="journey-insight-icon first">
+                    <i class="fas fa-flag"></i>
+                </div>
+                <div class="journey-insight-content">
+                    <span class="journey-insight-value" id="journeyFirstAnime">—</span>
+                    <span class="journey-insight-label">First Anime</span>
+                    <span class="journey-insight-detail" id="journeyFirstDate">—</span>
+                </div>
+            </div>
+
+            <div class="journey-insight-card" data-delay="1">
+                <div class="journey-insight-icon fastest">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div class="journey-insight-content">
+                    <span class="journey-insight-value" id="journeyFastestMonth">—</span>
+                    <span class="journey-insight-label">Fastest Month</span>
+                    <span class="journey-insight-detail" id="journeyFastestCount">0 anime</span>
+                </div>
+            </div>
+
+            <div class="journey-insight-card" data-delay="2">
+                <div class="journey-insight-icon active">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="journey-insight-content">
+                    <span class="journey-insight-value" id="journeyActiveYear">—</span>
+                    <span class="journey-insight-label">Most Active Year</span>
+                    <span class="journey-insight-detail" id="journeyActiveCount">0 anime</span>
+                </div>
+            </div>
+
+            <div class="journey-insight-card" data-delay="3">
+                <div class="journey-insight-icon pace">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="journey-insight-content">
+                    <span class="journey-insight-value" id="journeyPace">0</span>
+                    <span class="journey-insight-label">Completion Pace</span>
+                    <span class="journey-insight-detail">per month</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Milestone Timeline -->
+    <div class="journey-milestones">
+        <div class="journey-milestones-header">
+            <h3 class="journey-milestones-title">
+                <i class="fas fa-trophy"></i>
+                Milestone Timeline
+            </h3>
+            <span class="journey-milestones-subtitle">Your achievement milestones</span>
+        </div>
+        <div class="journey-milestones-container" id="milestonesContainer">
+            <!-- Generated by JS -->
+        </div>
+    </div>
+
+    <!-- Pace Analysis -->
+    <div class="journey-pace">
+        <div class="journey-pace-header">
+            <h3 class="journey-pace-title">
+                <i class="fas fa-chart-simple"></i>
+                Pace Analysis
+            </h3>
+            <span class="journey-pace-subtitle">Understanding your watching rhythm</span>
+        </div>
+        <div class="journey-pace-grid" id="paceInsights">
+            <!-- Generated by JS -->
+        </div>
+    </div>
+</div>
+
+        
+        
+    </div>
+</div>
 
         <!-- Achievements Page -->
         <div id="achievements-page" class="page">
@@ -1440,6 +1990,7 @@
         <script src="Frontend/Js/extras.js"></script>
         <script src="Frontend/Js/level-system.js"></script>
         <script defer src="Frontend/Js/dual-storage.js"></script>
+        <script defer src="Frontend/Js/stats.js"></script>
 
         <script>
             // ============================================

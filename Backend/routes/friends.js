@@ -2,6 +2,7 @@ const express = require('express');
 const { db, COLLECTIONS } = require('../services/firebase');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
+const { verifyToken } = require('./auth');
 
 // Import notification function from user.js
 const userModule = require('./user');
