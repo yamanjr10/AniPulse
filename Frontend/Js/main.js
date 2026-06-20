@@ -10093,7 +10093,6 @@ async function loadFriendLeaderboard() {
                                 <span title="Anime">📺 ${formatNumber(user.totalAnime || 0)} anime</span>
                                 <span title="Hours">⏱️ ${formatNumberShort(user.totalHours || 0)} hrs</span>
                             </div>
-                            ${topGenres.length ? `<div class="leaderboard-genres">${topGenres.map(g => `<span class="genre-tag">${escapeHtml(g)}</span>`).join('')}</div>` : ''}
                         </div>
                     </div>
                     <div class="leaderboard-value">${valueDisplay}</div>
