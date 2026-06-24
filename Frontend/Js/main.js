@@ -11881,13 +11881,14 @@ function showToast(message, type = 'info') {
 })();
 
 // ============================================
-// GLOBAL LEADERBOARD SYSTEM - FIXED STATS
+// GLOBAL LEADERBOARD SYSTEM - WITH PERSISTENCE
 // ============================================
 
 class GlobalLeaderboard {
     constructor() {
-        this.currentMode = 'friends';
-        this.currentStat = 'level';
+        // RESTORE saved mode from localStorage
+        this.currentMode = localStorage.getItem('leaderboardMode') || 'friends';
+        this.currentStat = localStorage.getItem('leaderboardStat') || 'level';
         this.currentPage = 1;
         this.totalPages = 1;
         this.itemsPerPage = 20;
@@ -11902,24 +11903,55 @@ class GlobalLeaderboard {
         // Use API_BASE_URL from config.js
         this.apiUrl = window.API_BASE_URL || 'http://localhost:3000';
         console.log(`🌐 Leaderboard using API: ${this.apiUrl}`);
+        console.log(`📌 Restored mode: ${this.currentMode}, stat: ${this.currentStat}`);
         
         this.init();
     }
     
     init() {
+        // Restore active tab UI
+        this.restoreActiveTab();
+        this.restoreActiveFilter();
+        
         this.setupTabs();
         this.setupFilters();
         this.setupPagination();
         
-        // Load your stats FIRST (before loading leaderboard)
+        // Load your stats FIRST
         this.loadYourStats();
         
-        // Then load leaderboard
-        this.loadLeaderboard('friends');
+        // Then load leaderboard in the SAVED mode
+        this.loadLeaderboard(this.currentMode);
     }
     
     // ============================================
-    // LOAD YOUR STATS - SEPARATE FROM LEADERBOARD
+    // RESTORE UI STATE
+    // ============================================
+    
+    restoreActiveTab() {
+        const tabs = document.querySelectorAll('.leaderboard-mode-tab');
+        tabs.forEach(tab => {
+            if (tab.dataset.mode === this.currentMode) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+    }
+    
+    restoreActiveFilter() {
+        const filters = document.querySelectorAll('.leaderboard-filter-btn');
+        filters.forEach(btn => {
+            if (btn.dataset.stat === this.currentStat) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    
+    // ============================================
+    // LOAD YOUR STATS
     // ============================================
     
     async loadYourStats() {
@@ -11933,7 +11965,6 @@ class GlobalLeaderboard {
         }
 
         try {
-            // Get current user ID
             let userId = null;
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (user.uid) {
@@ -11971,11 +12002,9 @@ class GlobalLeaderboard {
             const stats = await response.json();
             console.log('📊 Stats loaded:', stats);
 
-            // Get stored XP from localStorage as fallback
             const userData = JSON.parse(localStorage.getItem('user') || '{}');
             const storedTotalXP = userData.totalXP || 0;
             
-            // Use API data, fallback to stored data
             stats.totalXP = stats.totalXP || storedTotalXP;
             stats.totalAnime = stats.totalAnime || 0;
             stats.totalEpisodes = stats.totalEpisodes || 0;
@@ -11984,7 +12013,6 @@ class GlobalLeaderboard {
             stats.title = stats.title || userData.title || 'Newbie';
             stats.name = stats.name || userData.username || 'You';
 
-            // Update UI
             this.updateYourStatsUI(stats);
 
         } catch (error) {
@@ -11994,7 +12022,7 @@ class GlobalLeaderboard {
     }
     
     // ============================================
-    // LOAD YOUR STATS FROM LOCAL (FALLBACK)
+    // LOAD YOUR STATS FROM LOCAL
     // ============================================
     
     loadYourStatsFromLocal() {
@@ -12004,7 +12032,6 @@ class GlobalLeaderboard {
         const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
         const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
         
-        // Calculate stats from animeData
         const completedAnime = animeData.filter(a => a.userStatus === 'Completed');
         let totalAnime = completedAnime.length;
         let totalEpisodes = 0;
@@ -12050,7 +12077,6 @@ class GlobalLeaderboard {
     updateYourStatsUI(stats) {
         console.log('🔄 Updating Your Stats UI:', stats);
 
-        // Helper to safely update element
         function updateElement(id, value) {
             const el = document.getElementById(id);
             if (el) {
@@ -12060,19 +12086,11 @@ class GlobalLeaderboard {
             return false;
         }
 
-        // Update total XP
         updateElement('yourTotalXP', this.formatNumber(stats.totalXP || 0));
-
-        // Update total anime
         updateElement('yourTotalAnime', this.formatNumber(stats.totalAnime || 0));
-
-        // Update total episodes
         updateElement('yourTotalEpisodes', this.formatNumber(stats.totalEpisodes || 0));
-
-        // Update total hours
         updateElement('yourTotalHours', this.formatNumber(stats.totalHours || 0));
 
-        // Update avatar
         const avatarEl = document.getElementById('yourAvatar');
         if (avatarEl) {
             const displayName = stats.name || 'User';
@@ -12083,13 +12101,11 @@ class GlobalLeaderboard {
             };
         }
 
-        // Update username
         const usernameEl = document.getElementById('yourUsername');
         if (usernameEl) {
             usernameEl.textContent = stats.name || 'You';
         }
 
-        // Update level
         const levelEl = document.getElementById('yourLevel');
         if (levelEl) {
             const level = stats.level || 1;
@@ -12097,7 +12113,6 @@ class GlobalLeaderboard {
             levelEl.textContent = `${title} • Lv.${level}`;
         }
 
-        // Update top genres
         const topGenresEl = document.getElementById('yourTopGenres');
         if (topGenresEl) {
             if (stats.topGenres && stats.topGenres.length > 0) {
@@ -12113,7 +12128,7 @@ class GlobalLeaderboard {
     }
     
     // ============================================
-    // SETUP TABS
+    // SETUP TABS - WITH PERSISTENCE
     // ============================================
     
     setupTabs() {
@@ -12127,6 +12142,10 @@ class GlobalLeaderboard {
                 tab.classList.add('active');
                 
                 this.currentMode = mode;
+                // SAVE to localStorage
+                localStorage.setItem('leaderboardMode', mode);
+                console.log(`📌 Switched to ${mode} mode (saved)`);
+                
                 this.currentPage = 1;
                 this.loadLeaderboard(mode);
             });
@@ -12134,7 +12153,7 @@ class GlobalLeaderboard {
     }
     
     // ============================================
-    // SETUP FILTERS
+    // SETUP FILTERS - WITH PERSISTENCE
     // ============================================
     
     setupFilters() {
@@ -12148,6 +12167,10 @@ class GlobalLeaderboard {
                 btn.classList.add('active');
                 
                 this.currentStat = stat;
+                // SAVE to localStorage
+                localStorage.setItem('leaderboardStat', stat);
+                console.log(`📌 Switched to ${stat} filter (saved)`);
+                
                 this.currentPage = 1;
                 this.loadLeaderboard(this.currentMode);
             });
@@ -12209,7 +12232,6 @@ class GlobalLeaderboard {
         this.isLoading = true;
         container.innerHTML = this.getLoadingHTML();
         
-        // Show/hide total players container
         const totalPlayersContainer = document.getElementById('leaderboardTotalPlayersContainer');
         if (totalPlayersContainer) {
             totalPlayersContainer.style.display = mode === 'global' ? 'block' : 'none';
@@ -12278,11 +12300,9 @@ class GlobalLeaderboard {
                 }
             }
             
-            // Add current user stats (already loaded)
             const userData = JSON.parse(localStorage.getItem('user') || '{}');
             const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
             
-            // Get current user's stats from the already loaded data
             let currentUserStats = {
                 uid: 'current',
                 name: userProfile.name || userData.username || 'You',
@@ -12297,7 +12317,6 @@ class GlobalLeaderboard {
                 isCurrentUser: true
             };
             
-            // Try to get current user's stats from the API
             try {
                 const myStatsResponse = await this.apiCall(`/api/user/full-stats/${userData.uid || 'current'}?period=all`);
                 if (myStatsResponse.ok) {
@@ -12313,7 +12332,6 @@ class GlobalLeaderboard {
                         title: myStats.title || currentUserStats.title
                     };
                     
-                    // Also update the stats card with fresh data
                     this.updateYourStatsUI(myStats);
                 }
             } catch (e) {
@@ -12331,7 +12349,7 @@ class GlobalLeaderboard {
     }
     
     // ============================================
-    // LOAD GLOBAL LEADERBOARD
+    // LOAD GLOBAL LEADERBOARD - FIXED
     // ============================================
     
     async loadGlobalLeaderboard(container) {
@@ -12357,8 +12375,11 @@ class GlobalLeaderboard {
                 return;
             }
             
-            console.log(`🌐 Fetching global leaderboard from ${this.apiUrl}`);
-            const response = await this.apiCall(`/api/ranking/global?limit=${this.itemsPerPage * 2}&page=${this.currentPage}&type=${this.currentStat}`);
+            // Fetch with higher limit to get more users
+            const limit = Math.max(this.itemsPerPage * 2, 50);
+            console.log(`🌐 Fetching global leaderboard with limit: ${limit}`);
+            
+            const response = await this.apiCall(`/api/ranking/global?limit=${limit}&page=${this.currentPage}&type=${this.currentStat}`);
             
             if (!response.ok) {
                 const errorText = await response.text();
@@ -12369,13 +12390,20 @@ class GlobalLeaderboard {
             const result = await response.json();
             console.log('📊 Global leaderboard data:', result);
             
+            // Ensure we have rankings
+            if (!result.rankings || result.rankings.length === 0) {
+                console.warn('No rankings returned from API');
+                container.innerHTML = this.getEmptyHTML('No users found in global leaderboard');
+                return;
+            }
+            
             this.cache[cacheKey] = {
                 data: result,
                 timestamp: Date.now()
             };
             
             this.rankings = result.rankings || [];
-            this.totalUsers = result.totalUsers || 0;
+            this.totalUsers = result.totalUsers || this.rankings.length;
             this.currentUserRank = result.currentUserRank;
             this.currentUserId = result.currentUserId;
             this.totalPages = Math.max(1, Math.ceil(this.totalUsers / this.itemsPerPage));
@@ -12434,7 +12462,6 @@ class GlobalLeaderboard {
             return;
         }
         
-        // Get current user ID for highlighting
         const currentUserId = localStorage.getItem('user') ? 
             JSON.parse(localStorage.getItem('user'))?.uid : null;
         
@@ -12472,6 +12499,12 @@ class GlobalLeaderboard {
                                 ${this.escapeHtml(user.name || 'User')} 
                                 ${isCurrentUser ? '<span class="leaderboard-you-badge">You</span>' : ''}
                             </div>
+                            <div class="leaderboard-level">${this.escapeHtml(user.title || 'Newbie')}</div>
+                            <div class="leaderboard-stats">
+                                <span title="Episodes">🎬 ${this.formatNumber(totalEpisodes)}</span>
+                                <span title="Anime">📺 ${this.formatNumber(totalAnime)}</span>
+                                <span title="Hours">⏱️ ${this.formatNumber(totalHours)}h</span>
+                            </div>
                         </div>
                     </div>
                     <div class="leaderboard-value">${statDisplay}</div>
@@ -12487,7 +12520,6 @@ class GlobalLeaderboard {
         
         container.innerHTML = html;
         
-        // Update total players count
         if (mode === 'global') {
             const totalEl = document.getElementById('leaderboardTotalPlayers');
             if (totalEl) {
@@ -12616,6 +12648,10 @@ function initLeaderboard() {
     if (!globalLeaderboard) {
         globalLeaderboard = new GlobalLeaderboard();
         console.log('✅ Global Leaderboard initialized');
+    } else {
+        // If already exists, just refresh
+        console.log('🔄 Refreshing existing leaderboard');
+        globalLeaderboard.loadLeaderboard(globalLeaderboard.currentMode);
     }
 }
 
@@ -12637,8 +12673,9 @@ document.addEventListener('DOMContentLoaded', () => {
 window.globalLeaderboard = globalLeaderboard;
 window.initLeaderboard = initLeaderboard;
 
-console.log('✅ Global Leaderboard class loaded');
+console.log('✅ Global Leaderboard class loaded with persistence');
 console.log(`📡 Using API: ${window.API_BASE_URL || 'http://localhost:3000'}`);
+
 
 
 // Initialize the app with saved theme (theme loads before loader)
