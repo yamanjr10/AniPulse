@@ -11881,7 +11881,7 @@ function showToast(message, type = 'info') {
 })();
 
 // ============================================
-// GLOBAL LEADERBOARD SYSTEM - WITH PERSISTENCE
+// GLOBAL LEADERBOARD SYSTEM - COMPLETE
 // ============================================
 
 class GlobalLeaderboard {
@@ -12142,7 +12142,6 @@ class GlobalLeaderboard {
                 tab.classList.add('active');
                 
                 this.currentMode = mode;
-                // SAVE to localStorage
                 localStorage.setItem('leaderboardMode', mode);
                 console.log(`📌 Switched to ${mode} mode (saved)`);
                 
@@ -12167,7 +12166,6 @@ class GlobalLeaderboard {
                 btn.classList.add('active');
                 
                 this.currentStat = stat;
-                // SAVE to localStorage
                 localStorage.setItem('leaderboardStat', stat);
                 console.log(`📌 Switched to ${stat} filter (saved)`);
                 
@@ -12349,7 +12347,7 @@ class GlobalLeaderboard {
     }
     
     // ============================================
-    // LOAD GLOBAL LEADERBOARD - FIXED
+    // LOAD GLOBAL LEADERBOARD
     // ============================================
     
     async loadGlobalLeaderboard(container) {
@@ -12390,7 +12388,6 @@ class GlobalLeaderboard {
             const result = await response.json();
             console.log('📊 Global leaderboard data:', result);
             
-            // Ensure we have rankings
             if (!result.rankings || result.rankings.length === 0) {
                 console.warn('No rankings returned from API');
                 container.innerHTML = this.getEmptyHTML('No users found in global leaderboard');
@@ -12498,12 +12495,6 @@ class GlobalLeaderboard {
                             <div class="leaderboard-name">
                                 ${this.escapeHtml(user.name || 'User')} 
                                 ${isCurrentUser ? '<span class="leaderboard-you-badge">You</span>' : ''}
-                            </div>
-                            <div class="leaderboard-level">${this.escapeHtml(user.title || 'Newbie')}</div>
-                            <div class="leaderboard-stats">
-                                <span title="Episodes">🎬 ${this.formatNumber(totalEpisodes)}</span>
-                                <span title="Anime">📺 ${this.formatNumber(totalAnime)}</span>
-                                <span title="Hours">⏱️ ${this.formatNumber(totalHours)}h</span>
                             </div>
                         </div>
                     </div>
@@ -12632,10 +12623,14 @@ class GlobalLeaderboard {
 }
 
 // ============================================
-// INITIALIZE
+// SINGLE INSTANCE MANAGEMENT
 // ============================================
 
-let globalLeaderboard = null;
+let _leaderboardInstance = null;
+
+// ============================================
+// INITIALIZE LEADERBOARD - SINGLE INSTANCE
+// ============================================
 
 function initLeaderboard() {
     const container = document.getElementById('friendLeaderboardList');
@@ -12645,36 +12640,131 @@ function initLeaderboard() {
         return;
     }
     
-    if (!globalLeaderboard) {
-        globalLeaderboard = new GlobalLeaderboard();
-        console.log('✅ Global Leaderboard initialized');
-    } else {
-        // If already exists, just refresh
-        console.log('🔄 Refreshing existing leaderboard');
-        globalLeaderboard.loadLeaderboard(globalLeaderboard.currentMode);
+    if (_leaderboardInstance) {
+        const savedMode = localStorage.getItem('leaderboardMode') || 'friends';
+        console.log(`🔄 Refreshing existing leaderboard in ${savedMode} mode`);
+        _leaderboardInstance.currentMode = savedMode;
+        _leaderboardInstance.loadLeaderboard(savedMode);
+        window.globalLeaderboard = _leaderboardInstance;
+        return;
     }
+    
+    console.log('✅ Creating new GlobalLeaderboard instance');
+    _leaderboardInstance = new GlobalLeaderboard();
+    window.globalLeaderboard = _leaderboardInstance;
 }
 
-// Listen for community tab clicks
-document.addEventListener('DOMContentLoaded', () => {
+// ============================================
+// COMMUNITY REFRESH - PRESERVES MODE
+// ============================================
+
+window.refreshCommunity = async function() {
+    console.log('🔄 Refreshing community data...');
+    
+    const communityPage = document.getElementById('community-page');
+    if (!communityPage || !communityPage.classList.contains('active')) {
+        return;
+    }
+    
+    try {
+        if (typeof loadFriends === 'function') {
+            loadFriends();
+        }
+        if (typeof loadFriendRequests === 'function') {
+            loadFriendRequests();
+        }
+        
+        const activeTab = document.querySelector('.community-tab.active');
+        if (activeTab && activeTab.dataset.tab === 'leaderboard') {
+            const savedMode = localStorage.getItem('leaderboardMode') || 'friends';
+            console.log(`🔄 Auto-refresh leaderboard in ${savedMode} mode`);
+            
+            if (_leaderboardInstance) {
+                _leaderboardInstance.currentMode = savedMode;
+                _leaderboardInstance.loadLeaderboard(savedMode);
+            } else {
+                initLeaderboard();
+            }
+        }
+        
+        console.log('✅ Community data refreshed');
+    } catch (error) {
+        console.warn('⚠️ Community refresh failed:', error);
+    }
+};
+
+// ============================================
+// STATE MANAGER INTEGRATION
+// ============================================
+
+if (window.StateManager && StateManager.prototype) {
+    StateManager.prototype.refreshCommunity = async function() {
+        console.log('🔄 StateManager auto-refreshing community...');
+        
+        const communityPage = document.getElementById('community-page');
+        if (!communityPage || !communityPage.classList.contains('active')) {
+            return;
+        }
+        
+        try {
+            if (typeof loadFriends === 'function') {
+                loadFriends();
+            }
+            if (typeof loadFriendRequests === 'function') {
+                loadFriendRequests();
+            }
+            
+            const savedMode = localStorage.getItem('leaderboardMode') || 'friends';
+            console.log(`🔄 StateManager refreshing leaderboard in ${savedMode} mode`);
+            
+            if (_leaderboardInstance) {
+                _leaderboardInstance.currentMode = savedMode;
+                _leaderboardInstance.loadLeaderboard(savedMode);
+            } else {
+                initLeaderboard();
+            }
+        } catch (error) {
+            console.warn('⚠️ StateManager community refresh failed:', error);
+        }
+    };
+}
+
+// ============================================
+// DOM EVENT LISTENERS
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
     const leaderboardTab = document.querySelector('.community-tab[data-tab="leaderboard"]');
     if (leaderboardTab) {
-        leaderboardTab.addEventListener('click', () => {
-            setTimeout(initLeaderboard, 100);
+        leaderboardTab.addEventListener('click', function() {
+            const savedMode = localStorage.getItem('leaderboardMode') || 'friends';
+            console.log(`📌 Leaderboard tab clicked, mode: ${savedMode}`);
+            
+            if (_leaderboardInstance) {
+                _leaderboardInstance.currentMode = savedMode;
+                _leaderboardInstance.loadLeaderboard(savedMode);
+            } else {
+                initLeaderboard();
+            }
         });
     }
     
     if (document.querySelector('.community-tab[data-tab="leaderboard"].active')) {
-        setTimeout(initLeaderboard, 200);
+        console.log('📌 Leaderboard tab already active, initializing...');
+        setTimeout(initLeaderboard, 300);
     }
 });
 
-// Export for global access
-window.globalLeaderboard = globalLeaderboard;
+// ============================================
+// EXPOSE TO GLOBAL
+// ============================================
+
+window.globalLeaderboard = _leaderboardInstance;
 window.initLeaderboard = initLeaderboard;
 
-console.log('✅ Global Leaderboard class loaded with persistence');
-console.log(`📡 Using API: ${window.API_BASE_URL || 'http://localhost:3000'}`);
+console.log('✅ Global Leaderboard system initialized');
+console.log(`📌 Current saved mode: ${localStorage.getItem('leaderboardMode') || 'friends'}`);
+console.log(`📌 Current saved stat: ${localStorage.getItem('leaderboardStat') || 'level'}`);
 
 
 
