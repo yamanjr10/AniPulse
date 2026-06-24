@@ -6629,213 +6629,6 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('✅ Activity Heatmap initialized successfully!');
 });
 
-// =============================================
-// DARK DASHBOARD CHARTS 
-// =============================================
-document.addEventListener('DOMContentLoaded', () => {
-    // =========================
-    // GLOBAL CHART STYLING
-    // =========================
-    Chart.defaults.color = "#b5b8ff";
-    Chart.defaults.borderColor = "rgba(255,255,255,0.05)";
-    Chart.defaults.font.family = "'Poppins', sans-serif";
-    Chart.defaults.plugins.legend.labels.color = "#aab";
-    Chart.defaults.plugins.title.color = "#b5b8ff";
-    Chart.defaults.plugins.tooltip.backgroundColor = "rgba(0,0,0,0.7)";
-    Chart.defaults.plugins.tooltip.titleColor = "#fff";
-    Chart.defaults.plugins.tooltip.bodyColor = "#ddd";
-    Chart.defaults.plugins.tooltip.borderColor = "rgba(255,255,255,0.1)";
-    Chart.defaults.plugins.tooltip.borderWidth = 1;
-
-    const completed = animeData.filter(a => a.userStatus?.toLowerCase() === 'completed');
-
-    //   Watch Time by Day of Week
-    (function watchByWeekdayChartInit() {
-        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const totals = Array(7).fill(0);
-
-        completed.forEach(a => {
-            if (!a.finishDate || !a.episodes || !a.duration) return;
-            const d = new Date(a.finishDate);
-            const day = isNaN(d.getDay()) ? Math.floor(Math.random() * 7) : d.getDay();
-            const hours = (a.episodes * a.duration) / 60;
-            totals[day] += hours;
-        });
-
-        new Chart(document.getElementById('watchByWeekdayChart'), {
-            type: 'line',
-            data: {
-                labels: weekdays,
-                datasets: [{
-                    label: 'Total Hours Watched',
-                    data: totals,
-                    borderColor: 'rgba(231,76,60,1)',
-                    backgroundColor: 'rgba(231,76,60,0.3)',
-                    tension: 0.3,
-                    fill: true,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        color: '#b5b8ff',
-                        font: { size: 16, weight: 'bold' },
-                        padding: { bottom: 10 }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: "rgba(255,255,255,0.05)" },
-                        ticks: { color: "#9ca3af" },
-                        title: { display: true, text: 'Hours', color: '#b5b8ff' }
-                    },
-                    x: {
-                        grid: { color: "rgba(255,255,255,0.03)" },
-                        ticks: { color: "#9ca3af" }
-                    }
-                }
-            }
-        });
-    })();
-
-    //  Longest & Shortest Anime — SPLIT INTO TWO CHARTS
-    (function animeLengthCharts() {
-        const sorted = [...completed].sort((a, b) => b.episodes - a.episodes);
-        const longest = sorted.slice(0, 5);
-
-        const nonMovies = sorted.filter(a => a.type?.toLowerCase() !== "movie");
-        const shortest = nonMovies.slice(-5).reverse();
-
-        // === Longest Chart ===
-        new Chart(document.getElementById('longestAnimeChart'), {
-            type: 'bar',
-            data: {
-                labels: longest.map(a => `${a.title.slice(0, 15)}`),
-                datasets: [{
-                    label: 'Episodes',
-                    data: longest.map(a => a.episodes),
-                    backgroundColor: 'rgba(46, 204, 113,0.7)',
-                    borderColor: 'rgba(0,0,0,0.1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        font: { size: 16, weight: 'bold' },
-                        color: '#b5b8ff',
-                        padding: { bottom: 10 }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: "rgba(255,255,255,0.05)" },
-                        ticks: { color: "#9ca3af" },
-                        title: { display: true, text: 'Episodes', color: '#b5b8ff' }
-                    },
-                    x: {
-                        grid: { color: "rgba(255,255,255,0.03)" },
-                        ticks: { color: "#9ca3af", maxRotation: 0 }
-                    }
-                }
-            }
-        });
-
-        // === Shortest Chart ===
-        new Chart(document.getElementById('shortestAnimeChart'), {
-            type: 'bar',
-            data: {
-                labels: shortest.map(a => `${a.title.slice(0, 15)}`),
-                datasets: [{
-                    label: 'Episodes',
-                    data: shortest.map(a => a.episodes),
-                    backgroundColor: 'rgba(241, 196, 15,0.7)',
-                    borderColor: 'rgba(0,0,0,0.1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        font: { size: 16, weight: 'bold' },
-                        color: '#b5b8ff',
-                        padding: { bottom: 10 }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: "rgba(255,255,255,0.05)" },
-                        ticks: { color: "#9ca3af" },
-                        title: { display: true, text: 'Episodes', color: '#b5b8ff' }
-                    },
-                    x: {
-                        grid: { color: "rgba(255,255,255,0.03)" },
-                        ticks: { color: "#9ca3af", maxRotation: 0 }
-                    }
-                }
-            }
-        });
-    })();
-
-    //  Favorite Seasons Chart
-    (function seasonalPreferenceChartInit() {
-        const seasonMap = { Winter: 0, Spring: 0, Summer: 0, Fall: 0 };
-        completed.forEach(a => {
-            if (!a.finishDate) return;
-            const [, month] = a.finishDate.split('-');
-            const m = parseInt(month, 10);
-            const season =
-                m <= 2 ? 'Winter' :
-                    m <= 5 ? 'Spring' :
-                        m <= 8 ? 'Summer' :
-                            'Fall';
-            seasonMap[season]++;
-        });
-
-        new Chart(document.getElementById('seasonalPreferenceChart'), {
-            type: 'polarArea',
-            data: {
-                labels: Object.keys(seasonMap),
-                datasets: [{
-                    data: Object.values(seasonMap),
-                    backgroundColor: [
-                        'rgba(52,152,219,0.7)',
-                        'rgba(46,204,113,0.7)',
-                        'rgba(241,196,15,0.7)',
-                        'rgba(231,76,60,0.7)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'right', labels: { color: '#b5b8ff' } },
-                    title: {
-                        display: true,
-                        color: '#b5b8ff',
-                        font: { size: 16, weight: 'bold' }
-                    }
-                }
-            }
-        });
-    })();
-});
 
 //  Handle "Member Since" date
 function initMemberSince() {
@@ -11635,222 +11428,6 @@ function showToast(message, type = 'info') {
     };
 
     // ============================================
-    // FIX animeLengthCharts
-    // ============================================
-
-    const originalAnimeLengthCharts = window.animeLengthCharts;
-
-    window.animeLengthCharts = function() {
-        console.log('📊 Initializing anime length charts (safe version)...');
-
-        const longestCanvas = document.getElementById('longestAnimeChart');
-        const shortestCanvas = document.getElementById('shortestAnimeChart');
-
-        // Check if canvases exist
-        if (!longestCanvas || !shortestCanvas) {
-            console.log('⏳ Anime length chart elements not ready');
-            return;
-        }
-
-        const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
-        const completed = animeData.filter(a => a.userStatus?.toLowerCase() === 'completed');
-
-        // Longest
-        const sorted = [...completed].sort((a, b) => b.episodes - a.episodes);
-        const longest = sorted.slice(0, 5);
-
-        const nonMovies = sorted.filter(a => a.type?.toLowerCase() !== "movie");
-        const shortest = nonMovies.slice(-5).reverse();
-
-        // === Longest Chart ===
-        const longestCtx = safeGetContext('longestAnimeChart');
-        if (longestCtx) {
-            if (window.AniPulseCharts && window.AniPulseCharts.longestChart) {
-                window.AniPulseCharts.longestChart = safeDestroyChart(window.AniPulseCharts.longestChart);
-            }
-            
-            window.AniPulseCharts = window.AniPulseCharts || {};
-            window.AniPulseCharts.longestChart = new Chart(longestCtx, {
-                type: 'bar',
-                data: {
-                    labels: longest.map(a => `${a.title.slice(0, 15)}`),
-                    datasets: [{
-                        label: 'Episodes',
-                        data: longest.map(a => a.episodes),
-                        backgroundColor: 'rgba(46, 204, 113,0.7)',
-                        borderColor: 'rgba(0,0,0,0.1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
-                        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#9ca3af', maxRotation: 0 } }
-                    }
-                }
-            });
-        }
-
-        // === Shortest Chart ===
-        const shortestCtx = safeGetContext('shortestAnimeChart');
-        if (shortestCtx) {
-            if (window.AniPulseCharts && window.AniPulseCharts.shortestChart) {
-                window.AniPulseCharts.shortestChart = safeDestroyChart(window.AniPulseCharts.shortestChart);
-            }
-            
-            window.AniPulseCharts = window.AniPulseCharts || {};
-            window.AniPulseCharts.shortestChart = new Chart(shortestCtx, {
-                type: 'bar',
-                data: {
-                    labels: shortest.map(a => `${a.title.slice(0, 15)}`),
-                    datasets: [{
-                        label: 'Episodes',
-                        data: shortest.map(a => a.episodes),
-                        backgroundColor: 'rgba(241, 196, 15,0.7)',
-                        borderColor: 'rgba(0,0,0,0.1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
-                        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#9ca3af', maxRotation: 0 } }
-                    }
-                }
-            });
-        }
-
-        console.log('✅ Anime length charts initialized safely');
-    };
-
-    // ============================================
-    // FIX seasonalPreferenceChart
-    // ============================================
-
-    window.seasonalPreferenceChart = function() {
-        const canvas = document.getElementById('seasonalPreferenceChart');
-        if (!canvas) {
-            console.log('⏳ Seasonal preference chart element not ready');
-            return;
-        }
-
-        const ctx = safeGetContext('seasonalPreferenceChart');
-        if (!ctx) return;
-
-        const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
-        const completed = animeData.filter(a => a.userStatus?.toLowerCase() === 'completed');
-
-        const seasonMap = { Winter: 0, Spring: 0, Summer: 0, Fall: 0 };
-        completed.forEach(a => {
-            if (!a.finishDate) return;
-            const [, month] = a.finishDate.split('-');
-            const m = parseInt(month, 10);
-            const season =
-                m <= 2 ? 'Winter' :
-                m <= 5 ? 'Spring' :
-                m <= 8 ? 'Summer' :
-                'Fall';
-            seasonMap[season]++;
-        });
-
-        if (window.AniPulseCharts && window.AniPulseCharts.seasonalChart) {
-            window.AniPulseCharts.seasonalChart = safeDestroyChart(window.AniPulseCharts.seasonalChart);
-        }
-
-        window.AniPulseCharts = window.AniPulseCharts || {};
-        window.AniPulseCharts.seasonalChart = new Chart(ctx, {
-            type: 'polarArea',
-            data: {
-                labels: Object.keys(seasonMap),
-                datasets: [{
-                    data: Object.values(seasonMap),
-                    backgroundColor: [
-                        'rgba(52,152,219,0.7)',
-                        'rgba(46,204,113,0.7)',
-                        'rgba(241,196,15,0.7)',
-                        'rgba(231,76,60,0.7)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'right', labels: { color: '#b5b8ff' } }
-                }
-            }
-        });
-
-        console.log('✅ Seasonal preference chart initialized safely');
-    };
-
-    // ============================================
-    // OVERRIDE watchByWeekdayChart
-    // ============================================
-
-    window.watchByWeekdayChart = function() {
-        const canvas = document.getElementById('watchByWeekdayChart');
-        if (!canvas) {
-            console.log('⏳ Watch by weekday chart element not ready');
-            return;
-        }
-
-        const ctx = safeGetContext('watchByWeekdayChart');
-        if (!ctx) return;
-
-        const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
-        const completed = animeData.filter(a => a.userStatus?.toLowerCase() === 'completed');
-
-        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const totals = Array(7).fill(0);
-
-        completed.forEach(a => {
-            if (!a.finishDate || !a.episodes || !a.duration) return;
-            const d = new Date(a.finishDate);
-            const day = isNaN(d.getDay()) ? Math.floor(Math.random() * 7) : d.getDay();
-            const hours = (a.episodes * a.duration) / 60;
-            totals[day] += hours;
-        });
-
-        if (window.AniPulseCharts && window.AniPulseCharts.watchWeekdayChart) {
-            window.AniPulseCharts.watchWeekdayChart = safeDestroyChart(window.AniPulseCharts.watchWeekdayChart);
-        }
-
-        window.AniPulseCharts = window.AniPulseCharts || {};
-        window.AniPulseCharts.watchWeekdayChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: weekdays,
-                datasets: [{
-                    label: 'Total Hours Watched',
-                    data: totals,
-                    borderColor: 'rgba(231,76,60,1)',
-                    backgroundColor: 'rgba(231,76,60,0.3)',
-                    tension: 0.3,
-                    fill: true,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#9ca3af" } },
-                    x: { grid: { color: "rgba(255,255,255,0.03)" }, ticks: { color: "#9ca3af" } }
-                }
-            }
-        });
-
-        console.log('✅ Watch by weekday chart initialized safely');
-    };
-
-    // ============================================
     // HOOK INTO PAGE NAVIGATION
     // ============================================
 
@@ -12301,9 +11878,768 @@ function showToast(message, type = 'info') {
         }
     });
 
-    console.log('✅ User profile fix applied!');
-
 })();
+
+// ============================================
+// GLOBAL LEADERBOARD SYSTEM - FIXED STATS
+// ============================================
+
+class GlobalLeaderboard {
+    constructor() {
+        this.currentMode = 'friends';
+        this.currentStat = 'level';
+        this.currentPage = 1;
+        this.totalPages = 1;
+        this.itemsPerPage = 20;
+        this.isLoading = false;
+        this.rankings = [];
+        this.totalUsers = 0;
+        this.currentUserRank = null;
+        this.currentUserId = null;
+        this.cache = {};
+        this.cacheTTL = 60000;
+        
+        // Use API_BASE_URL from config.js
+        this.apiUrl = window.API_BASE_URL || 'http://localhost:3000';
+        console.log(`🌐 Leaderboard using API: ${this.apiUrl}`);
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupTabs();
+        this.setupFilters();
+        this.setupPagination();
+        
+        // Load your stats FIRST (before loading leaderboard)
+        this.loadYourStats();
+        
+        // Then load leaderboard
+        this.loadLeaderboard('friends');
+    }
+    
+    // ============================================
+    // LOAD YOUR STATS - SEPARATE FROM LEADERBOARD
+    // ============================================
+    
+    async loadYourStats() {
+        console.log('📊 Loading your stats...');
+        
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.warn('No auth token, cannot load stats');
+            this.loadYourStatsFromLocal();
+            return;
+        }
+
+        try {
+            // Get current user ID
+            let userId = null;
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.uid) {
+                userId = user.uid;
+            } else if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    userId = payload.uid;
+                } catch (e) {
+                    console.warn('Could not decode token:', e);
+                }
+            }
+
+            if (!userId) {
+                console.warn('No user ID found');
+                this.loadYourStatsFromLocal();
+                return;
+            }
+
+            console.log(`📊 Loading stats for user: ${userId}`);
+
+            const response = await fetch(`${this.apiUrl}/api/user/full-stats/${userId}?period=all`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                console.error('Stats API error:', response.status);
+                this.loadYourStatsFromLocal();
+                return;
+            }
+
+            const stats = await response.json();
+            console.log('📊 Stats loaded:', stats);
+
+            // Get stored XP from localStorage as fallback
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            const storedTotalXP = userData.totalXP || 0;
+            
+            // Use API data, fallback to stored data
+            stats.totalXP = stats.totalXP || storedTotalXP;
+            stats.totalAnime = stats.totalAnime || 0;
+            stats.totalEpisodes = stats.totalEpisodes || 0;
+            stats.totalHours = stats.totalHours || 0;
+            stats.level = stats.level || userData.level || 1;
+            stats.title = stats.title || userData.title || 'Newbie';
+            stats.name = stats.name || userData.username || 'You';
+
+            // Update UI
+            this.updateYourStatsUI(stats);
+
+        } catch (error) {
+            console.error('Failed to load your stats:', error);
+            this.loadYourStatsFromLocal();
+        }
+    }
+    
+    // ============================================
+    // LOAD YOUR STATS FROM LOCAL (FALLBACK)
+    // ============================================
+    
+    loadYourStatsFromLocal() {
+        console.log('📦 Loading stats from localStorage fallback');
+        
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
+        
+        // Calculate stats from animeData
+        const completedAnime = animeData.filter(a => a.userStatus === 'Completed');
+        let totalAnime = completedAnime.length;
+        let totalEpisodes = 0;
+        let totalHours = 0;
+        
+        completedAnime.forEach(anime => {
+            let episodes = 0;
+            if (anime.type === 'Movie') {
+                episodes = 1;
+            } else {
+                episodes = anime.episodes || 0;
+            }
+            totalEpisodes += episodes;
+            
+            let hours = 0;
+            if (anime.type === 'Movie') {
+                hours = (anime.duration || 120) / 60;
+            } else {
+                hours = (episodes * (anime.duration || 20)) / 60;
+            }
+            totalHours += hours;
+        });
+        
+        const stats = {
+            name: userProfile.name || userData.username || 'You',
+            avatar: userProfile.avatar || userData.avatar,
+            level: userData.level || 1,
+            title: userData.title || 'Newbie',
+            totalXP: userData.totalXP || 0,
+            totalAnime: totalAnime,
+            totalEpisodes: totalEpisodes,
+            totalHours: Math.round(totalHours),
+            topGenres: []
+        };
+        
+        this.updateYourStatsUI(stats);
+    }
+    
+    // ============================================
+    // UPDATE YOUR STATS UI
+    // ============================================
+    
+    updateYourStatsUI(stats) {
+        console.log('🔄 Updating Your Stats UI:', stats);
+
+        // Helper to safely update element
+        function updateElement(id, value) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value !== undefined && value !== null ? value : '0';
+                return true;
+            }
+            return false;
+        }
+
+        // Update total XP
+        updateElement('yourTotalXP', this.formatNumber(stats.totalXP || 0));
+
+        // Update total anime
+        updateElement('yourTotalAnime', this.formatNumber(stats.totalAnime || 0));
+
+        // Update total episodes
+        updateElement('yourTotalEpisodes', this.formatNumber(stats.totalEpisodes || 0));
+
+        // Update total hours
+        updateElement('yourTotalHours', this.formatNumber(stats.totalHours || 0));
+
+        // Update avatar
+        const avatarEl = document.getElementById('yourAvatar');
+        if (avatarEl) {
+            const displayName = stats.name || 'User';
+            const avatarUrl = stats.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff&bold=true&size=200`;
+            avatarEl.src = avatarUrl;
+            avatarEl.onerror = function() {
+                this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff&bold=true&size=200`;
+            };
+        }
+
+        // Update username
+        const usernameEl = document.getElementById('yourUsername');
+        if (usernameEl) {
+            usernameEl.textContent = stats.name || 'You';
+        }
+
+        // Update level
+        const levelEl = document.getElementById('yourLevel');
+        if (levelEl) {
+            const level = stats.level || 1;
+            const title = stats.title || 'Newbie';
+            levelEl.textContent = `${title} • Lv.${level}`;
+        }
+
+        // Update top genres
+        const topGenresEl = document.getElementById('yourTopGenres');
+        if (topGenresEl) {
+            if (stats.topGenres && stats.topGenres.length > 0) {
+                topGenresEl.innerHTML = stats.topGenres.slice(0, 5).map(g => 
+                    `<span class="genre-tag">${this.escapeHtml(g)}</span>`
+                ).join('');
+            } else {
+                topGenresEl.innerHTML = '<span class="genre-tag" style="color: rgba(255,255,255,0.4);">No genres yet</span>';
+            }
+        }
+
+        console.log('✅ Your Stats UI updated');
+    }
+    
+    // ============================================
+    // SETUP TABS
+    // ============================================
+    
+    setupTabs() {
+        const tabs = document.querySelectorAll('.leaderboard-mode-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const mode = tab.dataset.mode;
+                if (mode === this.currentMode) return;
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                this.currentMode = mode;
+                this.currentPage = 1;
+                this.loadLeaderboard(mode);
+            });
+        });
+    }
+    
+    // ============================================
+    // SETUP FILTERS
+    // ============================================
+    
+    setupFilters() {
+        const filters = document.querySelectorAll('.leaderboard-filter-btn');
+        filters.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const stat = btn.dataset.stat;
+                if (stat === this.currentStat) return;
+                
+                filters.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                this.currentStat = stat;
+                this.currentPage = 1;
+                this.loadLeaderboard(this.currentMode);
+            });
+        });
+    }
+    
+    // ============================================
+    // SETUP PAGINATION
+    // ============================================
+    
+    setupPagination() {
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.leaderboard-page-btn');
+            if (!btn) return;
+            
+            const page = parseInt(btn.dataset.page);
+            if (isNaN(page) || page === this.currentPage) return;
+            
+            this.currentPage = page;
+            this.loadLeaderboard(this.currentMode);
+        });
+    }
+    
+    // ============================================
+    // API CALL HELPER
+    // ============================================
+    
+    async apiCall(endpoint, options = {}) {
+        const url = `${this.apiUrl}${endpoint}`;
+        const token = localStorage.getItem('authToken');
+        
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            ...options
+        };
+        
+        try {
+            const response = await fetch(url, defaultOptions);
+            return response;
+        } catch (error) {
+            console.error(`API Error (${endpoint}):`, error);
+            throw error;
+        }
+    }
+    
+    // ============================================
+    // LOAD LEADERBOARD
+    // ============================================
+    
+    async loadLeaderboard(mode) {
+        if (this.isLoading) return;
+        
+        const container = document.getElementById('friendLeaderboardList');
+        if (!container) return;
+        
+        this.isLoading = true;
+        container.innerHTML = this.getLoadingHTML();
+        
+        // Show/hide total players container
+        const totalPlayersContainer = document.getElementById('leaderboardTotalPlayersContainer');
+        if (totalPlayersContainer) {
+            totalPlayersContainer.style.display = mode === 'global' ? 'block' : 'none';
+        }
+        
+        try {
+            if (mode === 'friends') {
+                await this.loadFriendsLeaderboard(container);
+            } else {
+                await this.loadGlobalLeaderboard(container);
+            }
+        } catch (error) {
+            console.error('Leaderboard load error:', error);
+            container.innerHTML = this.getErrorHTML(error.message);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+    
+    // ============================================
+    // LOAD FRIENDS LEADERBOARD
+    // ============================================
+    
+    async loadFriendsLeaderboard(container) {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            container.innerHTML = this.getEmptyHTML('Please login to see friends leaderboard');
+            return;
+        }
+        
+        try {
+            const friendsResponse = await this.apiCall('/api/friends/list');
+            
+            if (!friendsResponse.ok) throw new Error('Failed to load friends');
+            
+            const friends = await friendsResponse.json();
+            
+            if (!friends || friends.length === 0) {
+                container.innerHTML = this.getEmptyHTML('Add friends to see leaderboard!');
+                return;
+            }
+            
+            const friendStats = [];
+            for (const friend of friends) {
+                try {
+                    const statsResponse = await this.apiCall(`/api/user/full-stats/${friend.uid}?period=all`);
+                    
+                    if (statsResponse.ok) {
+                        const stats = await statsResponse.json();
+                        friendStats.push({
+                            uid: friend.uid,
+                            name: stats.name || friend.name,
+                            avatar: stats.avatar || friend.avatar,
+                            level: stats.level || 1,
+                            title: stats.title || 'Newbie',
+                            totalXP: stats.totalXP || 0,
+                            totalAnime: stats.totalAnime || 0,
+                            totalEpisodes: stats.totalEpisodes || 0,
+                            totalHours: stats.totalHours || 0,
+                            topGenres: stats.topGenres || [],
+                            isCurrentUser: false
+                        });
+                    }
+                } catch (e) {
+                    console.warn(`Could not get stats for ${friend.name}:`, e);
+                }
+            }
+            
+            // Add current user stats (already loaded)
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            
+            // Get current user's stats from the already loaded data
+            let currentUserStats = {
+                uid: 'current',
+                name: userProfile.name || userData.username || 'You',
+                avatar: userProfile.avatar || userData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile.name || 'You')}&background=6366F1&color=fff`,
+                level: userData.level || 1,
+                title: userData.title || 'Newbie',
+                totalXP: userData.totalXP || 0,
+                totalAnime: 0,
+                totalEpisodes: 0,
+                totalHours: 0,
+                topGenres: [],
+                isCurrentUser: true
+            };
+            
+            // Try to get current user's stats from the API
+            try {
+                const myStatsResponse = await this.apiCall(`/api/user/full-stats/${userData.uid || 'current'}?period=all`);
+                if (myStatsResponse.ok) {
+                    const myStats = await myStatsResponse.json();
+                    currentUserStats = {
+                        ...currentUserStats,
+                        totalXP: myStats.totalXP || currentUserStats.totalXP,
+                        totalAnime: myStats.totalAnime || 0,
+                        totalEpisodes: myStats.totalEpisodes || 0,
+                        totalHours: myStats.totalHours || 0,
+                        topGenres: myStats.topGenres || [],
+                        level: myStats.level || currentUserStats.level,
+                        title: myStats.title || currentUserStats.title
+                    };
+                    
+                    // Also update the stats card with fresh data
+                    this.updateYourStatsUI(myStats);
+                }
+            } catch (e) {
+                console.warn('Could not get current user stats:', e);
+            }
+            
+            const allUsers = [currentUserStats, ...friendStats];
+            const sorted = this.sortUsers(allUsers);
+            this.renderLeaderboard(container, sorted, 'friends');
+            
+        } catch (error) {
+            console.error('Friends leaderboard error:', error);
+            container.innerHTML = this.getErrorHTML('Failed to load friends leaderboard');
+        }
+    }
+    
+    // ============================================
+    // LOAD GLOBAL LEADERBOARD
+    // ============================================
+    
+    async loadGlobalLeaderboard(container) {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            container.innerHTML = this.getEmptyHTML('Please login to see global leaderboard');
+            return;
+        }
+        
+        try {
+            const cacheKey = `${this.currentStat}_${this.currentPage}`;
+            const cached = this.cache[cacheKey];
+            
+            if (cached && (Date.now() - cached.timestamp < this.cacheTTL)) {
+                console.log('📦 Using cached global leaderboard');
+                const data = cached.data;
+                this.rankings = data.rankings || [];
+                this.totalUsers = data.totalUsers || 0;
+                this.currentUserRank = data.currentUserRank;
+                this.currentUserId = data.currentUserId;
+                this.totalPages = Math.max(1, Math.ceil(this.totalUsers / this.itemsPerPage));
+                this.renderLeaderboard(container, data, 'global');
+                return;
+            }
+            
+            console.log(`🌐 Fetching global leaderboard from ${this.apiUrl}`);
+            const response = await this.apiCall(`/api/ranking/global?limit=${this.itemsPerPage * 2}&page=${this.currentPage}&type=${this.currentStat}`);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', response.status, errorText);
+                throw new Error(`Failed to load global leaderboard (${response.status})`);
+            }
+            
+            const result = await response.json();
+            console.log('📊 Global leaderboard data:', result);
+            
+            this.cache[cacheKey] = {
+                data: result,
+                timestamp: Date.now()
+            };
+            
+            this.rankings = result.rankings || [];
+            this.totalUsers = result.totalUsers || 0;
+            this.currentUserRank = result.currentUserRank;
+            this.currentUserId = result.currentUserId;
+            this.totalPages = Math.max(1, Math.ceil(this.totalUsers / this.itemsPerPage));
+            
+            this.renderLeaderboard(container, result, 'global');
+            
+        } catch (error) {
+            console.error('Global leaderboard error:', error);
+            container.innerHTML = this.getErrorHTML(error.message);
+        }
+    }
+    
+    // ============================================
+    // SORT USERS
+    // ============================================
+    
+    sortUsers(users) {
+        const statMap = {
+            'level': 'level',
+            'xp': 'totalXP',
+            'anime': 'totalAnime',
+            'episodes': 'totalEpisodes',
+            'hours': 'totalHours'
+        };
+        
+        const sortField = statMap[this.currentStat] || 'totalXP';
+        
+        return users.sort((a, b) => {
+            const valA = a[sortField] || 0;
+            const valB = b[sortField] || 0;
+            if (valA === valB) {
+                return (a.name || '').localeCompare(b.name || '');
+            }
+            return valB - valA;
+        });
+    }
+    
+    // ============================================
+    // RENDER LEADERBOARD
+    // ============================================
+    
+    renderLeaderboard(container, data, mode) {
+        let rankings = data.rankings || data || [];
+        
+        if (Array.isArray(data) && !data.rankings) {
+            rankings = data;
+        }
+        
+        if (!Array.isArray(rankings)) {
+            console.warn('Rankings is not an array:', rankings);
+            rankings = [];
+        }
+        
+        if (rankings.length === 0) {
+            container.innerHTML = this.getEmptyHTML('No users found');
+            return;
+        }
+        
+        // Get current user ID for highlighting
+        const currentUserId = localStorage.getItem('user') ? 
+            JSON.parse(localStorage.getItem('user'))?.uid : null;
+        
+        let html = '<div class="leaderboard-list">';
+        
+        rankings.forEach((user, index) => {
+            const rank = user.rank || (index + 1);
+            const isTop3 = rank <= 3;
+            const rankClass = isTop3 ? `top-${rank}` : '';
+            
+            const isCurrentUser = user.isCurrentUser || 
+                                  user.uid === currentUserId || 
+                                  user.uid === 'current';
+            
+            const statDisplay = this.getStatDisplay(user);
+            
+            let rankIcon = `#${rank}`;
+            if (rank === 1) rankIcon = '🥇';
+            else if (rank === 2) rankIcon = '🥈';
+            else if (rank === 3) rankIcon = '🥉';
+            
+            const totalEpisodes = user.totalEpisodes || 0;
+            const totalAnime = user.totalAnime || 0;
+            const totalHours = user.totalHours || 0;
+            
+            html += `
+                <div class="leaderboard-item ${isCurrentUser ? 'current-user' : ''}" onclick="window.openUserProfile && window.openUserProfile('${user.uid}')">
+                    <div class="leaderboard-rank ${rankClass}">${rankIcon}</div>
+                    <div class="leaderboard-user">
+                        <img src="${user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=6366F1&color=fff`}" 
+                             class="leaderboard-avatar" 
+                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=6366F1&color=fff'">
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">
+                                ${this.escapeHtml(user.name || 'User')} 
+                                ${isCurrentUser ? '<span class="leaderboard-you-badge">You</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="leaderboard-value">${statDisplay}</div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        
+        if (mode === 'global' && this.totalPages > 1) {
+            html += this.getPaginationHTML();
+        }
+        
+        container.innerHTML = html;
+        
+        // Update total players count
+        if (mode === 'global') {
+            const totalEl = document.getElementById('leaderboardTotalPlayers');
+            if (totalEl) {
+                totalEl.textContent = this.totalUsers.toLocaleString();
+            }
+        }
+    }
+    
+    // ============================================
+    // HELPERS
+    // ============================================
+    
+    getStatDisplay(user) {
+        const statMap = {
+            'level': `Lv.${user.level || 1}`,
+            'xp': `${this.formatNumber(user.totalXP || 0)} XP`,
+            'anime': `${this.formatNumber(user.totalAnime || 0)} anime`,
+            'episodes': `${this.formatNumber(user.totalEpisodes || 0)} eps`,
+            'hours': `${this.formatNumber(user.totalHours || 0)} hrs`
+        };
+        return statMap[this.currentStat] || `Lv.${user.level || 1}`;
+    }
+    
+    getPaginationHTML() {
+        const currentPage = this.currentPage;
+        const totalPages = this.totalPages;
+        const maxVisible = 5;
+        
+        let html = '<div class="leaderboard-pagination">';
+        
+        html += `<button class="leaderboard-page-btn" data-page="${currentPage - 1}" ${currentPage <= 1 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-left"></i>
+        </button>`;
+        
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        
+        if (endPage - startPage < maxVisible - 1) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+        
+        if (startPage > 1) {
+            html += `<button class="leaderboard-page-btn" data-page="1">1</button>`;
+            if (startPage > 2) html += '<span class="leaderboard-page-dots">…</span>';
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="leaderboard-page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += '<span class="leaderboard-page-dots">…</span>';
+            html += `<button class="leaderboard-page-btn" data-page="${totalPages}">${totalPages}</button>`;
+        }
+        
+        html += `<button class="leaderboard-page-btn" data-page="${currentPage + 1}" ${currentPage >= totalPages ? 'disabled' : ''}>
+            <i class="fas fa-chevron-right"></i>
+        </button>`;
+        
+        html += '</div>';
+        
+        return html;
+    }
+    
+    getLoadingHTML() {
+        return `
+            <div class="leaderboard-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Loading leaderboard...</span>
+            </div>
+        `;
+    }
+    
+    getErrorHTML(message) {
+        return `
+            <div class="leaderboard-empty">
+                <i class="fas fa-exclamation-circle"></i>
+                <h4>Something went wrong</h4>
+                <p>${this.escapeHtml(message || 'Please try again later')}</p>
+                <button class="leaderboard-retry-btn" onclick="window.globalLeaderboard?.loadLeaderboard('${this.currentMode}')">
+                    <i class="fas fa-sync-alt"></i> Retry
+                </button>
+            </div>
+        `;
+    }
+    
+    getEmptyHTML(message) {
+        return `
+            <div class="leaderboard-empty">
+                <i class="fas fa-users"></i>
+                <h4>No users to show</h4>
+                <p>${this.escapeHtml(message || 'Check back later')}</p>
+            </div>
+        `;
+    }
+    
+    formatNumber(num) {
+        if (num === undefined || num === null) return '0';
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+        return num.toString();
+    }
+    
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// ============================================
+// INITIALIZE
+// ============================================
+
+let globalLeaderboard = null;
+
+function initLeaderboard() {
+    const container = document.getElementById('friendLeaderboardList');
+    if (!container) {
+        console.log('⏳ Leaderboard container not found, waiting...');
+        setTimeout(initLeaderboard, 300);
+        return;
+    }
+    
+    if (!globalLeaderboard) {
+        globalLeaderboard = new GlobalLeaderboard();
+        console.log('✅ Global Leaderboard initialized');
+    }
+}
+
+// Listen for community tab clicks
+document.addEventListener('DOMContentLoaded', () => {
+    const leaderboardTab = document.querySelector('.community-tab[data-tab="leaderboard"]');
+    if (leaderboardTab) {
+        leaderboardTab.addEventListener('click', () => {
+            setTimeout(initLeaderboard, 100);
+        });
+    }
+    
+    if (document.querySelector('.community-tab[data-tab="leaderboard"].active')) {
+        setTimeout(initLeaderboard, 200);
+    }
+});
+
+// Export for global access
+window.globalLeaderboard = globalLeaderboard;
+window.initLeaderboard = initLeaderboard;
+
+console.log('✅ Global Leaderboard class loaded');
+console.log(`📡 Using API: ${window.API_BASE_URL || 'http://localhost:3000'}`);
+
 
 // Initialize the app with saved theme (theme loads before loader)
 initializeTheme();

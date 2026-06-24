@@ -1312,92 +1312,113 @@
                     </div>
                 </div>
 
-                <!-- Tab Content: Leaderboard (FULLY FUNCTIONAL) -->
-                <div id="community-leaderboard-tab" class="community-tab-content">
-                    <div class="friend-leaderboard">
-                        <h3><i class="fas fa-chart-line"></i> Friend Leaderboard</h3>
-                        <p class="leaderboard-subtitle">Compare your stats with friends!</p>
+               <!-- Tab Content: Leaderboard (FULLY FUNCTIONAL) -->
+<div id="community-leaderboard-tab" class="community-tab-content">
+    <div class="friend-leaderboard">
+        <h3><i class="fas fa-chart-line"></i> Leaderboard</h3>
+        <p class="leaderboard-subtitle">Compare your stats with friends and the world!</p>
 
-                        <!-- Leaderboard Filters -->
-                        <div class="leaderboard-filters">
-                            <button class="leaderboard-filter-btn active" data-stat="level">
-                                <i class="fas fa-chart-line"></i> Level
-                            </button>
-                            <button class="leaderboard-filter-btn" data-stat="xp">
-                                <i class="fas fa-star"></i> Total XP
-                            </button>
-                            <button class="leaderboard-filter-btn" data-stat="anime">
-                                <i class="fas fa-tv"></i> Anime
-                            </button>
-                            <button class="leaderboard-filter-btn" data-stat="hours">
-                                <i class="fas fa-clock"></i> Hours
-                            </button>
-                            <button class="leaderboard-filter-btn" data-stat="episodes">
-                                <i class="fas fa-film"></i> Episodes
-                            </button>
-                        </div>
+        <!-- Mode Tabs -->
+        <div class="leaderboard-mode-tabs">
+            <button class="leaderboard-mode-tab active" data-mode="friends">
+                <i class="fas fa-user-friends"></i>
+                <span>Friends</span>
+            </button>
+            <button class="leaderboard-mode-tab" data-mode="global">
+                <i class="fas fa-globe"></i>
+                <span>Global</span>
+            </button>
+        </div>
 
-                        <!-- Time Period Filter -->
-                        <div class="time-period-filter">
-                            <label><i class="fas fa-calendar-alt"></i> Show data from:</label>
-                            <div class="time-period-buttons">
-                                <button class="time-period-btn" data-period="week">
-                                    <i class="fas fa-calendar-week"></i> This Week
-                                </button>
-                                <button class="time-period-btn" data-period="month">
-                                    <i class="fas fa-calendar-month"></i> This Month
-                                </button>
-                                <button class="time-period-btn" data-period="year">
-                                    <i class="fas fa-calendar-year"></i> This Year
-                                </button>
-                                <button class="time-period-btn active" data-period="all">
-                                    <i class="fas fa-infinity"></i> All Time
-                                </button>
-                            </div>
-                        </div>
+        <!-- Leaderboard Filters -->
+        <div class="leaderboard-filters">
+            <button class="leaderboard-filter-btn active" data-stat="level">
+                <i class="fas fa-chart-line"></i> Level
+            </button>
+            <button class="leaderboard-filter-btn" data-stat="xp">
+                <i class="fas fa-star"></i> Total XP
+            </button>
+            <button class="leaderboard-filter-btn" data-stat="anime">
+                <i class="fas fa-tv"></i> Anime
+            </button>
+            <button class="leaderboard-filter-btn" data-stat="hours">
+                <i class="fas fa-clock"></i> Hours
+            </button>
+            <button class="leaderboard-filter-btn" data-stat="episodes">
+                <i class="fas fa-film"></i> Episodes
+            </button>
+        </div>
 
-                        <!-- Your Stats Card (Enhanced) -->
-                        <div class="your-stats-card" id="yourStatsCard">
-                            <div class="your-stats-header">
-                                <img id="yourAvatar" class="your-avatar" src="" alt="">
-                                <div>
-                                    <h4 id="yourUsername">You</h4>
-                                    <span id="yourLevel" class="your-level">Lv.1</span>
-                                </div>
-                            </div>
-                            <div class="your-stats-grid">
-                                <div class="your-stat">
-                                    <span class="stat-value" id="yourTotalXP">0</span>
-                                    <span class="stat-label">Total XP</span>
-                                </div>
-                                <div class="your-stat">
-                                    <span class="stat-value" id="yourTotalAnime">0</span>
-                                    <span class="stat-label">Anime</span>
-                                </div>
-                                <div class="your-stat">
-                                    <span class="stat-value" id="yourTotalEpisodes">0</span>
-                                    <span class="stat-label">Episodes</span>
-                                </div>
-                                <div class="your-stat">
-                                    <span class="stat-value" id="yourTotalHours">0</span>
-                                    <span class="stat-label">Hours</span>
-                                </div>
-                            </div>
-                            <!-- Top Genres Section -->
-                            <div class="your-top-genres">
-                                <span class="genres-label"><i class="fas fa-music"></i> Top Genres:</span>
-                                <div id="yourTopGenres" class="genre-tags"></div>
-                            </div>
-                        </div>
+        <!-- Time Period Filter -->
+        <div class="time-period-filter">
+            <label><i class="fas fa-calendar-alt"></i> Show data from:</label>
+            <div class="time-period-buttons">
+                <button class="time-period-btn" data-period="week">
+                    <i class="fas fa-calendar-week"></i> This Week
+                </button>
+                <button class="time-period-btn" data-period="month">
+                    <i class="fas fa-calendar-month"></i> This Month
+                </button>
+                <button class="time-period-btn" data-period="year">
+                    <i class="fas fa-calendar-year"></i> This Year
+                </button>
+                <button class="time-period-btn active" data-period="all">
+                    <i class="fas fa-infinity"></i> All Time
+                </button>
+            </div>
+        </div>
 
-                        <!-- Friends Leaderboard List -->
-                        <div id="friendLeaderboardList" class="friend-leaderboard-list">
-                            <div class="loading-spinner">
-                                <i class="fas fa-spinner fa-spin"></i> Loading leaderboard...
-                            </div>
-                        </div>
-                    </div>
+        <!-- Your Stats Card (Enhanced) -->
+        <div class="your-stats-card" id="yourStatsCard">
+            <div class="your-stats-header">
+                <img id="yourAvatar" class="your-avatar" src="" alt="">
+                <div>
+                    <h4 id="yourUsername">You</h4>
+                    <span id="yourLevel" class="your-level">Lv.1</span>
                 </div>
+            </div>
+            <div class="your-stats-grid">
+                <div class="your-stat">
+                    <span class="stat-value" id="yourTotalXP">0</span>
+                    <span class="stat-label">Total XP</span>
+                </div>
+                <div class="your-stat">
+                    <span class="stat-value" id="yourTotalAnime">0</span>
+                    <span class="stat-label">Anime</span>
+                </div>
+                <div class="your-stat">
+                    <span class="stat-value" id="yourTotalEpisodes">0</span>
+                    <span class="stat-label">Episodes</span>
+                </div>
+                <div class="your-stat">
+                    <span class="stat-value" id="yourTotalHours">0</span>
+                    <span class="stat-label">Hours</span>
+                </div>
+            </div>
+            <!-- Top Genres Section -->
+            <div class="your-top-genres">
+                <span class="genres-label"><i class="fas fa-music"></i> Top Genres:</span>
+                <div id="yourTopGenres" class="genre-tags"></div>
+            </div>
+        </div>
+
+        <!-- Total Players (Global Mode) -->
+        <div id="leaderboardTotalPlayersContainer" style="display: none;">
+            <div class="leaderboard-total-players">
+                <i class="fas fa-users"></i>
+                <span id="leaderboardTotalPlayers">0</span>
+                <span>players ranked</span>
+            </div>
+        </div>
+
+        <!-- Friends Leaderboard List -->
+        <div id="friendLeaderboardList" class="friend-leaderboard-list">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Loading leaderboard...
+            </div>
+        </div>
+    </div>
+</div>
             </div>
         </div>
 

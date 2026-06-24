@@ -5,12 +5,15 @@ const router = express.Router();
 
 function verifyToken(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'No token' });
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.uid;
     next();
   } catch (error) {
+    console.error('Token verification failed:', error);
     res.status(401).json({ error: 'Invalid token' });
   }
 }
@@ -124,57 +127,248 @@ function getXPProgress(currentLevel, currentXP) {
   return ((currentXP - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
 }
 
-// Get global rankings from users collection
-router.get('/global', async (req, res) => {
+// ============================================
+// GET GLOBAL RANKINGS
+// ============================================
+
+router.get('/global', verifyToken, async (req, res) => {
   try {
-    const { type = 'level', limit = 100 } = req.query;
+    const { limit = 50, page = 1, type = 'xp' } = req.query;
+    const currentUserId = req.userId;
     
-    let orderField = 'level';
-    let orderDirection = 'desc';
+    // Determine sort field
+    const sortField = type === 'xp' ? 'totalXP' : 
+                      type === 'level' ? 'level' : 
+                      type === 'anime' ? 'totalAnime' : 
+                      type === 'hours' ? 'totalHours' : 
+                      type === 'episodes' ? 'totalEpisodes' : 'totalXP';
     
-    if (type === 'xp') {
-      orderField = 'totalXP';
-    } else if (type === 'anime') {
-      orderField = 'totalAnime';
-    } else if (type === 'hours') {
-      orderField = 'totalHours';
-    } else if (type === 'level') {
-      orderField = 'level';
-    }
-    
+    // Get all users with stats (limit to 100 for performance)
     const snapshot = await db.collection(COLLECTIONS.USERS)
-      .orderBy(orderField, orderDirection)
-      .limit(parseInt(limit))
+      .orderBy(sortField, 'desc')
+      .limit(parseInt(limit) + 10)
       .get();
     
-    const rankings = [];
-    let rank = 1;
+    const allUsers = [];
+    let userRank = null;
+    let totalUsers = 0;
     
+    // First pass: collect all users
     for (const doc of snapshot.docs) {
       const userData = doc.data();
-      const level = userData.level || getLevelFromXP(userData.totalXP || 0);
+      const uid = doc.id;
       
-      rankings.push({
-        rank: rank++,
-        uid: doc.id,
-        username: userData.username || userData.name || 'Anime Fan',
-        avatar: userData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.username || userData.name || 'User')}&background=6366F1&color=fff`,
+      // Skip users with no name
+      const displayName = userData.name || userData.username;
+      if (!displayName || displayName === 'User') continue;
+      
+      const level = userData.level || 1;
+      const title = getTitleForLevel(level);
+      
+      const userEntry = {
+        uid: uid,
+        username: displayName,
+        name: displayName,
+        avatar: userData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff&bold=true&size=200`,
         level: level,
-        title: getTitleForLevel(level),
+        title: title,
         totalXP: userData.totalXP || 0,
         totalAnime: userData.totalAnime || 0,
-        totalHours: userData.totalHours || 0
-      });
+        totalHours: userData.totalHours || 0,
+        totalEpisodes: userData.totalEpisodes || 0,
+        isCurrentUser: uid === currentUserId
+      };
+      
+      allUsers.push(userEntry);
+      
+      if (uid === currentUserId) {
+        userRank = allUsers.length;
+      }
     }
     
-    res.json(rankings);
+    // Get total user count
+    try {
+      const countSnapshot = await db.collection(COLLECTIONS.USERS).count().get();
+      totalUsers = countSnapshot.data().count || allUsers.length;
+    } catch (countError) {
+      console.warn('Could not get total user count:', countError.message);
+      totalUsers = allUsers.length;
+    }
+    
+    // If current user not found in top results, fetch their rank separately
+    if (!userRank && currentUserId) {
+      try {
+        const userDoc = await db.collection(COLLECTIONS.USERS).doc(currentUserId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const userXP = userData.totalXP || 0;
+          
+          // Count users with higher XP
+          const higherUsers = await db.collection(COLLECTIONS.USERS)
+            .where('totalXP', '>', userXP)
+            .count()
+            .get();
+          
+          userRank = higherUsers.data().count + 1;
+          
+          // Add current user to results if not already there
+          const displayName = userData.name || userData.username || 'User';
+          if (!allUsers.some(u => u.uid === currentUserId)) {
+            const currentUserEntry = {
+              uid: currentUserId,
+              username: displayName,
+              name: displayName,
+              avatar: userData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff&bold=true&size=200`,
+              level: userData.level || 1,
+              title: getTitleForLevel(userData.level || 1),
+              totalXP: userData.totalXP || 0,
+              totalAnime: userData.totalAnime || 0,
+              totalHours: userData.totalHours || 0,
+              totalEpisodes: userData.totalEpisodes || 0,
+              isCurrentUser: true
+            };
+            // Insert at correct position
+            let insertIndex = allUsers.findIndex(u => u.totalXP < userXP);
+            if (insertIndex === -1) insertIndex = allUsers.length;
+            allUsers.splice(insertIndex, 0, currentUserEntry);
+          }
+        }
+      } catch (rankError) {
+        console.warn('Could not fetch user rank:', rankError.message);
+      }
+    }
+    
+    // Assign ranks to all users
+    const rankedUsers = allUsers.map((user, index) => ({
+      ...user,
+      rank: index + 1
+    }));
+    
+    // Prepare response
+    const response = {
+      rankings: rankedUsers,
+      totalUsers: totalUsers,
+      currentUserRank: userRank,
+      currentUserId: currentUserId
+    };
+    
+    res.json(response);
+    
   } catch (error) {
-    console.error('Ranking error:', error);
+    console.error('Global ranking error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get user's rank
+// ============================================
+// GET GLOBAL RANKINGS WITH PAGINATION
+// ============================================
+
+router.get('/global-paginated', verifyToken, async (req, res) => {
+  try {
+    const { limit = 20, page = 1, type = 'xp' } = req.query;
+    const currentUserId = req.userId;
+    
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const sortField = type === 'xp' ? 'totalXP' : 
+                      type === 'level' ? 'level' : 
+                      type === 'anime' ? 'totalAnime' : 
+                      type === 'hours' ? 'totalHours' : 
+                      type === 'episodes' ? 'totalEpisodes' : 'totalXP';
+    
+    // Get paginated users
+    const snapshot = await db.collection(COLLECTIONS.USERS)
+      .orderBy(sortField, 'desc')
+      .offset(offset)
+      .limit(parseInt(limit))
+      .get();
+    
+    const rankings = [];
+    
+    for (const doc of snapshot.docs) {
+      const userData = doc.data();
+      const uid = doc.id;
+      
+      const displayName = userData.name || userData.username;
+      if (!displayName || displayName === 'User') continue;
+      
+      const level = userData.level || 1;
+      
+      rankings.push({
+        uid: uid,
+        username: displayName,
+        name: displayName,
+        avatar: userData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff&bold=true&size=200`,
+        level: level,
+        title: getTitleForLevel(level),
+        totalXP: userData.totalXP || 0,
+        totalAnime: userData.totalAnime || 0,
+        totalHours: userData.totalHours || 0,
+        totalEpisodes: userData.totalEpisodes || 0,
+        isCurrentUser: uid === currentUserId
+      });
+    }
+    
+    // Get total count
+    let totalUsers = 0;
+    try {
+      const countSnapshot = await db.collection(COLLECTIONS.USERS).count().get();
+      totalUsers = countSnapshot.data().count || 0;
+    } catch (countError) {
+      console.warn('Could not get total user count:', countError.message);
+      totalUsers = rankings.length;
+    }
+    
+    // Get current user's rank
+    let userRank = null;
+    if (currentUserId) {
+      try {
+        const userDoc = await db.collection(COLLECTIONS.USERS).doc(currentUserId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const userXP = userData.totalXP || 0;
+          
+          const higherUsers = await db.collection(COLLECTIONS.USERS)
+            .where('totalXP', '>', userXP)
+            .count()
+            .get();
+          
+          userRank = higherUsers.data().count + 1;
+        }
+      } catch (e) {
+        console.warn('Could not get user rank:', e.message);
+      }
+    }
+    
+    // Calculate real ranks with offset
+    const rankedUsers = rankings.map((user, index) => ({
+      ...user,
+      rank: offset + index + 1
+    }));
+    
+    // If current user is on this page, highlight them
+    const currentUserOnPage = rankedUsers.find(u => u.isCurrentUser);
+    
+    res.json({
+      rankings: rankedUsers,
+      totalUsers: totalUsers,
+      currentUserRank: userRank,
+      currentUserId: currentUserId,
+      page: parseInt(page),
+      totalPages: Math.ceil(totalUsers / parseInt(limit)),
+      hasCurrentUserOnPage: !!currentUserOnPage
+    });
+    
+  } catch (error) {
+    console.error('Paginated ranking error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// GET USER RANK
+// ============================================
+
 router.get('/my-rank', verifyToken, async (req, res) => {
   try {
     const userDoc = await db.collection(COLLECTIONS.USERS).doc(req.userId).get();
@@ -203,13 +397,22 @@ router.get('/my-rank', verifyToken, async (req, res) => {
     const nextLevelTitle = getTitleForLevel(currentLevel + 1);
     
     // Count users with higher XP
-    const higherUsers = await db.collection(COLLECTIONS.USERS)
-      .where('totalXP', '>', currentXP)
-      .count()
-      .get();
-    
-    const totalUsers = (await db.collection(COLLECTIONS.USERS).count().get()).data().count;
-    const rank = higherUsers.data().count + 1;
+    let rank = 0;
+    let totalUsers = 0;
+    try {
+      const higherUsers = await db.collection(COLLECTIONS.USERS)
+        .where('totalXP', '>', currentXP)
+        .count()
+        .get();
+      
+      const countSnapshot = await db.collection(COLLECTIONS.USERS).count().get();
+      totalUsers = countSnapshot.data().count || 0;
+      rank = higherUsers.data().count + 1;
+    } catch (countError) {
+      console.warn('Could not get user count:', countError.message);
+      rank = 1;
+      totalUsers = 1;
+    }
     
     res.json({
       rank,
@@ -229,43 +432,10 @@ router.get('/my-rank', verifyToken, async (req, res) => {
   }
 });
 
-// Get leaderboard by specific level range
-router.get('/by-level/:minLevel/:maxLevel', async (req, res) => {
-  const { minLevel, maxLevel } = req.params;
-  const { limit = 50 } = req.query;
-  
-  try {
-    const snapshot = await db.collection(COLLECTIONS.USERS)
-      .where('level', '>=', parseInt(minLevel))
-      .where('level', '<=', parseInt(maxLevel))
-      .orderBy('totalXP', 'desc')
-      .limit(parseInt(limit))
-      .get();
-    
-    const rankings = [];
-    let rank = 1;
-    
-    for (const doc of snapshot.docs) {
-      const userData = doc.data();
-      rankings.push({
-        rank: rank++,
-        uid: doc.id,
-        username: userData.username || userData.name || 'Anime Fan',
-        avatar: userData.avatar || null,
-        level: userData.level || 1,
-        title: getTitleForLevel(userData.level || 1),
-        totalXP: userData.totalXP || 0
-      });
-    }
-    
-    res.json(rankings);
-  } catch (error) {
-    console.error('Level range ranking error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+// ============================================
+// GET XP CURVE
+// ============================================
 
-// Get XP progression curve (for level up preview)
 router.get('/xp-curve', async (req, res) => {
   try {
     const curve = [];

@@ -21472,3 +21472,1071 @@ body.modal-open {
         transform: translateY(-3px) !important;
     }
 }
+
+/* ============================================
+   ENHANCED LEADERBOARD - PREMIUM DESIGN
+   ============================================ */
+
+/* Leaderboard Container */
+.friend-leaderboard {
+    background: linear-gradient(145deg, rgba(26, 31, 46, 0.95), rgba(15, 23, 42, 0.98));
+    border-radius: 28px;
+    padding: 28px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.friend-leaderboard h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #FFFFFF, #A78BFA);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.leaderboard-subtitle {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+/* ============================================
+   LEADERBOARD MODE TABS
+   ============================================ */
+
+.leaderboard-mode-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 60px;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    backdrop-filter: blur(8px);
+}
+
+.leaderboard-mode-tab {
+    flex: 1;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 50px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.leaderboard-mode-tab i {
+    font-size: 0.95rem;
+    transition: transform 0.3s ease;
+}
+
+.leaderboard-mode-tab:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(139, 92, 246, 0.08);
+}
+
+.leaderboard-mode-tab:hover i {
+    transform: scale(1.1);
+}
+
+.leaderboard-mode-tab.active {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: white;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+}
+
+.leaderboard-mode-tab.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: tabShine 2s infinite;
+}
+
+@keyframes tabShine {
+    0% { left: -100%; }
+    20% { left: 100%; }
+    100% { left: 100%; }
+}
+
+/* ============================================
+   LEADERBOARD MODE BADGE
+   ============================================ */
+
+.leaderboard-mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    background: rgba(139, 92, 246, 0.12);
+    border-radius: 40px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #A78BFA;
+    margin-bottom: 18px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+.leaderboard-mode-badge:hover {
+    background: rgba(139, 92, 246, 0.2);
+    border-color: rgba(139, 92, 246, 0.4);
+    transform: translateY(-2px);
+}
+
+.leaderboard-mode-badge i {
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   LEADERBOARD LIST - ENHANCED
+   ============================================ */
+
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* ============================================
+   LEADERBOARD ITEM - PREMIUM CARD
+   ============================================ */
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 20px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(139, 92, 246, 0.08);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    gap: 16px;
+}
+
+/* Premium glow effect on hover */
+.leaderboard-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.06), transparent);
+    transition: left 0.6s ease;
+    pointer-events: none;
+}
+
+.leaderboard-item:hover::before {
+    left: 100%;
+}
+
+/* Card hover effect */
+.leaderboard-item:hover {
+    transform: translateY(-3px) scale(1.01);
+    border-color: rgba(139, 92, 246, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================
+   CURRENT USER HIGHLIGHT - PREMIUM
+   ============================================ */
+
+.leaderboard-item.current-user {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(139, 92, 246, 0.08));
+    border: 2px solid rgba(139, 92, 246, 0.4);
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.15), inset 0 0 30px rgba(99, 102, 241, 0.05);
+    position: relative;
+}
+
+/* Animated border glow for current user */
+.leaderboard-item.current-user::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6, #A78BFA, #6366F1);
+    background-size: 300% 300%;
+    z-index: -1;
+    animation: borderGlow 3s ease infinite;
+    opacity: 0.5;
+}
+
+@keyframes borderGlow {
+    0% { background-position: 0% 50%; opacity: 0.3; }
+    50% { background-position: 100% 50%; opacity: 0.7; }
+    100% { background-position: 0% 50%; opacity: 0.3; }
+}
+
+/* Current user rank badge */
+.leaderboard-item.current-user .leaderboard-rank {
+    color: #A78BFA;
+}
+
+/* ============================================
+   LEADERBOARD RANK
+   ============================================ */
+
+.leaderboard-rank {
+    width: 48px;
+    min-width: 48px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.leaderboard-rank.top-1 {
+    color: #FFD700;
+    font-size: 1.6rem;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.leaderboard-rank.top-2 {
+    color: #C0C0C0;
+    font-size: 1.5rem;
+    text-shadow: 0 0 15px rgba(192, 192, 192, 0.3);
+}
+
+.leaderboard-rank.top-3 {
+    color: #CD7F32;
+    font-size: 1.5rem;
+    text-shadow: 0 0 15px rgba(205, 127, 50, 0.3);
+}
+
+.leaderboard-item:hover .leaderboard-rank {
+    transform: scale(1.05);
+}
+
+/* ============================================
+   LEADERBOARD USER SECTION
+   ============================================ */
+
+.leaderboard-user {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Avatar with glow */
+.leaderboard-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    flex-shrink: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #1a1f2e;
+}
+
+.leaderboard-item:hover .leaderboard-avatar {
+    transform: scale(1.08);
+    border-color: #8B5CF6;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+/* Current user avatar special glow */
+.leaderboard-item.current-user .leaderboard-avatar {
+    border-color: #8B5CF6;
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+    animation: avatarPulse 2s ease-in-out infinite;
+}
+
+@keyframes avatarPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.6); }
+}
+
+/* ============================================
+   LEADERBOARD INFO
+   ============================================ */
+
+.leaderboard-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.leaderboard-name {
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.leaderboard-item:hover .leaderboard-name {
+    background: linear-gradient(135deg, #FFFFFF, #A78BFA);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ============================================
+   "YOU" BADGE - PREMIUM
+   ============================================ */
+
+.leaderboard-you-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: white;
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 2px 12px;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.4);
+    animation: badgePulse 2s ease-in-out infinite;
+    white-space: nowrap;
+}
+
+@keyframes badgePulse {
+    0%, 100% { box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3); }
+    50% { box-shadow: 0 2px 20px rgba(99, 102, 241, 0.6); }
+}
+
+/* ============================================
+   LEADERBOARD STATS (Level, Episodes, Anime, Hours)
+   ============================================ */
+
+.leaderboard-level {
+    font-size: 0.7rem;
+    color: #A78BFA;
+    margin-top: 2px;
+    font-weight: 500;
+}
+
+.leaderboard-stats {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.4);
+    flex-wrap: wrap;
+}
+
+.leaderboard-stats span {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: all 0.3s ease;
+}
+
+.leaderboard-item:hover .leaderboard-stats span {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================
+   LEADERBOARD VALUE (Right side stat)
+   ============================================ */
+
+.leaderboard-value {
+    font-weight: 700;
+    color: #FBBF24;
+    min-width: 90px;
+    text-align: right;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    padding: 4px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 30px;
+    border: 1px solid rgba(251, 191, 36, 0.1);
+    transition: all 0.3s ease;
+}
+
+.leaderboard-item:hover .leaderboard-value {
+    background: rgba(251, 191, 36, 0.08);
+    border-color: rgba(251, 191, 36, 0.3);
+    transform: scale(1.02);
+}
+
+.leaderboard-item.current-user .leaderboard-value {
+    background: rgba(251, 191, 36, 0.12);
+    border-color: rgba(251, 191, 36, 0.3);
+    color: #FFD700;
+}
+
+/* ============================================
+   LEADERBOARD PAGINATION
+   ============================================ */
+
+.leaderboard-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(139, 92, 246, 0.1);
+    flex-wrap: wrap;
+}
+
+.leaderboard-page-btn {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.leaderboard-page-btn:hover:not(:disabled) {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.4);
+    color: #A78BFA;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+}
+
+.leaderboard-page-btn.active {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+}
+
+.leaderboard-page-btn.active:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 25px rgba(99, 102, 241, 0.45);
+}
+
+.leaderboard-page-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.leaderboard-page-dots {
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.85rem;
+    padding: 0 6px;
+    letter-spacing: 2px;
+}
+
+/* ============================================
+   LEADERBOARD LOADING & EMPTY STATES
+   ============================================ */
+
+.leaderboard-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+}
+
+.leaderboard-loading i {
+    font-size: 2.5rem;
+    color: #8B5CF6;
+    animation: spin 1s linear infinite;
+}
+
+.leaderboard-loading span {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.leaderboard-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 24px;
+    border: 1px dashed rgba(139, 92, 246, 0.2);
+}
+
+.leaderboard-empty i {
+    font-size: 3rem;
+    color: rgba(139, 92, 246, 0.3);
+}
+
+.leaderboard-empty h4 {
+    color: var(--color-text-primary);
+    font-size: 1.2rem;
+    margin: 8px 0 4px;
+    font-weight: 700;
+}
+
+.leaderboard-empty p {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    margin: 0;
+    max-width: 300px;
+}
+
+.leaderboard-retry-btn {
+    margin-top: 16px;
+    padding: 10px 28px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border: none;
+    border-radius: 40px;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.leaderboard-retry-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(99, 102, 241, 0.35);
+}
+
+.leaderboard-retry-btn i {
+    font-size: 0.8rem;
+    color: white;
+}
+
+/* ============================================
+   TOTAL PLAYERS DISPLAY
+   ============================================ */
+
+.leaderboard-total-players {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(139, 92, 246, 0.08);
+    border-radius: 40px;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    margin-bottom: 18px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.leaderboard-total-players:hover {
+    background: rgba(139, 92, 246, 0.12);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.leaderboard-total-players i {
+    color: #8B5CF6;
+    font-size: 1rem;
+}
+
+.leaderboard-total-players span:first-of-type {
+    font-weight: 700;
+    color: #A78BFA;
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .leaderboard-item {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+    
+    .leaderboard-avatar {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .leaderboard-rank {
+        width: 40px;
+        min-width: 40px;
+        font-size: 1rem;
+    }
+    
+    .leaderboard-value {
+        min-width: 70px;
+        font-size: 0.8rem;
+        padding: 3px 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .friend-leaderboard {
+        padding: 20px;
+    }
+    
+    .leaderboard-mode-tabs {
+        flex-direction: row;
+        border-radius: 40px;
+        padding: 4px;
+        overflow-x: auto;
+        gap: 4px;
+    }
+    
+    .leaderboard-mode-tab {
+        flex: 0 0 auto;
+        padding: 10px 18px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        gap: 6px;
+    }
+    
+    .leaderboard-mode-tab i {
+        font-size: 0.8rem;
+    }
+    
+    .leaderboard-mode-tab span {
+        display: inline;
+    }
+    
+    .leaderboard-item {
+        padding: 12px 14px;
+        gap: 10px;
+        flex-wrap: wrap;
+        border-radius: 16px;
+    }
+    
+    .leaderboard-rank {
+        width: 36px;
+        min-width: 36px;
+        font-size: 0.9rem;
+    }
+    
+    .leaderboard-rank.top-1,
+    .leaderboard-rank.top-2,
+    .leaderboard-rank.top-3 {
+        font-size: 1.2rem;
+    }
+    
+    .leaderboard-avatar {
+        width: 38px;
+        height: 38px;
+    }
+    
+    .leaderboard-name {
+        font-size: 0.85rem;
+    }
+    
+    .leaderboard-stats {
+        gap: 6px;
+        font-size: 0.55rem;
+    }
+    
+    .leaderboard-stats span {
+        padding: 1px 8px;
+    }
+    
+    .leaderboard-value {
+        min-width: 60px;
+        font-size: 0.7rem;
+        padding: 2px 8px;
+    }
+    
+    .leaderboard-you-badge {
+        font-size: 0.45rem;
+        padding: 1px 8px;
+    }
+    
+    .leaderboard-pagination {
+        gap: 4px;
+    }
+    
+    .leaderboard-page-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.7rem;
+    }
+    
+    .leaderboard-mode-badge {
+        font-size: 0.7rem;
+        padding: 6px 14px;
+    }
+    
+    .leaderboard-total-players {
+        font-size: 0.75rem;
+        padding: 8px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .friend-leaderboard {
+        padding: 16px;
+        border-radius: 20px;
+    }
+    
+    .friend-leaderboard h3 {
+        font-size: 1.1rem;
+    }
+    
+    .leaderboard-mode-tab {
+        padding: 8px 12px;
+        font-size: 0.65rem;
+    }
+    
+    .leaderboard-mode-tab i {
+        font-size: 0.7rem;
+    }
+    
+    .leaderboard-item {
+        padding: 10px 12px;
+        gap: 8px;
+        border-radius: 14px;
+    }
+    
+    .leaderboard-rank {
+        width: 30px;
+        min-width: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .leaderboard-rank.top-1,
+    .leaderboard-rank.top-2,
+    .leaderboard-rank.top-3 {
+        font-size: 1rem;
+    }
+    
+    .leaderboard-avatar {
+        width: 34px;
+        height: 34px;
+        border-width: 2px;
+    }
+    
+    .leaderboard-user {
+        gap: 10px;
+    }
+    
+    .leaderboard-info {
+        min-width: 0;
+    }
+    
+    .leaderboard-name {
+        font-size: 0.75rem;
+        gap: 4px;
+    }
+    
+    .leaderboard-level {
+        font-size: 0.55rem;
+    }
+    
+    .leaderboard-stats {
+        gap: 4px;
+        font-size: 0.5rem;
+    }
+    
+    .leaderboard-stats span {
+        padding: 1px 6px;
+    }
+    
+    .leaderboard-value {
+        min-width: 50px;
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
+    
+    .leaderboard-you-badge {
+        font-size: 0.4rem;
+        padding: 1px 6px;
+    }
+    
+    .leaderboard-pagination {
+        gap: 3px;
+    }
+    
+    .leaderboard-page-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 0.6rem;
+    }
+    
+    .leaderboard-page-dots {
+        font-size: 0.6rem;
+        padding: 0 4px;
+    }
+    
+    .leaderboard-mode-badge {
+        font-size: 0.6rem;
+        padding: 4px 10px;
+    }
+    
+    .leaderboard-mode-badge i {
+        font-size: 0.6rem;
+    }
+    
+    .leaderboard-total-players {
+        font-size: 0.65rem;
+        padding: 6px 12px;
+        gap: 6px;
+    }
+    
+    .leaderboard-total-players i {
+        font-size: 0.8rem;
+    }
+    
+    .leaderboard-total-players span:first-of-type {
+        font-size: 0.9rem;
+    }
+    
+    .leaderboard-empty {
+        padding: 40px 16px;
+    }
+    
+    .leaderboard-empty i {
+        font-size: 2rem;
+    }
+    
+    .leaderboard-empty h4 {
+        font-size: 1rem;
+    }
+    
+    .leaderboard-empty p {
+        font-size: 0.75rem;
+    }
+    
+    .leaderboard-retry-btn {
+        padding: 8px 20px;
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================
+   LIGHT MODE SUPPORT
+   ============================================ */
+
+[data-theme="light"] .friend-leaderboard {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98));
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .leaderboard-mode-tabs {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .leaderboard-mode-tab {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .leaderboard-mode-tab:hover {
+    color: rgba(0, 0, 0, 0.7);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+[data-theme="light"] .leaderboard-mode-tab.active {
+    color: white;
+}
+
+[data-theme="light"] .leaderboard-item {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .leaderboard-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .leaderboard-item.current-user {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.04));
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+[data-theme="light"] .leaderboard-rank {
+    color: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .leaderboard-rank.top-1 {
+    color: #DAA520;
+}
+
+[data-theme="light"] .leaderboard-rank.top-2 {
+    color: #A8A8A8;
+}
+
+[data-theme="light"] .leaderboard-rank.top-3 {
+    color: #CD7F32;
+}
+
+[data-theme="light"] .leaderboard-name {
+    color: #1E293B;
+}
+
+[data-theme="light"] .leaderboard-item:hover .leaderboard-name {
+    background: linear-gradient(135deg, #1E293B, #7C3AED);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .leaderboard-level {
+    color: #6366F1;
+}
+
+[data-theme="light"] .leaderboard-stats {
+    color: rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="light"] .leaderboard-stats span {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .leaderboard-item:hover .leaderboard-stats span {
+    background: rgba(99, 102, 241, 0.06);
+    border-color: rgba(99, 102, 241, 0.15);
+    color: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] .leaderboard-value {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(251, 191, 36, 0.15);
+    color: #D97706;
+}
+
+[data-theme="light"] .leaderboard-item:hover .leaderboard-value {
+    background: rgba(251, 191, 36, 0.06);
+    border-color: rgba(251, 191, 36, 0.25);
+}
+
+[data-theme="light"] .leaderboard-item.current-user .leaderboard-value {
+    background: rgba(251, 191, 36, 0.08);
+    border-color: rgba(251, 191, 36, 0.25);
+    color: #D97706;
+}
+
+[data-theme="light"] .leaderboard-page-btn {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .leaderboard-page-btn:hover:not(:disabled) {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.3);
+    color: #6366F1;
+}
+
+[data-theme="light"] .leaderboard-page-btn.active {
+    color: white;
+}
+
+[data-theme="light"] .leaderboard-page-dots {
+    color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .leaderboard-mode-badge {
+    background: rgba(99, 102, 241, 0.06);
+    color: #6366F1;
+    border-color: rgba(99, 102, 241, 0.15);
+}
+
+[data-theme="light"] .leaderboard-mode-badge:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="light"] .leaderboard-total-players {
+    background: rgba(99, 102, 241, 0.04);
+    border-color: rgba(99, 102, 241, 0.1);
+    color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .leaderboard-total-players span:first-of-type {
+    color: #6366F1;
+}
+
+[data-theme="light"] .leaderboard-empty {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .leaderboard-empty p {
+    color: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .leaderboard-empty h4 {
+    color: #1E293B;
+}
+
+[data-theme="light"] .leaderboard-loading span {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .leaderboard-you-badge {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .leaderboard-item,
+    .leaderboard-item::before,
+    .leaderboard-item.current-user::after,
+    .leaderboard-mode-tab.active::before,
+    .leaderboard-avatar,
+    .leaderboard-rank,
+    .leaderboard-value,
+    .leaderboard-page-btn,
+    .leaderboard-mode-badge,
+    .leaderboard-you-badge,
+    .leaderboard-item.current-user .leaderboard-avatar {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .leaderboard-item:hover {
+        transform: translateY(-2px);
+    }
+    
+    .leaderboard-item.current-user {
+        border-color: rgba(139, 92, 246, 0.4);
+    }
+}
