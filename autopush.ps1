@@ -13,7 +13,7 @@ git add .
 
 # Commit with timestamp
 $time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-git commit -m "Anipulse Version 3( Part 1 ) - Official Release"
+git commit -m "Anipulse Version 3 ( Part 1 ) - Official Release"
 
 # Push to GitHub
 git push origin main
