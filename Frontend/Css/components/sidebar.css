@@ -1,0 +1,434 @@
+/* ============================================
+   SIDEBAR / NAVIGATION COMPONENT
+   ============================================ */
+
+/* ===== SIDEBAR MENU ===== */
+.sidebar-menu {
+    padding: var(--space-4) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+/* ===== MENU ITEMS ===== */
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-xl);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-bounce);
+    position: relative;
+    overflow: hidden;
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+}
+
+/* Glass Reflection Effect */
+.menu-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.menu-item:hover::before {
+    left: 100%;
+}
+
+/* Icon Styling */
+.menu-item i {
+    width: 24px;
+    font-size: var(--text-base);
+    transition: all var(--transition-bounce);
+    position: relative;
+    z-index: 1;
+}
+
+/* Text Styling */
+.menu-item span {
+    position: relative;
+    z-index: 1;
+    transition: all var(--transition);
+}
+
+/* ===== HOVER EFFECTS ===== */
+.menu-item:hover {
+    transform: translateX(8px);
+}
+
+/* Dashboard - Purple Theme */
+.menu-item[data-page="dashboard"]:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.08));
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+}
+.menu-item[data-page="dashboard"]:hover i {
+    color: var(--clr-secondary-light);
+    text-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+    transform: scale(1.15) rotate(-5deg);
+}
+.menu-item[data-page="dashboard"]:hover span {
+    color: var(--clr-secondary-light);
+    letter-spacing: var(--tracking-wide);
+}
+
+/* Anime List - Blue Theme */
+.menu-item[data-page="anime-list"]:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.08));
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+.menu-item[data-page="anime-list"]:hover i {
+    color: var(--clr-info-light);
+    text-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+    transform: scale(1.15) rotate(-5deg);
+}
+.menu-item[data-page="anime-list"]:hover span {
+    color: var(--clr-info-light);
+    letter-spacing: var(--tracking-wide);
+}
+
+/* Watchlist - Red Theme */
+.menu-item[data-page="watchlist"]:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08));
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+}
+.menu-item[data-page="watchlist"]:hover i {
+    color: var(--clr-danger-light);
+    text-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
+    transform: scale(1.15) rotate(-5deg);
+}
+.menu-item[data-page="watchlist"]:hover span {
+    color: var(--clr-danger-light);
+    letter-spacing: var(--tracking-wide);
+}
+
+/* Statistics - Green Theme */
+.menu-item[data-page="statistics"]:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+}
+.menu-item[data-page="statistics"]:hover i {
+    color: var(--clr-success-light);
+    text-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
+    transform: scale(1.15) rotate(-5deg);
+}
+.menu-item[data-page="statistics"]:hover span {
+    color: var(--clr-success-light);
+    letter-spacing: var(--tracking-wide);
+}
+
+/* Achievements - Yellow Theme */
+.menu-item[data-page="achievements"]:hover {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08));
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+}
+.menu-item[data-page="achievements"]:hover i {
+    color: var(--clr-warning-light);
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+    transform: scale(1.15) rotate(-5deg);
+}
+.menu-item[data-page="achievements"]:hover span {
+    color: var(--clr-warning-light);
+    letter-spacing: var(--tracking-wide);
+}
+
+/* Community - Cyan Theme */
+.menu-item[data-page="community"]:hover {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.08));
+    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+}
+.menu-item[data-page="community"]:hover i {
+    color: #22D3EE;
+    text-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+    transform: scale(1.15) rotate(-5deg);
+}
+.menu-item[data-page="community"]:hover span {
+    color: #22D3EE;
+    letter-spacing: var(--tracking-wide);
+}
+
+/* Settings - Gray Theme */
+.menu-item[data-page="settings"]:hover {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(71, 85, 105, 0.08));
+    box-shadow: 0 4px 15px rgba(100, 116, 139, 0.2);
+}
+.menu-item[data-page="settings"]:hover i {
+    color: var(--clr-soft);
+    text-shadow: 0 0 8px rgba(148, 163, 184, 0.5);
+    transform: scale(1.15) rotate(-5deg);
+}
+.menu-item[data-page="settings"]:hover span {
+    color: var(--clr-soft);
+    letter-spacing: var(--tracking-wide);
+}
+
+/* ===== ACTIVE STATES ===== */
+.menu-item.active {
+    position: relative;
+    animation: slideInLeft 0.4s ease;
+}
+
+.menu-item.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: currentColor;
+    border-radius: 3px;
+    animation: glowLine 1.5s infinite;
+}
+
+@keyframes glowLine {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Dashboard Active */
+.menu-item.active[data-page="dashboard"] {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.12));
+    color: var(--clr-secondary-light);
+}
+.menu-item.active[data-page="dashboard"] i {
+    color: var(--clr-secondary-light);
+    text-shadow: 0 0 6px rgba(167, 139, 250, 0.4);
+}
+
+/* Anime List Active */
+.menu-item.active[data-page="anime-list"] {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.12));
+    color: var(--clr-info-light);
+}
+.menu-item.active[data-page="anime-list"] i {
+    color: var(--clr-info-light);
+}
+
+/* Watchlist Active */
+.menu-item.active[data-page="watchlist"] {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.12));
+    color: var(--clr-danger-light);
+}
+.menu-item.active[data-page="watchlist"] i {
+    color: var(--clr-danger-light);
+}
+
+/* Statistics Active */
+.menu-item.active[data-page="statistics"] {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.12));
+    color: var(--clr-success-light);
+}
+.menu-item.active[data-page="statistics"] i {
+    color: var(--clr-success-light);
+}
+
+/* Achievements Active */
+.menu-item.active[data-page="achievements"] {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.12));
+    color: var(--clr-warning-light);
+}
+.menu-item.active[data-page="achievements"] i {
+    color: var(--clr-warning-light);
+}
+
+/* Community Active */
+.menu-item.active[data-page="community"] {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(8, 145, 178, 0.12));
+    color: #22D3EE;
+}
+.menu-item.active[data-page="community"] i {
+    color: #22D3EE;
+}
+
+/* Settings Active */
+.menu-item.active[data-page="settings"] {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.2), rgba(71, 85, 105, 0.12));
+    color: var(--clr-soft);
+}
+.menu-item.active[data-page="settings"] i {
+    color: var(--clr-soft);
+}
+
+/* ===== LOGOUT BUTTON ===== */
+.menu-item#logoutBtn {
+    margin-top: var(--space-4);
+    border-top: 1px solid rgba(239, 68, 68, 0.2);
+    padding-top: var(--space-3);
+    margin-bottom: 0;
+}
+
+.menu-item#logoutBtn::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.3), transparent);
+    pointer-events: none;
+}
+
+.menu-item#logoutBtn:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08));
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+    transform: translateX(8px);
+}
+
+.menu-item#logoutBtn:hover i {
+    color: var(--clr-danger-light);
+    text-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
+    transform: scale(1.15) rotate(-5deg);
+}
+
+.menu-item#logoutBtn:hover span {
+    color: var(--clr-danger-light);
+    letter-spacing: var(--tracking-wide);
+}
+
+.menu-item#logoutBtn:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease;
+}
+
+/* ============================================
+   LIGHT MODE
+   ============================================ */
+[data-theme="light"] .menu-item {
+    color: var(--text-muted);
+}
+
+[data-theme="light"] .menu-item[data-page="dashboard"]:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+}
+[data-theme="light"] .menu-item[data-page="anime-list"]:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
+}
+[data-theme="light"] .menu-item[data-page="watchlist"]:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+}
+[data-theme="light"] .menu-item[data-page="statistics"]:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+}
+[data-theme="light"] .menu-item[data-page="achievements"]:hover {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05));
+}
+[data-theme="light"] .menu-item[data-page="community"]:hover {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.05));
+}
+[data-theme="light"] .menu-item[data-page="settings"]:hover {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.1), rgba(71, 85, 105, 0.05));
+}
+[data-theme="light"] .menu-item#logoutBtn {
+    border-top-color: rgba(239, 68, 68, 0.15);
+}
+[data-theme="light"] .menu-item#logoutBtn:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+}
+[data-theme="light"] .menu-item#logoutBtn:hover i {
+    color: var(--clr-danger);
+}
+[data-theme="light"] .menu-item#logoutBtn:hover span {
+    color: var(--clr-danger);
+}
+
+[data-theme="light"] .menu-item.active[data-page="dashboard"] {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.08));
+}
+[data-theme="light"] .menu-item.active[data-page="anime-list"] {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.08));
+}
+[data-theme="light"] .menu-item.active[data-page="watchlist"] {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08));
+}
+[data-theme="light"] .menu-item.active[data-page="statistics"] {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
+}
+[data-theme="light"] .menu-item.active[data-page="achievements"] {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08));
+}
+[data-theme="light"] .menu-item.active[data-page="community"] {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.08));
+}
+[data-theme="light"] .menu-item.active[data-page="settings"] {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(71, 85, 105, 0.08));
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-15px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    40% { transform: translateY(-3px) scale(1.1); }
+    80% { transform: translateY(1px) scale(1.05); }
+}
+
+.menu-item:hover i {
+    animation: iconBounce 0.4s ease;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    .menu-item,
+    .menu-item::before,
+    .menu-item i,
+    .menu-item::after {
+        animation: none !important;
+        transition: none !important;
+    }
+    .menu-item:hover {
+        transform: translateX(4px);
+    }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .menu-item {
+        padding: var(--space-3) var(--space-4);
+        gap: var(--space-3);
+        font-size: var(--text-sm);
+    }
+    .menu-item i {
+        width: 20px;
+        font-size: var(--text-base);
+    }
+    .menu-item#logoutBtn {
+        margin-top: var(--space-3);
+        padding-top: var(--space-3);
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-item {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-xs);
+        border-radius: var(--radius-lg);
+    }
+    .menu-item i {
+        width: 18px;
+        font-size: var(--text-sm);
+    }
+    .menu-item#logoutBtn {
+        margin-top: var(--space-2);
+        padding-top: var(--space-2);
+    }
+    .menu-item#logoutBtn::before {
+        top: -6px;
+    }
+}

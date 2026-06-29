@@ -1,0 +1,1040 @@
+/* ------------------------------------
+   WATCHLIST PAGE - PREMIUM DESIGN
+   Same margins as other sections
+   ------------------------------------ */
+
+#watchlist-page {
+    margin: 0 24px 48px 24px !important;
+    width: auto !important;
+}
+
+#watchlist-page .dashboard-section {
+    position: relative;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+/* Section Title with heart animation */
+#watchlist-page .section-title {
+    font-size: 1.6rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    position: relative !important;
+    padding-bottom: 16px !important;
+    letter-spacing: -0.3px !important;
+    width: auto !important;
+    background: linear-gradient(135deg,
+        #8B5CF6 0%,
+        #6366F1 25%,
+        #A78BFA 50%,
+        #F59E0B 75%,
+        #8B5CF6 100%) !important;
+    background-size: 300% auto !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    animation: titleGradient 5s ease infinite !important;
+}
+
+@keyframes titleGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+#watchlist-page .section-title i {
+    background: linear-gradient(135deg, #FF6B6B, #EF4444, #FF6B6B) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-size: 1.5rem !important;
+    animation: heartbeat 1.5s ease-in-out infinite !important;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    14% { transform: scale(1.15); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.2); }
+    70% { transform: scale(1); }
+}
+
+/* Animated underline */
+#watchlist-page .section-title::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 80px !important;
+    height: 4px !important;
+    background: linear-gradient(90deg, #8B5CF6, #6366F1, #A78BFA, #F59E0B) !important;
+    border-radius: 4px !important;
+    animation: underlineGlow 3s ease infinite !important;
+    background-size: 300% 100% !important;
+}
+
+@keyframes underlineGlow {
+    0%, 100% { background-position: 0% 50%; width: 80px; opacity: 1; }
+    50% { background-position: 100% 50%; width: 110px; opacity: 0.8; }
+}
+
+/* ============================================
+   WATCHLIST FILTERS - COLOR CODED
+   ============================================ */
+
+.watchlist-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 28px;
+    padding: 8px;
+    background: linear-gradient(145deg,
+        rgba(26, 31, 46, 0.8),
+        rgba(15, 23, 42, 0.9));
+    border-radius: 60px;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    position: relative;
+    z-index: 2;
+    backdrop-filter: blur(10px);
+}
+
+/* ===== FILTER BUTTON BASE ===== */
+.filter-btn {
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 40px;
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.4));
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-width: 90px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Shine effect on hover */
+.filter-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.5s ease;
+}
+
+.filter-btn:hover::before {
+    left: 100%;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ===== ALL - Default ===== */
+.filter-btn[data-status="all"] {
+    color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.filter-btn[data-status="all"]:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.filter-btn[data-status="all"].active {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+/* ===== WATCHING - Purple ===== */
+.filter-btn[data-status="Watching"] {
+    color: rgba(139, 92, 246, 0.5);
+    background: rgba(139, 92, 246, 0.05);
+    border-color: rgba(139, 92, 246, 0.08);
+}
+
+.filter-btn[data-status="Watching"]:hover {
+    background: rgba(139, 92, 246, 0.1);
+    color: #A78BFA;
+    border-color: rgba(139, 92, 246, 0.2);
+}
+
+.filter-btn[data-status="Watching"].active {
+    background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
+}
+
+/* ===== COMPLETED - Green ===== */
+.filter-btn[data-status="Completed"] {
+    color: rgba(16, 185, 129, 0.5);
+    background: rgba(16, 185, 129, 0.05);
+    border-color: rgba(16, 185, 129, 0.08);
+}
+
+.filter-btn[data-status="Completed"]:hover {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34D399;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.filter-btn[data-status="Completed"].active {
+    background: linear-gradient(135deg, #059669, #10B981);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+}
+
+/* ===== PLAN TO WATCH - Blue ===== */
+.filter-btn[data-status="Plan to Watch"] {
+    color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.08);
+}
+
+.filter-btn[data-status="Plan to Watch"]:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60A5FA;
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.filter-btn[data-status="Plan to Watch"].active {
+    background: linear-gradient(135deg, #2563EB, #3B82F6);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+}
+
+/* ===== DROPPED - Red ===== */
+.filter-btn[data-status="Dropped"] {
+    color: rgba(239, 68, 68, 0.5);
+    background: rgba(239, 68, 68, 0.05);
+    border-color: rgba(239, 68, 68, 0.08);
+}
+
+.filter-btn[data-status="Dropped"]:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.filter-btn[data-status="Dropped"].active {
+    background: linear-gradient(135deg, #DC2626, #EF4444);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+}
+
+/* ===== ON-HOLD - Yellow/Orange ===== */
+.filter-btn[data-status="On-Hold"] {
+    color: rgba(245, 158, 11, 0.5);
+    background: rgba(245, 158, 11, 0.05);
+    border-color: rgba(245, 158, 11, 0.08);
+}
+
+.filter-btn[data-status="On-Hold"]:hover {
+    background: rgba(245, 158, 11, 0.1);
+    color: #FBBF24;
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.filter-btn[data-status="On-Hold"].active {
+    background: linear-gradient(135deg, #D97706, #F59E0B);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+}
+
+/* ===== ACTIVE BUTTON SHINE ===== */
+.filter-btn.active::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+        transparent,
+        rgba(255, 255, 255, 0.15),
+        transparent);
+    transform: rotate(45deg) translateX(-100%);
+    animation: buttonShine 3s infinite;
+}
+
+@keyframes buttonShine {
+    0% { transform: rotate(45deg) translateX(-100%); }
+    20% { transform: rotate(45deg) translateX(100%); }
+    100% { transform: rotate(45deg) translateX(100%); }
+}
+
+/* ============================================
+   WATCHLIST GRID
+   ============================================ */
+
+#watchlist-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: 24px !important;
+    margin-bottom: 40px;
+    min-height: 400px;
+    position: relative;
+}
+
+/* ============================================
+   NO ANIME STATE
+   ============================================ */
+
+.no-anime {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background: linear-gradient(145deg,
+        rgba(26, 31, 46, 0.6),
+        rgba(15, 23, 42, 0.7));
+    border-radius: 28px;
+    border: 1px dashed rgba(139, 92, 246, 0.3);
+    color: var(--color-text-tertiary, rgba(255, 255, 255, 0.3));
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.no-anime::before {
+    content: '\f07c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 400;
+    font-size: 3rem;
+    margin-bottom: 16px;
+    color: #8B5CF6;
+    opacity: 0.5;
+}
+
+/* ============================================
+   ANIME CARDS
+   ============================================ */
+
+#watchlist-container .anime-card {
+    background: linear-gradient(145deg,
+        rgba(30, 41, 59, 0.9),
+        rgba(15, 23, 42, 0.95));
+    border: 1px solid rgba(139, 92, 246, 0.08);
+    border-radius: 24px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    position: relative;
+    cursor: pointer;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+/* Gradient border effect */
+#watchlist-container .anime-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(135deg, #8B5CF6, #6366F1, #A78BFA);
+    border-radius: 24px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+#watchlist-container .anime-card:hover::before {
+    opacity: 0.5;
+}
+
+/* Shine effect */
+#watchlist-container .anime-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+#watchlist-container .anime-card:hover::after {
+    left: 100%;
+}
+
+#watchlist-container .anime-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 40px -15px rgba(139, 92, 246, 0.35);
+}
+
+/* Cover image */
+#watchlist-container .anime-cover {
+    width: 100%;
+    height: 370px;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+#watchlist-container .anime-card:hover .anime-cover {
+    transform: scale(1.05);
+}
+
+/* Info section */
+#watchlist-container .anime-info {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(145deg,
+        rgba(26, 31, 46, 0.95),
+        rgba(15, 23, 42, 0.98));
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ============================================
+   ANIME TITLE - SINGLE LINE WITH ELLIPSIS
+   ============================================ */
+
+#watchlist-container .anime-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #F1F5F9);
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    display: block !important;
+    line-height: 1.4;
+    transition: all 0.3s ease;
+    min-height: auto !important;
+    max-width: 100%;
+    position: relative;
+    cursor: help;
+}
+
+/* Remove multi-line clamp */
+#watchlist-container .anime-title {
+    -webkit-line-clamp: unset !important;
+    line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+    display: block !important;
+}
+
+/* ===== HOVER - Gradient text ===== */
+#watchlist-container .anime-card:hover .anime-title {
+    background: linear-gradient(135deg, #A78BFA, #8B5CF6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ===== TOOLTIP - Show full title on hover ===== */
+#watchlist-container .anime-title::after {
+    content: attr(data-fulltitle);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 100;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Tooltip arrow */
+#watchlist-container .anime-title::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.92);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+/* Show tooltip on hover */
+#watchlist-container .anime-title:hover::after,
+#watchlist-container .anime-title:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+/* ============================================
+   ANIME META
+   ============================================ */
+
+#watchlist-container .anime-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Type badge */
+#watchlist-container .anime-type {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.1));
+    padding: 3px 10px;
+    border-radius: 30px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #C4B5FD;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Score */
+#watchlist-container .anime-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #FBBF24;
+    font-weight: 700;
+    font-size: 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 3px 8px;
+    border-radius: 30px;
+}
+
+/* Progress bar */
+#watchlist-container .progress-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 6px 0;
+}
+
+#watchlist-container .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #8B5CF6, #6366F1);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+#watchlist-container .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* ===== STATUS BADGE ===== */
+#watchlist-container .anime-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: white;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    z-index: 3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Status colors */
+#watchlist-container .anime-badge[data-status="Watching"] {
+    background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+}
+
+#watchlist-container .anime-badge[data-status="Completed"] {
+    background: linear-gradient(135deg, #059669, #10B981);
+}
+
+#watchlist-container .anime-badge[data-status="Plan to Watch"] {
+    background: linear-gradient(135deg, #2563EB, #3B82F6);
+}
+
+#watchlist-container .anime-badge[data-status="Dropped"] {
+    background: linear-gradient(135deg, #DC2626, #EF4444);
+}
+
+#watchlist-container .anime-badge[data-status="On-Hold"] {
+    background: linear-gradient(135deg, #D97706, #F59E0B);
+}
+
+/* ===== RATING BADGE ===== */
+#watchlist-container .rating-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: linear-gradient(135deg, #F59E0B, #FBBF24);
+    color: #1E293B;
+    padding: 3px 10px;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    z-index: 3;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    padding: 16px;
+}
+
+#pagination {
+    display: flex;
+    gap: 8px;
+    background: linear-gradient(145deg,
+        rgba(26, 31, 46, 0.8),
+        rgba(15, 23, 42, 0.9));
+    padding: 8px;
+    border-radius: 60px;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.page-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 40px;
+    color: var(--color-text-secondary, rgba(255, 255, 255, 0.3));
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: rgba(139, 92, 246, 0.12);
+    color: #ffffff;
+    border-color: rgba(139, 92, 246, 0.2);
+    transform: translateY(-2px);
+}
+
+.page-btn.active {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: white;
+    box-shadow: 0 6px 15px -5px rgba(99, 102, 241, 0.4);
+    font-weight: 700;
+}
+
+.page-btn.active::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+        transparent,
+        rgba(255, 255, 255, 0.15),
+        transparent);
+    transform: rotate(45deg) translateX(-100%);
+    animation: paginationShine 3s infinite;
+}
+
+@keyframes paginationShine {
+    0% { transform: rotate(45deg) translateX(-100%); }
+    20% { transform: rotate(45deg) translateX(100%); }
+    100% { transform: rotate(45deg) translateX(100%); }
+}
+
+.page-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Previous/Next buttons */
+.page-btn:first-child,
+.page-btn:last-child {
+    width: auto;
+    padding: 0 20px;
+    gap: 8px;
+}
+
+/* ============================================
+   LIGHT THEME
+   ============================================ */
+
+[data-theme="light"] .watchlist-filters,
+[data-theme="light"] #pagination {
+    background: linear-gradient(145deg,
+        rgba(255, 255, 255, 0.9),
+        rgba(248, 250, 252, 0.95));
+    backdrop-filter: blur(10px);
+    border-color: rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.08);
+}
+
+/* Light mode - All */
+[data-theme="light"] .filter-btn[data-status="all"] {
+    color: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .filter-btn[data-status="all"]:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: #0f172a;
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .filter-btn[data-status="all"].active {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: white;
+}
+
+/* Light mode - Watching */
+[data-theme="light"] .filter-btn[data-status="Watching"] {
+    color: rgba(124, 58, 237, 0.4);
+    background: rgba(124, 58, 237, 0.04);
+    border-color: rgba(124, 58, 237, 0.06);
+}
+
+[data-theme="light"] .filter-btn[data-status="Watching"]:hover {
+    background: rgba(124, 58, 237, 0.08);
+    color: #7C3AED;
+    border-color: rgba(124, 58, 237, 0.12);
+}
+
+[data-theme="light"] .filter-btn[data-status="Watching"].active {
+    background: linear-gradient(135deg, #6D28D9, #7C3AED);
+    color: white;
+}
+
+/* Light mode - Completed */
+[data-theme="light"] .filter-btn[data-status="Completed"] {
+    color: rgba(5, 150, 105, 0.4);
+    background: rgba(5, 150, 105, 0.04);
+    border-color: rgba(5, 150, 105, 0.06);
+}
+
+[data-theme="light"] .filter-btn[data-status="Completed"]:hover {
+    background: rgba(5, 150, 105, 0.08);
+    color: #059669;
+    border-color: rgba(5, 150, 105, 0.12);
+}
+
+[data-theme="light"] .filter-btn[data-status="Completed"].active {
+    background: linear-gradient(135deg, #047857, #059669);
+    color: white;
+}
+
+/* Light mode - Plan to Watch */
+[data-theme="light"] .filter-btn[data-status="Plan to Watch"] {
+    color: rgba(37, 99, 235, 0.4);
+    background: rgba(37, 99, 235, 0.04);
+    border-color: rgba(37, 99, 235, 0.06);
+}
+
+[data-theme="light"] .filter-btn[data-status="Plan to Watch"]:hover {
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563EB;
+    border-color: rgba(37, 99, 235, 0.12);
+}
+
+[data-theme="light"] .filter-btn[data-status="Plan to Watch"].active {
+    background: linear-gradient(135deg, #1D4ED8, #2563EB);
+    color: white;
+}
+
+/* Light mode - Dropped */
+[data-theme="light"] .filter-btn[data-status="Dropped"] {
+    color: rgba(220, 38, 38, 0.4);
+    background: rgba(220, 38, 38, 0.04);
+    border-color: rgba(220, 38, 38, 0.06);
+}
+
+[data-theme="light"] .filter-btn[data-status="Dropped"]:hover {
+    background: rgba(220, 38, 38, 0.08);
+    color: #DC2626;
+    border-color: rgba(220, 38, 38, 0.12);
+}
+
+[data-theme="light"] .filter-btn[data-status="Dropped"].active {
+    background: linear-gradient(135deg, #B91C1C, #DC2626);
+    color: white;
+}
+
+/* Light mode - On-Hold */
+[data-theme="light"] .filter-btn[data-status="On-Hold"] {
+    color: rgba(217, 119, 6, 0.4);
+    background: rgba(217, 119, 6, 0.04);
+    border-color: rgba(217, 119, 6, 0.06);
+}
+
+[data-theme="light"] .filter-btn[data-status="On-Hold"]:hover {
+    background: rgba(217, 119, 6, 0.08);
+    color: #D97706;
+    border-color: rgba(217, 119, 6, 0.12);
+}
+
+[data-theme="light"] .filter-btn[data-status="On-Hold"].active {
+    background: linear-gradient(135deg, #B45309, #D97706);
+    color: white;
+}
+
+[data-theme="light"] .page-btn {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .page-btn:hover:not(:disabled) {
+    background: rgba(139, 92, 246, 0.06);
+    color: #0f172a;
+    border-color: rgba(139, 92, 246, 0.1);
+}
+
+[data-theme="light"] .page-btn.active {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: white;
+}
+
+[data-theme="light"] #watchlist-container .anime-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98)) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] #watchlist-container .anime-info {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98)) !important;
+}
+
+[data-theme="light"] #watchlist-container .anime-title {
+    color: #0f172a;
+}
+
+[data-theme="light"] #watchlist-container .anime-title::after {
+    background: rgba(255, 255, 255, 0.95);
+    color: #0f172a;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] #watchlist-container .anime-title::before {
+    border-top-color: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="light"] .no-anime {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.95));
+    border-color: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1100px) {
+    #watchlist-page {
+        margin: 0 20px 40px 20px !important;
+    }
+    #watchlist-container {
+        gap: 20px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    #watchlist-container {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+        gap: 20px !important;
+    }
+    .filter-btn {
+        padding: 6px 16px;
+        font-size: 0.75rem;
+        min-width: 80px;
+    }
+}
+
+@media (max-width: 768px) {
+    #watchlist-page {
+        margin: 0 16px 32px 16px !important;
+    }
+    .watchlist-filters {
+        padding: 6px;
+        gap: 8px;
+    }
+    .filter-btn {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+        min-width: 70px;
+    }
+    #watchlist-container .anime-cover {
+        height: 240px !important;
+    }
+    #watchlist-container .anime-title {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 640px) {
+    #watchlist-page {
+        margin: 0 12px 28px 12px !important;
+    }
+    .watchlist-filters {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        border-radius: 24px;
+    }
+    .filter-btn {
+        width: 100%;
+        padding: 6px 10px;
+        font-size: 0.65rem;
+        text-transform: capitalize;
+        min-width: auto;
+    }
+    #watchlist-container {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+        gap: 16px !important;
+    }
+    #watchlist-container .anime-cover {
+        height: 200px !important;
+    }
+    #watchlist-container .anime-info {
+        padding: 12px !important;
+    }
+    #watchlist-container .anime-title {
+        font-size: 0.8rem;
+    }
+    .page-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 0.75rem;
+    }
+    .page-btn:first-child,
+    .page-btn:last-child {
+        padding: 0 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    #watchlist-page {
+        margin: 0 10px 24px 10px !important;
+    }
+    .watchlist-filters {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    #watchlist-container {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+        gap: 12px !important;
+    }
+    #watchlist-container .anime-cover {
+        height: 170px !important;
+    }
+    #watchlist-container .anime-title {
+        font-size: 0.75rem;
+    }
+    .page-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 0.7rem;
+    }
+    .page-btn:first-child,
+    .page-btn:last-child {
+        padding: 0 12px;
+    }
+}
+
+/* ============================================
+   ENTRANCE ANIMATION
+   ============================================ */
+
+#watchlist-container .anime-card {
+    animation: cardFadeIn 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) backwards;
+}
+
+@keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#watchlist-container .anime-card:nth-child(1) { animation-delay: 0.02s; }
+#watchlist-container .anime-card:nth-child(2) { animation-delay: 0.04s; }
+#watchlist-container .anime-card:nth-child(3) { animation-delay: 0.06s; }
+#watchlist-container .anime-card:nth-child(4) { animation-delay: 0.08s; }
+#watchlist-container .anime-card:nth-child(5) { animation-delay: 0.1s; }
+#watchlist-container .anime-card:nth-child(6) { animation-delay: 0.12s; }
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    #watchlist-container .anime-card,
+    #watchlist-container .anime-card::after,
+    .filter-btn.active::after,
+    .page-btn.active::after,
+    .filter-btn::before {
+        animation: none !important;
+        transition: none !important;
+    }
+    #watchlist-container .anime-card:hover {
+        transform: translateY(-4px);
+    }
+    #watchlist-container .anime-title::after,
+    #watchlist-container .anime-title::before {
+        transition: none !important;
+    }
+}

@@ -1,152 +1,170 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- SEO -->
     <meta name="description"
-        content="AniPulse is a modern anime tracker to manage watchlists, track progress, view monthly stats, and analyze your anime journey in one clean dashboard.">
-
+        content="AniPulse is a modern anime tracker to manage watchlists, track progress, view monthly stats, and analyze your anime journey in one clean dashboard." />
     <meta name="keywords"
-        content="AniPulse, anime tracker, anime watchlist, anime stats, anime dashboard, track anime, anime analytics, otaku">
-
+        content="AniPulse, anime tracker, anime watchlist, anime stats, anime dashboard, track anime, anime analytics, otaku" />
     <title>AniPulse | Anime Tracker & Stats Dashboard</title>
 
     <!-- Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Poppins:wght@300;500;700&display=swap"
-        rel="stylesheet" crossorigin="anonymous">
+        rel="stylesheet" crossorigin="anonymous" />
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        crossorigin="anonymous">
+        crossorigin="anonymous" />
 
     <!-- Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"
         crossorigin="anonymous"></script>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="/Frontend/Css/dashboard.css">
-    <link rel="stylesheet" href="/Frontend/Css/responsive.css">
-    <link rel="stylesheet" href="/Frontend/Css/level-system.css">
-    <link rel="stylesheet" href="/Frontend/Css/Stats.css">
+    <!-- CSS - Refactored Modular Structure -->
+    <link rel="stylesheet" href="/Frontend/Css/variables.css" />
+    <link rel="stylesheet" href="/Frontend/Css/reset.css" />
+    <link rel="stylesheet" href="/Frontend/Css/typography.css" />
+    <link rel="stylesheet" href="/Frontend/Css/utilities.css" />
+    <link rel="stylesheet" href="/Frontend/Css/layout/layout.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/header.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/sidebar.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/cards.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/buttons.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/forms.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/modals.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/charts.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/badges.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/progress.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/animations.css" />
+    <link rel="stylesheet" href="/Frontend/Css/components/level-system.css" />
+    <link rel="stylesheet" href="Frontend/Css/components/toast.css" />
+    <link rel="stylesheet" href="Frontend/Css/components/loading.css" />
+    <link rel="stylesheet" href="/Frontend/Css/pages/dashboard.css" />
+    <link rel="stylesheet" href="/Frontend/Css/pages/statistics.css" />
+    <link rel="stylesheet" href="/Frontend/Css/pages/watchlist.css" />
+    <link rel="stylesheet" href="/Frontend/Css/pages/anime-list.css" />
+    <link rel="stylesheet" href="/Frontend/Css/pages/achievements.css" />
+    <link rel="stylesheet" href="/Frontend/Css/pages/community.css" />
+    <link rel="stylesheet" href="/Frontend/Css/pages/settings.css" />
+    <link rel="stylesheet" href="Frontend/Css/pages/recap.css" />
+    <link rel="stylesheet" href="/Frontend/Css/responsive/tablet.css" />
+    <link rel="stylesheet" href="/Frontend/Css/responsive/mobile.css" />
+    <link rel="stylesheet" href="/Frontend/Css/responsive/small-mobile.css" />
 
     <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.json" />
 
     <!-- Theme -->
-    <meta name="theme-color" content="#0b1120">
-    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#0b1120" />
+    <meta name="color-scheme" content="dark light" />
 
     <!-- Mobile PWA -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AniPulse">
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AniPulse" />
 
     <!-- Main Browser Icon -->
-    <link rel="shortcut icon" href="/Frontend/icon/icon-72x72.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/Frontend/icon/icon-72x72.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/Frontend/icon/icon-72x72.png">
+    <link rel="shortcut icon" href="/Frontend/icon/icon-72x72.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/Frontend/icon/icon-72x72.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/Frontend/icon/icon-72x72.png" />
 
     <!-- PWA Icons -->
-    <link rel="apple-touch-icon" sizes="72x72" href="/Frontend/icon/icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="96x96" href="/Frontend/icon/icon-96x96.png">
-    <link rel="apple-touch-icon" sizes="128x128" href="/Frontend/icon/icon-128x128.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/Frontend/icon/icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/Frontend/icon/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/Frontend/icon/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="384x384" href="/Frontend/icon/icon-384x384.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/Frontend/icon/icon-512x512.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/Frontend/icon/icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="96x96" href="/Frontend/icon/icon-96x96.png" />
+    <link rel="apple-touch-icon" sizes="128x128" href="/Frontend/icon/icon-128x128.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/Frontend/icon/icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/Frontend/icon/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/Frontend/icon/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="384x384" href="/Frontend/icon/icon-384x384.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/Frontend/icon/icon-512x512.png" />
 
     <!-- Windows Tile -->
-    <meta name="msapplication-TileColor" content="#6366F1">
-    <meta name="msapplication-TileImage" content="/Frontend/icon/icon-192x192.png">
+    <meta name="msapplication-TileColor" content="#6366F1" />
+    <meta name="msapplication-TileImage" content="/Frontend/icon/icon-192x192.png" />
 
     <!-- Disable Cache -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
 </head>
 
 <body data-theme="dark">
-
-    <!-- Loading Screen -->
-    <div id="app-loader">
+    <!-- ============================================ -->
+    <!-- LOADING SCREEN -->
+    <!-- ============================================ -->
+    <div id="app-loader" role="status" aria-label="Loading application">
         <div class="loader-container">
-
-            <!-- Logo -->
             <div class="loader-logo">
-                <i class="fas fa-heartbeat"></i>
+                <i class="fas fa-heartbeat" aria-hidden="true"></i>
                 <span>AniPulse</span>
             </div>
-
-            <!-- Subtitle -->
             <p class="loader-text">Syncing your anime universe…</p>
-
-            <!-- Progress Bar -->
             <div class="progress-wrapper">
-                <div class="progress-bar">
+                <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                     <span id="loader-progress"></span>
                 </div>
                 <div class="progress-percent">
                     <span id="loader-percent">0%</span>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================ -->
     <div class="main-content">
-        <!-- Top Bar -->
-        <div class="top-bar">
-
-
+        <!-- ============================================ -->
+        <!-- TOP BAR / HEADER -->
+        <!-- ============================================ -->
+        <header class="top-bar" role="banner">
             <div class="header-left">
-                <a href="dashboard.html">
+                <a href="dashboard.html" aria-label="AniPulse Home">
                     <div class="app-logo">
-                        <h2><i class="fas fa-heartbeat" style="color: var(--accent);"></i> <span>AniPulse</span></h2>
+                        <h2>
+                            <i class="fas fa-heartbeat" aria-hidden="true"></i>
+                            <span>AniPulse</span>
+                        </h2>
                     </div>
                 </a>
             </div>
 
-            <!-- User Action -->
             <div class="user-actions">
-
                 <!-- Search -->
-                <div class="search-trigger" id="searchToggle">
-                    <i class="fas fa-search"></i>
-
+                <div class="search-trigger" id="searchToggle" role="button" aria-label="Search" tabindex="0">
+                    <i class="fas fa-search" aria-hidden="true"></i>
                     <div class="search-dropdown">
                         <div class="search-input-wrapper">
-                            <input type="text" id="dashboardSearch" placeholder="Search anime..." />
+                            <input type="text" id="dashboardSearch" placeholder="Search anime..."
+                                aria-label="Search anime" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Theme Toggle -->
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="fas fa-sun"></i>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <i class="fas fa-sun" aria-hidden="true"></i>
                 </button>
 
-                <!-- NOTIFICATION BELL -->
+                <!-- Notifications -->
                 <div class="notification-container">
-                    <button class="notification-bell" id="notificationBell">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                    <button class="notification-bell" id="notificationBell" aria-label="Notifications">
+                        <i class="fas fa-bell" aria-hidden="true"></i>
+                        <span class="notification-badge" id="notificationBadge" hidden>0</span>
                     </button>
-
-                    <div class="notification-dropdown" id="notificationDropdown" style="display: none;">
+                    <div class="notification-dropdown" id="notificationDropdown" hidden>
                         <div class="notification-header">
                             <h3>Notifications</h3>
-                            <button class="mark-all-read" id="markAllReadBtn">Mark all read</button>
+                            <button class="mark-all-read" id="markAllReadBtn">
+                                Mark all read
+                            </button>
                         </div>
                         <div class="notification-list" id="notificationList">
                             <div class="notification-loading">Loading...</div>
@@ -158,106 +176,136 @@
                 </div>
 
                 <!-- User Profile -->
-                <div class="user-profile" id="profileMenuToggle">
+                <div class="user-profile" id="profileMenuToggle" role="button" aria-label="Profile menu" tabindex="0">
                     <img loading="lazy" src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
-                        alt="User Avatar" class="user-avatar">
+                        alt="User Avatar" class="user-avatar" />
 
                     <!-- Profile Dropdown -->
                     <div class="profile-dropdown">
-
-                        <!-- sidebar user profile -->
+                        <!-- User Info -->
                         <div class="sidebar-user">
                             <div class="user-avatar-container">
                                 <img loading="lazy"
                                     src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
-                                    alt="User" class="sidebar-avatar">
-                                <div class="online-status"></div>
+                                    alt="User" class="sidebar-avatar" />
+                                <div class="online-status" aria-label="Online"></div>
                             </div>
                             <div class="sidebar-user-info">
-                                <div class="sidebar-username">Loading...</div>
-                                <!--Level Badge -->
-                                <div class="sidebar-level" id="sidebarLevel">
-                                    <span class="level-badge" id="levelBadgeText">Lv.16</span>
-                                    <span class="level-title" id="levelTitleText">Anime God</span>
+                                <div class="sidebar-user-main">
+                                    <div class="sidebar-username">Username</div>
+                                    <div class="sidebar-level" id="sidebarLevel">
+                                        <span class="level-badge" id="levelBadgeText">Lv.16</span>
+                                        <span class="level-title" id="levelTitleText">Anime God</span>
+                                    </div>
                                 </div>
                                 <div class="sidebar-user-stats">
                                     <div class="stat-item">
                                         <span class="stat-number" id="statNumber">0</span>
                                         <span class="stat-label" id="statLabel">Anime</span>
+                                        <div class="stat-divider"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Sidebar Menu -->
-                        <div class="sidebar-menu">
+
+                        <!-- Navigation Menu -->
+                        <nav class="sidebar-menu" aria-label="Main navigation">
                             <div class="menu-item active" data-page="dashboard">
-                                <i class="fas fa-home"></i><span>Dashboard</span>
+                                <i class="fas fa-home" aria-hidden="true"></i>
+                                <span>Dashboard</span>
                             </div>
                             <div class="menu-item" data-page="anime-list">
-                                <i class="fas fa-film"></i><span>My Anime</span>
+                                <i class="fas fa-film" aria-hidden="true"></i>
+                                <span>My Anime</span>
                             </div>
                             <div class="menu-item" data-page="watchlist">
-                                <i class="fas fa-heart"></i><span>Watch List</span>
+                                <i class="fas fa-heart" aria-hidden="true"></i>
+                                <span>Watch List</span>
                             </div>
                             <div class="menu-item" data-page="statistics">
-                                <i class="fas fa-chart-line"></i><span>My Stats</span>
+                                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                                <span>My Stats</span>
                             </div>
                             <div class="menu-item" data-page="achievements">
-                                <i class="fas fa-trophy"></i><span>Achievements</span>
+                                <i class="fas fa-trophy" aria-hidden="true"></i>
+                                <span>Achievements</span>
                             </div>
                             <div class="menu-item" data-page="community">
-                                <i class="fas fa-users"></i><span>Community</span>
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                <span>Community</span>
                             </div>
                             <div class="menu-item" data-page="settings">
-                                <i class="fas fa-cog"></i><span>Settings</span>
+                                <i class="fas fa-cog" aria-hidden="true"></i>
+                                <span>Settings</span>
                             </div>
                             <div class="menu-item" id="logoutBtn">
-                                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                                <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                                <span>Logout</span>
                             </div>
-
-                        </div>
-
+                        </nav>
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <!-- Dashboard Page -->
-        <div id="dashboard-page" class="page active">
-            <!-- Stats Section -->
-            <div class="dashboard-section">
+        <!-- ============================================ -->
+        <!-- DASHBOARD PAGE -->
+        <!-- ============================================ -->
+        <main id="dashboard-page" class="page active">
+            <!-- Greeting Banner -->
+            <section class="greeting-banner" id="greetingBanner" role="region" aria-label="Daily greeting">
+                <!-- Floating Orbs for Premium Effect -->
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
 
-                <div id="greetingBanner" class="greeting-banner" role="region" aria-label="Daily greeting">
+                <!-- Shine Effect Overlay -->
+                <div class="shine-overlay"></div>
 
+                <div class="banner-content">
                     <div class="greeting-left">
-
-                        <!-- Main greeting line + emoji -->
                         <div class="greeting-main">
-                            <span id="greetingLine" class="greeting-line"></span>
-                            <span id="greetingEmoji" class="greeting-emoji" aria-hidden="true"></span>
+                            <h1 id="greetingLine" class="greeting-line">
+                                Good morning, Otaku
+                            </h1>
+                            <span id="greetingEmoji" class="greeting-emoji" aria-hidden="true">☀️</span>
+                        </div>
+                        <p id="greetingSubline" class="greeting-subline">
+                            Fresh episodes, fresh start
+                        </p>
+
+                        <!-- Stats Row - Using the class names the JS expects -->
+                        <div class="banner-stats">
+                            <div class="stat-item glass">
+                                <i class="fas fa-clock"></i>
+                                <span id="liveClock">--:--</span>
+                            </div>
+                            <div class="stat-item glass">
+                                <i class="fas fa-fire"></i>
+                                <span id="streakInfo"> 0-day streak</span>
+                            </div>
+                            <div class="stat-item glass">
+                                <i class="fas fa-calendar-day"></i>
+                                <span id="currentDate">Loading...</span>
+                            </div>
                         </div>
 
-                        <!-- Subline text -->
-                        <div id="greetingSubline" class="greeting-subline"></div>
-
-                        <!-- Meta info: clock, focus, streak, date -->
-                        <div class="greeting-meta">
-                            <span id="liveClock" class="greeting-meta-item"></span>
-                            <span id="streakInfo" class="greeting-meta-item"></span>
-
-                            <!-- Current date reuses same style -->
-                            <span id="currentDate" class="greeting-meta-item"></span>
+                        <!-- Quote Card -->
+                        <div class="quote-card">
+                            <i class="fas fa-quote-left quote-icon"></i>
+                            <span id="dailyQuote" class="greeting-quote">"Loading quote..."</span>
                         </div>
-
-                        <!-- Daily quote -->
-                        <div id="dailyQuote" class="greeting-quote"></div>
-
                     </div>
                 </div>
+            </section>
 
-                <h2 class="section-title"><i class="fas fa-tachometer-alt"></i> Overview (<span
-                        id="current-month">October</span>)</h2>
+            <!-- Stats Overview -->
+            <section class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                    Overview (<span id="current-month">October</span>)
+                </h2>
                 <div class="stats-grid">
                     <div class="stat-card fade-in">
                         <div class="stat-header">
@@ -267,11 +315,10 @@
                                 <div class="stat-change" id="completed-change"></div>
                             </div>
                             <div class="stat-icon success">
-                                <i class="fas fa-check-circle"></i>
+                                <i class="fas fa-check-circle" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
-
                     <div class="stat-card fade-in">
                         <div class="stat-header">
                             <div>
@@ -280,11 +327,10 @@
                                 <div class="stat-change" id="movies-change"></div>
                             </div>
                             <div class="stat-icon info">
-                                <i class="fas fa-video"></i>
+                                <i class="fas fa-video" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
-
                     <div class="stat-card fade-in">
                         <div class="stat-header">
                             <div>
@@ -293,11 +339,10 @@
                                 <div class="stat-change" id="episodes-change"></div>
                             </div>
                             <div class="stat-icon warning">
-                                <i class="fas fa-play-circle"></i>
+                                <i class="fas fa-play-circle" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
-
                     <div class="stat-card fade-in">
                         <div class="stat-header">
                             <div>
@@ -306,71 +351,72 @@
                                 <div class="stat-change" id="hours-change"></div>
                             </div>
                             <div class="stat-icon primary">
-                                <i class="fas fa-clock"></i>
+                                <i class="fas fa-clock" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Anime DNA Section -->
-            <div class="dashboard-section" id="anime-dna-section">
+            <!-- Anime DNA -->
+            <section class="dashboard-section" id="anime-dna-section">
                 <h2 class="section-title">
-                    <i class="fas fa-dna"></i> Your Anime DNA
+                    <i class="fas fa-dna" aria-hidden="true"></i>
+                    Your Anime DNA
                 </h2>
-
                 <div class="dna-grid">
                     <div class="dna-card">
                         <span class="dna-label">Favorite Genre</span>
                         <span class="dna-value" id="dna-genre">—</span>
                     </div>
-
                     <div class="dna-card">
-                        <span class="dna-label">Average Score Given</span>
+                        <span class="dna-label">Average Score </span>
                         <span class="dna-value" id="dna-score">—</span>
                     </div>
-
                     <div class="dna-card">
                         <span class="dna-label">Preferred Format</span>
                         <span class="dna-value" id="dna-format">—</span>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Quick Actions -->
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
+            <section class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-bolt" aria-hidden="true"></i>
+                    Quick Actions
+                </h2>
                 <div class="quick-actions">
                     <button class="action-btn" id="addAnimeBtn">
                         <div class="action-icon primary">
-                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-plus" aria-hidden="true"></i>
                         </div>
-                        <div class="action-text">Add Anime</div>
+                        <span class="action-text">Add Anime</span>
                     </button>
                     <button class="action-btn" id="importBtn">
                         <div class="action-icon success">
-                            <i class="fas fa-file-import"></i>
+                            <i class="fas fa-file-import" aria-hidden="true"></i>
                         </div>
-                        <div class="action-text">Import Data</div>
+                        <span class="action-text">Import Data</span>
                     </button>
                     <button class="action-btn" id="exportBtn">
                         <div class="action-icon warning">
-                            <i class="fas fa-file-export"></i>
+                            <i class="fas fa-file-export" aria-hidden="true"></i>
                         </div>
-                        <div class="action-text">Export Data</div>
+                        <span class="action-text">Export Data</span>
                     </button>
                     <button class="action-btn" id="statsBtn">
                         <div class="action-icon info">
-                            <i class="fas fa-chart-pie"></i>
+                            <i class="fas fa-chart-pie" aria-hidden="true"></i>
                         </div>
-                        <div class="action-text">View Stats</div>
+                        <span class="action-text">View Stats</span>
                     </button>
                 </div>
-            </div>
+            </section>
 
-            <!-- Dashboard Grid -->
-            <div class="dashboard-grid">
-                <!-- Monthly Progress Chart -->
+            <!-- Charts Grid -->
+            <section class="dashboard-grid">
+                <!-- Monthly Progress -->
                 <div class="chart-card fade-in">
                     <div class="chart-header">
                         <div class="chart-title">Monthly Progress</div>
@@ -383,11 +429,10 @@
                     </div>
                 </div>
 
-                <!-- Genre Distribution Chart -->
+                <!-- Genre Distribution -->
                 <div class="chart-card fade-in">
                     <div class="chart-header">
                         <div class="chart-title">Genre Distribution</div>
-                        <!-- Add filter buttons here -->
                         <div class="genre-filter-buttons">
                             <button class="genre-filter-btn active" data-filter="month">
                                 This Month
@@ -406,87 +451,93 @@
                     <div class="chart-container">
                         <canvas id="genreDistributionChart"></canvas>
                     </div>
-                    <!-- No data message (hidden by default) -->
-                    <div id="genreNoDataMessage" class="no-data-message" style="display: none;">
-                        <i class="fas fa-chart-pie"></i>
+                    <div id="genreNoDataMessage" class="no-data-message" hidden>
+                        <i class="fas fa-chart-pie" aria-hidden="true"></i>
                         <p>No completed anime found for this period.</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Activity Heatmap Section -->
-            <div class="chart-card fade-in">
+            <!-- Activity Heatmap -->
+            <section class="chart-card fade-in">
                 <div class="heatmap-header">
                     <div class="heatmap-title">
-                        <i class="fas fa-calendar-day"></i> Activity Heatmap
+                        <i class="fas fa-calendar-day" aria-hidden="true"></i>
+                        Activity Heatmap
                     </div>
                     <div class="total-contributions" id="totalContributionsDisplay">
-                        <i class="fas fa-fire"></i> <span id="totalCount">0</span> contributions in <span
-                            id="currentYearDisplay">2026</span>
+                        <i class="fas fa-fire" aria-hidden="true"></i>
+                        <span id="totalCount">0</span> contributions in
+                        <span id="currentYearDisplay">2026</span>
                     </div>
                 </div>
 
-                <!-- Year Filter -->
                 <div class="heatmap-years" id="heatmapYears">
                     <button class="year-btn" data-year="2024">2024</button>
                     <button class="year-btn" data-year="2025">2025</button>
                     <button class="year-btn active" data-year="2026">2026</button>
                 </div>
 
-                <!-- Heatmap Grid -->
                 <div class="heatmap-wrapper">
                     <div class="heatmap-grid" id="heatmapGrid"></div>
                 </div>
 
-                <!-- Legend -->
                 <div class="heatmap-legend">
                     <span class="legend-text">Less</span>
                     <div class="legend-colors">
-                        <div class="legend-color" style="background: #2d3748;"></div>
-                        <div class="legend-color" style="background: #9be9a8;"></div>
-                        <div class="legend-color" style="background: #40c463;"></div>
-                        <div class="legend-color" style="background: #30a14e;"></div>
-                        <div class="legend-color" style="background: #216e39;"></div>
+                        <div class="legend-color" style="background: #2d3748"></div>
+                        <div class="legend-color" style="background: #9be9a8"></div>
+                        <div class="legend-color" style="background: #40c463"></div>
+                        <div class="legend-color" style="background: #30a14e"></div>
+                        <div class="legend-color" style="background: #216e39"></div>
                     </div>
                     <span class="legend-text">More</span>
                 </div>
-            </div>
+            </section>
 
-            <!-- Currently Watching Section -->
-            <div class="dashboard-section" id="currently-watching-section">
-                <h2 class="section-title"><i class="fas fa-eye"></i> Currently Watching</h2>
-                <div class="top-anime-grid" id="currently-watching-grid">
-                </div>
-            </div>
+            <!-- Currently Watching -->
+            <section class="dashboard-section" id="currently-watching-section">
+                <h2 class="section-title">
+                    <i class="fas fa-eye" aria-hidden="true"></i>
+                    Currently Watching
+                </h2>
+                <div class="top-anime-grid" id="currently-watching-grid"></div>
+            </section>
 
-            <!-- Top Rated Section -->
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-star"></i> Top Rated Anime</h2>
-                <div class="top-anime-grid" id="top-rated-anime">
-                </div>
-            </div>
+            <!-- Top Rated -->
+            <section class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-star" aria-hidden="true"></i>
+                    Top Rated Anime
+                </h2>
+                <div class="top-anime-grid" id="top-rated-anime"></div>
+            </section>
 
             <!-- Recent Activity -->
-            <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-history"></i> Recent Activity</h2>
+            <section class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-history" aria-hidden="true"></i>
+                    Recent Activity
+                </h2>
                 <div class="activity-card fade-in">
                     <div class="activity-header">
                         <div class="activity-title">Latest Changes</div>
                     </div>
-                    <div class="activity-list" id="recent-activity"> </div>
+                    <div class="activity-list" id="recent-activity"></div>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
 
-        <!-- My Anime Page -->
-
-        <div id="anime-list-page" class="page">
+        <!-- ============================================ -->
+        <!-- ANIME LIST PAGE -->
+        <!-- ============================================ -->
+        <section id="anime-list-page" class="page" hidden>
             <div class="anime-list-container">
                 <div class="anime-list-header">
                     <div class="anime-list-title">
-                        <h2
-                            style="font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; ">
-                            <i class="fa fa-list-ul"></i>Anime List
+                        <h2>
+                            <i class="fa fa-list-ul" aria-hidden="true"></i>
+                            Anime List
                         </h2>
                     </div>
                     <div class="anime-filters">
@@ -503,8 +554,8 @@
                             <option value="02">February</option>
                             <option value="03">March</option>
                             <option value="04">April</option>
-                            <option value="05" selected>May</option>
-                            <option value="06">June</option>
+                            <option value="05">May</option>
+                            <option value="06" selected>June</option>
                             <option value="07">July</option>
                             <option value="08">August</option>
                             <option value="09">September</option>
@@ -523,13 +574,10 @@
                         <div class="anime-counter">
                             <span id="anime-count">Total Anime: 0</span>
                         </div>
-
                     </div>
                 </div>
 
-                <!-- Table View (Default) -->
                 <div id="anime-table-view">
-
                     <div class="table-container">
                         <table class="anime-table">
                             <thead>
@@ -542,74 +590,74 @@
                                     <th>Date</th>
                                 </tr>
                             </thead>
-                            <tbody id="anime-table-body">
-                            </tbody>
+                            <tbody id="anime-table-body"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-
-
-        <!-- Watchlist Page -->
-        <div id="watchlist-page" class="page">
+        <!-- ============================================ -->
+        <!-- WATCHLIST PAGE -->
+        <!-- ============================================ -->
+        <section id="watchlist-page" class="page" hidden>
             <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-heart"></i> Watch List</h2>
+                <h2 class="section-title">
+                    <i class="fas fa-heart" aria-hidden="true"></i>
+                    Watch List
+                </h2>
 
-                <!-- Filter Buttons -->
                 <div class="watchlist-filters">
                     <button class="filter-btn active" data-status="all">All</button>
                     <button class="filter-btn" data-status="Watching">Watching</button>
                     <button class="filter-btn" data-status="On-Hold">On-Hold</button>
-                    <button class="filter-btn" data-status="Plan to Watch">Plan to Watch</button>
+                    <button class="filter-btn" data-status="Plan to Watch">
+                        Plan to Watch
+                    </button>
                     <button class="filter-btn" data-status="Dropped">Dropped</button>
-                    <button class="filter-btn" data-status="Completed">Completed</button>
+                    <button class="filter-btn" data-status="Completed">
+                        Completed
+                    </button>
                 </div>
 
-                <!-- Watchlist Grid -->
-                <div class="top-anime-grid" id="watchlist-container">
-                    <!-- Anime cards will load here dynamically -->
-                </div>
+                <div class="top-anime-grid" id="watchlist-container"></div>
 
-                <!-- Pagination -->
                 <div class="pagination-container">
                     <div id="pagination"></div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Statistics page -->
-        <div id="statistics-page" class="page">
+        <!-- ============================================ -->
+        <!-- STATISTICS PAGE -->
+        <!-- ============================================ -->
+        <section id="statistics-page" class="page" hidden>
             <div class="dashboard-section">
-
-                <!-- ============================================
-     STATISTICS HERO SECTION - PREMIUM DESIGN
-     ============================================ -->
+                <!-- Stats Hero -->
                 <div class="stats-hero" id="statsHero">
-                    <!-- Background Pattern -->
-                    <div class="hero-bg-pattern"></div>
+                    <div class="hero-glow-orb hero-glow-1"></div>
+                    <div class="hero-glow-orb hero-glow-2"></div>
+                    <div class="hero-glow-orb hero-glow-3"></div>
 
                     <div class="stats-hero-content">
-                        <!-- Left Side: Greeting & Insights -->
                         <div class="stats-hero-left">
                             <div class="hero-badge">
                                 <span class="hero-badge-icon">✨</span>
                                 <span class="hero-badge-text">Your Anime Journey</span>
                             </div>
-
                             <div class="hero-greeting">
                                 <h1 class="hero-title">
                                     <span class="hero-greeting-text">Welcome back,</span>
                                     <span class="hero-username" id="heroUsername">AnimeFan</span>
                                 </h1>
-                                <p class="hero-subtitle" id="heroSubtitle">You're on an incredible anime journey!</p>
+                                <p class="hero-subtitle" id="heroSubtitle">
+                                    You're on an incredible anime journey!
+                                </p>
                             </div>
-
                             <div class="hero-insights">
                                 <div class="hero-insight-item">
                                     <div class="hero-insight-icon trophy">
-                                        <i class="fas fa-trophy"></i>
+                                        <i class="fas fa-trophy" aria-hidden="true"></i>
                                     </div>
                                     <div class="hero-insight-info">
                                         <span class="hero-insight-label">Top Genre</span>
@@ -618,7 +666,7 @@
                                 </div>
                                 <div class="hero-insight-item">
                                     <div class="hero-insight-icon streak">
-                                        <i class="fas fa-fire"></i>
+                                        <i class="fas fa-fire" aria-hidden="true"></i>
                                     </div>
                                     <div class="hero-insight-info">
                                         <span class="hero-insight-label">Watch Streak</span>
@@ -627,7 +675,7 @@
                                 </div>
                                 <div class="hero-insight-item">
                                     <div class="hero-insight-icon rating">
-                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star" aria-hidden="true"></i>
                                     </div>
                                     <div class="hero-insight-info">
                                         <span class="hero-insight-label">Avg Rating</span>
@@ -637,41 +685,37 @@
                             </div>
                         </div>
 
-                        <!-- Right Side: Key Stats Cards -->
                         <div class="stats-hero-right">
                             <div class="hero-stat-card">
                                 <div class="hero-stat-icon completed">
-                                    <i class="fas fa-check-circle"></i>
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i>
                                 </div>
                                 <div class="hero-stat-info">
                                     <span class="hero-stat-value" id="heroCompleted">0</span>
                                     <span class="hero-stat-label">Completed</span>
                                 </div>
                             </div>
-
                             <div class="hero-stat-card">
                                 <div class="hero-stat-icon episodes">
-                                    <i class="fas fa-film"></i>
+                                    <i class="fas fa-film" aria-hidden="true"></i>
                                 </div>
                                 <div class="hero-stat-info">
                                     <span class="hero-stat-value" id="heroEpisodes">0</span>
                                     <span class="hero-stat-label">Episodes</span>
                                 </div>
                             </div>
-
                             <div class="hero-stat-card">
                                 <div class="hero-stat-icon time">
-                                    <i class="fas fa-clock"></i>
+                                    <i class="fas fa-clock" aria-hidden="true"></i>
                                 </div>
                                 <div class="hero-stat-info">
                                     <span class="hero-stat-value" id="heroTime">0h</span>
                                     <span class="hero-stat-label">Watch Time</span>
                                 </div>
                             </div>
-
                             <div class="hero-stat-card">
                                 <div class="hero-stat-icon rating-star">
-                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star" aria-hidden="true"></i>
                                 </div>
                                 <div class="hero-stat-info">
                                     <span class="hero-stat-value" id="heroRating">0.0</span>
@@ -680,33 +724,22 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Decorative Elements -->
-                    <div class="hero-decoration">
-                        <div class="hero-glow-orb hero-glow-1"></div>
-                        <div class="hero-glow-orb hero-glow-2"></div>
-                        <div class="hero-glow-orb hero-glow-3"></div>
-                        <div class="hero-glow-orb hero-glow-4"></div>
-                    </div>
                 </div>
 
-                <!-- ============================================
-     OVERVIEW METRICS SECTION
-     ============================================ -->
+                <!-- Overview Metrics -->
                 <div class="overview-metrics" id="overviewMetrics">
                     <div class="overview-header">
                         <h2 class="overview-title">
-                            <i class="fas fa-chart-simple"></i>
+                            <i class="fas fa-chart-simple" aria-hidden="true"></i>
                             Library Overview
                         </h2>
                         <span class="overview-subtitle">Your anime stats at a glance</span>
                     </div>
 
                     <div class="overview-grid">
-                        <!-- Card 1: Anime Completed -->
-                        <div class="metric-card" data-delay="0">
+                        <div class="metric-card">
                             <div class="metric-icon completed">
-                                <i class="fas fa-check-circle"></i>
+                                <i class="fas fa-check-circle" aria-hidden="true"></i>
                             </div>
                             <div class="metric-content">
                                 <span class="metric-value" id="metricCompleted">0</span>
@@ -714,11 +747,9 @@
                                 <span class="metric-change" id="metricCompletedChange">+0 this month</span>
                             </div>
                         </div>
-
-                        <!-- Card 2: Episodes Watched -->
-                        <div class="metric-card" data-delay="1">
+                        <div class="metric-card">
                             <div class="metric-icon episodes">
-                                <i class="fas fa-film"></i>
+                                <i class="fas fa-film" aria-hidden="true"></i>
                             </div>
                             <div class="metric-content">
                                 <span class="metric-value" id="metricEpisodes">0</span>
@@ -726,11 +757,9 @@
                                 <span class="metric-change" id="metricEpisodesChange">+0 this month</span>
                             </div>
                         </div>
-
-                        <!-- Card 3: Watch Time -->
-                        <div class="metric-card" data-delay="2">
+                        <div class="metric-card">
                             <div class="metric-icon time">
-                                <i class="fas fa-clock"></i>
+                                <i class="fas fa-clock" aria-hidden="true"></i>
                             </div>
                             <div class="metric-content">
                                 <span class="metric-value" id="metricTime">0h</span>
@@ -738,11 +767,9 @@
                                 <span class="metric-change" id="metricTimeChange">+0h this month</span>
                             </div>
                         </div>
-
-                        <!-- Card 4: Average Score -->
-                        <div class="metric-card" data-delay="3">
+                        <div class="metric-card">
                             <div class="metric-icon rating">
-                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
                             </div>
                             <div class="metric-content">
                                 <span class="metric-value" id="metricRating">0.0</span>
@@ -750,11 +777,9 @@
                                 <span class="metric-change" id="metricRatingChange">★ from 0 ratings</span>
                             </div>
                         </div>
-
-                        <!-- Card 5: Completion Rate -->
-                        <div class="metric-card" data-delay="4">
+                        <div class="metric-card">
                             <div class="metric-icon rate">
-                                <i class="fas fa-percent"></i>
+                                <i class="fas fa-percent" aria-hidden="true"></i>
                             </div>
                             <div class="metric-content">
                                 <span class="metric-value" id="metricRate">0%</span>
@@ -762,11 +787,9 @@
                                 <span class="metric-change" id="metricRateChange">of total entries</span>
                             </div>
                         </div>
-
-                        <!-- Card 6: Currently Watching -->
-                        <div class="metric-card" data-delay="5">
+                        <div class="metric-card">
                             <div class="metric-icon watching">
-                                <i class="fas fa-eye"></i>
+                                <i class="fas fa-eye" aria-hidden="true"></i>
                             </div>
                             <div class="metric-content">
                                 <span class="metric-value" id="metricWatching">0</span>
@@ -774,11 +797,9 @@
                                 <span class="metric-change" id="metricWatchingChange">active now</span>
                             </div>
                         </div>
-
-                        <!-- Card 7: Plan to Watch -->
-                        <div class="metric-card" data-delay="6">
+                        <div class="metric-card">
                             <div class="metric-icon plan">
-                                <i class="fas fa-clock"></i>
+                                <i class="fas fa-clock" aria-hidden="true"></i>
                             </div>
                             <div class="metric-content">
                                 <span class="metric-value" id="metricPlan">0</span>
@@ -786,11 +807,9 @@
                                 <span class="metric-change" id="metricPlanChange">in your queue</span>
                             </div>
                         </div>
-
-                        <!-- Card 8: Current Streak -->
-                        <div class="metric-card" data-delay="7">
+                        <div class="metric-card">
                             <div class="metric-icon streak">
-                                <i class="fas fa-fire"></i>
+                                <i class="fas fa-fire" aria-hidden="true"></i>
                             </div>
                             <div class="metric-content">
                                 <span class="metric-value" id="metricStreak">0</span>
@@ -801,15 +820,12 @@
                     </div>
                 </div>
 
-                <!-- ============================================
-     LIBRARY ANALYTICS SECTION
-     ============================================ -->
+                <!-- Library Analytics -->
                 <div class="library-analytics" id="libraryAnalytics">
-                    <!-- Section Header -->
                     <div class="analytics-header">
                         <div class="analytics-header-left">
                             <h2 class="analytics-title">
-                                <i class="fas fa-layer-group"></i>
+                                <i class="fas fa-layer-group" aria-hidden="true"></i>
                                 Library Analytics
                             </h2>
                         </div>
@@ -819,34 +835,27 @@
                         </div>
                     </div>
 
-                    <!-- Charts Grid -->
                     <div class="analytics-grid">
-                        <!-- Genre Distribution -->
                         <div class="analytics-card chart-card">
                             <div class="analytics-card-header">
                                 <div class="analytics-card-title">
-                                    <i class="fas fa-tags"></i>
+                                    <i class="fas fa-tags" aria-hidden="true"></i>
                                     Genre Distribution
                                 </div>
                                 <span class="analytics-card-badge">Top 10</span>
                             </div>
-                            <div class="analytics-chart-container" id="genreDistribution">
-                                <!-- Bars will be rendered by JS -->
-                            </div>
+                            <div class="analytics-chart-container" id="genreDistribution"></div>
                         </div>
 
-                        <!-- Format Distribution -->
                         <div class="analytics-card chart-card">
                             <div class="analytics-card-header">
                                 <div class="analytics-card-title">
-                                    <i class="fas fa-film"></i>
+                                    <i class="fas fa-film" aria-hidden="true"></i>
                                     Format Distribution
                                 </div>
                                 <span class="analytics-card-badge">Overview</span>
                             </div>
-                            <div class="analytics-chart-container" id="formatDistribution">
-                                <!-- Bars will be rendered by JS -->
-                            </div>
+                            <div class="analytics-chart-container" id="formatDistribution"></div>
                         </div>
                     </div>
 
@@ -854,17 +863,16 @@
                     <div class="insights-panel">
                         <div class="insights-header">
                             <h3 class="insights-title">
-                                <i class="fas fa-lightbulb"></i>
+                                <i class="fas fa-lightbulb" aria-hidden="true"></i>
                                 Library Insights
                             </h3>
                             <span class="insights-subtitle">Key takeaways from your collection</span>
                         </div>
 
                         <div class="insights-grid">
-                            <!-- Insight 1: Most Watched Genre -->
-                            <div class="insight-card" data-delay="0">
+                            <div class="insight-card">
                                 <div class="insight-icon genre">
-                                    <i class="fas fa-trophy"></i>
+                                    <i class="fas fa-trophy" aria-hidden="true"></i>
                                 </div>
                                 <div class="insight-content">
                                     <span class="insight-value" id="insightTopGenre">—</span>
@@ -872,11 +880,9 @@
                                     <span class="insight-detail" id="insightTopGenreCount">0 anime</span>
                                 </div>
                             </div>
-
-                            <!-- Insight 2: Second Favorite Genre -->
-                            <div class="insight-card" data-delay="1">
+                            <div class="insight-card">
                                 <div class="insight-icon second">
-                                    <i class="fas fa-medal"></i>
+                                    <i class="fas fa-medal" aria-hidden="true"></i>
                                 </div>
                                 <div class="insight-content">
                                     <span class="insight-value" id="insightSecondGenre">—</span>
@@ -884,11 +890,9 @@
                                     <span class="insight-detail" id="insightSecondGenreCount">0 anime</span>
                                 </div>
                             </div>
-
-                            <!-- Insight 3: Preferred Format -->
-                            <div class="insight-card" data-delay="2">
+                            <div class="insight-card">
                                 <div class="insight-icon format">
-                                    <i class="fas fa-tv"></i>
+                                    <i class="fas fa-tv" aria-hidden="true"></i>
                                 </div>
                                 <div class="insight-content">
                                     <span class="insight-value" id="insightPreferredFormat">—</span>
@@ -896,11 +900,9 @@
                                     <span class="insight-detail" id="insightPreferredFormatCount">0 anime</span>
                                 </div>
                             </div>
-
-                            <!-- Insight 4: Library Diversity -->
-                            <div class="insight-card" data-delay="3">
+                            <div class="insight-card">
                                 <div class="insight-icon diversity">
-                                    <i class="fas fa-shield-alt"></i>
+                                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
                                 </div>
                                 <div class="insight-content">
                                     <span class="insight-value" id="insightDiversity">—</span>
@@ -908,11 +910,9 @@
                                     <span class="insight-detail" id="insightDiversityDetail">0 genres</span>
                                 </div>
                             </div>
-
-                            <!-- Insight 5: Completion Rate -->
-                            <div class="insight-card" data-delay="4">
+                            <div class="insight-card">
                                 <div class="insight-icon completion">
-                                    <i class="fas fa-check-circle"></i>
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i>
                                 </div>
                                 <div class="insight-content">
                                     <span class="insight-value" id="insightCompletion">0%</span>
@@ -920,11 +920,9 @@
                                     <span class="insight-detail" id="insightCompletionDetail">0 completed</span>
                                 </div>
                             </div>
-
-                            <!-- Insight 6: Total Genres -->
-                            <div class="insight-card" data-delay="5">
+                            <div class="insight-card">
                                 <div class="insight-icon genres">
-                                    <i class="fas fa-palette"></i>
+                                    <i class="fas fa-palette" aria-hidden="true"></i>
                                 </div>
                                 <div class="insight-content">
                                     <span class="insight-value" id="insightTotalGenres">0</span>
@@ -933,23 +931,15 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Smart Insights -->
-                        <div class="smart-insights" id="smartInsights">
-                            <!-- Generated by JS -->
-                        </div>
                     </div>
                 </div>
 
-                <!-- ============================================
-     RATING ANALYTICS SECTION
-     ============================================ -->
+                <!-- Rating Analytics -->
                 <div class="rating-analytics" id="ratingAnalytics">
-                    <!-- Section Header -->
                     <div class="rating-header">
                         <div class="rating-header-left">
                             <h2 class="rating-title">
-                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
                                 Rating Analytics
                             </h2>
                         </div>
@@ -959,51 +949,46 @@
                         </div>
                     </div>
 
-                    <!-- Main Grid -->
                     <div class="rating-grid">
-                        <!-- Score Distribution Chart -->
                         <div class="rating-card chart-card">
                             <div class="rating-card-header">
                                 <div class="rating-card-title">
-                                    <i class="fas fa-chart-bar"></i>
+                                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
                                     Score Distribution
                                 </div>
                                 <span class="rating-card-badge">Histogram</span>
                             </div>
-                            <div class="rating-chart-container" id="scoreDistributionChart">
-                                <!-- Bars rendered by JS -->
-                            </div>
+                            <div class="rating-chart-container" id="scoreDistributionChart"></div>
                         </div>
 
-                        <!-- Rating Behavior Insights -->
                         <div class="rating-card insights-card">
                             <div class="rating-card-header">
                                 <div class="rating-card-title">
-                                    <i class="fas fa-brain"></i>
+                                    <i class="fas fa-brain" aria-hidden="true"></i>
                                     Rating Behavior
                                 </div>
                                 <span class="rating-card-badge">Insights</span>
                             </div>
                             <div class="rating-behavior-grid">
                                 <div class="behavior-card">
-                                    <div class="behavior-value" id="behaviorAvgScore">0.0</div>
-                                    <div class="behavior-label">Average Rating</div>
-                                    <div class="behavior-detail" id="behaviorAvgDetail">from 0 ratings</div>
+                                    <span class="behavior-value" id="behaviorAvgScore">0.0</span>
+                                    <span class="behavior-label">Average Rating</span>
+                                    <span class="behavior-detail" id="behaviorAvgDetail">from 0 ratings</span>
                                 </div>
                                 <div class="behavior-card">
-                                    <div class="behavior-value" id="behaviorMostCommon">—</div>
-                                    <div class="behavior-label">Most Common Rating</div>
-                                    <div class="behavior-detail" id="behaviorCommonCount">0 times</div>
+                                    <span class="behavior-value" id="behaviorMostCommon">—</span>
+                                    <span class="behavior-label">Most Common Rating</span>
+                                    <span class="behavior-detail" id="behaviorCommonCount">0 times</span>
                                 </div>
                                 <div class="behavior-card">
-                                    <div class="behavior-value" id="behaviorHighestGenre">—</div>
-                                    <div class="behavior-label">Highest Rated Genre</div>
-                                    <div class="behavior-detail" id="behaviorHighestDetail">0.0★ from 0 anime</div>
+                                    <span class="behavior-value" id="behaviorHighestGenre">—</span>
+                                    <span class="behavior-label">Highest Rated Genre</span>
+                                    <span class="behavior-detail" id="behaviorHighestDetail">0.0★ from 0 anime</span>
                                 </div>
                                 <div class="behavior-card">
-                                    <div class="behavior-value" id="behaviorLowestGenre">—</div>
-                                    <div class="behavior-label">Lowest Rated Genre</div>
-                                    <div class="behavior-detail" id="behaviorLowestDetail">0.0★ from 0 anime</div>
+                                    <span class="behavior-value" id="behaviorLowestGenre">—</span>
+                                    <span class="behavior-label">Lowest Rated Genre</span>
+                                    <span class="behavior-detail" id="behaviorLowestDetail">0.0★ from 0 anime</span>
                                 </div>
                             </div>
                         </div>
@@ -1013,13 +998,16 @@
                     <div class="rating-personality">
                         <div class="personality-card">
                             <div class="personality-icon" id="personalityIcon">
-                                <i class="fas fa-user-astronaut"></i>
+                                <i class="fas fa-user-astronaut" aria-hidden="true"></i>
                             </div>
                             <div class="personality-content">
                                 <div class="personality-label">Your Rating Personality</div>
-                                <div class="personality-value" id="personalityName">Loading...</div>
-                                <div class="personality-description" id="personalityDescription">Analyzing your rating
-                                    patterns...</div>
+                                <div class="personality-value" id="personalityName">
+                                    Loading...
+                                </div>
+                                <div class="personality-description" id="personalityDescription">
+                                    Analyzing your rating patterns...
+                                </div>
                             </div>
                             <div class="personality-stats">
                                 <div class="personality-stat">
@@ -1037,65 +1025,39 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Average Score by Genre -->
-                    <div class="rating-genre-section">
-                        <div class="rating-card">
-                            <div class="rating-card-header">
-                                <div class="rating-card-title">
-                                    <i class="fas fa-tags"></i>
-                                    Average Score by Genre
-                                </div>
-                                <span class="rating-card-badge">Ranking</span>
-                            </div>
-                            <div class="rating-chart-container" id="genreScoreChart">
-                                <!-- Bars rendered by JS -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Advanced Rating Insights -->
-                    <div class="rating-advanced">
-                        <div class="advanced-header">
-                            <h3 class="advanced-title">
-                                <i class="fas fa-lightbulb"></i>
-                                Advanced Rating Insights
-                            </h3>
-                            <span class="advanced-subtitle">Deeper analysis of your scoring behavior</span>
-                        </div>
-                        <div class="advanced-grid" id="advancedInsights">
-                            <!-- Generated by JS -->
-                        </div>
-                    </div>
                 </div>
 
-                <!-- ============================================
-     COMPLETION JOURNEY SECTION
-     ============================================ -->
+                <!-- Completion Journey -->
                 <div class="completion-journey" id="completionJourney">
-                    <!-- Section Header -->
                     <div class="journey-header">
                         <div class="journey-header-left">
                             <h2 class="journey-title">
-                                <i class="fas fa-road"></i>
+                                <i class="fas fa-road" aria-hidden="true"></i>
                                 Completion Journey
                             </h2>
                         </div>
                         <div class="journey-header-right">
                             <div class="journey-time-filters">
-                                <button class="journey-filter-btn active" data-range="all">All Time</button>
-                                <button class="journey-filter-btn" data-range="year">Last Year</button>
-                                <button class="journey-filter-btn" data-range="90d">90 Days</button>
-                                <button class="journey-filter-btn" data-range="30d">30 Days</button>
+                                <button class="journey-filter-btn active" data-range="all">
+                                    All Time
+                                </button>
+                                <button class="journey-filter-btn" data-range="year">
+                                    Last Year
+                                </button>
+                                <button class="journey-filter-btn" data-range="90d">
+                                    90 Days
+                                </button>
+                                <button class="journey-filter-btn" data-range="30d">
+                                    30 Days
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Primary Chart -->
                     <div class="journey-chart-card">
                         <div class="journey-chart-header">
                             <div class="journey-chart-title">
-                                <i class="fas fa-chart-line"></i>
+                                <i class="fas fa-chart-line" aria-hidden="true"></i>
                                 Cumulative Completions
                             </div>
                             <div class="journey-chart-stats">
@@ -1108,11 +1070,10 @@
                         </div>
                     </div>
 
-                    <!-- Monthly Completion Bar Chart -->
                     <div class="journey-secondary-chart">
                         <div class="journey-chart-header">
                             <div class="journey-chart-title">
-                                <i class="fas fa-calendar-alt"></i>
+                                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
                                 Monthly Completions
                             </div>
                             <div class="journey-chart-stats">
@@ -1125,20 +1086,19 @@
                         </div>
                     </div>
 
-                    <!-- Journey Insights -->
                     <div class="journey-insights">
                         <div class="journey-insights-header">
                             <h3 class="journey-insights-title">
-                                <i class="fas fa-lightbulb"></i>
+                                <i class="fas fa-lightbulb" aria-hidden="true"></i>
                                 Journey Insights
                             </h3>
                             <span class="journey-insights-subtitle">Key milestones and statistics</span>
                         </div>
 
                         <div class="journey-insights-grid">
-                            <div class="journey-insight-card" data-delay="0">
+                            <div class="journey-insight-card">
                                 <div class="journey-insight-icon first">
-                                    <i class="fas fa-flag"></i>
+                                    <i class="fas fa-flag" aria-hidden="true"></i>
                                 </div>
                                 <div class="journey-insight-content">
                                     <span class="journey-insight-value" id="journeyFirstAnime">—</span>
@@ -1146,10 +1106,9 @@
                                     <span class="journey-insight-detail" id="journeyFirstDate">—</span>
                                 </div>
                             </div>
-
-                            <div class="journey-insight-card" data-delay="1">
+                            <div class="journey-insight-card">
                                 <div class="journey-insight-icon fastest">
-                                    <i class="fas fa-rocket"></i>
+                                    <i class="fas fa-rocket" aria-hidden="true"></i>
                                 </div>
                                 <div class="journey-insight-content">
                                     <span class="journey-insight-value" id="journeyFastestMonth">—</span>
@@ -1157,10 +1116,9 @@
                                     <span class="journey-insight-detail" id="journeyFastestCount">0 anime</span>
                                 </div>
                             </div>
-
-                            <div class="journey-insight-card" data-delay="2">
+                            <div class="journey-insight-card">
                                 <div class="journey-insight-icon active">
-                                    <i class="fas fa-calendar-check"></i>
+                                    <i class="fas fa-calendar-check" aria-hidden="true"></i>
                                 </div>
                                 <div class="journey-insight-content">
                                     <span class="journey-insight-value" id="journeyActiveYear">—</span>
@@ -1168,10 +1126,9 @@
                                     <span class="journey-insight-detail" id="journeyActiveCount">0 anime</span>
                                 </div>
                             </div>
-
-                            <div class="journey-insight-card" data-delay="3">
+                            <div class="journey-insight-card">
                                 <div class="journey-insight-icon pace">
-                                    <i class="fas fa-tachometer-alt"></i>
+                                    <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
                                 </div>
                                 <div class="journey-insight-content">
                                     <span class="journey-insight-value" id="journeyPace">0</span>
@@ -1182,46 +1139,41 @@
                         </div>
                     </div>
 
-                    <!-- Milestone Timeline -->
                     <div class="journey-milestones">
                         <div class="journey-milestones-header">
                             <h3 class="journey-milestones-title">
-                                <i class="fas fa-trophy"></i>
+                                <i class="fas fa-trophy" aria-hidden="true"></i>
                                 Milestone Timeline
                             </h3>
                             <span class="journey-milestones-subtitle">Your achievement milestones</span>
                         </div>
-                        <div class="journey-milestones-container" id="milestonesContainer">
-                            <!-- Generated by JS -->
-                        </div>
+                        <div class="journey-milestones-container" id="milestonesContainer"></div>
                     </div>
 
-                    <!-- Pace Analysis -->
                     <div class="journey-pace">
                         <div class="journey-pace-header">
                             <h3 class="journey-pace-title">
-                                <i class="fas fa-chart-simple"></i>
+                                <i class="fas fa-chart-simple" aria-hidden="true"></i>
                                 Pace Analysis
                             </h3>
                             <span class="journey-pace-subtitle">Understanding your watching rhythm</span>
                         </div>
-                        <div class="journey-pace-grid" id="paceInsights">
-                            <!-- Generated by JS -->
-                        </div>
+                        <div class="journey-pace-grid" id="paceInsights"></div>
                     </div>
                 </div>
-
-
-
             </div>
-        </div>
+        </section>
 
-        <!-- Achievements Page -->
-        <div id="achievements-page" class="page">
+        <!-- ============================================ -->
+        <!-- ACHIEVEMENTS PAGE -->
+        <!-- ============================================ -->
+        <section id="achievements-page" class="page" hidden>
             <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-trophy"></i> Achievements</h2>
+                <h2 class="section-title">
+                    <i class="fas fa-trophy" aria-hidden="true"></i>
+                    Achievements
+                </h2>
 
-                <!-- Achievements Summary -->
                 <div class="achievements-summary">
                     <div class="summary-card">
                         <span class="summary-label">Total</span>
@@ -1237,142 +1189,151 @@
                     </div>
                 </div>
 
-                <!-- Achievements Grid -->
                 <div class="achievements-grid" id="achievementsGrid"></div>
             </div>
+        </section>
 
-
-        </div>
-
-        <!-- Community Page -->
-        <div id="community-page" class="page">
+        <!-- ============================================ -->
+        <!-- COMMUNITY PAGE -->
+        <!-- ============================================ -->
+        <section id="community-page" class="page" hidden>
             <div class="dashboard-section">
                 <h2 class="section-title">
-                    <i class="fas fa-users"></i>
+                    <i class="fas fa-users" aria-hidden="true"></i>
                     Community
                 </h2>
 
-                <!-- Community Tabs -->
                 <div class="community-tabs">
                     <button class="community-tab active" data-tab="friends">
-                        <i class="fas fa-user-friends"></i> Friends
+                        <i class="fas fa-user-friends" aria-hidden="true"></i> Friends
                     </button>
                     <button class="community-tab" data-tab="feed">
-                        <i class="fas fa-newspaper"></i> Feed
+                        <i class="fas fa-newspaper" aria-hidden="true"></i> Feed
                     </button>
                     <button class="community-tab" data-tab="discussions">
-                        <i class="fas fa-comments"></i> Discussions
+                        <i class="fas fa-comments" aria-hidden="true"></i> Discussions
                     </button>
                     <button class="community-tab" data-tab="leaderboard">
-                        <i class="fas fa-trophy"></i> Leaderboard
+                        <i class="fas fa-trophy" aria-hidden="true"></i> Leaderboard
                     </button>
                 </div>
 
-                <!-- Tab Content: Friends -->
+                <!-- Friends Tab -->
                 <div id="community-friends-tab" class="community-tab-content active">
-                    <!-- Friend Requests Section -->
-                    <div class="friend-requests-section" id="friendRequestsSection" style="display: none;">
-                        <h3><i class="fas fa-user-plus"></i> Friend Requests</h3>
+                    <div class="friend-requests-section" id="friendRequestsSection" hidden>
+                        <h3>
+                            <i class="fas fa-user-plus" aria-hidden="true"></i> Friend
+                            Requests
+                        </h3>
                         <div id="friendRequestsList" class="friend-requests-list"></div>
                     </div>
 
-                    <!-- Search Users -->
                     <div class="search-users-section">
-                        <h3><i class="fas fa-search"></i> Find Friends</h3>
+                        <h3>
+                            <i class="fas fa-search" aria-hidden="true"></i> Find Friends
+                        </h3>
                         <div class="search-users-input">
-                            <input type="text" id="searchUsersInput" placeholder="Search by username...">
-                            <button id="searchUsersBtn" class="btn btn-primary">Search</button>
+                            <input type="text" id="searchUsersInput" placeholder="Search by username..." />
+                            <button id="searchUsersBtn" class="btn btn-primary">
+                                Search
+                            </button>
                         </div>
                         <div id="searchResultsList" class="search-results-list"></div>
                     </div>
 
-                    <!-- Friends List -->
                     <div class="friends-list-section">
-                        <h3><i class="fas fa-users"></i> Your Friends (<span id="friendsCount">0</span>)</h3>
+                        <h3>
+                            <i class="fas fa-users" aria-hidden="true"></i> Your Friends
+                            (<span id="friendsCount">0</span>)
+                        </h3>
                         <div id="friendsList" class="friends-grid"></div>
                     </div>
                 </div>
 
-                <!-- Tab Content: Feed (Coming Soon) -->
+                <!-- Feed Tab -->
                 <div id="community-feed-tab" class="community-tab-content">
                     <div class="coming-soon-card">
-                        <i class="fas fa-newspaper"></i>
+                        <i class="fas fa-newspaper" aria-hidden="true"></i>
                         <h3>Activity Feed</h3>
                         <p>See what your friends are watching and achieving!</p>
                         <span class="coming-badge-small">Coming Soon</span>
                     </div>
                 </div>
 
-                <!-- Tab Content: Discussions (Coming Soon) -->
+                <!-- Discussions Tab -->
                 <div id="community-discussions-tab" class="community-tab-content">
                     <div class="coming-soon-card">
-                        <i class="fas fa-comments"></i>
+                        <i class="fas fa-comments" aria-hidden="true"></i>
                         <h3>Discussions</h3>
                         <p>Join conversations about your favorite anime!</p>
                         <span class="coming-badge-small">Coming Soon</span>
                     </div>
                 </div>
 
-                <!-- Tab Content: Leaderboard (FULLY FUNCTIONAL) -->
+                <!-- Leaderboard Tab -->
                 <div id="community-leaderboard-tab" class="community-tab-content">
                     <div class="friend-leaderboard">
-                        <h3><i class="fas fa-chart-line"></i> Leaderboard</h3>
-                        <p class="leaderboard-subtitle">Compare your stats with friends and the world!</p>
+                        <h3>
+                            <i class="fas fa-chart-line" aria-hidden="true"></i> Leaderboard
+                        </h3>
+                        <p class="leaderboard-subtitle">
+                            Compare your stats with friends and the world!
+                        </p>
 
-                        <!-- Mode Tabs -->
                         <div class="leaderboard-mode-tabs">
                             <button class="leaderboard-mode-tab active" data-mode="friends">
-                                <i class="fas fa-user-friends"></i>
+                                <i class="fas fa-user-friends" aria-hidden="true"></i>
                                 <span>Friends</span>
                             </button>
                             <button class="leaderboard-mode-tab" data-mode="global">
-                                <i class="fas fa-globe"></i>
+                                <i class="fas fa-globe" aria-hidden="true"></i>
                                 <span>Global</span>
                             </button>
                         </div>
 
-                        <!-- Leaderboard Filters -->
                         <div class="leaderboard-filters">
                             <button class="leaderboard-filter-btn active" data-stat="level">
-                                <i class="fas fa-chart-line"></i> Level
+                                <i class="fas fa-chart-line" aria-hidden="true"></i> Level
                             </button>
                             <button class="leaderboard-filter-btn" data-stat="xp">
-                                <i class="fas fa-star"></i> Total XP
+                                <i class="fas fa-star" aria-hidden="true"></i> Total XP
                             </button>
                             <button class="leaderboard-filter-btn" data-stat="anime">
-                                <i class="fas fa-tv"></i> Anime
+                                <i class="fas fa-tv" aria-hidden="true"></i> Anime
                             </button>
                             <button class="leaderboard-filter-btn" data-stat="hours">
-                                <i class="fas fa-clock"></i> Hours
+                                <i class="fas fa-clock" aria-hidden="true"></i> Hours
                             </button>
                             <button class="leaderboard-filter-btn" data-stat="episodes">
-                                <i class="fas fa-film"></i> Episodes
+                                <i class="fas fa-film" aria-hidden="true"></i> Episodes
                             </button>
                         </div>
 
-                        <!-- Time Period Filter -->
                         <div class="time-period-filter">
-                            <label><i class="fas fa-calendar-alt"></i> Show data from:</label>
+                            <label><i class="fas fa-calendar-alt" aria-hidden="true"></i> Show
+                                data from:</label>
                             <div class="time-period-buttons">
                                 <button class="time-period-btn" data-period="week">
-                                    <i class="fas fa-calendar-week"></i> This Week
+                                    <i class="fas fa-calendar-week" aria-hidden="true"></i> This
+                                    Week
                                 </button>
                                 <button class="time-period-btn" data-period="month">
-                                    <i class="fas fa-calendar-month"></i> This Month
+                                    <i class="fas fa-calendar-month" aria-hidden="true"></i>
+                                    This Month
                                 </button>
                                 <button class="time-period-btn" data-period="year">
-                                    <i class="fas fa-calendar-year"></i> This Year
+                                    <i class="fas fa-calendar-year" aria-hidden="true"></i> This
+                                    Year
                                 </button>
                                 <button class="time-period-btn active" data-period="all">
-                                    <i class="fas fa-infinity"></i> All Time
+                                    <i class="fas fa-infinity" aria-hidden="true"></i> All Time
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Your Stats Card (Enhanced) -->
                         <div class="your-stats-card" id="yourStatsCard">
                             <div class="your-stats-header">
-                                <img id="yourAvatar" class="your-avatar" src="" alt="">
+                                <img id="yourAvatar" class="your-avatar" src="" alt="" />
                                 <div>
                                     <h4 id="yourUsername">You</h4>
                                     <span id="yourLevel" class="your-level">Lv.1</span>
@@ -1396,153 +1357,119 @@
                                     <span class="stat-label">Hours</span>
                                 </div>
                             </div>
-                            <!-- Top Genres Section -->
                             <div class="your-top-genres">
-                                <span class="genres-label"><i class="fas fa-music"></i> Top Genres:</span>
+                                <span class="genres-label"><i class="fas fa-music" aria-hidden="true"></i> Top
+                                    Genres:</span>
                                 <div id="yourTopGenres" class="genre-tags"></div>
                             </div>
                         </div>
 
-                        <!-- Total Players (Global Mode) -->
-                        <div id="leaderboardTotalPlayersContainer" style="display: none;">
+                        <div id="leaderboardTotalPlayersContainer" hidden>
                             <div class="leaderboard-total-players">
-                                <i class="fas fa-users"></i>
+                                <i class="fas fa-users" aria-hidden="true"></i>
                                 <span id="leaderboardTotalPlayers">0</span>
                                 <span>players ranked</span>
                             </div>
                         </div>
 
-                        <!-- Friends Leaderboard List -->
                         <div id="friendLeaderboardList" class="friend-leaderboard-list">
                             <div class="loading-spinner">
-                                <i class="fas fa-spinner fa-spin"></i> Loading leaderboard...
+                                <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                                Loading leaderboard...
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Settings Page -->
-        <div id="settings-page" class="page">
+        <!-- ============================================ -->
+        <!-- SETTINGS PAGE -->
+        <!-- ============================================ -->
+        <section id="settings-page" class="page" hidden>
             <div class="dashboard-section">
-                <h2 class="section-title"><i class="fas fa-cog"></i> Settings</h2>
+                <h2 class="section-title">
+                    <i class="fas fa-cog" aria-hidden="true"></i>
+                    Settings
+                </h2>
 
-                <div class="settings-container">
-                    <!-- Profile Preview -->
-                    <div class="profile-preview">
-                        <img loading="lazy"
-                            src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
-                            alt="User Avatar" class="profile-preview-avatar" id="profilePreviewAvatar">
-                        <div class="profile-preview-info">
-                            <div class="profile-preview-name" id="profilePreviewName">Aris</div>
-                            <div class="profile-preview-join-date">
-                                <i class="fas fa-calendar-plus"></i>
-                                <span id="memberSinceText">Member since May 2026</span>
-                            </div>
-                        </div>
-                    </div>
+                <!-- ===== SETTINGS TABS ===== -->
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-tab="profile">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </button>
+                    <button class="settings-tab" data-tab="appearance">
+                        <i class="fas fa-palette"></i>
+                        <span>Appearance</span>
+                    </button>
+                    <button class="settings-tab" data-tab="experience">
+                        <i class="fas fa-star"></i>
+                        <span>Experience</span>
+                    </button>
+                    <button class="settings-tab" data-tab="sync">
+                        <i class="fas fa-cloud"></i>
+                        <span>Sync & Backup</span>
+                    </button>
+                    <button class="settings-tab" data-tab="danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Danger Zone</span>
+                    </button>
+                </div>
 
-                    <!-- Level Progress Card - Upgraded -->
-                    <div class="level-card settings-level-card">
-                        <div class="level-card-header">
-                            <div class="level-rank">
-                                <div class="level-badge-image" id="settingsLevelBadge">
-                                    <i class="fas fa-user-astronaut"></i>
-                                </div>
-                                <div class="level-title-wrap">
-                                    <div class="level-title" id="settingsLevelTitle">Anime God</div>
-                                    <div class="level-subtitle" id="settingsLevelSubtitle">Seasoned Binger</div>
-                                </div>
-                            </div>
-                            <div class="level-number" id="settingsLevelNumber">Level 16</div>
-                        </div>
-                        <div class="level-progress">
-                            <div class="progress-track">
-                                <div class="progress-fill" id="settingsProgressFill" style="width: 0%"></div>
-                            </div>
-                            <div class="progress-row">
-                                <div class="progress-stats">
-                                    <span class="current" id="settingsCurrentXP">2464</span>
-                                    <span>/</span>
-                                    <span class="next" id="settingsNextXP">3000</span>
-                                    <span>XP</span>
-                                </div>
-                                <div class="progress-percent" id="settingsProgressPercent">0%</div>
-                            </div>
-                            <div class="xp-delta" id="settingsXpDelta" aria-hidden="true" style="display:none;">+0 XP
-                            </div>
-                        </div>
-                        <div class="level-next">
-                            <div>
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="settingsNextInfo">Next: Transcendent at 18000 XP</span>
-                            </div>
-                        </div>
-                    </div>
+                <!-- ===== SETTINGS CONTENT ===== -->
+                <div class="settings-content">
 
-                    <!-- XP Queue Status Card -->
-                    <div class="settings-group queue-status-card">
-                        <h3><i class="fas fa-clock"></i> XP Queue Status</h3>
-                        <div class="queue-info" id="queueInfoContainer">
-                            <div class="queue-stats">
-                                <div class="queue-stat-item">
-                                    <span class="queue-label">Queued XP:</span>
-                                    <span class="queue-value" id="queuedXPAmount">0</span>
+                    <!-- ===== TAB 1: PROFILE ===== -->
+                    <div class="settings-tab-content active" id="tab-profile">
+                        <!-- Profile Preview -->
+                        <div class="profile-preview">
+                            <img loading="lazy"
+                                src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
+                                alt="User Avatar" class="profile-preview-avatar" id="profilePreviewAvatar" />
+                            <div class="profile-preview-info">
+                                <div class="profile-preview-name" id="profilePreviewName">
+                                    Aris
                                 </div>
-                                <div class="queue-stat-item">
-                                    <span class="queue-label">Queue Items:</span>
-                                    <span class="queue-value" id="queuedItemsCount">0</span>
+                                <div class="profile-preview-join-date">
+                                    <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                                    <span id="memberSinceText">Member since May 2026</span>
                                 </div>
-                                <div class="queue-stat-item">
-                                    <span class="queue-label">Today's XP:</span>
-                                    <span class="queue-value" id="todayXPAmount">0</span>
-                                    <span class="queue-max">/ <span id="dailyLimit">--</span></span>
-                                </div>
-                            </div>
-                            <div class="queue-progress">
-                                <div class="progress-track">
-                                    <div class="progress-fill" id="queueProgressFill" style="width: 0%"></div>
-                                </div>
-                                <span class="queue-percent" id="queuePercent">0%</span>
-                            </div>
-                            <div class="queue-message" id="queueMessage">
-                                <i class="fas fa-check-circle"></i> No pending XP in queue
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Settings Groups Container -->
-                    <div class="settings-groups-container">
                         <!-- Profile Settings -->
                         <div class="settings-group">
-                            <h3><i class="fas fa-user"></i> Profile Settings</h3>
+                            <h3>
+                                <i class="fas fa-user" aria-hidden="true"></i> Profile Settings
+                            </h3>
                             <div class="settings-item">
                                 <label for="usernameInput">Display Name</label>
-                                <input type="text" id="usernameInput" placeholder="Enter your display name">
+                                <input type="text" id="usernameInput" placeholder="Enter your display name" />
                             </div>
-
                             <div class="settings-item">
                                 <label for="avatarInput">Profile Photo</label>
                                 <div class="file-input-wrapper">
-                                    <input type="file" id="avatarInput" accept="image/*">
-                                    <div class="file-input-btn" style="background-color: var(--primary)">
-                                        <i class="fas fa-upload"></i> Choose Image
+                                    <input type="file" id="avatarInput" accept="image/*" />
+                                    <div class="file-input-btn">
+                                        <i class="fas fa-upload" aria-hidden="true"></i> Choose Image
                                     </div>
                                 </div>
                             </div>
-
                             <div class="settings-item">
-                                <button id="resetAvatar" class="btn-reset">
-                                    <i class="fas fa-undo"></i> Reset to Default Avatar
+                                <button id="resetAvatar" class="btn btn-secondary">
+                                    <i class="fas fa-undo" aria-hidden="true"></i> Reset to Default Avatar
                                 </button>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- 🎨 Appearance Settings -->
-                        <div class="settings-group modern-appearance" id="appearance-settings">
-                            <h3><i class="fas fa-palette"></i> Appearance</h3>
-
+                    <!-- ===== TAB 2: APPEARANCE ===== -->
+                    <div class="settings-tab-content" id="tab-appearance">
+                        <div class="settings-group">
+                            <h3>
+                                <i class="fas fa-palette" aria-hidden="true"></i> Appearance
+                            </h3>
                             <div class="settings-item">
                                 <label class="section-label">Theme</label>
                                 <div class="theme-selection">
@@ -1561,27 +1488,110 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Cloud Sync Section -->
+                    <!-- ===== TAB 3: EXPERIENCE ===== -->
+                    <div class="settings-tab-content" id="tab-experience">
+                        <!-- Level Card -->
+                        <div class="level-card settings-level-card">
+                            <div class="level-card-header">
+                                <div class="level-rank">
+                                    <div class="level-badge-image" id="settingsLevelBadge">
+                                        <i class="fas fa-user-astronaut" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="level-title-wrap">
+                                        <div class="level-title" id="settingsLevelTitle">
+                                            Anime God
+                                        </div>
+                                        <div class="level-subtitle" id="settingsLevelSubtitle">
+                                            Seasoned Binger
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="level-number" id="settingsLevelNumber">
+                                    Level 16
+                                </div>
+                            </div>
+                            <div class="level-progress">
+                                <div class="progress-track">
+                                    <div class="progress-fill" id="settingsProgressFill" style="width: 0%"></div>
+                                </div>
+                                <div class="progress-row">
+                                    <div class="progress-stats">
+                                        <span class="current" id="settingsCurrentXP">2464</span>
+                                        <span>/</span>
+                                        <span class="next" id="settingsNextXP">3000</span>
+                                        <span>XP</span>
+                                    </div>
+                                    <div class="progress-percent" id="settingsProgressPercent">
+                                        0%
+                                    </div>
+                                </div>
+                                <div class="xp-delta" id="settingsXpDelta" hidden>+0 XP</div>
+                            </div>
+                            <div class="level-next">
+                                <div>
+                                    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                                    <span id="settingsNextInfo">Next: Transcendent at 18000 XP</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Queue Status -->
+                        <div class="settings-group queue-status-card">
+                            <h3>
+                                <i class="fas fa-clock" aria-hidden="true"></i> XP Queue Status
+                            </h3>
+                            <div class="queue-info" id="queueInfoContainer">
+                                <div class="queue-stats">
+                                    <div class="queue-stat-item">
+                                        <span class="queue-label">Queued XP:</span>
+                                        <span class="queue-value" id="queuedXPAmount">0</span>
+                                    </div>
+                                    <div class="queue-stat-item">
+                                        <span class="queue-label">Queue Items:</span>
+                                        <span class="queue-value" id="queuedItemsCount">0</span>
+                                    </div>
+                                    <div class="queue-stat-item">
+                                        <span class="queue-label">Today's XP:</span>
+                                        <span class="queue-value" id="todayXPAmount">0</span>
+                                        <span class="queue-max">/ <span id="dailyLimit">--</span></span>
+                                    </div>
+                                </div>
+                                <div class="queue-progress">
+                                    <div class="progress-track">
+                                        <div class="progress-fill" id="queueProgressFill" style="width: 0%"></div>
+                                    </div>
+                                    <span class="queue-percent" id="queuePercent">0%</span>
+                                </div>
+                                <div class="queue-message" id="queueMessage">
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i> No pending XP in queue
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== TAB 4: SYNC & BACKUP ===== -->
+                    <div class="settings-tab-content" id="tab-sync">
+                        <!-- Cloud Sync -->
                         <div class="settings-group">
-                            <h3><i class="fas fa-cloud-upload-alt"></i> Cloud Sync</h3>
-
+                            <h3>
+                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i> Cloud Sync
+                            </h3>
                             <div class="settings-item">
                                 <div class="sync-status" id="syncStatus">
-                                    <i class="fas fa-cloud"></i>
+                                    <i class="fas fa-cloud" aria-hidden="true"></i>
                                     <span id="syncStatusText">Cloud sync active</span>
                                 </div>
                             </div>
-
                             <div class="settings-item">
                                 <button id="syncNowBtn" class="btn btn-primary">
-                                    <i class="fas fa-sync-alt"></i> Sync Now
+                                    <i class="fas fa-sync-alt" aria-hidden="true"></i> Sync Now
                                 </button>
                                 <button id="loadFromCloudBtn" class="btn btn-secondary">
-                                    <i class="fas fa-cloud-download-alt"></i> Load from Cloud
+                                    <i class="fas fa-cloud-download-alt" aria-hidden="true"></i> Load from Cloud
                                 </button>
                             </div>
-
                             <div class="settings-item">
                                 <small class="sync-info">
                                     Last sync: <span id="lastSyncTime">Never</span>
@@ -1589,562 +1599,607 @@
                             </div>
                         </div>
 
-                        <!-- Backup & Restore Section - Full Width -->
-                        <div class="form-group">
-                            <h3 style="color: var(--primary); margin-bottom: 0.5rem;">
-                                Auto Backup
+                        <!-- Auto Backup -->
+                        <div class="settings-group">
+                            <h3>
+                                <i class="fas fa-save" aria-hidden="true"></i> Auto Backup
                             </h3>
-                            <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem;">
+                            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.3); margin-bottom: 1rem;">
                                 Automatically export and update your anime data JSON file whenever you make changes.
                             </p>
-                            <button id="enableBackupBtn" class="action-btn" style="max-width: 250px; padding: 0.75rem;">
-                                <div class="action-icon info" style="width: 40px; height: 40px;">
-                                    <i class="fas fa-save"></i>
-                                </div>
-                                <div class="action-text">Enable Auto Backup</div>
+                            <button id="enableBackupBtn" class="btn btn-success">
+                                <i class="fas fa-save" aria-hidden="true"></i> Enable Auto Backup
                             </button>
                             <small id="backupStatus"
-                                style="display:block; margin-top:0.5rem; color:var(--text-light);"></small>
+                                style="display: block; margin-top: 0.5rem; color: rgba(255,255,255,0.2);"></small>
                         </div>
+                    </div>
 
-                        <!-- Danger Zone - Full Width -->
+                    <!-- ===== TAB 5: DANGER ZONE ===== -->
+                    <div class="settings-tab-content" id="tab-danger">
                         <div class="danger-zone">
-                            <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
-                            <p style="color: var(--text-light); margin-bottom: 1.5rem;">
-                                These actions are irreversible. Please proceed with caution.
-                            </p>
+                            <h3>
+                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Danger Zone
+                            </h3>
+                            <p>These actions are irreversible. Please proceed with caution.</p>
                             <div class="danger-actions">
                                 <button class="btn btn-danger" id="clearDataBtn" disabled>
-                                    <i class="fas fa-trash"></i> Clear All Data
+                                    <i class="fas fa-trash" aria-hidden="true"></i> Clear All Data
                                 </button>
                                 <button class="btn btn-success" id="exportDataBtn">
-                                    <i class="fas fa-file-export"></i> Export Data as JSON
+                                    <i class="fas fa-file-export" aria-hidden="true"></i> Export Data as JSON
                                 </button>
                             </div>
                         </div>
 
-                        <button class="settings-btn" id="openRecapFromSettings">
-                            <i class="fas fa-chart-line"></i> View Recap
-                        </button>
+                        <!-- Recap Button -->
+                        <div style="margin-top: 1.5rem;">
+                            <button class="settings-btn" id="openRecapFromSettings">
+                                <i class="fas fa-chart-line" aria-hidden="true"></i> View Recap
+                            </button>
+                        </div>
+                    </div>
 
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- /main-content -->
+
+    <!-- ============================================ -->
+    <!-- MODALS -->
+    <!-- ============================================ -->
+
+    <!-- Add Anime Modal -->
+    <div id="addAnimeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="addAnimeTitle" hidden>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="addAnimeTitle">Add New Anime</h2>
+                <button class="close-modal" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="addAnimeForm">
+                <input type="hidden" id="animeId" />
+                <div class="form-group">
+                    <label for="animeTitle">Title</label>
+                    <input type="text" id="animeTitle" placeholder="Search for an anime..." required />
+                    <div class="search-loading" id="searchLoading">Searching...</div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+                <div class="form-group">
+                    <label for="animeType">Type</label>
+                    <select id="animeType" required>
+                        <option value="TV">TV Series</option>
+                        <option value="Movie">Movie</option>
+                        <option value="OVA">OVA</option>
+                        <option value="ONA">ONA</option>
+                        <option value="Special">Special</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="animeEpisodes">Total Episodes</label>
+                    <input type="number" id="animeEpisodes" value="1" required />
+                </div>
+                <div class="form-group">
+                    <label for="animeDuration">Duration (minutes)</label>
+                    <input type="number" id="animeDuration" value="20" min="1" required />
+                </div>
+                <div class="form-group">
+                    <label for="animeStatus">Status</label>
+                    <select id="animeStatus" required>
+                        <option value="Completed">Completed</option>
+                        <option value="Watching">Watching</option>
+                        <option value="Plan to Watch">Plan to Watch</option>
+                        <option value="Dropped">Dropped</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="animeProgress">Episode Progress</label>
+                    <input type="number" id="animeProgress" min="0" value="0" required />
+                </div>
+                <div class="form-group">
+                    <label for="animeScore">Score (0-10)</label>
+                    <input type="number" id="animeScore" min="0" max="10" step="0.1" placeholder="7.5" required />
+                </div>
+                <div class="form-group">
+                    <label for="animeYear">Completion Year</label>
+                    <select id="animeYear">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="animeMonth">Completion Month</label>
+                    <select id="animeMonth">
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06" selected>June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="animeCover">Cover Image URL</label>
+                    <input type="text" id="animeCover" placeholder="Will be auto-filled from search" disabled />
+                </div>
+                <div class="form-group">
+                    <label for="animeGenres">Genres</label>
+                    <input type="text" id="animeGenres" placeholder="Will be auto-filled from search" disabled />
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary close-modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        Add Anime
+                    </button>
+                    <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none">
+                        Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle" hidden>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="importModalTitle">Import Anime Data</h2>
+                <button class="close-modal" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="importFile">Select JSON file</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="importFile" accept=".json" />
+                    <div class="file-input-btn">
+                        <i class="fas fa-file-import" aria-hidden="true"></i> Choose File
                     </div>
                 </div>
             </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary close-modal">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="importDataBtn">
+                    Import Data
+                </button>
+            </div>
         </div>
+    </div>
 
-        <!-- Add Anime Modal -->
-        <div id="addAnimeModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">Add New Anime</h2>
-                    <button class="close-modal">&times;</button>
+    <!-- Name Entry Modal -->
+    <div id="nameEntryModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="nameEntryTitle" hidden>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="nameEntryTitle">
+                    <i class="fas fa-user-astronaut" aria-hidden="true"></i>
+                    Welcome to AniPulse!
                 </div>
-                <form id="addAnimeForm">
-                    <input type="hidden" id="animeId">
+                <button class="close-modal" onclick="hideNameEntryModal()" aria-label="Close modal">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Let's personalize your experience. What should we call you?</p>
+                <form id="nameEntryForm">
                     <div class="form-group">
-                        <label for="animeTitle">Title</label>
-                        <input type="text" placeholder="Search for an anime..." id="animeTitle" required>
-                        <div class="search-loading" id="searchLoading">Searching...</div>
-                        <div class="search-results" id="searchResults"></div>
+                        <label for="userNameInput">Your Name</label>
+                        <input type="text" id="userNameInput" placeholder="Enter your name..." autocomplete="off"
+                            maxlength="30" />
                     </div>
-
-                    <div class="form-group">
-                        <label for="animeType">Type</label>
-                        <select id="animeType" required>
-                            <option value="TV">TV Series</option>
-                            <option value="Movie">Movie</option>
-                            <option value="OVA">OVA</option>
-                            <option value="ONA">ONA</option>
-                            <option value="Special">Special</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="animeEpisodes">Total Episodes</label>
-                        <input type="number" id="animeEpisodes" value="1" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="animeDuration">Duration (minutes)</label>
-                        <input type="number" id="animeDuration" value="20" min="1" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="animeStatus">Status</label>
-                        <select id="animeStatus" required>
-                            <option value="Completed">Completed</option>
-                            <option value="Watching">Watching</option>
-                            <option value="Plan to Watch">Plan to Watch</option>
-                            <option value="Dropped">Dropped</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="animeProgress">Episode Progress</label>
-                        <input type="number" id="animeProgress" min="0" value="0" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="animeScore">Score (0-10)</label>
-                        <input type="number" id="animeScore" min="0" max="10" step="0.1" placeholder="7.5" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="animeYear">Completion Year</label>
-                        <select id="animeYear">
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026" selected>2026</option>
-                            <option value="2027">2027</option>
-                            <option value="2028">2028</option>
-                            <option value="2029">2029</option>
-                            <option value="2030">2030</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="animeMonth">Completion Month</label>
-                        <select id="animeMonth">
-                            <option value="01">January</option>
-                            <option value="02">February</option>
-                            <option value="03">March</option>
-                            <option value="04">April</option>
-                            <option value="05">May</option>
-                            <option value="06" selected>June</option>
-                            <option value="07">July</option>
-                            <option value="08">August</option>
-                            <option value="09">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="animeCover">Cover Image URL</label>
-                        <input type="text" id="animeCover" placeholder="Will be auto-filled from search" disabled>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="animeGenres">Genres</label>
-                        <input type="text" id="animeGenres" placeholder="Will be auto-filled from search" disabled>
-                    </div>
-
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">Add Anime</button>
-                        <button type="button" class="btn btn-danger" id="deleteBtn"
-                            style="display: none;">Delete</button>
+                        <button type="submit" class="btn btn-primary" style="width: 100%">
+                            <i class="fas fa-check" aria-hidden="true"></i> Save & Continue
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
+    </div>
 
-        <!-- Import Modal -->
-        <div id="importModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">Import Anime Data</h2>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="form-group">
-                    <label for="importFile">Select JSON file</label>
-                    <div class="file-input-wrapper">
-                        <input type="file" id="importFile" accept=".json">
-                        <div class="file-input-btn">
-                            <i class="fas fa-file-import"></i> Choose File
+    <!-- All Activity Modal -->
+    <div id="allActivityModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="allActivityTitle" hidden>
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="allActivityTitle">All Activity</h2>
+                <button class="close-modal" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="activity-list-full" id="all-activity-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="userProfileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="userProfileTitle" hidden>
+        <div class="modal-content profile-modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="userProfileTitle">
+                    <i class="fas fa-user-circle" aria-hidden="true"></i> User Profile
+                </h2>
+                <button class="close-modal" onclick="closeUserProfileModal()" aria-label="Close modal">
+                    &times;
+                </button>
+            </div>
+            <div class="profile-modal-body">
+                <!-- Profile Header -->
+                <div class="profile-header-section">
+                    <div class="profile-avatar-large">
+                        <img id="profileAvatar" src="" alt="" />
+                        <div class="profile-status-dot"></div>
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="profileName">Loading...</h2>
+                        <div class="profile-badges">
+                            <span class="profile-level-badge" id="profileLevel">Lv.1</span>
+                            <span class="profile-title-badge" id="profileTitle">Newbie</span>
                         </div>
+                        <button class="friend-action-btn" id="profileFriendBtn" style="display: none">
+                            <i class="fas fa-user-plus" aria-hidden="true"></i> Add Friend
+                        </button>
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary close-modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="importDataBtn">Import Data</button>
-                </div>
-            </div>
-        </div>
 
-        <!-- Toast Container -->
-        <div class="toast-container" id="toastContainer"></div>
-
-        <!-- Empty State Component -->
-        <div class="empty-state" id="emptyStateTemplate" style="display: none;">
-            <div class="empty-state-icon">
-                <i class="fas"></i>
-            </div>
-            <h3 class="empty-state-title"></h3>
-            <p class="empty-state-message"></p>
-            <button class="empty-state-action btn-primary"></button>
-        </div>
-
-        <!-- Name Entry Modal -->
-        <div id="nameEntryModal" class="modal">
-            <div class="modal-content" style="max-width: 450px;">
-                <div class="modal-header">
-                    <div class="modal-title">
-                        <i class="fas fa-user-astronaut"></i>
-                        Welcome to AniPulse!
+                <!-- Stats Grid -->
+                <div class="profile-stats-grid">
+                    <div class="profile-stat-item">
+                        <span class="stat-value" id="profileTotalAnime">0</span>
+                        <span class="stat-label">Total Anime</span>
                     </div>
-                    <button class="close-modal" onclick="hideNameEntryModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p style="margin-bottom: 20px; color: var(--color-text-secondary);">
-                        Let's personalize your experience. What should we call you?
-                    </p>
-                    <form id="nameEntryForm">
-                        <div class="form-group">
-                            <label for="userNameInput">Your Name</label>
-                            <input type="text" id="userNameInput" placeholder="Enter your name..." autocomplete="off"
-                                maxlength="30" style="font-size: 1.1rem; padding: 12px;">
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">
-                                <i class="fas fa-check"></i> Save & Continue
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- All Activity Modal -->
-        <div id="allActivityModal" class="modal">
-            <div class="modal-content large-modal">
-                <div class="modal-header">
-                    <h2 class="modal-title">All Activity</h2>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="activity-list-full" id="all-activity-list">
-                        <!-- All activities will be populated here -->
+                    <div class="profile-stat-item">
+                        <span class="stat-value" id="profileCompleted">0</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
+                    <div class="profile-stat-item">
+                        <span class="stat-value" id="profileEpisodes">0</span>
+                        <span class="stat-label">Eps</span>
+                    </div>
+                    <div class="profile-stat-item">
+                        <span class="stat-value" id="profileHours">0</span>
+                        <span class="stat-label">Hrs</span>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Install Prompt Container -->
-        <div id="installPrompt" class="install-prompt" style="display: none;">
-            <div class="install-prompt-content">
-                <div class="install-icon">
-                    <i class="fas fa-download"></i>
-                </div>
-                <div class="install-text">
-                    <h4>Install AniPulse</h4>
-                    <p>Install as app for faster access and offline support</p>
-                </div>
-                <div class="install-actions">
-                    <button id="closeInstallPrompt" class="install-close">
-                        <i class="fas fa-times"></i>
+                <!-- Tabs -->
+                <div class="profile-tabs">
+                    <button class="profile-tab active" data-tab="completed">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i> Completed
                     </button>
-                    <button id="installAppBtn" class="install-btn">
-                        Install <i class="fas fa-arrow-right"></i>
+                    <button class="profile-tab" data-tab="watching">
+                        <i class="fas fa-play-circle" aria-hidden="true"></i> Watching
+                    </button>
+                    <button class="profile-tab" data-tab="plan">
+                        <i class="fas fa-clock" aria-hidden="true"></i> Plan to Watch
+                    </button>
+                    <button class="profile-tab" data-tab="achievements">
+                        <i class="fas fa-trophy" aria-hidden="true"></i> Achievements
+                    </button>
+                    <button class="profile-tab" data-tab="activity">
+                        <i class="fas fa-history" aria-hidden="true"></i> Activity
                     </button>
                 </div>
-            </div>
-        </div>
 
-        <!-- FULLSCREEN RECAP MODAL -->
-        <div id="recap-modal" class="recap-modal hidden">
-            <div class="recap-container">
-                <button class="recap-close">&times;</button>
-
-                <div class="recap-slide active" id="slide-1"></div>
-                <div class="recap-slide" id="slide-2"></div>
-                <div class="recap-slide" id="slide-3"></div>
-                <div class="recap-slide" id="slide-4"></div>
-                <div class="recap-slide" id="slide-5"></div>
-                <div class="recap-slide" id="slide-6"></div>
-                <div class="recap-slide" id="slide-7"></div>
-                <div class="recap-slide" id="slide-8"></div>
-                <div class="recap-slide" id="slide-9"></div>
-                <div class="recap-slide" id="slide-10"></div>
-                <div class="recap-slide" id="slide-11"></div>
-                <div class="recap-slide" id="slide-12"></div>
-
-                <div class="recap-controls">
-                    <button id="prev-slide">←</button>
-                    <button id="next-slide">→</button>
+                <!-- Tab Content -->
+                <div id="profileTabCompleted" class="profile-tab-content active">
+                    <div class="profile-anime-grid" id="profileCompletedList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                            Loading...
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- User Profile Modal (Enhanced) -->
-        <div id="userProfileModal" class="modal" style="display: none;">
-            <div class="modal-content profile-modal">
-                <div class="modal-header">
-                    <h2 class="modal-title">
-                        <i class="fas fa-user-circle"></i> User Profile
-                    </h2>
-                    <button class="close-modal" onclick="closeUserProfileModal()">&times;</button>
+                <div id="profileTabWatching" class="profile-tab-content">
+                    <div class="profile-anime-grid" id="profileWatchingList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                            Loading...
+                        </div>
+                    </div>
                 </div>
-                <div class="profile-modal-body">
-                    <!-- Profile Header -->
-                    <div class="profile-header-section">
-                        <div class="profile-avatar-large">
-                            <img id="profileAvatar" src="" alt="">
-                            <div class="profile-status-dot"></div>
-                        </div>
-                        <div class="profile-info">
-                            <h2 id="profileName">Loading...</h2>
-                            <div class="profile-badges">
-                                <span class="profile-level-badge" id="profileLevel">Lv.1</span>
-                                <span class="profile-title-badge" id="profileTitle">Newbie</span>
-                            </div>
-                            <button class="friend-action-btn" id="profileFriendBtn" style="display: none;">
-                                <i class="fas fa-user-plus"></i> Add Friend
-                            </button>
+                <div id="profileTabPlan" class="profile-tab-content">
+                    <div class="profile-anime-grid" id="profilePlanList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                            Loading...
                         </div>
                     </div>
-
-                    <!-- Stats Grid -->
-                    <div class="profile-stats-grid">
-                        <div class="profile-stat-item">
-                            <div class="stat-value" id="profileTotalAnime">0</div>
-                            <div class="stat-label">Total Anime</div>
-                        </div>
-                        <div class="profile-stat-item">
-                            <div class="stat-value" id="profileCompleted">0</div>
-                            <div class="stat-label">Completed</div>
-                        </div>
-                        <div class="profile-stat-item">
-                            <div class="stat-value" id="profileEpisodes">0</div>
-                            <div class="stat-label">Eps</div>
-                        </div>
-                        <div class="profile-stat-item">
-                            <div class="stat-value" id="profileHours">0</div>
-                            <div class="stat-label">Hrs</div>
+                </div>
+                <div id="profileTabAchievements" class="profile-tab-content">
+                    <div class="profile-achievements-grid" id="profileAchievementsList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                            Loading...
                         </div>
                     </div>
-
-                    <!-- Tabs for Anime Lists -->
-                    <div class="profile-tabs">
-                        <button class="profile-tab active" data-tab="completed">
-                            <i class="fas fa-check-circle"></i> Completed
-                        </button>
-                        <button class="profile-tab" data-tab="watching">
-                            <i class="fas fa-play-circle"></i> Watching
-                        </button>
-                        <button class="profile-tab" data-tab="plan">
-                            <i class="fas fa-clock"></i> Plan to Watch
-                        </button>
-                        <button class="profile-tab" data-tab="achievements">
-                            <i class="fas fa-trophy"></i> Achievements
-                        </button>
-                        <button class="profile-tab" data-tab="activity">
-                            <i class="fas fa-history"></i> Activity
-                        </button>
-                    </div>
-
-                    <!-- Tab Content: Completed Anime -->
-                    <div id="profileTabCompleted" class="profile-tab-content active">
-                        <div class="profile-anime-grid" id="profileCompletedList">
-                            <div class="loading-spinner">Loading...</div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content: Watching Anime -->
-                    <div id="profileTabWatching" class="profile-tab-content">
-                        <div class="profile-anime-grid" id="profileWatchingList">
-                            <div class="loading-spinner">Loading...</div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content: Plan to Watch -->
-                    <div id="profileTabPlan" class="profile-tab-content">
-                        <div class="profile-anime-grid" id="profilePlanList">
-                            <div class="loading-spinner">Loading...</div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content: Achievements -->
-                    <div id="profileTabAchievements" class="profile-tab-content">
-                        <div class="profile-achievements-grid" id="profileAchievementsList">
-                            <div class="loading-spinner">Loading...</div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content: Activity -->
-                    <div id="profileTabActivity" class="profile-tab-content">
-                        <div class="profile-activity-list" id="profileActivityList">
-                            <div class="loading-spinner">Loading...</div>
+                </div>
+                <div id="profileTabActivity" class="profile-tab-content">
+                    <div class="profile-activity-list" id="profileActivityList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                            Loading...
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Floating Add Anime Button -->
-        <div class="floating-add-anime" id="floatingAddAnimeBtn">
-            <i class="fas fa-plus"></i>
-            <span class="floating-add-tooltip">
-                <i class="fas fa-plus-circle"></i> Add Anime
-            </span>
+    <!-- Recap Modal -->
+    <div id="recap-modal" class="recap-modal hidden" role="dialog" aria-modal="true" aria-labelledby="recapTitle">
+        <div class="recap-container">
+            <button class="recap-close" aria-label="Close recap">&times;</button>
+            <div class="recap-slide active" id="slide-1"></div>
+            <div class="recap-slide" id="slide-2"></div>
+            <div class="recap-slide" id="slide-3"></div>
+            <div class="recap-slide" id="slide-4"></div>
+            <div class="recap-slide" id="slide-5"></div>
+            <div class="recap-slide" id="slide-6"></div>
+            <div class="recap-slide" id="slide-7"></div>
+            <div class="recap-slide" id="slide-8"></div>
+            <div class="recap-slide" id="slide-9"></div>
+            <div class="recap-slide" id="slide-10"></div>
+            <div class="recap-slide" id="slide-11"></div>
+            <div class="recap-slide" id="slide-12"></div>
+            <div class="recap-controls">
+                <button id="prev-slide" aria-label="Previous slide">←</button>
+                <button id="next-slide" aria-label="Next slide">→</button>
+            </div>
         </div>
+    </div>
 
+    <!-- ============================================ -->
+    <!-- TOAST CONTAINER -->
+    <!-- ============================================ -->
+    <div id="toastContainer" class="toast-container" role="status" aria-live="polite"></div>
 
+    <!-- ============================================ -->
+    <!-- EMPTY STATE TEMPLATE -->
+    <!-- ============================================ -->
+    <div id="emptyStateTemplate" hidden>
+        <div class="empty-state-icon"><i class="fas" aria-hidden="true"></i></div>
+        <h3 class="empty-state-title"></h3>
+        <p class="empty-state-message"></p>
+        <button class="empty-state-action btn-primary"></button>
+    </div>
 
+    <!-- ============================================ -->
+    <!-- INSTALL PROMPT -->
+    <!-- ============================================ -->
+    <div id="installPrompt" class="install-prompt" hidden>
+        <div class="install-prompt-content">
+            <div class="install-icon">
+                <i class="fas fa-download" aria-hidden="true"></i>
+            </div>
+            <div class="install-text">
+                <h4>Install AniPulse</h4>
+                <p>Install as app for faster access and offline support</p>
+            </div>
+            <div class="install-actions">
+                <button id="closeInstallPrompt" class="install-close" aria-label="Close install prompt">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+                <button id="installAppBtn" class="install-btn">
+                    Install <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
-        <script defer src="/Frontend/Js/config.js"></script>
-        <script src="Frontend/Js/main.js"></script>
-        <script src="Frontend/Js/extras.js"></script>
-        <script src="Frontend/Js/level-system.js"></script>
-        <script defer src="Frontend/Js/dual-storage.js"></script>
-        <script defer src="Frontend/Js/stats.js"></script>
+    <!-- Floating Add Anime Button -->
+    <div class="floating-add-anime" id="floatingAddAnimeBtn" role="button" aria-label="Add Anime">
+        <i class="fas fa-plus"></i>
+        <span class="floating-add-tooltip">
+            <i class="fas fa-plus-circle"></i> Add Anime
+        </span>
+    </div>
 
-        <script>
-            // ============================================
-            // PAGE NAVIGATION - COMPLETE WITH ALL FUNCTIONS
-            // ============================================
+    <!-- ============================================ -->
+    <!-- SCRIPTS -->
+    <!-- ============================================ -->
 
-            // Page Navigation - MODIFIED to save state
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.addEventListener('click', function (e) {
-                    if (this.id === 'logoutBtn') return;
+    <script defer src="/Frontend/Js/config.js"></script>
+    <script src="Frontend/Js/main.js"></script>
+    <script src="Frontend/Js/extras.js"></script>
+    <script src="Frontend/Js/level-system.js"></script>
+    <script defer src="Frontend/Js/dual-storage.js"></script>
+    <script defer src="Frontend/Js/stats.js"></script>
 
-                    const pageId = this.getAttribute('data-page');
-                    if (!pageId) return;
+    <!-- Application Bootstrap -->
+    <script>
+        // ============================================
+        // PAGE NAVIGATION
+        // ============================================
 
-                    // Save current page to localStorage
-                    localStorage.setItem('lastActivePage', pageId);
+        // Page Navigation - MODIFIED to save state
+        document.querySelectorAll(".menu-item").forEach((item) => {
+            item.addEventListener("click", function (e) {
+                if (this.id === "logoutBtn") return;
 
-                    // Save current scroll position
-                    localStorage.setItem('lastScrollPosition', window.scrollY);
+                const pageId = this.getAttribute("data-page");
+                if (!pageId) return;
 
-                    // Remove active class from all menu items
-                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
+                // Save current page to localStorage
+                localStorage.setItem("lastActivePage", pageId);
 
-                    // Hide all pages
-                    document.querySelectorAll('.page').forEach(page => {
-                        page.classList.remove('active');
-                        page.style.display = 'none';
-                    });
+                // Save current scroll position
+                localStorage.setItem("lastScrollPosition", window.scrollY);
 
-                    // Show selected page
-                    const activePage = document.getElementById(`${pageId}-page`);
-                    if (activePage) {
-                        activePage.classList.add('active');
-                        activePage.style.display = 'block';
+                // Remove active class from all menu items
+                document
+                    .querySelectorAll(".menu-item")
+                    .forEach((i) => i.classList.remove("active"));
+                this.classList.add("active");
 
-                        // Refresh level UI
-                        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+                // Hide all pages
+                document.querySelectorAll(".page").forEach((page) => {
+                    page.classList.remove("active");
+                    page.hidden = true;
+                });
+
+                // Show selected page
+                const activePage = document.getElementById(`${pageId}-page`);
+                if (activePage) {
+                    activePage.classList.add("active");
+                    activePage.hidden = false;
+
+                    // Refresh level UI
+                    if (
+                        window.AniPulseLevelSystem &&
+                        typeof window.AniPulseLevelSystem.updateAllLevelUI === "function"
+                    ) {
+                        window.AniPulseLevelSystem.updateAllLevelUI();
+                    }
+                }
+
+                // Scroll to saved position or top
+                const savedScroll =
+                    parseInt(localStorage.getItem("lastScrollPosition")) || 0;
+                window.scrollTo({ top: savedScroll, behavior: "smooth" });
+
+                // Initialize page-specific content
+                if (pageId === "statistics") {
+                    setTimeout(() => {
+                        if (typeof initStatisticsCharts === "function")
+                            initStatisticsCharts();
+                        if (typeof updateStatisticsTables === "function")
+                            updateStatisticsTables();
+                        if (typeof refreshAllCharts === "function") refreshAllCharts();
+                    }, 100);
+                } else if (pageId === "watchlist") {
+                    setTimeout(() => {
+                        if (typeof updateWatchlist === "function")
+                            updateWatchlist("all", 1);
+                    }, 100);
+                } else if (pageId === "achievements") {
+                    setTimeout(() => {
+                        if (typeof updateAchievements === "function")
+                            updateAchievements();
+                    }, 100);
+                } else if (pageId === "community") {
+                    setTimeout(() => {
+                        if (typeof initCommunityPage === "function") initCommunityPage();
+                        if (typeof loadFriends === "function") loadFriends();
+                        if (typeof loadFriendRequests === "function")
+                            loadFriendRequests();
+                    }, 100);
+                } else if (pageId === "anime-list") {
+                    setTimeout(() => {
+                        if (typeof updateAnimeDisplay === "function")
+                            updateAnimeDisplay();
+                    }, 100);
+                } else if (pageId === "settings") {
+                    setTimeout(() => {
+                        if (typeof initSettings === "function") initSettings();
+                        if (typeof initSyncUI === "function") initSyncUI();
+                        if (typeof initAvatarSystem === "function") initAvatarSystem();
+                        if (
+                            window.AniPulseLevelSystem &&
+                            typeof window.AniPulseLevelSystem.updateAllLevelUI ===
+                            "function"
+                        ) {
                             window.AniPulseLevelSystem.updateAllLevelUI();
                         }
-                    }
+                    }, 100);
+                } else if (pageId === "dashboard") {
+                    setTimeout(() => {
+                        if (typeof updateStats === "function") updateStats();
+                        if (typeof updateTopRatedAnime === "function")
+                            updateTopRatedAnime();
+                        if (typeof updateCurrentMonthAnime === "function")
+                            updateCurrentMonthAnime();
+                        if (typeof updateRecentActivity === "function")
+                            updateRecentActivity();
+                        if (typeof updateCurrentlyWatching === "function")
+                            updateCurrentlyWatching();
+                        if (typeof renderAnimeDNA === "function") renderAnimeDNA();
+                    }, 100);
+                }
+            });
+        });
 
-                    // Scroll to saved position or top
-                    const savedScroll = parseInt(localStorage.getItem('lastScrollPosition')) || 0;
-                    window.scrollTo({ top: savedScroll, behavior: 'smooth' });
+        // ============================================
+        // INITIAL DASHBOARD LOAD
+        // ============================================
 
-                    // Initialize page-specific content
-                    if (pageId === 'statistics') {
-                        setTimeout(() => {
-                            if (typeof initStatisticsCharts === 'function') initStatisticsCharts();
-                            if (typeof updateStatisticsTables === 'function') updateStatisticsTables();
-                            if (typeof refreshAllCharts === 'function') refreshAllCharts();
-                        }, 100);
-                    } else if (pageId === 'watchlist') {
-                        setTimeout(() => {
-                            if (typeof updateWatchlist === 'function') updateWatchlist('all', 1);
-                        }, 100);
-                    } else if (pageId === 'achievements') {
-                        setTimeout(() => {
-                            if (typeof updateAchievements === 'function') updateAchievements();
-                        }, 100);
-                    } else if (pageId === 'ranking') {
-                        setTimeout(() => {
-                            if (typeof initRankingPage === 'function') initRankingPage();
-                            if (typeof loadRankings === 'function') loadRankings('level', true);
-                            if (typeof loadMyRank === 'function') loadMyRank();
-                        }, 100);
-                    } else if (pageId === 'community') {
-                        setTimeout(() => {
-                            if (typeof initCommunityPage === 'function') initCommunityPage();
-                            if (typeof loadFriends === 'function') loadFriends();
-                            if (typeof loadFriendRequests === 'function') loadFriendRequests();
-                        }, 100);
-                    } else if (pageId === 'anime-list') {
-                        setTimeout(() => {
-                            if (typeof updateAnimeDisplay === 'function') updateAnimeDisplay();
-                        }, 100);
-                    } else if (pageId === 'settings') {
-                        setTimeout(() => {
-                            if (typeof initSettings === 'function') initSettings();
-                            if (typeof initSyncUI === 'function') initSyncUI();
-                            if (typeof initAvatarSystem === 'function') initAvatarSystem();
-                            if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
-                                window.AniPulseLevelSystem.updateAllLevelUI();
-                            }
-                        }, 100);
-                    } else if (pageId === 'dashboard') {
-                        setTimeout(() => {
-                            if (typeof updateStats === 'function') updateStats();
-                            if (typeof updateTopRatedAnime === 'function') updateTopRatedAnime();
-                            if (typeof updateCurrentMonthAnime === 'function') updateCurrentMonthAnime();
-                            if (typeof updateRecentActivity === 'function') updateRecentActivity();
-                            if (typeof updateCurrentlyWatching === 'function') updateCurrentlyWatching();
-                            if (typeof renderAnimeDNA === 'function') renderAnimeDNA();
-                        }, 100);
-                    }
-                });
+        document.addEventListener("DOMContentLoaded", function () {
+            // Hide all pages first
+            document.querySelectorAll(".page").forEach((page) => {
+                page.hidden = true;
             });
 
-            // ============================================
-            // INITIAL DASHBOARD LOAD
-            // ============================================
-
-            // Make sure dashboard is visible on load
-            document.addEventListener('DOMContentLoaded', function () {
-                // Hide all pages first
-                document.querySelectorAll('.page').forEach(page => {
-                    page.style.display = 'none';
-                });
-
-                // Show dashboard page
-                const dashboardPage = document.getElementById('dashboard-page');
-                if (dashboardPage) {
-                    dashboardPage.style.display = 'block';
-                    dashboardPage.classList.add('active');
-                }
-
-                // Ensure level UI is in sync on initial load
-                if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
-                    window.AniPulseLevelSystem.updateAllLevelUI();
-                }
-
-                // Set active menu item
-                const dashboardMenuItem = document.querySelector('.menu-item[data-page="dashboard"]');
-                if (dashboardMenuItem) {
-                    dashboardMenuItem.classList.add('active');
-                }
-
-                // Initialize dashboard data
-                setTimeout(() => {
-                    if (typeof updateStats === 'function') updateStats();
-                    if (typeof updateTopRatedAnime === 'function') updateTopRatedAnime();
-                    if (typeof updateCurrentMonthAnime === 'function') updateCurrentMonthAnime();
-                    if (typeof updateRecentActivity === 'function') updateRecentActivity();
-                    if (typeof updateCurrentlyWatching === 'function') updateCurrentlyWatching();
-                    if (typeof renderAnimeDNA === 'function') renderAnimeDNA();
-                    if (typeof updateAnimeDisplay === 'function') updateAnimeDisplay();
-                    if (typeof updateSidebarUserInfo === 'function') updateSidebarUserInfo();
-                    if (typeof updateCurrentDate === 'function') updateCurrentDate();
-                }, 200);
-            });
-
-            // ============================================
-            // SERVICE WORKER REGISTRATION
-            // ============================================
-
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/service-worker.js').then(registration => {
-                        console.log('✅ ServiceWorker registered successfully:', registration.scope);
-                    }).catch(error => {
-                        console.log('❌ ServiceWorker registration failed:', error);
-                    });
-                });
+            // Show dashboard page
+            const dashboardPage = document.getElementById("dashboard-page");
+            if (dashboardPage) {
+                dashboardPage.hidden = false;
+                dashboardPage.classList.add("active");
             }
-        </script>
+
+            // Ensure level UI is in sync on initial load
+            if (
+                window.AniPulseLevelSystem &&
+                typeof window.AniPulseLevelSystem.updateAllLevelUI === "function"
+            ) {
+                window.AniPulseLevelSystem.updateAllLevelUI();
+            }
+
+            // Set active menu item
+            const dashboardMenuItem = document.querySelector(
+                '.menu-item[data-page="dashboard"]',
+            );
+            if (dashboardMenuItem) {
+                dashboardMenuItem.classList.add("active");
+            }
+
+            // Initialize dashboard data
+            setTimeout(() => {
+                if (typeof updateStats === "function") updateStats();
+                if (typeof updateTopRatedAnime === "function") updateTopRatedAnime();
+                if (typeof updateCurrentMonthAnime === "function")
+                    updateCurrentMonthAnime();
+                if (typeof updateRecentActivity === "function")
+                    updateRecentActivity();
+                if (typeof updateCurrentlyWatching === "function")
+                    updateCurrentlyWatching();
+                if (typeof renderAnimeDNA === "function") renderAnimeDNA();
+                if (typeof updateAnimeDisplay === "function") updateAnimeDisplay();
+                if (typeof updateSidebarUserInfo === "function")
+                    updateSidebarUserInfo();
+                if (typeof updateCurrentDate === "function") updateCurrentDate();
+            }, 200);
+        });
+
+        // ============================================
+        // SERVICE WORKER REGISTRATION
+        // ============================================
+
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker
+                    .register("/service-worker.js")
+                    .then((registration) => {
+                        console.log(
+                            "✅ ServiceWorker registered successfully:",
+                            registration.scope,
+                        );
+                    })
+                    .catch((error) => {
+                        console.log("❌ ServiceWorker registration failed:", error);
+                    });
+            });
+        }
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,633 @@
+/* ============================================
+   LOADER OVERLAY - PREMIUM
+   ============================================ */
+#app-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, #0B1120, #1A1F2E, #0B1120);
+    background-size: 300% 300%;
+    animation: gradientShift 6s ease-in-out infinite;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+#app-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* ============================================
+   FLOATING GLOW ORBS
+   ============================================ */
+.loader-orbs {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.loader-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+    animation: orbFloat 8s ease-in-out infinite;
+}
+
+.loader-orb-1 {
+    width: 300px;
+    height: 300px;
+    background: rgba(139, 92, 246, 0.15);
+    top: -100px;
+    right: -100px;
+    animation-delay: 0s;
+}
+
+.loader-orb-2 {
+    width: 250px;
+    height: 250px;
+    background: rgba(99, 102, 241, 0.1);
+    bottom: -80px;
+    left: -80px;
+    animation-delay: -3s;
+}
+
+.loader-orb-3 {
+    width: 200px;
+    height: 200px;
+    background: rgba(236, 72, 153, 0.08);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: -5s;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -40px) scale(1.2); }
+    66% { transform: translate(-30px, 30px) scale(0.8); }
+}
+
+/* ============================================
+   LOADER CONTAINER
+   ============================================ */
+.loader-container {
+    text-align: center;
+    max-width: 440px;
+    width: 90%;
+    padding: 48px 36px 40px;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 48px;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 1;
+    animation: containerFloat 3s ease-in-out infinite;
+}
+
+@keyframes containerFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+}
+
+/* Premium Border Glow */
+.loader-container::before {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    border-radius: 48px;
+    background: linear-gradient(135deg, 
+        rgba(139, 92, 246, 0.3) 0%, 
+        rgba(99, 102, 241, 0.1) 30%,
+        rgba(236, 72, 153, 0.05) 60%,
+        rgba(139, 92, 246, 0.2) 100%
+    );
+    background-size: 300% 300%;
+    animation: borderGlow 4s ease-in-out infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes borderGlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* ============================================
+   LOADER LOGO
+   ============================================ */
+.loader-logo {
+    font-size: 2.6rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    color: white;
+}
+
+.loader-logo .logo-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #8B5CF6, #6366F1);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    box-shadow: 0 8px 30px rgba(139, 92, 246, 0.3);
+    animation: iconPulse 2s ease-in-out infinite;
+    position: relative;
+}
+
+.loader-logo .logo-icon::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), transparent);
+    animation: iconRing 2s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes iconRing {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+.loader-logo .logo-text {
+    background: linear-gradient(135deg, #FFFFFF 30%, #A78BFA 70%, #6366F1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.loader-logo .logo-beta {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #A78BFA;
+    background: rgba(139, 92, 246, 0.15);
+    padding: 2px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    -webkit-text-fill-color: #A78BFA;
+}
+
+/* ============================================
+   LOADER TEXT
+   ============================================ */
+.loader-text {
+    font-size: 0.95rem;
+    color: #A78BFA;
+    margin-bottom: 28px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.loader-text .dots {
+    display: flex;
+    gap: 4px;
+}
+
+.loader-text .dot {
+    width: 4px;
+    height: 4px;
+    background: #A78BFA;
+    border-radius: 50%;
+    animation: dotBounce 1.4s ease-in-out infinite;
+}
+
+.loader-text .dot:nth-child(2) { animation-delay: 0.2s; }
+.loader-text .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================
+   PROGRESS WRAPPER
+   ============================================ */
+.progress-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ============================================
+   PROGRESS BAR - PREMIUM
+   ============================================ */
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+#loader-progress {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA, #8B5CF6, #6366F1);
+    background-size: 200% 100%;
+    border-radius: 50px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: progressGlow 2s ease-in-out infinite;
+}
+
+@keyframes progressGlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Shimmer effect */
+#loader-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.15), 
+        transparent
+    );
+    animation: progressShimmer 1.5s ease-in-out infinite;
+    border-radius: 50px;
+}
+
+@keyframes progressShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* ============================================
+   PROGRESS PERCENTAGE
+   ============================================ */
+.progress-percent {
+    font-size: 0.9rem;
+    color: #94A3B8;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+#loader-percent {
+    color: #A78BFA;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+/* Percentage number animation */
+#loader-percent.pop {
+    animation: percentPop 0.3s ease;
+}
+
+@keyframes percentPop {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================
+   LOADER ANIMATIONS
+   ============================================ */
+@keyframes loaderFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(1.02);
+    }
+}
+
+#app-loader.fade-out {
+    animation: loaderFadeOut 0.6s ease forwards;
+}
+
+/* ============================================
+   RESPONSIVE LOADER
+   ============================================ */
+@media (max-width: 768px) {
+    .loader-container {
+        padding: 36px 24px 32px;
+        border-radius: 32px;
+    }
+    
+    .loader-logo {
+        font-size: 2.2rem;
+    }
+    
+    .loader-logo .logo-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 1.6rem;
+        border-radius: 14px;
+    }
+    
+    .loader-text {
+        font-size: 0.85rem;
+        margin-bottom: 24px;
+    }
+    
+    .progress-percent {
+        font-size: 0.8rem;
+    }
+    
+    .loader-orb-1 {
+        width: 200px;
+        height: 200px;
+        top: -60px;
+        right: -60px;
+    }
+    
+    .loader-orb-2 {
+        width: 160px;
+        height: 160px;
+        bottom: -50px;
+        left: -50px;
+    }
+    
+    .loader-orb-3 {
+        width: 130px;
+        height: 130px;
+    }
+}
+
+@media (max-width: 480px) {
+    .loader-container {
+        padding: 28px 16px 24px;
+        border-radius: 24px;
+        max-width: 95%;
+    }
+    
+    .loader-logo {
+        font-size: 1.8rem;
+        gap: 10px;
+    }
+    
+    .loader-logo .logo-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.3rem;
+        border-radius: 12px;
+    }
+    
+    .loader-logo .logo-beta {
+        font-size: 0.5rem;
+        padding: 1px 8px;
+    }
+    
+    .loader-text {
+        font-size: 0.75rem;
+        margin-bottom: 20px;
+    }
+    
+    .loader-text .dot {
+        width: 3px;
+        height: 3px;
+    }
+    
+    .progress-bar {
+        height: 4px;
+    }
+    
+    .progress-percent {
+        font-size: 0.7rem;
+    }
+    
+    #loader-percent {
+        font-size: 0.8rem;
+    }
+    
+    .loader-orb-1 {
+        width: 140px;
+        height: 140px;
+        top: -40px;
+        right: -40px;
+    }
+    
+    .loader-orb-2 {
+        width: 110px;
+        height: 110px;
+        bottom: -30px;
+        left: -30px;
+    }
+    
+    .loader-orb-3 {
+        width: 90px;
+        height: 90px;
+    }
+}
+
+/* ============================================
+   LIGHT MODE LOADER
+   ============================================ */
+[data-theme="light"] #app-loader {
+    background: linear-gradient(135deg, #F8FAFC, #FFFFFF, #F8FAFC);
+    background-size: 300% 300%;
+    animation: gradientShift 6s ease-in-out infinite;
+}
+
+[data-theme="light"] .loader-container {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(139, 92, 246, 0.12);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .loader-container::before {
+    background: linear-gradient(135deg, 
+        rgba(139, 92, 246, 0.15) 0%, 
+        rgba(99, 102, 241, 0.08) 30%,
+        rgba(236, 72, 153, 0.04) 60%,
+        rgba(139, 92, 246, 0.1) 100%
+    );
+}
+
+[data-theme="light"] .loader-text {
+    color: #6366F1;
+}
+
+[data-theme="light"] .loader-text .dot {
+    background: #6366F1;
+}
+
+[data-theme="light"] .progress-bar {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .progress-percent {
+    color: #64748B;
+}
+
+[data-theme="light"] #loader-percent {
+    color: #6366F1;
+}
+
+[data-theme="light"] .loader-logo .logo-text {
+    background: linear-gradient(135deg, #1a1f2e 30%, #7C3AED 70%, #6366F1);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+[data-theme="light"] .loader-logo .logo-beta {
+    color: #7C3AED;
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.1);
+    -webkit-text-fill-color: #7C3AED;
+}
+
+[data-theme="light"] .loader-orb-1 {
+    background: rgba(139, 92, 246, 0.06);
+}
+
+[data-theme="light"] .loader-orb-2 {
+    background: rgba(99, 102, 241, 0.04);
+}
+
+[data-theme="light"] .loader-orb-3 {
+    background: rgba(236, 72, 153, 0.03);
+}
+
+[data-theme="light"] .loader-logo .logo-icon {
+    box-shadow: 0 8px 30px rgba(139, 92, 246, 0.15);
+}
+
+/* ============================================
+   LOADER STATE VARIATIONS
+   ============================================ */
+
+/* Loading - 25% */
+#loader-progress.loading-25 {
+    width: 25%;
+}
+
+/* Loading - 50% */
+#loader-progress.loading-50 {
+    width: 50%;
+}
+
+/* Loading - 75% */
+#loader-progress.loading-75 {
+    width: 75%;
+}
+
+/* Loading - 90% */
+#loader-progress.loading-90 {
+    width: 90%;
+}
+
+/* Loading - 100% (Complete) */
+#loader-progress.loading-100 {
+    width: 100%;
+    background: linear-gradient(90deg, #10B981, #34D399, #6EE7B7);
+    animation: none;
+}
+
+#loader-progress.loading-100::after {
+    display: none;
+}
+
+/* Loading complete text */
+.loading-complete #loader-percent {
+    color: #34D399;
+}
+
+.loading-complete .loader-text {
+    color: #34D399;
+}
+
+.loading-complete .loader-text .dot {
+    background: #34D399;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    #app-loader,
+    .loader-container,
+    .loader-logo .logo-icon,
+    .loader-logo .logo-icon::after,
+    .loader-text .dot,
+    #loader-progress,
+    #loader-progress::after,
+    .loader-orb {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    #loader-progress {
+        transition: none !important;
+    }
+    
+    #app-loader.fade-out {
+        animation: none !important;
+        opacity: 0;
+    }
+    
+    .loader-container {
+        transform: none !important;
+    }
+}
+
+/* ============================================
+   SKELETON LOADING (For content)
+   ============================================ */
+.skeleton {
+    background: linear-gradient(90deg, 
+        var(--bg-tertiary) 0%, 
+        var(--bg-hover) 50%, 
+        var(--bg-tertiary) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s infinite;
+    border-radius: var(--radius-md);
+}
+
+@keyframes skeletonLoading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

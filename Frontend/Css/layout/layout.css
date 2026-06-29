@@ -1,0 +1,93 @@
+/* ============================================
+   LAYOUT.CSS - Main Layout System
+   ============================================ */
+
+/* ============================================
+   MAIN CONTENT - DEFAULT (No Sidebar)
+   ============================================ */
+.main-content {
+    padding: 24px 32px;
+    padding-top: calc(70px + 32px + 15px);
+    min-height: 100vh;
+    transition: all 0.25s ease;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+/* ============================================
+   WITH SIDEBAR - ONLY WHEN SIDEBAR EXISTS
+   ============================================ */
+.sidebar + .main-content,
+body.has-sidebar .main-content {
+    margin-left: 240px;
+    max-width: calc(100% - 240px);
+}
+
+/* ============================================
+   NO SIDEBAR - LANDING PAGE, LOGIN, ETC.
+   ============================================ */
+body.no-sidebar .main-content {
+    margin-left: 0;
+    max-width: 100%;
+    padding: 24px 32px;
+    padding-top: calc(70px + 32px + 15px);
+}
+
+/* ============================================
+   RESPONSIVE - TABLET
+   ============================================ */
+@media (max-width: 1024px) {
+    .main-content {
+        padding: 20px 24px;
+        padding-top: calc(65px + 20px + 12px);
+    }
+    
+    .sidebar + .main-content,
+    body.has-sidebar .main-content {
+        margin-left: 200px;
+        max-width: calc(100% - 200px);
+    }
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================ */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 16px;
+        padding-top: calc(56px + 16px + 10px);
+    }
+    
+    .sidebar + .main-content,
+    body.has-sidebar .main-content,
+    body.no-sidebar .main-content {
+        margin-left: 0;
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 12px;
+        padding-top: calc(50px + 12px + 8px);
+    }
+}
+
+/* ============================================
+   CONTAINER HELPER
+   ============================================ */
+.container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 12px;
+    }
+}

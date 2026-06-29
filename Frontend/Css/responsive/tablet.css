@@ -1,0 +1,175 @@
+/* ============================================
+   TABLET RESPONSIVE (768px - 1024px)
+   ============================================ */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    /* ===== LAYOUT ===== */
+    .container {
+        padding: 0 var(--space-4);
+    }
+    
+    /* ===== HEADER ===== */
+    .top-bar {
+        padding: 0 var(--space-4) !important;
+        height: 60px !important;
+    }
+    
+    .app-logo h2 {
+        font-size: var(--text-xl) !important;
+    }
+    
+    /* ===== GREETING ===== */
+    .greeting-banner {
+        margin: 0 var(--space-4) var(--space-6) var(--space-4) !important;
+        padding: var(--space-6) var(--space-8) !important;
+    }
+    
+    .greeting-line {
+        font-size: var(--text-2xl) !important;
+    }
+    
+    .greeting-emoji {
+        font-size: var(--text-2xl) !important;
+    }
+    
+    /* ===== STATS ===== */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: var(--space-4) !important;
+        margin: 0 var(--space-4) var(--space-6) var(--space-4) !important;
+    }
+    
+    .stat-value {
+        font-size: var(--text-2xl) !important;
+    }
+    
+    /* ===== DNA ===== */
+    .dna-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: var(--space-4) !important;
+        margin: 0 var(--space-4) var(--space-6) var(--space-4) !important;
+    }
+    
+    /* ===== QUICK ACTIONS ===== */
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: var(--space-4) !important;
+        margin: 0 var(--space-4) var(--space-6) var(--space-4) !important;
+    }
+    
+    /* ===== CHARTS ===== */
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+        gap: var(--space-4) !important;
+        margin: 0 var(--space-4) var(--space-6) var(--space-4) !important;
+    }
+    
+    .chart-container {
+        height: 250px !important;
+    }
+    
+    /* ===== ANIME CARDS ===== */
+    .top-anime-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: var(--space-4) !important;
+    }
+    
+    .anime-card .anime-cover {
+        height: 240px !important;
+    }
+    
+    /* ===== WATCHLIST ===== */
+    #watchlist-container {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: var(--space-3) !important;
+    }
+    
+    #watchlist-container .anime-cover {
+        height: 200px !important;
+    }
+    
+    /* ===== STATISTICS ===== */
+    #statistics-page {
+        margin: 0 var(--space-4) var(--space-6) var(--space-4) !important;
+    }
+    
+    .statistics-grid {
+        grid-template-columns: 1fr !important;
+        gap: var(--space-4) !important;
+    }
+    
+    .statistics-grid .chart-container {
+        height: 250px !important;
+    }
+    
+    /* ===== SETTINGS ===== */
+    #settings-page {
+        margin: 0 var(--space-4) var(--space-6) var(--space-4) !important;
+    }
+    
+    .settings-groups-container {
+        gap: var(--space-4) !important;
+    }
+    
+    .settings-group {
+        padding: var(--space-5) !important;
+    }
+    
+    /* ===== COMMUNITY ===== */
+    #community-page {
+        margin: 0 var(--space-4) var(--space-6) var(--space-4) !important;
+    }
+    
+    .community-tabs {
+        flex-wrap: wrap !important;
+        border-radius: var(--radius-lg) !important;
+        padding: var(--space-2) !important;
+    }
+    
+    .community-tab {
+        padding: var(--space-2) var(--space-4) !important;
+        font-size: var(--text-sm) !important;
+    }
+    
+    .friends-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: var(--space-3) !important;
+    }
+    
+    /* ===== MODALS ===== */
+    .modal-content {
+        padding: var(--space-5) !important;
+        max-width: 90% !important;
+    }
+    
+    .modal-content.large {
+        max-width: 95% !important;
+    }
+    
+    /* ===== TOASTS ===== */
+    .toast-container {
+        right: var(--space-4) !important;
+    }
+    
+    /* ===== FLOATING BUTTON ===== */
+    .floating-add-anime {
+        width: 56px !important;
+        height: 56px !important;
+        bottom: 24px !important;
+        right: 24px !important;
+    }
+    
+    .floating-add-anime i {
+        font-size: var(--text-xl) !important;
+    }
+    
+    /* ===== PROFILE DROPDOWN ===== */
+    .profile-dropdown {
+        width: 300px !important;
+    }
+    
+    .profile-dropdown .sidebar-avatar {
+        width: 50px !important;
+        height: 50px !important;
+    }
+}

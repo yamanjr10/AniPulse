@@ -2494,133 +2494,750 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
 // =============================================
-// MAKE EDIT ANIME GLOBALLY AVAILABLE
+// COMPLETE WORKING MODAL SYSTEM
 // =============================================
 
-// Edit anime - Shows existing dates properly
-function editAnime(id) {
-    const anime = animeData.find(a => a.id == id);
-    if (!anime) return;
+(function completeModalSystem() {
+    console.log('🚀 Initializing complete modal system...');
 
-    isEditing = true;
-    currentEditId = id;
-
-    // Populate form with anime data
-    const animeIdInput = document.getElementById('animeId');
-    const animeTitle = document.getElementById('animeTitle');
-    const animeType = document.getElementById('animeType');
-    const animeEpisodes = document.getElementById('animeEpisodes');
-    const animeDuration = document.getElementById('animeDuration');
-    const animeStatus = document.getElementById('animeStatus');
-    const animeProgress = document.getElementById('animeProgress');
-    const animeScore = document.getElementById('animeScore');
-    const animeCover = document.getElementById('animeCover');
-    const animeGenres = document.getElementById('animeGenres');
-    const animeYear = document.getElementById('animeYear');
-    const animeMonth = document.getElementById('animeMonth');
-    const durationInput = document.getElementById('animeDuration');
-    const submitButton = document.getElementById('submitBtn');
-    const deleteButton = document.getElementById('deleteBtn');
-    const addModal = document.getElementById('addAnimeModal');
-    const searchResultsDiv = document.getElementById('searchResults');
-
-    if (animeIdInput) animeIdInput.value = anime.id;
-    if (animeTitle) animeTitle.value = anime.title;
-    if (animeType) animeType.value = anime.type;
-    if (animeEpisodes) animeEpisodes.value = anime.episodes;
-    if (animeDuration) animeDuration.value = anime.duration || (anime.type === 'Movie' ? 120 : 20);
-    if (animeStatus) animeStatus.value = anime.userStatus;
-    if (animeProgress) animeProgress.value = anime.progress;
-    if (animeScore) animeScore.value = anime.score || '';
-    if (animeCover) animeCover.value = anime.cover || '';
-    if (animeGenres) animeGenres.value = anime.genres ? anime.genres.join(', ') : '';
-
-    // Set finish date if exists - extract year and month for display
-    if (anime.finishDate && animeYear && animeMonth) {
-        const [year, month] = anime.finishDate.split('-');
-        animeYear.value = year;
-        animeMonth.value = month;
-    } else if (animeYear && animeMonth) {
-        // Set current date as default
-        const now = new Date();
-        animeYear.value = now.getFullYear().toString();
-        animeMonth.value = (now.getMonth() + 1).toString().padStart(2, '0');
+    // ============================================
+    // 1. MODAL OPEN/CLOSE FUNCTIONS
+    // ============================================
+    
+    function openModal(modalElement) {
+        if (!modalElement) return;
+        
+        // Remove hidden attribute
+        modalElement.removeAttribute('hidden');
+        
+        // Force display
+        modalElement.style.display = 'flex';
+        modalElement.style.visibility = 'visible';
+        modalElement.style.opacity = '1';
+        modalElement.style.pointerEvents = 'auto';
+        modalElement.style.zIndex = '99999';
+        
+        // Add show class
+        modalElement.classList.add('show');
+        modalElement.classList.add('active');
+        
+        // Lock body scroll
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        document.body.style.top = '0';
+        
+        console.log('✅ Modal opened');
     }
 
-    // Set duration input readonly based on type
-    if (durationInput) {
-        if (anime.type === 'Movie') {
-            durationInput.readOnly = false;
-        } else {
-            durationInput.readOnly = true;
+    function closeModal(modalElement) {
+        if (!modalElement) return;
+        
+        // Hide modal
+        modalElement.style.display = 'none';
+        modalElement.style.visibility = 'hidden';
+        modalElement.style.opacity = '0';
+        modalElement.classList.remove('show');
+        modalElement.classList.remove('active');
+        
+        // Add hidden attribute back
+        modalElement.setAttribute('hidden', '');
+        
+        // Restore body scroll
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.top = '';
+        
+        console.log('✅ Modal closed');
+    }
+
+    // ============================================
+    // 2. RESET EDITING STATE
+    // ============================================
+    
+    function resetEditingState() {
+        window.isEditing = false;
+        window.currentEditId = null;
+        const submitBtn = document.getElementById('submitBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+        if (submitBtn) submitBtn.textContent = 'Add Anime';
+        if (deleteBtn) deleteBtn.style.display = 'none';
+        
+        // Reset form
+        const form = document.getElementById('addAnimeForm');
+        if (form) {
+            form.reset();
+            document.getElementById('animeEpisodes').value = 1;
+            document.getElementById('animeDuration').value = 20;
+            document.getElementById('animeProgress').value = 0;
+            document.getElementById('animeStatus').value = 'Plan to Watch';
         }
     }
 
-    // Update button text and show delete button
-    if (submitButton) submitButton.textContent = 'Update Anime';
-    if (deleteButton) deleteButton.style.display = 'inline-block';
+    // ============================================
+    // 3. SETUP MODAL CLOSE HANDLERS
+    // ============================================
+    
+    function setupModalHandlers() {
+        const addModal = document.getElementById('addAnimeModal');
+        if (!addModal) {
+            console.warn('⚠️ Add anime modal not found');
+            return;
+        }
 
-    // Show modal
-    if (addModal) addModal.style.display = 'flex';
+        // Make sure modal starts hidden
+        addModal.setAttribute('hidden', '');
+        addModal.style.display = 'none';
+        addModal.classList.remove('show', 'active');
 
-    // Close search results if open
-    if (searchResultsDiv) searchResultsDiv.style.display = 'none';
-}
+        // CLOSE ON BACKDROP CLICK
+        addModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal(this);
+                resetEditingState();
+            }
+        });
 
-// Make editAnime available globally for click handlers
-window.editAnime = editAnime;
+        // CLOSE ON X BUTTON
+        const closeX = addModal.querySelector('.close-modal');
+        if (closeX) {
+            closeX.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeModal(document.getElementById('addAnimeModal'));
+                resetEditingState();
+            });
+        }
 
-// =============================================
-// DELETE ANIME FUNCTION
-// =============================================
+        // CLOSE ON CANCEL BUTTON
+        const cancelBtn = addModal.querySelector('.btn-secondary.close-modal');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeModal(document.getElementById('addAnimeModal'));
+                resetEditingState();
+            });
+        }
 
-// Delete anime - Fixed version
-function deleteAnime() {
-    if (!currentEditId) return;
-
-    if (!confirm('Are you sure you want to delete this anime?')) return;
-
-    const anime = animeData.find(a => a.id == currentEditId);
-    if (anime) {
-        logActivity("deleted", anime.title);
+        console.log('✅ Modal close handlers setup');
     }
 
-    animeData = animeData.filter(a => a.id != currentEditId);
-    saveData();
-    try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { /* ignore */ }
+    // ============================================
+    // 4. SETUP ADD ANIME BUTTON
+    // ============================================
+    
+    function setupAddAnimeButton() {
+        const addAnimeBtn = document.getElementById('addAnimeBtn');
+        if (!addAnimeBtn) {
+            console.warn('⚠️ Add anime button not found');
+            return;
+        }
 
-    const addModal = document.getElementById('addAnimeModal');
-    const animeFormElement = document.getElementById('addAnimeForm');
-    const searchResultsDiv = document.getElementById('searchResults');
-    const submitButton = document.getElementById('submitBtn');
-    const deleteButton = document.getElementById('deleteBtn');
-    const statusFilter = document.getElementById('statusFilter');
-
-    if (addModal) addModal.style.display = 'none';
-    if (animeFormElement) animeFormElement.reset();
-    if (searchResultsDiv) {
-        searchResultsDiv.style.display = 'none';
-        searchResultsDiv.innerHTML = '';
+        addAnimeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('🖱️ Add Anime button clicked');
+            
+            resetEditingState();
+            openModal(document.getElementById('addAnimeModal'));
+        });
+        
+        console.log('✅ Add anime button setup');
     }
 
-    isEditing = false;
-    currentEditId = null;
-    if (submitButton) submitButton.textContent = 'Add Anime';
-    if (deleteButton) deleteButton.style.display = 'none';
+    // ============================================
+    // 5. SETUP FLOATING ADD ANIME BUTTON
+    // ============================================
+    
+    function setupFloatingButton() {
+        const floatingBtn = document.getElementById('floatingAddAnimeBtn');
+        if (!floatingBtn) {
+            console.warn('⚠️ Floating button not found');
+            return;
+        }
 
-    // Reset filters to show all statuses
-    if (statusFilter) statusFilter.value = 'all';
+        floatingBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('🖱️ Floating Add Anime button clicked');
+            
+            resetEditingState();
+            openModal(document.getElementById('addAnimeModal'));
+            
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(50);
+            }
+        });
+        
+        console.log('✅ Floating button setup');
+    }
 
-    // Refresh everything
-    updateAllComponents();
+    // ============================================
+    // 6. EDIT ANIME FUNCTION
+    // ============================================
+    
+    window.editAnime = function(id) {
+        console.log('✏️ Editing anime with ID:', id);
+        
+        const anime = animeData.find(a => a.id == id);
+        if (!anime) {
+            console.error('❌ Anime not found');
+            if (typeof showToast === 'function') {
+                showToast('Anime not found', 'error');
+            }
+            return;
+        }
 
-    showToast('Anime deleted successfully!', 'success');
-}
+        console.log('📝 Found anime:', anime.title);
 
-// Make deleteAnime available globally
-window.deleteAnime = deleteAnime;
+        // Set editing state
+        window.isEditing = true;
+        window.currentEditId = id;
+
+        // Get all form elements
+        const animeIdInput = document.getElementById('animeId');
+        const animeTitle = document.getElementById('animeTitle');
+        const animeType = document.getElementById('animeType');
+        const animeEpisodes = document.getElementById('animeEpisodes');
+        const animeDuration = document.getElementById('animeDuration');
+        const animeStatus = document.getElementById('animeStatus');
+        const animeProgress = document.getElementById('animeProgress');
+        const animeScore = document.getElementById('animeScore');
+        const animeCover = document.getElementById('animeCover');
+        const animeGenres = document.getElementById('animeGenres');
+        const animeYear = document.getElementById('animeYear');
+        const animeMonth = document.getElementById('animeMonth');
+        const durationInput = document.getElementById('animeDuration');
+        const submitButton = document.getElementById('submitBtn');
+        const deleteButton = document.getElementById('deleteBtn');
+        const addModal = document.getElementById('addAnimeModal');
+        const searchResultsDiv = document.getElementById('searchResults');
+
+        // Populate form with anime data
+        if (animeIdInput) animeIdInput.value = anime.id;
+        if (animeTitle) animeTitle.value = anime.title;
+        if (animeType) animeType.value = anime.type || 'TV';
+        if (animeEpisodes) animeEpisodes.value = anime.episodes || 0;
+        if (animeDuration) animeDuration.value = anime.duration || (anime.type === 'Movie' ? 120 : 20);
+        if (animeStatus) animeStatus.value = anime.userStatus || 'Plan to Watch';
+        if (animeProgress) animeProgress.value = anime.progress || 0;
+        if (animeScore) animeScore.value = anime.score || '';
+        if (animeCover) animeCover.value = anime.cover || '';
+        if (animeGenres) animeGenres.value = anime.genres ? anime.genres.join(', ') : '';
+
+        // Set finish date if exists
+        if (anime.finishDate && animeYear && animeMonth) {
+            const [year, month] = anime.finishDate.split('-');
+            animeYear.value = year;
+            animeMonth.value = month;
+        } else if (animeYear && animeMonth) {
+            const now = new Date();
+            animeYear.value = now.getFullYear().toString();
+            animeMonth.value = (now.getMonth() + 1).toString().padStart(2, '0');
+        }
+
+        // Set duration input readonly based on type
+        if (durationInput) {
+            if (anime.type === 'Movie') {
+                durationInput.readOnly = false;
+            } else {
+                durationInput.readOnly = true;
+            }
+        }
+
+        // Update button text and show delete button
+        if (submitButton) submitButton.textContent = 'Update Anime';
+        if (deleteButton) deleteButton.style.display = 'inline-block';
+
+        // Close search results if open
+        if (searchResultsDiv) {
+            searchResultsDiv.style.display = 'none';
+            searchResultsDiv.innerHTML = '';
+        }
+
+        // OPEN THE MODAL
+        if (addModal) {
+            openModal(addModal);
+            console.log('✅ Edit modal opened for:', anime.title);
+        } else {
+            console.error('❌ Add anime modal not found!');
+        }
+    };
+
+    // ============================================
+    // 7. DELETE ANIME FUNCTION
+    // ============================================
+    
+    window.deleteAnime = function() {
+        if (!window.currentEditId) {
+            if (typeof showToast === 'function') {
+                showToast('No anime selected to delete', 'error');
+            }
+            return;
+        }
+
+        if (!confirm('Are you sure you want to delete this anime?')) return;
+
+        const anime = animeData.find(a => a.id == window.currentEditId);
+        if (anime && typeof logActivity === 'function') {
+            logActivity("deleted", anime.title);
+        }
+
+        animeData = animeData.filter(a => a.id != window.currentEditId);
+        if (typeof saveData === 'function') saveData();
+        try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { /* ignore */ }
+
+        // Close modal
+        closeModal(document.getElementById('addAnimeModal'));
+        resetEditingState();
+
+        // Refresh everything
+        if (typeof updateAllComponents === 'function') updateAllComponents();
+
+        if (typeof showToast === 'function') {
+            showToast('Anime deleted successfully!', 'success');
+        }
+    };
+
+    // ============================================
+    // 8. FORM SUBMIT HANDLER (Add/Update)
+    // ============================================
+    
+    window.handleAddAnime = function(e) {
+        e.preventDefault();
+
+        const title = document.getElementById('animeTitle')?.value.trim();
+        if (!title) {
+            if (typeof showToast === 'function') {
+                showToast('Please enter an anime title', 'error');
+            }
+            return;
+        }
+
+        const type = document.getElementById('animeType')?.value || 'TV';
+        const episodes = parseInt(document.getElementById('animeEpisodes')?.value) || 0;
+        const duration = parseInt(document.getElementById('animeDuration')?.value) || 20;
+        const status = document.getElementById('animeStatus')?.value || 'Plan to Watch';
+        const progress = parseInt(document.getElementById('animeProgress')?.value) || 0;
+        const score = parseFloat(document.getElementById('animeScore')?.value) || null;
+        const cover = document.getElementById('animeCover')?.value || '';
+        const genres = (document.getElementById('animeGenres')?.value || '')
+            .split(',')
+            .map(g => g.trim())
+            .filter(Boolean);
+        const year = document.getElementById('animeYear')?.value;
+        const month = document.getElementById('animeMonth')?.value;
+
+        const getNextId = () => {
+            if (animeData.length === 0) return 1;
+            const maxId = Math.max(...animeData.map(a => parseInt(a.id) || 0));
+            return maxId + 1;
+        };
+
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+        const currentDay = String(now.getDate()).padStart(2, '0');
+
+        // Check if editing or adding
+        if (window.isEditing && window.currentEditId) {
+            // ============================================
+            // UPDATE EXISTING ANIME
+            // ============================================
+            const existingAnime = animeData.find(a => a.id == window.currentEditId);
+            if (!existingAnime) {
+                if (typeof showToast === 'function') {
+                    showToast('Anime not found', 'error');
+                }
+                return;
+            }
+
+            const wasCompleted = existingAnime.userStatus === 'Completed';
+            const isNowCompleted = status === 'Completed';
+
+            let finishDate = existingAnime.finishDate;
+            let actualFinishDate = existingAnime.actualFinishDate;
+
+            if (isNowCompleted) {
+                if (!wasCompleted) {
+                    if (year && month) {
+                        const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+                        finishDate = `${year}-${month}`;
+                        actualFinishDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+                    } else {
+                        finishDate = `${currentYear}-${currentMonth}`;
+                        actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
+                    }
+                }
+            } else {
+                finishDate = null;
+                actualFinishDate = null;
+            }
+
+            // Update anime
+            existingAnime.title = title;
+            existingAnime.type = type;
+            existingAnime.episodes = episodes;
+            existingAnime.duration = duration;
+            existingAnime.userStatus = status;
+            existingAnime.progress = progress;
+            existingAnime.score = score;
+            existingAnime.cover = cover;
+            existingAnime.genres = genres;
+            existingAnime.finishDate = finishDate;
+            existingAnime.actualFinishDate = actualFinishDate;
+            existingAnime.updatedAt = new Date().toISOString();
+
+            if (typeof saveData === 'function') saveData();
+            if (typeof logActivity === 'function') logActivity('edited', title);
+
+            // Close modal and reset
+            closeModal(document.getElementById('addAnimeModal'));
+            resetEditingState();
+
+            if (typeof updateAllComponents === 'function') updateAllComponents();
+            
+            if (typeof showToast === 'function') {
+                showToast(`"${title}" updated successfully!`, 'success');
+            }
+
+        } else {
+            // ============================================
+            // ADD NEW ANIME
+            // ============================================
+            let finishDate = null;
+            let actualFinishDate = null;
+
+            if (status === 'Completed') {
+                if (year && month) {
+                    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+                    finishDate = `${year}-${month}`;
+                    actualFinishDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+                } else {
+                    finishDate = `${currentYear}-${currentMonth}`;
+                    actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
+                }
+            }
+
+            const newAnime = {
+                id: getNextId(),
+                title: title,
+                type: type,
+                episodes: episodes,
+                duration: duration,
+                userStatus: status,
+                progress: progress,
+                score: score,
+                cover: cover,
+                genres: genres,
+                finishDate: finishDate,
+                actualFinishDate: actualFinishDate,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            animeData.push(newAnime);
+            if (typeof saveData === 'function') saveData();
+            if (typeof logActivity === 'function') logActivity('added', title);
+
+            // Close modal and reset
+            closeModal(document.getElementById('addAnimeModal'));
+            resetEditingState();
+
+            if (typeof updateAllComponents === 'function') updateAllComponents();
+            
+            if (typeof showToast === 'function') {
+                showToast(`"${title}" added successfully!`, 'success');
+            }
+        }
+    };
+
+    // ============================================
+    // 9. SETUP FORM SUBMIT
+    // ============================================
+    
+    function setupFormSubmit() {
+        const form = document.getElementById('addAnimeForm');
+        if (!form) {
+            console.warn('⚠️ Form not found');
+            return;
+        }
+
+        form.addEventListener('submit', window.handleAddAnime);
+        console.log('✅ Form submit setup');
+    }
+
+    // ============================================
+    // 10. TABLE ROW CLICK HANDLER
+    // ============================================
+    
+    function attachTableClickHandler() {
+        const tableBody = document.getElementById('anime-table-body');
+        if (!tableBody) {
+            setTimeout(attachTableClickHandler, 500);
+            return;
+        }
+
+        // Remove existing handler to avoid duplicates
+        if (tableBody._clickHandler) {
+            tableBody.removeEventListener('click', tableBody._clickHandler);
+        }
+
+        const clickHandler = function(e) {
+            const row = e.target.closest('tr[data-id]');
+            if (!row) return;
+
+            // Ignore clicks on interactive elements
+            if (e.target.closest('.progress-wrapper') ||
+                e.target.closest('.badge') ||
+                e.target.closest('a') ||
+                e.target.closest('button') ||
+                e.target.closest('.anime-cover')) {
+                return;
+            }
+
+            const animeId = row.getAttribute('data-id');
+            if (animeId && typeof window.editAnime === 'function') {
+                console.log('🖱️ Row clicked, ID:', animeId);
+                window.editAnime(animeId);
+            }
+        };
+
+        tableBody.addEventListener('click', clickHandler);
+        tableBody._clickHandler = clickHandler;
+        console.log('✅ Table click handler attached');
+    }
+
+    // ============================================
+    // 11. ESCAPE KEY HANDLER
+    // ============================================
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('addAnimeModal');
+            if (modal && (modal.style.display === 'flex' || modal.classList.contains('show'))) {
+                closeModal(modal);
+                resetEditingState();
+            }
+        }
+    });
+
+    // ============================================
+    // 12. INITIALIZE EVERYTHING
+    // ============================================
+    
+    function init() {
+        console.log('🚀 Initializing...');
+        
+        // Make sure modal starts hidden
+        const modal = document.getElementById('addAnimeModal');
+        if (modal) {
+            modal.setAttribute('hidden', '');
+            modal.style.display = 'none';
+            modal.classList.remove('show', 'active');
+        }
+        
+        // Setup all handlers
+        setupModalHandlers();
+        setupAddAnimeButton();
+        setupFloatingButton();
+        setupFormSubmit();
+        
+        // Attach table click handler
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(attachTableClickHandler, 300);
+            });
+        } else {
+            setTimeout(attachTableClickHandler, 300);
+        }
+        
+        console.log('✅ Complete modal system initialized!');
+        console.log('💡 Click "Add Anime" button to open modal');
+        console.log('💡 Click any table row to edit');
+        console.log('💡 Click X or Cancel to close modal');
+    }
+
+    // Run init when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();
+
+// =============================================
+// MAKE SURE GLOBAL FUNCTIONS EXIST
+// =============================================
+
+// These are already defined in your main.js, but ensuring they're available
+window.editAnime = window.editAnime || function(id) {
+    console.log('Edit anime called with ID:', id);
+};
+
+window.deleteAnime = window.deleteAnime || function() {
+    console.log('Delete anime called');
+};
+
+window.handleAddAnime = window.handleAddAnime || function(e) {
+    console.log('Handle add anime called');
+    e.preventDefault();
+};
+
+console.log('✅ All functions are ready!');
+
+// ============================================
+// FLOATING ADD ANIME BUTTON - GUARANTEED WORKING
+// ============================================
+
+(function setupFloatingButton() {
+    console.log('🔧 Setting up floating button...');
+
+    // Function to open modal
+    function openAddModal() {
+        console.log('🖱️ Opening add modal...');
+        
+        const modal = document.getElementById('addAnimeModal');
+        if (!modal) {
+            console.error('❌ Modal not found');
+            return;
+        }
+
+        // Reset editing state
+        window.isEditing = false;
+        window.currentEditId = null;
+
+        // Reset form
+        const form = document.getElementById('addAnimeForm');
+        if (form) {
+            form.reset();
+            const eps = document.getElementById('animeEpisodes');
+            const dur = document.getElementById('animeDuration');
+            const prog = document.getElementById('animeProgress');
+            const status = document.getElementById('animeStatus');
+            if (eps) eps.value = 1;
+            if (dur) dur.value = 20;
+            if (prog) prog.value = 0;
+            if (status) status.value = 'Plan to Watch';
+        }
+
+        // Reset buttons
+        const submitBtn = document.getElementById('submitBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const idInput = document.getElementById('animeId');
+        if (submitBtn) submitBtn.textContent = 'Add Anime';
+        if (deleteBtn) deleteBtn.style.display = 'none';
+        if (idInput) idInput.value = '';
+
+        // Open modal - REMOVE HIDDEN ATTRIBUTE
+        modal.removeAttribute('hidden');
+        modal.style.display = 'flex';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        modal.style.pointerEvents = 'auto';
+        modal.style.zIndex = '99999';
+        modal.classList.add('show', 'active');
+
+        // Lock body
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        document.body.style.top = '0';
+
+        console.log('✅ Modal opened');
+    }
+
+    // ============================================
+    // METHOD 1: Direct onclick attribute (MOST RELIABLE)
+    // ============================================
+    
+    // Make the function globally available
+    window.openAddAnimeModal = openAddModal;
+
+    // ============================================
+    // METHOD 2: Add event listener to the button
+    // ============================================
+    
+    function attachButtonListener() {
+        const btn = document.getElementById('floatingAddAnimeBtn');
+        if (!btn) {
+            console.warn('⚠️ Floating button not found, retrying...');
+            setTimeout(attachButtonListener, 300);
+            return;
+        }
+
+        console.log('✅ Floating button found');
+
+        // Remove all existing listeners by cloning
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+
+        // Add click listener
+        newBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openAddModal();
+            
+            // Haptic feedback for mobile
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(50);
+            }
+        });
+
+        console.log('✅ Floating button listener attached');
+    }
+
+    // ============================================
+    // METHOD 3: Also attach to the main Add Anime button
+    // ============================================
+    
+    function attachMainButtonListener() {
+        const mainBtn = document.getElementById('addAnimeBtn');
+        if (!mainBtn) return;
+
+        const newMainBtn = mainBtn.cloneNode(true);
+        mainBtn.parentNode.replaceChild(newMainBtn, mainBtn);
+
+        newMainBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openAddModal();
+        });
+
+        console.log('✅ Main button listener attached');
+    }
+
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    
+    // Run immediately if DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(attachButtonListener, 100);
+            setTimeout(attachMainButtonListener, 100);
+        });
+    } else {
+        setTimeout(attachButtonListener, 100);
+        setTimeout(attachMainButtonListener, 100);
+    }
+
+    console.log('✅ Floating button setup complete');
+    console.log('💡 Click the floating + button or type openAddAnimeModal() in console');
+
+})();
 
 // =============================================
 // UPDATE ANIME TABLE VIEW WITH WORKING CLICKS
@@ -4831,7 +5448,7 @@ function updateSidebarUserInfo() {
                 <span class="stat-number" id="toggleNumber" title="${totalHours.toLocaleString()} Hours">
                     ${formatNumberShort(totalHours)}
                 </span>
-                <span class="stat-label" id="toggleLabel">Hrs</span>
+                <span class="stat-label" id="toggleLabel">Hours</span>
             </div>
         `;
     }
@@ -5424,7 +6041,7 @@ function updateSidebarUserInfo() {
           <div class="stat-divider"></div>
           <div class="stat-item" id="toggleStat">
             <span class="stat-number fade-up" id="toggleNumber" title="${totalHours.toLocaleString()} Hours">0</span>
-            <span class="stat-label fade-up" id="toggleLabel">Hrs</span>
+            <span class="stat-label fade-up" id="toggleLabel">Hours</span>
           </div>
         `;
 
@@ -5449,7 +6066,7 @@ function updateSidebarUserInfo() {
                     toggleNumberEl.textContent = formatShort(totalEpisodes);
                     toggleNumberEl.title = totalEpisodes.toLocaleString() + ' Episodes';
                 } else {
-                    toggleLabelEl.textContent = 'Hrs';
+                    toggleLabelEl.textContent = 'Hours';
                     toggleNumberEl.textContent = formatShort(totalHours);
                     toggleNumberEl.title = totalHours.toLocaleString() + ' Hours';
                 }
@@ -6810,7 +7427,7 @@ function isRecapWindowOpen() {
     // TEST MODE: Only January 1-21
     if (TEST_MODE) {
         const d = new Date();
-        return d.getMonth() === 5 && d.getDate() <= 21;
+        return d.getMonth() === 5 && d.getDate() <= 30;
     }
 
     // PRODUCTION: First 7 days of ANY month
@@ -12765,6 +13382,7 @@ window.initLeaderboard = initLeaderboard;
 console.log('✅ Global Leaderboard system initialized');
 console.log(`📌 Current saved mode: ${localStorage.getItem('leaderboardMode') || 'friends'}`);
 console.log(`📌 Current saved stat: ${localStorage.getItem('leaderboardStat') || 'level'}`);
+
 
 
 

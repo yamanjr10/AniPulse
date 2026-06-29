@@ -1,0 +1,161 @@
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+/* ===== FONT IMPORTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* ===== HEADINGS ===== */
+.heading-xl {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-extrabold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tighter);
+}
+
+.heading-lg {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+}
+
+.heading-md {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+}
+
+.heading-sm {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+}
+
+.heading-xs {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+}
+
+/* ===== GRADIENT TEXT ===== */
+.gradient-text {
+    background: var(--gradient-aurora);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 300% 300%;
+    animation: gradientFlow 5s ease infinite;
+}
+
+@keyframes gradientFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* ===== SECTION TITLE ===== */
+.section-title {
+    font-family: var(--font-family-heading);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-primary);
+    position: relative;
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-title i {
+    color: var(--clr-secondary);
+    font-size: var(--text-xl);
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 48px;
+    height: 2px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-full);
+}
+
+/* ===== LINKS ===== */
+.link {
+    color: var(--clr-primary);
+    text-decoration: none;
+    transition: color var(--transition);
+    cursor: pointer;
+}
+
+.link:hover {
+    color: var(--clr-secondary);
+}
+
+.link-underline {
+    color: var(--clr-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--transition);
+}
+
+.link-underline:hover {
+    color: var(--clr-secondary);
+}
+
+/* ===== CODE ===== */
+code {
+    background: var(--bg-tertiary);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+pre {
+    background: var(--bg-tertiary);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    color: var(--text-primary);
+}
+
+/* ===== QUOTE ===== */
+blockquote {
+    border-left: 4px solid var(--clr-primary);
+    padding: var(--space-2) var(--space-4);
+    margin: var(--space-4) 0;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* ===== LISTS ===== */
+.list-disc {
+    list-style: disc;
+    padding-left: var(--space-6);
+}
+
+.list-decimal {
+    list-style: decimal;
+    padding-left: var(--space-6);
+}
+
+.list-none {
+    list-style: none;
+    padding-left: 0;
+}

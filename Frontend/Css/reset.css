@@ -1,0 +1,242 @@
+/* ============================================
+   RESET & BASE STYLES
+   Modern CSS Reset
+   ============================================ */
+
+/* ===== BOX SIZING ===== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===== ROOT ===== */
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* ===== BODY ===== */
+body {
+    font-family: var(--font-family);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    line-height: var(--leading-normal);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    transition: background-color var(--transition), color var(--transition);
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ===== SELECTION ===== */
+::selection {
+    background: var(--clr-primary);
+    color: white;
+}
+
+::-moz-selection {
+    background: var(--clr-primary);
+    color: white;
+}
+
+/* ===== TYPOGRAPHY ===== */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-heading);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-primary);
+}
+
+h1 { font-size: var(--text-4xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); }
+h5 { font-size: var(--text-lg); }
+h6 { font-size: var(--text-base); }
+
+a {
+    color: var(--clr-primary);
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+a:hover {
+    color: var(--clr-secondary);
+}
+
+p {
+    margin-bottom: var(--space-4);
+}
+
+ul, ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+svg {
+    display: block;
+}
+
+/* ===== BUTTONS ===== */
+button {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    background: none;
+    border: none;
+    color: inherit;
+}
+
+/* ===== INPUTS ===== */
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px var(--bg-secondary) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+/* ===== FOCUS ===== */
+:focus-visible {
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 2px;
+}
+
+/* ===== TABLES ===== */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* ===== CODE ===== */
+code,
+kbd,
+samp,
+pre {
+    font-family: var(--font-family-mono);
+    font-size: var(--text-sm);
+}
+
+/* ===== HR ===== */
+hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: var(--space-4) 0;
+}
+
+/* ===== FIELD SET ===== */
+fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+legend {
+    font-weight: var(--font-semibold);
+}
+
+/* ===== PROGRESS ===== */
+progress {
+    vertical-align: baseline;
+}
+
+/* ===== DETAILS ===== */
+details summary {
+    cursor: pointer;
+}
+
+/* ===== TEMPLATE ===== */
+template {
+    display: none !important;
+}
+
+/* ===== HIDDEN ===== */
+[hidden] {
+    display: none !important;
+}
+
+/* ===== PRINT ===== */
+@media print {
+    *,
+    *::before,
+    *::after {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    body {
+        min-height: auto !important;
+    }
+
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+
+    a[href]::after {
+        content: " (" attr(href) ")";
+    }
+
+    abbr[title]::after {
+        content: " (" attr(title) ")";
+    }
+
+    img {
+        page-break-inside: avoid;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+
+    pre {
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+    }
+}

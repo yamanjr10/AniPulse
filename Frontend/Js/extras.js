@@ -212,7 +212,7 @@ function processNextToast() {
             minute: "2-digit"
         });
 
-        streakInfo.textContent = `🔥 ${streak}-day streak`;
+        streakInfo.textContent = ` ${streak}-day streak`;
 
         dailyQuote.textContent =
             quotes[Math.floor(Math.random() * quotes.length)];
@@ -1609,3 +1609,63 @@ window.addEventListener('focus', () => {
         observer.observe(modal, { attributes: true });
     }
 })();
+
+// ============================================
+// SETTINGS TAB SWITCHING
+// ============================================
+
+(function initSettingsTabs() {
+    const tabs = document.querySelectorAll('.settings-tab');
+    const contents = document.querySelectorAll('.settings-tab-content');
+
+    if (!tabs.length || !contents.length) return;
+
+    // Get saved tab from localStorage
+    const savedTab = localStorage.getItem('settingsActiveTab') || 'profile';
+
+    // Activate saved tab
+    tabs.forEach(tab => {
+        const tabName = tab.dataset.tab;
+        if (tabName === savedTab) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+
+    contents.forEach(content => {
+        const contentId = content.id.replace('tab-', '');
+        if (contentId === savedTab) {
+            content.classList.add('active');
+        } else {
+            content.classList.remove('active');
+        }
+    });
+
+    // Tab click handler
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+
+            // Update tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            // Update contents
+            contents.forEach(content => {
+                const contentId = content.id.replace('tab-', '');
+                if (contentId === tabName) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+
+            // Save to localStorage
+            localStorage.setItem('settingsActiveTab', tabName);
+        });
+    });
+
+    console.log('✅ Settings tabs initialized');
+})();
+
