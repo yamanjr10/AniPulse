@@ -1,8 +1,4 @@
 /* ============================================
-   MODALS.CSS - Complete Modal Styles
-   ============================================ */
-
-/* ============================================
    MODAL OVERLAY
    ============================================ */
 .modal {
@@ -1007,3 +1003,1140 @@
     background-clip: text;
 }
 
+/* ============================================
+   USER PROFILE MODAL - COMPLETE STYLING
+   ============================================ */
+
+/* ============================================
+   PROFILE MODAL CONTAINER
+   ============================================ */
+.modal-content.profile-modal {
+    max-width: 960px;
+    width: 100%;
+    max-height: 92vh;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-radius: 28px;
+    background: linear-gradient(160deg, rgba(18, 22, 40, 0.98), rgba(8, 12, 28, 0.99));
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.06) inset;
+    position: relative;
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================
+   PROFILE MODAL HEADER
+   ============================================ */
+.modal-content.profile-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 28px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(99, 102, 241, 0.03));
+    border-bottom: 1px solid rgba(139, 92, 246, 0.06);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.modal-content.profile-modal .modal-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    color: #FFFFFF;
+}
+
+.modal-content.profile-modal .modal-title i {
+    color: #8B5CF6;
+    font-size: 1.2rem;
+}
+
+.modal-content.profile-modal .close-modal {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    border-radius: 50%;
+    color: #94A3B8;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-content.profile-modal .close-modal:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #EF4444;
+    transform: rotate(90deg) scale(1.05);
+}
+
+/* ============================================
+   PROFILE MODAL BODY - SCROLLABLE
+   ============================================ */
+.profile-modal-body {
+    padding: 24px 28px 28px;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(92vh - 76px);
+}
+
+.profile-modal-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.profile-modal-body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.profile-modal-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border-radius: 10px;
+}
+
+/* ============================================
+   PROFILE HEADER SECTION
+   ============================================ */
+.profile-header-section {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(99, 102, 241, 0.03));
+    padding: 24px 28px;
+    border-radius: 24px;
+    border: 1px solid rgba(139, 92, 246, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-header-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.05), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.profile-header-section::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.03), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* ============================================
+   PROFILE AVATAR
+   ============================================ */
+.profile-avatar-large {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.profile-avatar-large img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(139, 92, 246, 0.3);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+    transition: all 0.4s ease;
+}
+
+.profile-avatar-large img:hover {
+    transform: scale(1.05);
+    border-color: #8B5CF6;
+    box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25);
+}
+
+/* ============================================
+   STATUS DOT
+   ============================================ */
+.profile-status-dot {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(135deg, #10B981, #059669);
+    border-radius: 50%;
+    border: 2.5px solid rgba(18, 22, 40, 0.95);
+    animation: pulseOnline 2s infinite;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+@keyframes pulseOnline {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.7; }
+}
+
+/* ============================================
+   PROFILE INFO
+   ============================================ */
+.profile-info {
+    flex: 1;
+    min-width: 180px;
+    z-index: 1;
+}
+
+#profileName {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    background: linear-gradient(135deg, #FFFFFF, #C4B5FD, #A78BFA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============================================
+   PROFILE BADGES
+   ============================================ */
+.profile-badges {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.profile-level-badge {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    padding: 5px 18px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    box-shadow: 0 2px 15px rgba(99, 102, 241, 0.12);
+}
+
+.profile-title-badge {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 5px 18px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #94A3B8;
+    white-space: nowrap;
+}
+
+/* ============================================
+   XP BAR
+   ============================================ */
+.profile-xp-section {
+    margin-top: 6px;
+}
+
+.profile-xp-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.profile-xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA);
+    border-radius: 10px;
+    transition: width 0.8s ease;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+}
+
+.profile-xp-text {
+    font-size: 0.65rem;
+    color: #94A3B8;
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.profile-xp-text .xp-current {
+    color: #C4B5FD;
+    font-weight: 600;
+}
+
+/* ============================================
+   FRIEND ACTION BUTTON
+   ============================================ */
+.friend-action-btn {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border: none;
+    padding: 8px 22px;
+    border-radius: 40px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 15px rgba(99, 102, 241, 0.12);
+    z-index: 1;
+}
+
+.friend-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+}
+
+/* ============================================
+   PROFILE STATS GRID
+   ============================================ */
+.profile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    border: 1px solid rgba(139, 92, 246, 0.04);
+}
+
+.profile-stat-item {
+    text-align: center;
+    padding: 14px 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.profile-stat-item:hover {
+    background: rgba(139, 92, 246, 0.04);
+    transform: translateY(-3px);
+    border-color: rgba(139, 92, 246, 0.06);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.profile-stat-item .stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #FBBF24, #F59E0B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+    line-height: 1.2;
+}
+
+.profile-stat-item .stat-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: 2px;
+}
+
+/* ============================================
+   PROFILE TABS
+   ============================================ */
+.profile-tabs {
+    display: flex;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 5px;
+    border-radius: 60px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    border: 1px solid rgba(139, 92, 246, 0.04);
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+.profile-tabs::-webkit-scrollbar {
+    height: 2px;
+}
+
+.profile-tabs::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.profile-tabs::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border-radius: 10px;
+}
+
+.profile-tab {
+    background: transparent;
+    border: none;
+    padding: 10px 22px;
+    color: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 50px;
+    flex-shrink: 0;
+}
+
+.profile-tab:hover {
+    color: #A78BFA;
+    background: rgba(139, 92, 246, 0.04);
+}
+
+.profile-tab.active {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: white;
+    box-shadow: 0 2px 15px rgba(99, 102, 241, 0.1);
+}
+
+.profile-tab .tab-count {
+    font-size: 0.6rem;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0 10px;
+    border-radius: 30px;
+    font-weight: 700;
+}
+
+.profile-tab.active .tab-count {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   TAB CONTENT
+   ============================================ */
+.profile-tab-content {
+    display: none;
+    animation: tabFadeIn 0.3s ease;
+}
+
+.profile-tab-content.active {
+    display: block;
+}
+
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   PROFILE ANIME GRID
+   ============================================ */
+.profile-anime-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 16px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 4px 4px 8px 4px;
+}
+
+.profile-anime-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.profile-anime-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.profile-anime-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border-radius: 10px;
+}
+
+/* ============================================
+   PROFILE ANIME CARDS
+   ============================================ */
+.profile-anime-card {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(139, 92, 246, 0.04);
+    transition: all 0.35s ease;
+}
+
+.profile-anime-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(139, 92, 246, 0.12);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.profile-anime-cover {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.profile-anime-card:hover .profile-anime-cover {
+    transform: scale(1.03);
+}
+
+.profile-anime-info {
+    padding: 12px 14px;
+}
+
+.profile-anime-title {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: #F1F5F9;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-anime-score {
+    font-size: 0.75rem;
+    color: #FBBF24;
+}
+
+.profile-anime-episodes {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.profile-anime-count {
+    text-align: center;
+    padding: 14px;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(139, 92, 246, 0.04);
+    margin-top: 8px;
+}
+
+/* ============================================
+   PROFILE ACHIEVEMENTS GRID
+   ============================================ */
+.profile-achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 4px 4px 8px 4px;
+}
+
+.profile-achievements-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.profile-achievements-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.profile-achievements-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border-radius: 10px;
+}
+
+/* ============================================
+   PROFILE ACHIEVEMENT CARDS
+   ============================================ */
+.profile-achievement-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 14px;
+    border: 1px solid rgba(139, 92, 246, 0.04);
+    transition: all 0.3s ease;
+}
+
+.profile-achievement-card:hover {
+    transform: translateX(6px);
+    border-color: rgba(139, 92, 246, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.profile-achievement-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(139, 92, 246, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8B5CF6;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.profile-achievement-info {
+    flex: 1;
+}
+
+.profile-achievement-name {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: #F1F5F9;
+}
+
+.profile-achievement-desc {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   PROFILE ACTIVITY LIST
+   ============================================ */
+.profile-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 4px 4px 8px 4px;
+}
+
+.profile-activity-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.profile-activity-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+
+.profile-activity-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border-radius: 10px;
+}
+
+/* ============================================
+   PROFILE ACTIVITY ITEMS
+   ============================================ */
+.profile-activity-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 14px;
+    border: 1px solid rgba(139, 92, 246, 0.03);
+    transition: all 0.3s ease;
+}
+
+.profile-activity-item:hover {
+    transform: translateX(4px);
+    border-color: rgba(139, 92, 246, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.profile-activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.profile-activity-icon.added {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.profile-activity-icon.completed {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8B5CF6;
+}
+
+.profile-activity-icon.edited {
+    background: rgba(245, 158, 11, 0.1);
+    color: #F59E0B;
+}
+
+.profile-activity-content {
+    flex: 1;
+}
+
+.profile-activity-text {
+    font-size: 0.82rem;
+    color: #F1F5F9;
+}
+
+.profile-activity-text strong {
+    color: #A78BFA;
+}
+
+.profile-activity-time {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================
+   LOADING & EMPTY STATES
+   ============================================ */
+.loading-spinner {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.loading-spinner i {
+    font-size: 1.8rem;
+    margin-right: 12px;
+    color: #8B5CF6;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.2;
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+/* ============================================
+   RESPONSIVE - Profile Modal
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 992px) {
+    .modal-content.profile-modal {
+        max-width: 95%;
+    }
+    
+    .profile-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .profile-anime-grid {
+        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .modal-content.profile-modal {
+        max-width: calc(100% - 16px);
+        margin: 8px;
+        border-radius: 20px;
+        max-height: 94vh;
+    }
+    
+    .modal-content.profile-modal .modal-header {
+        padding: 14px 18px;
+    }
+    
+    .modal-content.profile-modal .modal-title {
+        font-size: 1.1rem;
+    }
+    
+    .modal-content.profile-modal .close-modal {
+        width: 34px;
+        height: 34px;
+        font-size: 1.1rem;
+    }
+    
+    .profile-modal-body {
+        padding: 16px 18px 20px;
+        max-height: calc(94vh - 60px);
+    }
+    
+    .profile-header-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+        padding: 18px 20px;
+    }
+    
+    .profile-avatar-large img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    #profileName {
+        font-size: 1.4rem;
+    }
+    
+    .profile-badges {
+        justify-content: center;
+    }
+    
+    .profile-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 14px 16px;
+    }
+    
+    .profile-stat-item .stat-value {
+        font-size: 1.4rem;
+    }
+    
+    .profile-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
+        border-radius: 30px;
+        padding: 4px;
+        gap: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .profile-tab {
+        padding: 8px 14px;
+        font-size: 0.7rem;
+        flex-shrink: 0;
+        gap: 6px;
+    }
+    
+    .profile-tab i {
+        font-size: 0.7rem;
+    }
+    
+    .profile-anime-grid {
+        grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+        gap: 12px;
+        max-height: 300px;
+    }
+    
+    .profile-achievements-grid {
+        grid-template-columns: 1fr;
+        max-height: 300px;
+    }
+    
+    .profile-activity-list {
+        max-height: 300px;
+    }
+    
+    .profile-anime-card {
+        flex-direction: row;
+        gap: 12px;
+    }
+    
+    .profile-anime-cover {
+        width: 48px;
+        height: 66px;
+        aspect-ratio: auto;
+    }
+    
+    .profile-anime-info {
+        padding: 8px 0;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .modal-content.profile-modal {
+        max-width: calc(100% - 8px);
+        margin: 4px;
+        border-radius: 16px;
+        max-height: 96vh;
+    }
+    
+    .modal-content.profile-modal .modal-header {
+        padding: 10px 14px;
+    }
+    
+    .modal-content.profile-modal .modal-title {
+        font-size: 0.95rem;
+    }
+    
+    .modal-content.profile-modal .close-modal {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+    }
+    
+    .profile-modal-body {
+        padding: 12px 14px 16px;
+        max-height: calc(96vh - 50px);
+    }
+    
+    .profile-header-section {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+    
+    .profile-avatar-large img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    #profileName {
+        font-size: 1.1rem;
+    }
+    
+    .profile-level-badge,
+    .profile-title-badge {
+        font-size: 0.6rem;
+        padding: 3px 12px;
+    }
+    
+    .profile-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        padding: 10px 12px;
+    }
+    
+    .profile-stat-item {
+        padding: 8px 4px;
+        border-radius: 12px;
+    }
+    
+    .profile-stat-item .stat-value {
+        font-size: 1.1rem;
+    }
+    
+    .profile-stat-item .stat-label {
+        font-size: 0.5rem;
+        letter-spacing: 0.3px;
+    }
+    
+    .profile-tab {
+        padding: 6px 10px;
+        font-size: 0.6rem;
+        gap: 4px;
+    }
+    
+    .profile-tab i {
+        font-size: 0.6rem;
+    }
+    
+    .profile-anime-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        max-height: 240px;
+    }
+    
+    .profile-anime-card {
+        flex-direction: column;
+        gap: 0;
+        border-radius: 12px;
+    }
+    
+    .profile-anime-cover {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 2/3;
+    }
+    
+    .profile-anime-info {
+        padding: 8px 10px;
+    }
+    
+    .profile-anime-title {
+        font-size: 0.7rem;
+    }
+    
+    .profile-anime-score {
+        font-size: 0.65rem;
+    }
+    
+    .profile-anime-episodes {
+        font-size: 0.55rem;
+    }
+    
+    .friend-action-btn {
+        padding: 6px 16px;
+        font-size: 0.7rem;
+    }
+}
+
+/* ============================================
+   LIGHT MODE - Profile Modal
+   ============================================ */
+[data-theme="light"] .modal-content.profile-modal {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.99));
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .modal-content.profile-modal .modal-title {
+    color: #1a1f2e;
+}
+
+[data-theme="light"] .modal-content.profile-modal .modal-title i {
+    color: #7C3AED;
+}
+
+[data-theme="light"] .modal-content.profile-modal .close-modal {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .modal-content.profile-modal .close-modal:hover {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+}
+
+[data-theme="light"] .profile-header-section {
+    background: rgba(139, 92, 246, 0.04);
+    border-color: rgba(139, 92, 246, 0.06);
+}
+
+[data-theme="light"] .profile-header-section::before,
+[data-theme="light"] .profile-header-section::after {
+    display: none;
+}
+
+[data-theme="light"] #profileName {
+    background: linear-gradient(135deg, #1a1f2e, #7C3AED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+[data-theme="light"] .profile-title-badge {
+    color: #64748B;
+    border-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .profile-stats-grid {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .profile-stat-item {
+    background: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="light"] .profile-stat-item:hover {
+    background: rgba(139, 92, 246, 0.04);
+    border-color: rgba(139, 92, 246, 0.06);
+}
+
+[data-theme="light"] .profile-stat-item .stat-label {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .profile-tabs {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .profile-tab {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .profile-tab:hover {
+    color: #7C3AED;
+    background: rgba(139, 92, 246, 0.04);
+}
+
+[data-theme="light"] .profile-tab.active {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: white;
+}
+
+[data-theme="light"] .profile-anime-card {
+    background: rgba(0, 0, 0, 0.01);
+    border-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .profile-anime-card:hover {
+    border-color: rgba(139, 92, 246, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .profile-anime-title {
+    color: #1a1f2e;
+}
+
+[data-theme="light"] .profile-anime-episodes {
+    color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .profile-achievement-card {
+    background: rgba(0, 0, 0, 0.01);
+    border-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .profile-achievement-name {
+    color: #1a1f2e;
+}
+
+[data-theme="light"] .profile-achievement-desc {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .profile-activity-item {
+    background: rgba(0, 0, 0, 0.01);
+    border-color: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .profile-activity-text {
+    color: #1a1f2e;
+}
+
+[data-theme="light"] .profile-activity-time {
+    color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .loading-spinner {
+    color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .empty-state {
+    color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .profile-xp-text {
+    color: #94A3B8;
+}
+
+[data-theme="light"] .profile-xp-text .xp-current {
+    color: #7C3AED;
+}
+
+[data-theme="light"] .profile-xp-bar {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .friend-action-btn {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+}
+
+[data-theme="light"] .profile-level-badge {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+}
+
+[data-theme="light"] .profile-anime-count {
+    color: rgba(0, 0, 0, 0.15);
+}

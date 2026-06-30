@@ -10279,7 +10279,7 @@ document.addEventListener('click', function (e) {
 });
 
 // ============================================
-// LEADERBOARD 
+// LEADERBOARD - COMPLETE FIXED VERSION
 // ============================================
 
 let currentLeaderboardStat = 'level';
@@ -10305,7 +10305,36 @@ function formatNumberShort(num) {
     return num.toString();
 }
 
-// Load your stats using full-stats endpoint
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatTimeAgo(dateString) {
+    if (!dateString) return 'Just now';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
+    return date.toLocaleDateString();
+}
+
+function formatCompactNumber(num) {
+    if (num === undefined || num === null) return '0';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toString();
+}
+
+// ============================================
+// LOAD YOUR STATS
+// ============================================
+
 async function loadYourStats(force = false) {
     if (!force && yourStatsCache) {
         return yourStatsCache;
@@ -10377,7 +10406,10 @@ async function loadYourStats(force = false) {
     }
 }
 
-// Load friend leaderboard
+// ============================================
+// LOAD FRIEND LEADERBOARD
+// ============================================
+
 async function loadFriendLeaderboard() {
     if (isLoadingLeaderboard) return;
 
@@ -10491,7 +10523,7 @@ async function loadFriendLeaderboard() {
             const topGenres = (user.topGenres || []).slice(0, 3);
 
             return `
-                <div class="leaderboard-item ${user.isCurrentUser ? 'current-user' : ''}" onclick="openUserProfile('${user.uid === 'current' ? currentUserId : user.uid}')">
+                <div class="leaderboard-item ${user.isCurrentUser ? 'current-user' : ''}" onclick="window.openUserProfile('${user.uid === 'current' ? currentUserId : user.uid}')">
                     <div class="leaderboard-rank ${rankClass}">#${index + 1}</div>
                     <div class="leaderboard-user">
                         <img src="${avatarUrl}" class="leaderboard-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=6366F1&color=fff'">
@@ -10519,6 +10551,10 @@ async function loadFriendLeaderboard() {
         isLoadingLeaderboard = false;
     }
 }
+
+// ============================================
+// INIT LEADERBOARD
+// ============================================
 
 function initLeaderboard() {
     currentTimePeriod = localStorage.getItem('leaderboardTimePeriod') || 'all';
@@ -10549,6 +10585,625 @@ function initLeaderboard() {
 
     loadFriendLeaderboard();
 }
+
+// ============================================
+// USER PROFILE MODAL - COMPLETE FIXED
+// ============================================
+
+let _profileUserId = null;
+
+// Safe helper functions
+function safeSetText(id, value, defaultValue = '—') {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = value !== undefined && value !== null ? value : defaultValue;
+    }
+    return el;
+}
+
+function safeSetHTML(id, html) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.innerHTML = html || '';
+    }
+    return el;
+}
+
+// ============================================
+// OPEN USER PROFILE - WITH FALLBACKS
+// ============================================
+
+async function openUserProfile(userId) {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        showToast('Please login first', 'error');
+        return;
+    }
+
+    _profileUserId = userId;
+
+    const modal = document.getElementById('userProfileModal');
+    if (!modal) {
+        console.error('User profile modal not found');
+        showToast('Profile modal not available', 'error');
+        return;
+    }
+
+    // ✅ FIX: Show modal properly
+    modal.removeAttribute('hidden');
+    modal.classList.add('active');
+    modal.classList.add('show');
+    modal.style.display = 'flex';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'auto';
+    modal.style.zIndex = '10000';
+
+    // Lock body scroll
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    document.body.style.top = '0';
+
+    // Show loading state
+    safeSetText('profileName', 'Loading...');
+    safeSetHTML('profileCompletedList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading anime list...</div>');
+    safeSetHTML('profileWatchingList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+    safeSetHTML('profilePlanList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+    safeSetHTML('profileAchievementsList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading achievements...</div>');
+    safeSetHTML('profileActivityList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading activity...</div>');
+
+    try {
+        // Try primary API endpoint
+        const response = await fetch(`http://localhost:3000/api/user/full-profile/${userId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            // If 404, try fallback endpoint
+            if (response.status === 404) {
+                console.warn('Full profile endpoint not found, trying fallback...');
+                const fallbackResponse = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (fallbackResponse.ok) {
+                    const profile = await fallbackResponse.json();
+                    renderUserProfileWithFallback(profile);
+                    return;
+                }
+                
+                // If fallback also fails, try friends list
+                console.warn('Profile endpoints unavailable, using friends fallback...');
+                await renderFriendsFallback(userId);
+                return;
+            }
+            throw new Error(`Failed to load profile (${response.status})`);
+        }
+
+        const profile = await response.json();
+        profile.stats = profile.stats || {};
+        profile.animeList = profile.animeList || {};
+        profile.achievements = profile.achievements || [];
+        profile.recentActivity = profile.recentActivity || [];
+
+        renderUserProfile(profile);
+
+    } catch (error) {
+        console.error('Failed to load profile:', error);
+        showToast('Failed to load user profile, showing friends instead', 'info');
+        await renderFriendsFallback(userId);
+    }
+}
+
+// ============================================
+// RENDER USER PROFILE - MAIN
+// ============================================
+
+function renderUserProfile(profile) {
+    console.log('📝 Rendering user profile...');
+
+    safeSetText('profileName', profile.name || profile.username || 'User');
+    safeSetText('profileLevel', `Lv.${profile.level || 1}`);
+    safeSetText('profileTitle', profile.levelTitle || profile.title || 'Newbie');
+
+    const xpFillEl = document.getElementById('profileXpFill');
+    if (xpFillEl) {
+        const progress = Math.min(100, Math.max(0, profile.xpProgress || 0));
+        xpFillEl.style.width = `${progress}%`;
+    }
+
+    const xpTextEl = document.getElementById('profileXpText');
+    if (xpTextEl) {
+        const currentXP = profile.totalXP || 0;
+        const nextXP = (profile.totalXP + profile.xpToNextLevel) || 1000;
+        xpTextEl.innerHTML = `
+            <span class="xp-current">${formatCompactNumber(currentXP)}</span> / 
+            <span class="xp-next">${formatCompactNumber(nextXP)}</span> XP
+        `;
+    }
+
+    const avatarImg = document.getElementById('profileAvatar');
+    if (avatarImg) {
+        const avatarUrl = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
+        avatarImg.src = avatarUrl;
+        avatarImg.onerror = function() {
+            this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
+        };
+    }
+
+    function updateStatElement(id, value) {
+        const el = document.getElementById(id);
+        if (el) {
+            const num = value || 0;
+            el.innerHTML = formatCompactNumber(num);
+            el.setAttribute('title', num.toLocaleString());
+        }
+    }
+
+    updateStatElement('profileTotalAnime', profile.stats?.totalAnime);
+    updateStatElement('profileCompleted', profile.stats?.completed);
+    updateStatElement('profileWatching', profile.stats?.watching);
+    updateStatElement('profilePlanToWatch', profile.stats?.planToWatch);
+    updateStatElement('profileEpisodes', profile.stats?.totalEpisodes);
+    updateStatElement('profileHours', profile.stats?.totalHours);
+
+    const friendBtn = document.getElementById('profileFriendBtn');
+    if (friendBtn) {
+        if (!profile.isCurrentUser) {
+            friendBtn.style.display = 'block';
+            if (profile.isFriend) {
+                friendBtn.innerHTML = '<i class="fas fa-user-check"></i> Friends';
+                friendBtn.disabled = true;
+                friendBtn.style.opacity = '0.6';
+                friendBtn.style.cursor = 'not-allowed';
+            } else {
+                friendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+                friendBtn.disabled = false;
+                friendBtn.style.opacity = '1';
+                friendBtn.style.cursor = 'pointer';
+                friendBtn.onclick = () => {
+                    if (typeof sendFriendRequest === 'function') {
+                        sendFriendRequest(profile.uid);
+                    }
+                };
+            }
+        } else {
+            friendBtn.style.display = 'none';
+        }
+    }
+
+    // Anime Lists
+    renderProfileAnimeList('completed', profile.animeList?.completed || []);
+    renderProfileAnimeList('watching', profile.animeList?.watching || []);
+    renderProfileAnimeList('plan', profile.animeList?.planToWatch || []);
+
+    // Achievements
+    const achievements = profile.achievements || [];
+    const container = document.getElementById('profileAchievementsList');
+    if (container) {
+        if (achievements.length > 0) {
+            container.innerHTML = achievements.map(achievement => `
+                <div class="profile-achievement-card">
+                    <div class="profile-achievement-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="profile-achievement-info">
+                        <div class="profile-achievement-name">${escapeHtml(achievement)}</div>
+                        <div class="profile-achievement-desc">Unlocked achievement</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<div class="empty-state">No achievements unlocked yet</div>';
+        }
+    }
+
+    // Activity
+    const activities = profile.recentActivity || [];
+    const activityContainer = document.getElementById('profileActivityList');
+    if (activityContainer) {
+        if (activities.length > 0) {
+            activityContainer.innerHTML = activities.map(activity => {
+                let iconClass = 'added';
+                let iconName = 'plus-circle';
+
+                switch (activity.action) {
+                    case 'completed': iconClass = 'completed'; iconName = 'check-circle'; break;
+                    case 'added': iconClass = 'added'; iconName = 'plus-circle'; break;
+                    case 'edited': iconClass = 'edited'; iconName = 'edit'; break;
+                    default: iconClass = 'added'; iconName = 'plus-circle';
+                }
+
+                return `
+                    <div class="profile-activity-item">
+                        <div class="profile-activity-icon ${iconClass}">
+                            <i class="fas fa-${iconName}"></i>
+                        </div>
+                        <div class="profile-activity-content">
+                            <div class="profile-activity-text">
+                                ${activity.action === 'completed' ? 'Completed' : 
+                                  activity.action === 'added' ? 'Added' : 'Updated'} 
+                                <strong>${escapeHtml(activity.animeTitle || 'anime')}</strong>
+                            </div>
+                            <div class="profile-activity-time">${formatTimeAgo(activity.timestamp)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            activityContainer.innerHTML = '<div class="empty-state">No recent activity</div>';
+        }
+    }
+
+    console.log('✅ User profile rendered successfully');
+}
+
+// ============================================
+// RENDER PROFILE WITH FALLBACK DATA
+// ============================================
+
+function renderUserProfileWithFallback(profile) {
+    console.log('📝 Rendering user profile with fallback data...');
+
+    safeSetText('profileName', profile.name || profile.username || 'User');
+    safeSetText('profileLevel', `Lv.${profile.level || 1}`);
+    safeSetText('profileTitle', profile.levelTitle || profile.title || 'Newbie');
+
+    const xpFillEl = document.getElementById('profileXpFill');
+    if (xpFillEl) {
+        const progress = Math.min(100, Math.max(0, profile.xpProgress || 0));
+        xpFillEl.style.width = `${progress}%`;
+    }
+
+    const xpTextEl = document.getElementById('profileXpText');
+    if (xpTextEl) {
+        const currentXP = profile.totalXP || 0;
+        const nextXP = (profile.totalXP + profile.xpToNextLevel) || 1000;
+        xpTextEl.innerHTML = `
+            <span class="xp-current">${formatCompactNumber(currentXP)}</span> / 
+            <span class="xp-next">${formatCompactNumber(nextXP)}</span> XP
+        `;
+    }
+
+    const avatarImg = document.getElementById('profileAvatar');
+    if (avatarImg) {
+        const avatarUrl = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
+        avatarImg.src = avatarUrl;
+        avatarImg.onerror = function() {
+            this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
+        };
+    }
+
+    function updateStatElement(id, value) {
+        const el = document.getElementById(id);
+        if (el) {
+            const num = value || 0;
+            el.innerHTML = formatCompactNumber(num);
+            el.setAttribute('title', num.toLocaleString());
+        }
+    }
+
+    updateStatElement('profileTotalAnime', profile.stats?.totalAnime || 0);
+    updateStatElement('profileCompleted', profile.stats?.completed || 0);
+    updateStatElement('profileWatching', profile.stats?.watching || 0);
+    updateStatElement('profilePlanToWatch', profile.stats?.planToWatch || 0);
+    updateStatElement('profileEpisodes', profile.stats?.totalEpisodes || 0);
+    updateStatElement('profileHours', profile.stats?.totalHours || 0);
+
+    const friendBtn = document.getElementById('profileFriendBtn');
+    if (friendBtn) {
+        if (!profile.isCurrentUser) {
+            friendBtn.style.display = 'block';
+            if (profile.isFriend) {
+                friendBtn.innerHTML = '<i class="fas fa-user-check"></i> Friends';
+                friendBtn.disabled = true;
+                friendBtn.style.opacity = '0.6';
+            } else {
+                friendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+                friendBtn.disabled = false;
+                friendBtn.style.opacity = '1';
+                friendBtn.onclick = () => {
+                    if (typeof sendFriendRequest === 'function') {
+                        sendFriendRequest(profile.uid);
+                    }
+                };
+            }
+        } else {
+            friendBtn.style.display = 'none';
+        }
+    }
+
+    renderProfileAnimeList('completed', profile.animeList?.completed || []);
+    renderProfileAnimeList('watching', profile.animeList?.watching || []);
+    renderProfileAnimeList('plan', profile.animeList?.planToWatch || []);
+
+    const achievements = profile.achievements || [];
+    const container = document.getElementById('profileAchievementsList');
+    if (container) {
+        if (achievements.length > 0) {
+            container.innerHTML = achievements.map(achievement => `
+                <div class="profile-achievement-card">
+                    <div class="profile-achievement-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="profile-achievement-info">
+                        <div class="profile-achievement-name">${escapeHtml(achievement)}</div>
+                        <div class="profile-achievement-desc">Unlocked achievement</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<div class="empty-state">No achievements unlocked yet</div>';
+        }
+    }
+
+    const activities = profile.recentActivity || [];
+    const activityContainer = document.getElementById('profileActivityList');
+    if (activityContainer) {
+        if (activities.length > 0) {
+            activityContainer.innerHTML = activities.map(activity => {
+                let iconClass = 'added';
+                let iconName = 'plus-circle';
+
+                switch (activity.action) {
+                    case 'completed': iconClass = 'completed'; iconName = 'check-circle'; break;
+                    case 'added': iconClass = 'added'; iconName = 'plus-circle'; break;
+                    case 'edited': iconClass = 'edited'; iconName = 'edit'; break;
+                    default: iconClass = 'added'; iconName = 'plus-circle';
+                }
+
+                return `
+                    <div class="profile-activity-item">
+                        <div class="profile-activity-icon ${iconClass}">
+                            <i class="fas fa-${iconName}"></i>
+                        </div>
+                        <div class="profile-activity-content">
+                            <div class="profile-activity-text">
+                                ${activity.action === 'completed' ? 'Completed' : 
+                                  activity.action === 'added' ? 'Added' : 'Updated'} 
+                                <strong>${escapeHtml(activity.animeTitle || 'anime')}</strong>
+                            </div>
+                            <div class="profile-activity-time">${formatTimeAgo(activity.timestamp)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            activityContainer.innerHTML = '<div class="empty-state">No recent activity</div>';
+        }
+    }
+
+    console.log('✅ User profile rendered with fallback');
+}
+
+// ============================================
+// FRIENDS FALLBACK
+// ============================================
+
+async function renderFriendsFallback(userId) {
+    console.log('📝 Using friends fallback for user:', userId);
+    
+    const modal = document.getElementById('userProfileModal');
+    if (!modal) return;
+
+    let userData = null;
+    let friendsList = [];
+
+    const token = localStorage.getItem('authToken');
+    
+    try {
+        const friendsResponse = await fetch('http://localhost:3000/api/friends/list', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (friendsResponse.ok) {
+            friendsList = await friendsResponse.json();
+        }
+    } catch (e) {
+        console.warn('Could not fetch friends list:', e);
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    
+    if (userId === currentUser.uid || userId === 'current') {
+        userData = {
+            name: userProfile.name || currentUser.username || 'You',
+            avatar: userProfile.avatar || currentUser.avatar,
+            level: currentUser.level || 1,
+            title: currentUser.title || 'Newbie',
+            totalXP: currentUser.totalXP || 0,
+            stats: {
+                totalAnime: 0,
+                completed: 0,
+                watching: 0,
+                planToWatch: 0,
+                totalEpisodes: 0,
+                totalHours: 0
+            },
+            isCurrentUser: true,
+            achievements: ['🌟 Profile Loaded'],
+            recentActivity: [],
+            animeList: {
+                completed: [],
+                watching: [],
+                planToWatch: []
+            }
+        };
+    } else {
+        const foundFriend = friendsList.find(f => f.uid === userId);
+        
+        if (foundFriend) {
+            userData = {
+                name: foundFriend.name || foundFriend.username || 'Friend',
+                avatar: foundFriend.avatar,
+                level: foundFriend.level || 1,
+                title: foundFriend.title || 'Newbie',
+                totalXP: foundFriend.totalXP || 0,
+                stats: {
+                    totalAnime: foundFriend.totalAnime || 0,
+                    completed: 0,
+                    watching: 0,
+                    planToWatch: 0,
+                    totalEpisodes: 0,
+                    totalHours: 0
+                },
+                isCurrentUser: false,
+                isFriend: true,
+                achievements: ['👥 Friend'],
+                recentActivity: [],
+                animeList: {
+                    completed: [],
+                    watching: [],
+                    planToWatch: []
+                }
+            };
+        } else {
+            userData = {
+                name: 'Unknown User',
+                avatar: `https://ui-avatars.com/api/?name=Unknown&background=6366F1&color=fff`,
+                level: 1,
+                title: 'Newbie',
+                totalXP: 0,
+                stats: {
+                    totalAnime: 0,
+                    completed: 0,
+                    watching: 0,
+                    planToWatch: 0,
+                    totalEpisodes: 0,
+                    totalHours: 0
+                },
+                isCurrentUser: false,
+                isFriend: false,
+                achievements: ['🔍 User Not Found'],
+                recentActivity: [],
+                animeList: {
+                    completed: [],
+                    watching: [],
+                    planToWatch: []
+                }
+            };
+        }
+    }
+
+    if (friendsList.length > 0) {
+        const friendNames = friendsList.slice(0, 3).map(f => f.name || f.username || 'Friend');
+        if (friendNames.length > 0) {
+            userData.achievements = [
+                ...userData.achievements,
+                `👥 Friends: ${friendNames.join(', ')}${friendsList.length > 3 ? ` +${friendsList.length - 3} more` : ''}`
+            ];
+        }
+    }
+
+    renderUserProfileWithFallback(userData);
+    showToast('Profile loaded with friends fallback', 'info');
+}
+
+// ============================================
+// RENDER PROFILE ANIME LIST
+// ============================================
+
+function renderProfileAnimeList(type, animeList) {
+    const containerId = `profile${type.charAt(0).toUpperCase() + type.slice(1)}List`;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (!animeList || animeList.length === 0) {
+        container.innerHTML = `<div class="empty-state">No ${type} anime found</div>`;
+        return;
+    }
+
+    container.innerHTML = animeList.slice(0, 10).map(anime => `
+        <div class="profile-anime-card">
+            <img src="${anime.cover || 'https://placehold.co/60x85/6a5acd/white?text=No+Image'}" 
+                 class="profile-anime-cover" 
+                 onerror="this.src='https://placehold.co/60x85/6a5acd/white?text=No+Image'">
+            <div class="profile-anime-info">
+                <div class="profile-anime-title">${escapeHtml(anime.title)}</div>
+                ${anime.score ? `<div class="profile-anime-score">⭐ ${anime.score}</div>` : ''}
+                <div class="profile-anime-episodes">${anime.episodes || 0} episodes</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// CLOSE USER PROFILE MODAL
+// ============================================
+
+function closeUserProfileModal() {
+    const modal = document.getElementById('userProfileModal');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.style.pointerEvents = 'none';
+        modal.setAttribute('hidden', '');
+        
+        // Restore body scroll
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.top = '';
+    }
+    _profileUserId = null;
+}
+
+// ============================================
+// PROFILE TAB SWITCHING
+// ============================================
+
+document.addEventListener('click', function(e) {
+    const tab = e.target.closest('.profile-tab');
+    if (!tab) return;
+
+    const tabName = tab.dataset.tab;
+    const container = tab.closest('.profile-modal-body');
+    if (!container) return;
+
+    container.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    const contentMap = {
+        'completed': 'profileTabCompleted',
+        'watching': 'profileTabWatching',
+        'plan': 'profileTabPlan',
+        'achievements': 'profileTabAchievements',
+        'activity': 'profileTabActivity'
+    };
+
+    Object.values(contentMap).forEach(contentId => {
+        const content = document.getElementById(contentId);
+        if (content) content.classList.remove('active');
+    });
+
+    const activeContentId = contentMap[tabName];
+    if (activeContentId) {
+        const activeContent = document.getElementById(activeContentId);
+        if (activeContent) activeContent.classList.add('active');
+    }
+});
+
+// ============================================
+// EXPOSE FUNCTIONS GLOBALLY
+// ============================================
+
+window.openUserProfile = openUserProfile;
+window.closeUserProfileModal = closeUserProfileModal;
+window.renderUserProfile = renderUserProfile;
+window.renderUserProfileWithFallback = renderUserProfileWithFallback;
+window.renderFriendsFallback = renderFriendsFallback;
+window.renderProfileAnimeList = renderProfileAnimeList;
+window.loadFriendLeaderboard = loadFriendLeaderboard;
+window.initLeaderboard = initLeaderboard;
 
 // ============================================
 // INITIALIZE COMMUNITY PAGE
@@ -10585,6 +11240,8 @@ if (communityMenuItemFinal) {
         setTimeout(initCommunityPage, 100);
     });
 }
+
+console.log('✅ Community & Leaderboard system loaded with profile fallbacks!');
 
 // ============================================
 // STATE PERSISTENCE & AUTO-REFRESH SYSTEM

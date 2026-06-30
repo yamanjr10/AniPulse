@@ -1,12 +1,11 @@
 // =============================================
-//UPDATE 1.0.0
+// UPDATE 1.0.0 - COMPLETE EXTRAS.JS
 // =============================================
 
 // Make sure showToast is available
 if (typeof showToast === 'undefined') {
     window.showToast = function (message, type = 'info') {
         console.log(`[Toast] ${type}: ${message}`);
-        // Create a simple toast if the main one isn't available
         const toastContainer = document.getElementById('toastContainer');
         if (toastContainer) {
             const toast = document.createElement('div');
@@ -81,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('lastBackup', now.toString());
 });
 
-// --- Favorite Genres Over Time Chart (based on user animeData) ---
+// --- Favorite Genres Over Time Chart ---
 function calculateUserGenreTrends() {
     const genreTrends = {};
     const years = new Set();
@@ -127,7 +126,7 @@ function processNextToast() {
 }
 
 // =============================================
-//Greatings
+// GREETINGS
 // =============================================
 
 (function () {
@@ -173,18 +172,14 @@ function processNextToast() {
     ];
 
     // --- Streak logic ---
-    const today = new Date().toDateString(); // "Mon Jan 10 2026"
+    const today = new Date().toDateString();
     let streak = parseInt(localStorage.getItem("streak") || "0");
     const lastActive = localStorage.getItem("lastActive");
 
-    // If user performed an action today, do nothing
-    // If user comes after skipping one or more days, reset streak
     if (lastActive !== today) {
         if (lastActive === new Date(Date.now() - 86400000).toDateString()) {
-            // Last active was yesterday → continue streak
             streak += 1;
         } else {
-            // Last active was before yesterday → reset streak
             streak = 1;
         }
         localStorage.setItem("streak", streak);
@@ -223,52 +218,49 @@ function processNextToast() {
 })();
 
 // profile Drop Down Menu toggle
-
 const profileToggle = document.getElementById("profileMenuToggle");
 const profileDropdown = document.querySelector(".profile-dropdown");
 
-profileToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    profileDropdown.classList.toggle("open");
-});
+if (profileToggle && profileDropdown) {
+    profileToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        profileDropdown.classList.toggle("open");
+    });
 
-document.addEventListener("click", () => {
-    profileDropdown.classList.remove("open");
-});
+    document.addEventListener("click", () => {
+        profileDropdown.classList.remove("open");
+    });
+}
 
 // search Drop Down Menu toggle
-
 const searchToggle = document.getElementById("searchToggle");
 const searchDropdown = document.querySelector(".search-dropdown");
 const searchInput = document.getElementById("dashboardSearch");
 
-/* Toggle when clicking the search icon */
-searchToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    searchDropdown.classList.toggle("open");
-    searchInput.focus();
-});
+if (searchToggle && searchDropdown) {
+    searchToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        searchDropdown.classList.toggle("open");
+        if (searchInput) searchInput.focus();
+    });
 
-/* Prevent closing when clicking inside the dropdown */
-searchDropdown.addEventListener("click", (e) => {
-    e.stopPropagation();
-});
+    searchDropdown.addEventListener("click", (e) => {
+        e.stopPropagation();
+    });
 
-/* Close when clicking outside */
-document.addEventListener("click", () => {
-    searchDropdown.classList.remove("open");
-});
+    document.addEventListener("click", () => {
+        searchDropdown.classList.remove("open");
+    });
+}
+
 // =============================================
 // ANIME DNA - FIXED VERSION
 // =============================================
 
-// Safe function to get anime data
 function getAnimeDataSafe() {
-    // Try to get from global variable first
     if (typeof window.animeData !== 'undefined' && window.animeData) {
         return window.animeData;
     }
-    // Fallback to localStorage
     const stored = localStorage.getItem('animeData');
     if (stored) {
         return JSON.parse(stored);
@@ -276,12 +268,8 @@ function getAnimeDataSafe() {
     return [];
 }
 
-// Calculate Anime DNA from user's completed anime
 function calculateAnimeDNA() {
-    // Use safe function to get data
     const animeList = getAnimeDataSafe();
-
-    // Filter only completed anime
     const completedAnime = animeList.filter(anime => anime.userStatus === 'Completed');
 
     if (completedAnime.length === 0) {
@@ -292,12 +280,10 @@ function calculateAnimeDNA() {
         };
     }
 
-    // 1. Calculate favorite genre (most common)
     const genreCount = {};
     completedAnime.forEach(anime => {
         if (anime.genres && Array.isArray(anime.genres)) {
             anime.genres.forEach(genre => {
-                // Skip unwanted genres
                 if (genre === 'Award Winning') return;
                 genreCount[genre] = (genreCount[genre] || 0) + 1;
             });
@@ -313,16 +299,13 @@ function calculateAnimeDNA() {
         }
     }
 
-    // 2. Calculate average score
     const scoredAnime = completedAnime.filter(anime => anime.score && anime.score > 0);
     let avgScore = '—';
     if (scoredAnime.length > 0) {
         const totalScore = scoredAnime.reduce((sum, anime) => sum + anime.score, 0);
-        const average = totalScore / scoredAnime.length;
-        avgScore = average.toFixed(1);
+        avgScore = (totalScore / scoredAnime.length).toFixed(1);
     }
 
-    // 3. Calculate preferred format (most common type)
     const typeCount = {};
     completedAnime.forEach(anime => {
         const type = anime.type || 'TV';
@@ -345,7 +328,6 @@ function calculateAnimeDNA() {
     };
 }
 
-// Render Anime DNA to the dashboard
 function renderAnimeDNA() {
     const dnaGenre = document.getElementById('dna-genre');
     const dnaScore = document.getElementById('dna-score');
@@ -355,12 +337,10 @@ function renderAnimeDNA() {
 
     const dna = calculateAnimeDNA();
 
-    // Update with animation
     dnaGenre.textContent = dna.topGenre;
     dnaScore.textContent = dna.avgScore;
     dnaFormat.textContent = dna.topFormat;
 
-    // Add animation classes
     [dnaGenre, dnaScore, dnaFormat].forEach(el => {
         el.classList.add('dna-updated');
         setTimeout(() => {
@@ -369,29 +349,23 @@ function renderAnimeDNA() {
     });
 }
 
-// Also add a function to update DNA when data changes
 function updateAnimeDNA() {
-    // Small delay to ensure data is updated
     setTimeout(() => {
         renderAnimeDNA();
     }, 100);
 }
 
-// Listen for data changes
 if (typeof window !== 'undefined') {
-    // Listen for storage events
     window.addEventListener('storage', (e) => {
         if (e.key === 'animeData') {
             updateAnimeDNA();
         }
     });
 
-    // Listen for custom anime update event
     window.addEventListener('animeUpdate', () => {
         updateAnimeDNA();
     });
 
-    // Also try to hook into updateAllComponents if available
     setTimeout(() => {
         if (typeof window.updateAllComponents === 'function') {
             const originalUpdateAll = window.updateAllComponents;
@@ -403,9 +377,7 @@ if (typeof window !== 'undefined') {
     }, 1000);
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Small delay to ensure animeData is loaded
     setTimeout(() => {
         renderAnimeDNA();
     }, 500);
@@ -416,30 +388,27 @@ document.addEventListener('DOMContentLoaded', () => {
 // =============================================
 
 const clearBtn = document.getElementById("clearDataBtn");
-
-clearBtn.addEventListener("click", function () {
-    if (clearBtn.disabled) {
-        return;
-    }
-
-    const confirmDelete = confirm("Are you sure you want to delete all data?");
-    if (confirmDelete) {
-        localStorage.clear();
-        location.reload();
-    }
-});
+if (clearBtn) {
+    clearBtn.addEventListener("click", function () {
+        if (clearBtn.disabled) {
+            return;
+        }
+        const confirmDelete = confirm("Are you sure you want to delete all data?");
+        if (confirmDelete) {
+            localStorage.clear();
+            location.reload();
+        }
+    });
+}
 
 // =============================================
 // No Background scroll
 // =============================================
 
-// Prevent background scroll when modal is open
 function preventBodyScroll(prevent) {
     if (prevent) {
-        // Get scrollbar width to prevent layout shift
         const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
         document.documentElement.style.setProperty('--scrollbar-width', scrollbarWidth + 'px');
-
         document.body.classList.add('modal-open');
         document.body.style.paddingRight = scrollbarWidth + 'px';
     } else {
@@ -449,19 +418,16 @@ function preventBodyScroll(prevent) {
     }
 }
 
-// Attach to add anime modal
 document.getElementById('addAnimeBtn')?.addEventListener('click', function () {
     document.getElementById('addAnimeModal').style.display = 'block';
     preventBodyScroll(true);
 });
 
-// Attach to import button
 document.getElementById('importBtn')?.addEventListener('click', function () {
     document.getElementById('importModal').style.display = 'block';
     preventBodyScroll(true);
 });
 
-// Close modal handlers
 document.querySelectorAll('.close-modal, .modal .btn-secondary').forEach(btn => {
     btn.addEventListener('click', function (e) {
         const modal = this.closest('.modal');
@@ -472,7 +438,6 @@ document.querySelectorAll('.close-modal, .modal .btn-secondary').forEach(btn => 
     });
 });
 
-// Close modal when clicking outside
 document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', function (e) {
         if (e.target === this) {
@@ -482,7 +447,6 @@ document.querySelectorAll('.modal').forEach(modal => {
     });
 });
 
-// Handle escape key
 document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
         const openModal = document.querySelector('.modal[style*="display: block"], .modal[style*="display:block"], .modal.show');
@@ -494,7 +458,7 @@ document.addEventListener('keydown', function (e) {
 });
 
 // =============================================
-// CHECK FOR USER UPDATES - FIX MISSING FUNCTION
+// CHECK FOR USER UPDATES
 // =============================================
 
 async function checkForUserUpdates() {
@@ -503,19 +467,17 @@ async function checkForUserUpdates() {
     try {
         const updates = [];
         const now = new Date();
+        const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
 
-        // Check each anime in user's list for updates
         for (const userAnime of animeData) {
             if (userAnime.userStatus === 'Watching' || userAnime.userStatus === 'Plan to Watch') {
                 try {
-                    // Search for the anime to get latest info
                     const response = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(userAnime.title)}&limit=1`);
                     const data = await response.json();
 
                     if (data.data && data.data.length > 0) {
                         const latestInfo = data.data[0];
 
-                        // Check for new episodes
                         if (latestInfo.episodes && userAnime.episodes) {
                             if (latestInfo.episodes > userAnime.episodes) {
                                 updates.push({
@@ -532,12 +494,10 @@ async function checkForUserUpdates() {
                     console.error(`Error checking updates for ${userAnime.title}:`, error);
                 }
 
-                // Add small delay to avoid rate limiting
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
         }
 
-        // Show notifications for new updates
         if (updates.length > 0) {
             updates.forEach(update => {
                 if (typeof showToast === 'function') {
@@ -546,7 +506,6 @@ async function checkForUserUpdates() {
             });
         }
 
-        // Store updates for the upcoming page
         localStorage.setItem('userAnimeUpdates', JSON.stringify({
             updates: updates,
             lastChecked: now.toISOString()
@@ -560,13 +519,15 @@ async function checkForUserUpdates() {
         return [];
     }
 }
+
 // ============================================
-// USER PROFILE MODAL FUNCTIONS - SAFE VERSION
+// USER PROFILE MODAL - COMPLETE FIXED VERSION
 // ============================================
 
-let currentProfileUserId = null;
+// Use unique variable name to avoid conflicts
+let _profileModalUserId = null;
 
-// Helper: Format numbers to compact (10000 -> 10k)
+// Helper: Format numbers to compact
 function formatCompactNumber(num) {
     if (num === undefined || num === null) return '0';
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -592,15 +553,6 @@ function safeSetHTML(id, html) {
     return el;
 }
 
-// Helper: Safe set style
-function safeSetStyle(id, property, value) {
-    const el = document.getElementById(id);
-    if (el) {
-        el.style[property] = value;
-    }
-    return el;
-}
-
 // Helper: Safe set src
 function safeSetSrc(id, value, fallback) {
     const el = document.getElementById(id);
@@ -613,6 +565,10 @@ function safeSetSrc(id, value, fallback) {
     return el;
 }
 
+// ============================================
+// OPEN USER PROFILE - WITH FALLBACKS
+// ============================================
+
 async function openUserProfile(userId) {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -620,7 +576,7 @@ async function openUserProfile(userId) {
         return;
     }
 
-    currentProfileUserId = userId;
+    _profileModalUserId = userId;
 
     const modal = document.getElementById('userProfileModal');
     if (!modal) {
@@ -629,23 +585,61 @@ async function openUserProfile(userId) {
         return;
     }
 
+    // Show modal properly
+    modal.removeAttribute('hidden');
+    modal.classList.add('active');
+    modal.classList.add('show');
     modal.style.display = 'flex';
-    document.body.classList.add('modal-open');
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'auto';
+    modal.style.zIndex = '10000';
 
-    // Show loading state - safely
+    // Lock body scroll
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    document.body.style.top = '0';
+
+    // Show loading state
     safeSetText('profileName', 'Loading...');
     safeSetHTML('profileCompletedList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading anime list...</div>');
+    safeSetHTML('profileWatchingList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+    safeSetHTML('profilePlanList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+    safeSetHTML('profileAchievementsList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading achievements...</div>');
+    safeSetHTML('profileActivityList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading activity...</div>');
 
     try {
+        // Try primary API endpoint
         const response = await fetch(`http://localhost:3000/api/user/full-profile/${userId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!response.ok) throw new Error('Failed to load profile');
+        if (!response.ok) {
+            // If 404, try fallback endpoint
+            if (response.status === 404) {
+                console.warn('Full profile endpoint not found, trying fallback...');
+                const fallbackResponse = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (fallbackResponse.ok) {
+                    const profile = await fallbackResponse.json();
+                    renderUserProfileWithFallback(profile);
+                    return;
+                }
+                
+                // If fallback also fails, try friends list
+                console.warn('Profile endpoints unavailable, using friends fallback...');
+                await renderFriendsFallback(userId);
+                return;
+            }
+            throw new Error(`Failed to load profile (${response.status})`);
+        }
 
         const profile = await response.json();
-        
-        // Ensure required fields exist
         profile.stats = profile.stats || {};
         profile.animeList = profile.animeList || {};
         profile.achievements = profile.achievements || [];
@@ -655,41 +649,42 @@ async function openUserProfile(userId) {
 
     } catch (error) {
         console.error('Failed to load profile:', error);
-        showToast('Failed to load user profile', 'error');
-        closeUserProfileModal();
+        showToast('Failed to load user profile, showing friends instead', 'info');
+        await renderFriendsFallback(userId);
     }
 }
+
+// ============================================
+// RENDER USER PROFILE - MAIN
+// ============================================
 
 function renderUserProfile(profile) {
     console.log('📝 Rendering user profile...');
 
-    // ============================================
-    // HEADER INFO - SAFE
-    // ============================================
-
+    // Header Info
     safeSetText('profileName', profile.name || profile.username || 'User');
     safeSetText('profileLevel', `Lv.${profile.level || 1}`);
     safeSetText('profileTitle', profile.levelTitle || profile.title || 'Newbie');
 
-    // XP Fill - SAFE
+    // XP Fill
     const xpFillEl = document.getElementById('profileXpFill');
     if (xpFillEl) {
         const progress = Math.min(100, Math.max(0, profile.xpProgress || 0));
         xpFillEl.style.width = `${progress}%`;
     }
 
-    // XP Text - SAFE
+    // XP Text
     const xpTextEl = document.getElementById('profileXpText');
     if (xpTextEl) {
         const currentXP = profile.totalXP || 0;
-        const nextXP = (profile.totalXP + profile.xpToNextLevel) || 0;
+        const nextXP = (profile.totalXP + profile.xpToNextLevel) || 1000;
         xpTextEl.innerHTML = `
-            <span class="xp-current" data-full="${currentXP.toLocaleString()}">${formatCompactNumber(currentXP)}</span> / 
-            <span class="xp-next" data-full="${nextXP.toLocaleString()}">${formatCompactNumber(nextXP)}</span> XP
+            <span class="xp-current">${formatCompactNumber(currentXP)}</span> / 
+            <span class="xp-next">${formatCompactNumber(nextXP)}</span> XP
         `;
     }
 
-    // Avatar - SAFE
+    // Avatar
     const avatarImg = document.getElementById('profileAvatar');
     if (avatarImg) {
         const avatarUrl = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
@@ -699,18 +694,13 @@ function renderUserProfile(profile) {
         };
     }
 
-    // ============================================
-    // STATS WITH COMPACT FORMATTING - SAFE
-    // ============================================
-
+    // Stats
     function updateStatElement(id, value) {
         const el = document.getElementById(id);
         if (el) {
             const num = value || 0;
-            el.setAttribute('data-full', num.toLocaleString());
             el.innerHTML = formatCompactNumber(num);
             el.setAttribute('title', num.toLocaleString());
-            el.style.cursor = 'help';
         }
     }
 
@@ -721,10 +711,7 @@ function renderUserProfile(profile) {
     updateStatElement('profileEpisodes', profile.stats?.totalEpisodes);
     updateStatElement('profileHours', profile.stats?.totalHours);
 
-    // ============================================
-    // FRIEND BUTTON - SAFE
-    // ============================================
-
+    // Friend Button
     const friendBtn = document.getElementById('profileFriendBtn');
     if (friendBtn) {
         if (!profile.isCurrentUser) {
@@ -750,18 +737,12 @@ function renderUserProfile(profile) {
         }
     }
 
-    // ============================================
-    // ANIME LISTS - SAFE
-    // ============================================
-
+    // Anime Lists
     renderProfileAnimeList('completed', profile.animeList?.completed || []);
     renderProfileAnimeList('watching', profile.animeList?.watching || []);
     renderProfileAnimeList('plan', profile.animeList?.planToWatch || []);
 
-    // ============================================
-    // ACHIEVEMENTS - SAFE
-    // ============================================
-
+    // Achievements
     const achievements = profile.achievements || [];
     const container = document.getElementById('profileAchievementsList');
     if (container) {
@@ -794,10 +775,7 @@ function renderUserProfile(profile) {
         }
     }
 
-    // ============================================
-    // ACTIVITY - SAFE
-    // ============================================
-
+    // Activity
     const activities = profile.recentActivity || [];
     const activityContainer = document.getElementById('profileActivityList');
     if (activityContainer) {
@@ -837,6 +815,272 @@ function renderUserProfile(profile) {
     console.log('✅ User profile rendered successfully');
 }
 
+// ============================================
+// RENDER PROFILE WITH FALLBACK DATA
+// ============================================
+
+function renderUserProfileWithFallback(profile) {
+    console.log('📝 Rendering user profile with fallback data...');
+
+    safeSetText('profileName', profile.name || profile.username || 'User');
+    safeSetText('profileLevel', `Lv.${profile.level || 1}`);
+    safeSetText('profileTitle', profile.levelTitle || profile.title || 'Newbie');
+
+    const xpFillEl = document.getElementById('profileXpFill');
+    if (xpFillEl) {
+        const progress = Math.min(100, Math.max(0, profile.xpProgress || 0));
+        xpFillEl.style.width = `${progress}%`;
+    }
+
+    const xpTextEl = document.getElementById('profileXpText');
+    if (xpTextEl) {
+        const currentXP = profile.totalXP || 0;
+        const nextXP = (profile.totalXP + profile.xpToNextLevel) || 1000;
+        xpTextEl.innerHTML = `
+            <span class="xp-current">${formatCompactNumber(currentXP)}</span> / 
+            <span class="xp-next">${formatCompactNumber(nextXP)}</span> XP
+        `;
+    }
+
+    const avatarImg = document.getElementById('profileAvatar');
+    if (avatarImg) {
+        const avatarUrl = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
+        avatarImg.src = avatarUrl;
+        avatarImg.onerror = function() {
+            this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
+        };
+    }
+
+    function updateStatElement(id, value) {
+        const el = document.getElementById(id);
+        if (el) {
+            const num = value || 0;
+            el.innerHTML = formatCompactNumber(num);
+            el.setAttribute('title', num.toLocaleString());
+        }
+    }
+
+    updateStatElement('profileTotalAnime', profile.stats?.totalAnime || 0);
+    updateStatElement('profileCompleted', profile.stats?.completed || 0);
+    updateStatElement('profileWatching', profile.stats?.watching || 0);
+    updateStatElement('profilePlanToWatch', profile.stats?.planToWatch || 0);
+    updateStatElement('profileEpisodes', profile.stats?.totalEpisodes || 0);
+    updateStatElement('profileHours', profile.stats?.totalHours || 0);
+
+    const friendBtn = document.getElementById('profileFriendBtn');
+    if (friendBtn) {
+        if (!profile.isCurrentUser) {
+            friendBtn.style.display = 'block';
+            if (profile.isFriend) {
+                friendBtn.innerHTML = '<i class="fas fa-user-check"></i> Friends';
+                friendBtn.disabled = true;
+                friendBtn.style.opacity = '0.6';
+            } else {
+                friendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+                friendBtn.disabled = false;
+                friendBtn.style.opacity = '1';
+                friendBtn.onclick = () => {
+                    if (typeof sendFriendRequest === 'function') {
+                        sendFriendRequest(profile.uid);
+                    }
+                };
+            }
+        } else {
+            friendBtn.style.display = 'none';
+        }
+    }
+
+    renderProfileAnimeList('completed', profile.animeList?.completed || []);
+    renderProfileAnimeList('watching', profile.animeList?.watching || []);
+    renderProfileAnimeList('plan', profile.animeList?.planToWatch || []);
+
+    const achievements = profile.achievements || [];
+    const container = document.getElementById('profileAchievementsList');
+    if (container) {
+        if (achievements.length > 0) {
+            container.innerHTML = achievements.map(achievement => `
+                <div class="profile-achievement-card">
+                    <div class="profile-achievement-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="profile-achievement-info">
+                        <div class="profile-achievement-name">${escapeHtml(achievement)}</div>
+                        <div class="profile-achievement-desc">Unlocked achievement</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<div class="empty-state">No achievements unlocked yet</div>';
+        }
+    }
+
+    const activities = profile.recentActivity || [];
+    const activityContainer = document.getElementById('profileActivityList');
+    if (activityContainer) {
+        if (activities.length > 0) {
+            activityContainer.innerHTML = activities.map(activity => {
+                let iconClass = 'added';
+                let iconName = 'plus-circle';
+
+                switch (activity.action) {
+                    case 'completed': iconClass = 'completed'; iconName = 'check-circle'; break;
+                    case 'added': iconClass = 'added'; iconName = 'plus-circle'; break;
+                    case 'edited': iconClass = 'edited'; iconName = 'edit'; break;
+                    default: iconClass = 'added'; iconName = 'plus-circle';
+                }
+
+                return `
+                    <div class="profile-activity-item">
+                        <div class="profile-activity-icon ${iconClass}">
+                            <i class="fas fa-${iconName}"></i>
+                        </div>
+                        <div class="profile-activity-content">
+                            <div class="profile-activity-text">
+                                ${activity.action === 'completed' ? 'Completed' : 
+                                  activity.action === 'added' ? 'Added' : 'Updated'} 
+                                <strong>${escapeHtml(activity.animeTitle || 'anime')}</strong>
+                            </div>
+                            <div class="profile-activity-time">${formatTimeAgo(activity.timestamp)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            activityContainer.innerHTML = '<div class="empty-state">No recent activity</div>';
+        }
+    }
+
+    console.log('✅ User profile rendered with fallback');
+}
+
+// ============================================
+// FRIENDS FALLBACK
+// ============================================
+
+async function renderFriendsFallback(userId) {
+    console.log('📝 Using friends fallback for user:', userId);
+    
+    const modal = document.getElementById('userProfileModal');
+    if (!modal) return;
+
+    let userData = null;
+    let friendsList = [];
+
+    const token = localStorage.getItem('authToken');
+    
+    try {
+        const friendsResponse = await fetch('http://localhost:3000/api/friends/list', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (friendsResponse.ok) {
+            friendsList = await friendsResponse.json();
+        }
+    } catch (e) {
+        console.warn('Could not fetch friends list:', e);
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    
+    if (userId === currentUser.uid || userId === 'current') {
+        userData = {
+            name: userProfile.name || currentUser.username || 'You',
+            avatar: userProfile.avatar || currentUser.avatar,
+            level: currentUser.level || 1,
+            title: currentUser.title || 'Newbie',
+            totalXP: currentUser.totalXP || 0,
+            stats: {
+                totalAnime: 0,
+                completed: 0,
+                watching: 0,
+                planToWatch: 0,
+                totalEpisodes: 0,
+                totalHours: 0
+            },
+            isCurrentUser: true,
+            achievements: ['🌟 Profile Loaded'],
+            recentActivity: [],
+            animeList: {
+                completed: [],
+                watching: [],
+                planToWatch: []
+            }
+        };
+    } else {
+        const foundFriend = friendsList.find(f => f.uid === userId);
+        
+        if (foundFriend) {
+            userData = {
+                name: foundFriend.name || foundFriend.username || 'Friend',
+                avatar: foundFriend.avatar,
+                level: foundFriend.level || 1,
+                title: foundFriend.title || 'Newbie',
+                totalXP: foundFriend.totalXP || 0,
+                stats: {
+                    totalAnime: foundFriend.totalAnime || 0,
+                    completed: 0,
+                    watching: 0,
+                    planToWatch: 0,
+                    totalEpisodes: 0,
+                    totalHours: 0
+                },
+                isCurrentUser: false,
+                isFriend: true,
+                achievements: ['👥 Friend'],
+                recentActivity: [],
+                animeList: {
+                    completed: [],
+                    watching: [],
+                    planToWatch: []
+                }
+            };
+        } else {
+            userData = {
+                name: 'Unknown User',
+                avatar: `https://ui-avatars.com/api/?name=Unknown&background=6366F1&color=fff`,
+                level: 1,
+                title: 'Newbie',
+                totalXP: 0,
+                stats: {
+                    totalAnime: 0,
+                    completed: 0,
+                    watching: 0,
+                    planToWatch: 0,
+                    totalEpisodes: 0,
+                    totalHours: 0
+                },
+                isCurrentUser: false,
+                isFriend: false,
+                achievements: ['🔍 User Not Found'],
+                recentActivity: [],
+                animeList: {
+                    completed: [],
+                    watching: [],
+                    planToWatch: []
+                }
+            };
+        }
+    }
+
+    if (friendsList.length > 0) {
+        const friendNames = friendsList.slice(0, 3).map(f => f.name || f.username || 'Friend');
+        if (friendNames.length > 0) {
+            userData.achievements = [
+                ...userData.achievements,
+                `👥 Friends: ${friendNames.join(', ')}${friendsList.length > 3 ? ` +${friendsList.length - 3} more` : ''}`
+            ];
+        }
+    }
+
+    renderUserProfileWithFallback(userData);
+    showToast('Profile loaded with friends fallback', 'info');
+}
+
+// ============================================
+// RENDER PROFILE ANIME LIST
+// ============================================
+
 function renderProfileAnimeList(type, animeList) {
     const containerId = `profile${type.charAt(0).toUpperCase() + type.slice(1)}List`;
     const container = document.getElementById(containerId);
@@ -847,7 +1091,7 @@ function renderProfileAnimeList(type, animeList) {
         return;
     }
 
-    container.innerHTML = animeList.map(anime => `
+    container.innerHTML = animeList.slice(0, 10).map(anime => `
         <div class="profile-anime-card">
             <img src="${anime.cover || 'https://placehold.co/60x85/6a5acd/white?text=No+Image'}" 
                  class="profile-anime-cover" 
@@ -861,27 +1105,33 @@ function renderProfileAnimeList(type, animeList) {
     `).join('');
 }
 
-function renderProfileAchievements(achievements) {
-    // This is now handled inside renderUserProfile
-    // Keeping for backward compatibility
-}
-
-function renderProfileActivity(activities) {
-    // This is now handled inside renderUserProfile
-    // Keeping for backward compatibility
-}
+// ============================================
+// CLOSE USER PROFILE MODAL
+// ============================================
 
 function closeUserProfileModal() {
     const modal = document.getElementById('userProfileModal');
     if (modal) {
+        modal.classList.remove('active');
+        modal.classList.remove('show');
         modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.style.pointerEvents = 'none';
+        modal.setAttribute('hidden', '');
+        
         document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.top = '';
     }
-    currentProfileUserId = null;
+    _profileModalUserId = null;
 }
 
 // ============================================
-// PROFILE TAB SWITCHING - SAFE
+// PROFILE TAB SWITCHING
 // ============================================
 
 document.addEventListener('click', function(e) {
@@ -892,11 +1142,9 @@ document.addEventListener('click', function(e) {
     const container = tab.closest('.profile-modal-body');
     if (!container) return;
 
-    // Update active tab
     container.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
 
-    // Update active content
     const contentMap = {
         'completed': 'profileTabCompleted',
         'watching': 'profileTabWatching',
@@ -918,50 +1166,22 @@ document.addEventListener('click', function(e) {
 });
 
 // ============================================
-// CHECK IF REQUIRED ELEMENTS EXIST
+// EXPOSE FUNCTIONS GLOBALLY
 // ============================================
 
-function checkProfileModalElements() {
-    const requiredIds = [
-        'profileName',
-        'profileLevel',
-        'profileTitle',
-        'profileXpFill',
-        'profileXpText',
-        'profileAvatar',
-        'profileTotalAnime',
-        'profileCompleted',
-        'profileWatching',
-        'profilePlanToWatch',
-        'profileEpisodes',
-        'profileHours',
-        'profileFriendBtn',
-        'profileCompletedList',
-        'profileWatchingList',
-        'profilePlanList',
-        'profileAchievementsList',
-        'profileActivityList'
-    ];
-
-    const missing = requiredIds.filter(id => !document.getElementById(id));
-    
-    if (missing.length > 0) {
-        console.warn('⚠️ Missing profile modal elements:', missing);
-        return false;
-    }
-    return true;
-}
-
-// ============================================
-// UPDATE viewUserProfile
-// ============================================
-
+window.openUserProfile = openUserProfile;
+window.closeUserProfileModal = closeUserProfileModal;
+window.renderUserProfile = renderUserProfile;
+window.renderUserProfileWithFallback = renderUserProfileWithFallback;
+window.renderFriendsFallback = renderFriendsFallback;
+window.renderProfileAnimeList = renderProfileAnimeList;
 window.viewUserProfile = openUserProfile;
 
-console.log('✅ User profile functions loaded with safety checks!');
+console.log('✅ User profile functions loaded with fallbacks!');
+console.log('💡 Type "window.openUserProfile(userId)" to open a profile');
 
 // ============================================
-// REAL-TIME NOTIFICATION MANAGER - UPDATED
+// REAL-TIME NOTIFICATION MANAGER
 // ============================================
 
 class RealTimeNotificationManager {
@@ -998,18 +1218,20 @@ class RealTimeNotificationManager {
                 const data = await response.json();
                 const systemNotifs = data.notifications || [];
 
-                // Keep friend requests from existing notifications
                 const existingFriendReqs = this.notifications.filter(n => n.type === 'friend_request');
-
-                // Merge and remove duplicates
                 const allNotifs = [...systemNotifs, ...existingFriendReqs];
                 this.notifications = allNotifs.filter((n, i, arr) =>
                     arr.findIndex(x => x.id === n.id) === i
                 );
 
                 this.unreadCount = this.notifications.filter(n => !n.read).length;
-                this.renderNotifications();
-                this.updateBadge();
+                
+                if (typeof this.renderNotifications === 'function') {
+                    this.renderNotifications();
+                }
+                if (typeof this.updateBadge === 'function') {
+                    this.updateBadge();
+                }
             }
         } catch (error) {
             console.error('Load system notifications error:', error);
@@ -1043,26 +1265,31 @@ class RealTimeNotificationManager {
                     }
                 }));
 
-                // Keep notifications that are not friend requests
                 const otherNotifications = this.notifications.filter(n => n.type !== 'friend_request');
-
-                // Check for new requests
                 const existingIds = new Set(otherNotifications.map(n => n.id));
                 const newRequests = requestNotifications.filter(r => !existingIds.has(r.id));
 
                 if (newRequests.length > 0) {
                     this.notifications = [...newRequests, ...otherNotifications];
                     this.unreadCount += newRequests.length;
-                    this.renderNotifications();
-                    this.updateBadge();
+                    
+                    if (typeof this.renderNotifications === 'function') {
+                        this.renderNotifications();
+                    }
+                    if (typeof this.updateBadge === 'function') {
+                        this.updateBadge();
+                    }
 
-                    // Show toast for each new request
                     newRequests.forEach(req => {
-                        this.showToast(req.message, 'friend_request');
+                        if (typeof this.showToast === 'function') {
+                            this.showToast(req.message, 'friend_request');
+                        }
                     });
                 } else {
                     this.notifications = [...requestNotifications, ...otherNotifications];
-                    this.renderNotifications();
+                    if (typeof this.renderNotifications === 'function') {
+                        this.renderNotifications();
+                    }
                 }
             }
         } catch (error) {
@@ -1078,7 +1305,7 @@ class RealTimeNotificationManager {
             bell.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.isDropdownOpen = !this.isDropdownOpen;
-                dropdown.style.display = this.isDropdownOpen ? 'block' : 'none';
+                if (dropdown) dropdown.style.display = this.isDropdownOpen ? 'block' : 'none';
             });
         }
 
@@ -1138,7 +1365,6 @@ class RealTimeNotificationManager {
             `;
         }).join('');
 
-        // Add click handlers
         document.querySelectorAll('.notification-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 if (e.target.tagName === 'BUTTON') return;
@@ -1187,15 +1413,17 @@ class RealTimeNotificationManager {
     updateBadge() {
         const badge = document.getElementById('notificationBadge');
         if (this.unreadCount > 0) {
-            badge.style.display = 'flex';
-            badge.textContent = this.unreadCount > 99 ? '99+' : this.unreadCount;
+            if (badge) {
+                badge.style.display = 'flex';
+                badge.textContent = this.unreadCount > 99 ? '99+' : this.unreadCount;
+            }
             const bell = document.getElementById('notificationBell');
             if (bell) {
                 bell.classList.add('has-notifications');
                 setTimeout(() => bell.classList.remove('has-notifications'), 500);
             }
         } else {
-            badge.style.display = 'none';
+            if (badge) badge.style.display = 'none';
         }
     }
 
@@ -1215,8 +1443,12 @@ class RealTimeNotificationManager {
 
             this.notifications.forEach(n => n.read = true);
             this.unreadCount = 0;
-            this.renderNotifications();
-            this.updateBadge();
+            if (typeof this.renderNotifications === 'function') {
+                this.renderNotifications();
+            }
+            if (typeof this.updateBadge === 'function') {
+                this.updateBadge();
+            }
         } catch (error) {
             console.error('Mark all read error:', error);
         }
@@ -1226,7 +1458,6 @@ class RealTimeNotificationManager {
         const token = localStorage.getItem('authToken');
         if (!token) return;
 
-        // Show loading state
         const acceptBtn = document.querySelector(`.notification-item[data-id="${notificationId}"] .accept`);
         if (acceptBtn) {
             acceptBtn.textContent = 'Accepting...';
@@ -1240,11 +1471,9 @@ class RealTimeNotificationManager {
             });
 
             if (response.ok) {
-                // Get the friend's name
                 const notification = this.notifications.find(n => n.id === notificationId);
                 const friendName = notification?.data?.fromName || 'your new friend';
 
-                // Replace with accepted notification
                 const updatedNotification = {
                     id: notificationId + '_accepted',
                     type: 'friend_accepted',
@@ -1258,22 +1487,25 @@ class RealTimeNotificationManager {
                     }
                 };
 
-                // Replace the old notification
                 const index = this.notifications.findIndex(n => n.id === notificationId);
                 if (index !== -1) {
                     this.notifications[index] = updatedNotification;
                 }
 
-                this.showToast(`You are now friends with ${friendName}! 🎉`, 'friend_accepted');
-                this.renderNotifications();
-                this.updateBadge();
+                if (typeof this.showToast === 'function') {
+                    this.showToast(`You are now friends with ${friendName}! 🎉`, 'friend_accepted');
+                }
+                if (typeof this.renderNotifications === 'function') {
+                    this.renderNotifications();
+                }
+                if (typeof this.updateBadge === 'function') {
+                    this.updateBadge();
+                }
 
-                // Refresh friends list
                 if (typeof loadFriends === 'function') {
                     await loadFriends();
                 }
 
-                // Close dropdown after 2 seconds
                 setTimeout(() => {
                     const dropdown = document.getElementById('notificationDropdown');
                     if (dropdown) dropdown.style.display = 'none';
@@ -1282,7 +1514,9 @@ class RealTimeNotificationManager {
 
                 console.log('✅ Friend request accepted!');
             } else {
-                this.showToast('Failed to accept friend request', 'error');
+                if (typeof this.showToast === 'function') {
+                    this.showToast('Failed to accept friend request', 'error');
+                }
                 if (acceptBtn) {
                     acceptBtn.textContent = 'Accept';
                     acceptBtn.disabled = false;
@@ -1290,7 +1524,9 @@ class RealTimeNotificationManager {
             }
         } catch (error) {
             console.error('Accept error:', error);
-            this.showToast('Error accepting friend request', 'error');
+            if (typeof this.showToast === 'function') {
+                this.showToast('Error accepting friend request', 'error');
+            }
             if (acceptBtn) {
                 acceptBtn.textContent = 'Accept';
                 acceptBtn.disabled = false;
@@ -1315,12 +1551,17 @@ class RealTimeNotificationManager {
             });
 
             if (response.ok) {
-                // Remove the notification
                 this.notifications = this.notifications.filter(n => n.id !== notificationId);
                 this.unreadCount = Math.max(0, this.unreadCount - 1);
-                this.showToast('Friend request declined', 'info');
-                this.renderNotifications();
-                this.updateBadge();
+                if (typeof this.showToast === 'function') {
+                    this.showToast('Friend request declined', 'info');
+                }
+                if (typeof this.renderNotifications === 'function') {
+                    this.renderNotifications();
+                }
+                if (typeof this.updateBadge === 'function') {
+                    this.updateBadge();
+                }
 
                 setTimeout(() => {
                     const dropdown = document.getElementById('notificationDropdown');
@@ -1328,7 +1569,9 @@ class RealTimeNotificationManager {
                     this.isDropdownOpen = false;
                 }, 1500);
             } else {
-                this.showToast('Failed to decline friend request', 'error');
+                if (typeof this.showToast === 'function') {
+                    this.showToast('Failed to decline friend request', 'error');
+                }
                 if (declineBtn) {
                     declineBtn.textContent = 'Decline';
                     declineBtn.disabled = false;
@@ -1336,7 +1579,9 @@ class RealTimeNotificationManager {
             }
         } catch (error) {
             console.error('Decline error:', error);
-            this.showToast('Error declining friend request', 'error');
+            if (typeof this.showToast === 'function') {
+                this.showToast('Error declining friend request', 'error');
+            }
             if (declineBtn) {
                 declineBtn.textContent = 'Decline';
                 declineBtn.disabled = false;
@@ -1361,7 +1606,9 @@ class RealTimeNotificationManager {
                 }
                 break;
             case 'friend_accepted':
-                this.showToast(`${data?.userName || 'Someone'} is now your friend! 🎉`, 'friend_accepted');
+                if (typeof this.showToast === 'function') {
+                    this.showToast(`${data?.userName || 'Someone'} is now your friend! 🎉`, 'friend_accepted');
+                }
                 if (typeof loadFriends === 'function') loadFriends();
                 break;
         }
@@ -1448,7 +1695,7 @@ class RealTimeNotificationManager {
     }
 }
 
-// Initialize
+// Initialize notification manager
 let notificationManager;
 document.addEventListener('DOMContentLoaded', () => {
     notificationManager = new RealTimeNotificationManager();
@@ -1461,11 +1708,10 @@ window.addEventListener('focus', () => {
 });
 
 // ============================================
-// FLOATING ADD ANIME BUTTON - GLOBAL FOR ALL PAGES
+// FLOATING ADD ANIME BUTTON
 // ============================================
 
 (function initFloatingAddButton() {
-    // Wait for DOM to be fully loaded
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', setupFloatingButton);
     } else {
@@ -1473,15 +1719,12 @@ window.addEventListener('focus', () => {
     }
 
     function setupFloatingButton() {
-        // Get the floating button element
         const floatBtn = document.getElementById('floatingAddAnimeBtn');
         if (!floatBtn) return;
 
-        // Remove any existing listeners to avoid duplicates
         const newFloatBtn = floatBtn.cloneNode(true);
         floatBtn.parentNode?.replaceChild(newFloatBtn, floatBtn);
 
-        // Add click handler
         newFloatBtn.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -1491,49 +1734,40 @@ window.addEventListener('focus', () => {
         console.log('✅ Floating Add Anime button initialized');
     }
 
-    // Global function to open the add anime modal (can be called from anywhere)
     window.openAddAnimeModal = function () {
         const addModal = document.getElementById('addAnimeModal');
         const originalAddBtn = document.getElementById('addAnimeBtn');
 
-        // Reset editing state
         if (typeof window.isEditing !== 'undefined') {
             window.isEditing = false;
             window.currentEditId = null;
         }
 
-        // Reset form fields
         const animeForm = document.getElementById('addAnimeForm');
         if (animeForm) animeForm.reset();
 
-        // Reset submit button text and hide delete button
         const submitBtn = document.getElementById('submitBtn');
         const deleteBtn = document.getElementById('deleteBtn');
         if (submitBtn) submitBtn.textContent = 'Add Anime';
         if (deleteBtn) deleteBtn.style.display = 'none';
 
-        // Clear search results
         const searchResults = document.getElementById('searchResults');
         if (searchResults) {
             searchResults.style.display = 'none';
             searchResults.innerHTML = '';
         }
 
-        // Clear anime ID
         const animeIdField = document.getElementById('animeId');
         if (animeIdField) animeIdField.value = '';
 
-        // Reset cover and genres
         const coverInput = document.getElementById('animeCover');
         const genresInput = document.getElementById('animeGenres');
         if (coverInput) coverInput.value = '';
         if (genresInput) genresInput.value = '';
 
-        // Reset progress to 0
         const progressField = document.getElementById('animeProgress');
         if (progressField) progressField.value = 0;
 
-        // Set default type duration
         const typeSelect = document.getElementById('animeType');
         const durationField = document.getElementById('animeDuration');
         if (typeSelect && durationField) {
@@ -1546,51 +1780,32 @@ window.addEventListener('focus', () => {
             }
         }
 
-        // Show modal
         if (addModal) {
             addModal.style.display = 'flex';
-
-            // Prevent background scroll
             document.body.classList.add('modal-open');
             document.body.style.overflow = 'hidden';
             document.body.style.position = 'fixed';
             document.body.style.width = '100%';
             document.body.style.height = '100%';
 
-            // Focus on title input for better UX
             setTimeout(() => {
                 const titleInput = document.getElementById('animeTitle');
                 if (titleInput) titleInput.focus();
             }, 100);
         } else if (originalAddBtn && typeof originalAddBtn.click === 'function') {
-            // Fallback: click the original button
             originalAddBtn.click();
         } else {
             console.warn('Could not open Add Anime modal');
-            showToast('Add Anime feature unavailable', 'error');
+            if (typeof showToast === 'function') {
+                showToast('Add Anime feature unavailable', 'error');
+            }
         }
 
-        // Haptic feedback for mobile
         if (window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(50);
         }
     };
 
-    // Helper function for toast if needed
-    function showToast(message, type) {
-        const toastContainer = document.getElementById('toastContainer');
-        if (toastContainer) {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i><span>${message}</span>`;
-            toastContainer.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        } else {
-            console.log(`[${type}] ${message}`);
-        }
-    }
-
-    // Ensure modal close restores body scroll (safety)
     const modal = document.getElementById('addAnimeModal');
     if (modal) {
         const observer = new MutationObserver(function (mutations) {
@@ -1620,10 +1835,8 @@ window.addEventListener('focus', () => {
 
     if (!tabs.length || !contents.length) return;
 
-    // Get saved tab from localStorage
     const savedTab = localStorage.getItem('settingsActiveTab') || 'profile';
 
-    // Activate saved tab
     tabs.forEach(tab => {
         const tabName = tab.dataset.tab;
         if (tabName === savedTab) {
@@ -1642,16 +1855,13 @@ window.addEventListener('focus', () => {
         }
     });
 
-    // Tab click handler
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
             const tabName = this.dataset.tab;
 
-            // Update tabs
             tabs.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
 
-            // Update contents
             contents.forEach(content => {
                 const contentId = content.id.replace('tab-', '');
                 if (contentId === tabName) {
@@ -1661,7 +1871,6 @@ window.addEventListener('focus', () => {
                 }
             });
 
-            // Save to localStorage
             localStorage.setItem('settingsActiveTab', tabName);
         });
     });
@@ -1669,3 +1878,37 @@ window.addEventListener('focus', () => {
     console.log('✅ Settings tabs initialized');
 })();
 
+// ============================================
+// ESCAPE HTML HELPER - GLOBAL
+// ============================================
+
+if (typeof escapeHtml === 'undefined') {
+    window.escapeHtml = function(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+}
+
+// ============================================
+// FORMAT TIME AGO - GLOBAL
+// ============================================
+
+if (typeof formatTimeAgo === 'undefined') {
+    window.formatTimeAgo = function(dateString) {
+        if (!dateString) return 'Just now';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
+        return date.toLocaleDateString();
+    };
+}
+
+console.log('✅ extras.js loaded successfully!');
+console.log('✅ User profile modal has fallbacks for 404 errors');
+console.log('💡 To open profile: openUserProfile(userId)');
