@@ -2494,8 +2494,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
 // =============================================
-// COMPLETE WORKING MODAL SYSTEM
+// COMPLETE WORKING MODAL SYSTEM - FIXED
 // =============================================
 
 (function completeModalSystem() {
@@ -2508,21 +2509,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function openModal(modalElement) {
         if (!modalElement) return;
         
-        // Remove hidden attribute
         modalElement.removeAttribute('hidden');
-        
-        // Force display
         modalElement.style.display = 'flex';
         modalElement.style.visibility = 'visible';
         modalElement.style.opacity = '1';
         modalElement.style.pointerEvents = 'auto';
         modalElement.style.zIndex = '99999';
-        
-        // Add show class
         modalElement.classList.add('show');
         modalElement.classList.add('active');
         
-        // Lock body scroll
         document.body.classList.add('modal-open');
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
@@ -2536,17 +2531,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal(modalElement) {
         if (!modalElement) return;
         
-        // Hide modal
         modalElement.style.display = 'none';
         modalElement.style.visibility = 'hidden';
         modalElement.style.opacity = '0';
         modalElement.classList.remove('show');
         modalElement.classList.remove('active');
-        
-        // Add hidden attribute back
         modalElement.setAttribute('hidden', '');
         
-        // Restore body scroll
         document.body.classList.remove('modal-open');
         document.body.style.overflow = '';
         document.body.style.position = '';
@@ -2564,19 +2555,29 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetEditingState() {
         window.isEditing = false;
         window.currentEditId = null;
+        
         const submitBtn = document.getElementById('submitBtn');
         const deleteBtn = document.getElementById('deleteBtn');
         if (submitBtn) submitBtn.textContent = 'Add Anime';
         if (deleteBtn) deleteBtn.style.display = 'none';
         
-        // Reset form
         const form = document.getElementById('addAnimeForm');
         if (form) {
             form.reset();
-            document.getElementById('animeEpisodes').value = 1;
-            document.getElementById('animeDuration').value = 20;
-            document.getElementById('animeProgress').value = 0;
-            document.getElementById('animeStatus').value = 'Plan to Watch';
+            const eps = document.getElementById('animeEpisodes');
+            const dur = document.getElementById('animeDuration');
+            const prog = document.getElementById('animeProgress');
+            const status = document.getElementById('animeStatus');
+            if (eps) eps.value = 1;
+            if (dur) dur.value = 20;
+            if (prog) prog.value = 0;
+            if (status) status.value = 'Plan to Watch';
+        }
+        
+        const searchResults = document.getElementById('searchResults');
+        if (searchResults) {
+            searchResults.style.display = 'none';
+            searchResults.innerHTML = '';
         }
     }
 
@@ -2591,12 +2592,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Make sure modal starts hidden
         addModal.setAttribute('hidden', '');
         addModal.style.display = 'none';
         addModal.classList.remove('show', 'active');
 
-        // CLOSE ON BACKDROP CLICK
         addModal.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal(this);
@@ -2604,7 +2603,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // CLOSE ON X BUTTON
         const closeX = addModal.querySelector('.close-modal');
         if (closeX) {
             closeX.addEventListener('click', function(e) {
@@ -2615,7 +2613,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // CLOSE ON CANCEL BUTTON
         const cancelBtn = addModal.querySelector('.btn-secondary.close-modal');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', function(e) {
@@ -2643,9 +2640,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addAnimeBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
             console.log('🖱️ Add Anime button clicked');
-            
             resetEditingState();
             openModal(document.getElementById('addAnimeModal'));
         });
@@ -2667,9 +2662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         floatingBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
             console.log('🖱️ Floating Add Anime button clicked');
-            
             resetEditingState();
             openModal(document.getElementById('addAnimeModal'));
             
@@ -2699,11 +2692,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log('📝 Found anime:', anime.title);
 
-        // Set editing state
         window.isEditing = true;
         window.currentEditId = id;
 
-        // Get all form elements
         const animeIdInput = document.getElementById('animeId');
         const animeTitle = document.getElementById('animeTitle');
         const animeType = document.getElementById('animeType');
@@ -2722,7 +2713,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const addModal = document.getElementById('addAnimeModal');
         const searchResultsDiv = document.getElementById('searchResults');
 
-        // Populate form with anime data
         if (animeIdInput) animeIdInput.value = anime.id;
         if (animeTitle) animeTitle.value = anime.title;
         if (animeType) animeType.value = anime.type || 'TV';
@@ -2734,7 +2724,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (animeCover) animeCover.value = anime.cover || '';
         if (animeGenres) animeGenres.value = anime.genres ? anime.genres.join(', ') : '';
 
-        // Set finish date if exists
         if (anime.finishDate && animeYear && animeMonth) {
             const [year, month] = anime.finishDate.split('-');
             animeYear.value = year;
@@ -2745,7 +2734,6 @@ document.addEventListener('DOMContentLoaded', () => {
             animeMonth.value = (now.getMonth() + 1).toString().padStart(2, '0');
         }
 
-        // Set duration input readonly based on type
         if (durationInput) {
             if (anime.type === 'Movie') {
                 durationInput.readOnly = false;
@@ -2754,17 +2742,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Update button text and show delete button
         if (submitButton) submitButton.textContent = 'Update Anime';
         if (deleteButton) deleteButton.style.display = 'inline-block';
 
-        // Close search results if open
         if (searchResultsDiv) {
             searchResultsDiv.style.display = 'none';
             searchResultsDiv.innerHTML = '';
         }
 
-        // OPEN THE MODAL
         if (addModal) {
             openModal(addModal);
             console.log('✅ Edit modal opened for:', anime.title);
@@ -2796,11 +2781,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof saveData === 'function') saveData();
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { /* ignore */ }
 
-        // Close modal
         closeModal(document.getElementById('addAnimeModal'));
         resetEditingState();
 
-        // Refresh everything
         if (typeof updateAllComponents === 'function') updateAllComponents();
 
         if (typeof showToast === 'function') {
@@ -2809,7 +2792,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ============================================
-    // 8. FORM SUBMIT HANDLER (Add/Update)
+    // 8. FORM SUBMIT HANDLER (Add/Update) - FIXED
     // ============================================
     
     window.handleAddAnime = function(e) {
@@ -2837,22 +2820,66 @@ document.addEventListener('DOMContentLoaded', () => {
         const year = document.getElementById('animeYear')?.value;
         const month = document.getElementById('animeMonth')?.value;
 
-        const getNextId = () => {
+        // ============================================
+        // HELPER FUNCTIONS
+        // ============================================
+        
+        function getFormattedTimestamp() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const h = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            return y + '-' + m + '-' + d + ' ' + h + ':' + min + ':' + s;
+        }
+
+        function getNextId() {
             if (animeData.length === 0) return 1;
             const maxId = Math.max(...animeData.map(a => parseInt(a.id) || 0));
             return maxId + 1;
-        };
+        }
+
+        function getCompletionDate() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+            const currentDay = String(now.getDate()).padStart(2, '0');
+            
+            const selectedYear = document.getElementById('animeYear')?.value;
+            const selectedMonth = document.getElementById('animeMonth')?.value;
+            
+            if (selectedYear && selectedMonth) {
+                const yearInt = parseInt(selectedYear);
+                const monthInt = parseInt(selectedMonth);
+                const isCurrentMonth = (yearInt === currentYear && monthInt === parseInt(currentMonth));
+                const day = isCurrentMonth ? parseInt(currentDay) : 1;
+                
+                return {
+                    finishDate: selectedYear + '-' + selectedMonth,
+                    actualFinishDate: selectedYear + '-' + selectedMonth + '-' + String(day).padStart(2, '0')
+                };
+            }
+            
+            return {
+                finishDate: currentYear + '-' + currentMonth,
+                actualFinishDate: currentYear + '-' + currentMonth + '-' + currentDay
+            };
+        }
 
         const now = new Date();
         const currentYear = now.getFullYear();
         const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
         const currentDay = String(now.getDate()).padStart(2, '0');
+        const nowTimestamp = getFormattedTimestamp();
 
-        // Check if editing or adding
+        // ============================================
+        // CHECK IF EDITING OR ADDING
+        // ============================================
+        
         if (window.isEditing && window.currentEditId) {
-            // ============================================
-            // UPDATE EXISTING ANIME
-            // ============================================
+            // ========== UPDATE EXISTING ANIME ==========
             const existingAnime = animeData.find(a => a.id == window.currentEditId);
             if (!existingAnime) {
                 if (typeof showToast === 'function') {
@@ -2869,18 +2896,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isNowCompleted) {
                 if (!wasCompleted) {
-                    if (year && month) {
-                        const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
-                        finishDate = `${year}-${month}`;
-                        actualFinishDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
-                    } else {
-                        finishDate = `${currentYear}-${currentMonth}`;
-                        actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
-                    }
+                    const dateInfo = getCompletionDate();
+                    finishDate = dateInfo.finishDate;
+                    actualFinishDate = dateInfo.actualFinishDate;
                 }
             } else {
                 finishDate = null;
                 actualFinishDate = null;
+            }
+
+            // ✅ Determine correct log action
+            let logAction = 'edited';
+            let toastMessage = '"' + title + '" updated successfully!';
+
+            // If status changed to Completed → log as 'completed'
+            if (isNowCompleted && !wasCompleted) {
+                logAction = 'completed';
+                toastMessage = '"' + title + '" marked as completed! 🎉';
+            }
+            // If title changed
+            else if (existingAnime.title !== title) {
+                logAction = 'edited';
+                toastMessage = '"' + title + '" renamed successfully!';
             }
 
             // Update anime
@@ -2895,37 +2932,37 @@ document.addEventListener('DOMContentLoaded', () => {
             existingAnime.genres = genres;
             existingAnime.finishDate = finishDate;
             existingAnime.actualFinishDate = actualFinishDate;
-            existingAnime.updatedAt = new Date().toISOString();
+            existingAnime.updatedAt = nowTimestamp;
 
             if (typeof saveData === 'function') saveData();
-            if (typeof logActivity === 'function') logActivity('edited', title);
+            if (typeof logActivity === 'function') logActivity(logAction, title);
 
-            // Close modal and reset
             closeModal(document.getElementById('addAnimeModal'));
             resetEditingState();
 
             if (typeof updateAllComponents === 'function') updateAllComponents();
             
             if (typeof showToast === 'function') {
-                showToast(`"${title}" updated successfully!`, 'success');
+                showToast(toastMessage, 'success');
             }
 
         } else {
-            // ============================================
-            // ADD NEW ANIME
-            // ============================================
+            // ========== ADD NEW ANIME ==========
             let finishDate = null;
             let actualFinishDate = null;
 
+            let logAction = 'added';
+            let toastMessage = '"' + title + '" added successfully!';
+
             if (status === 'Completed') {
-                if (year && month) {
-                    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
-                    finishDate = `${year}-${month}`;
-                    actualFinishDate = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
-                } else {
-                    finishDate = `${currentYear}-${currentMonth}`;
-                    actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
-                }
+                const dateInfo = getCompletionDate();
+                finishDate = dateInfo.finishDate;
+                actualFinishDate = dateInfo.actualFinishDate;
+                logAction = 'completed';
+                toastMessage = '"' + title + '" added and marked as completed! 🎉';
+            } else if (status === 'Watching') {
+                logAction = 'watching';
+                toastMessage = '"' + title + '" added to your watching list! 📺';
             }
 
             const newAnime = {
@@ -2941,22 +2978,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 genres: genres,
                 finishDate: finishDate,
                 actualFinishDate: actualFinishDate,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                createdAt: nowTimestamp,
+                updatedAt: nowTimestamp
             };
 
             animeData.push(newAnime);
             if (typeof saveData === 'function') saveData();
-            if (typeof logActivity === 'function') logActivity('added', title);
+            if (typeof logActivity === 'function') logActivity(logAction, title);
 
-            // Close modal and reset
             closeModal(document.getElementById('addAnimeModal'));
             resetEditingState();
 
             if (typeof updateAllComponents === 'function') updateAllComponents();
             
             if (typeof showToast === 'function') {
-                showToast(`"${title}" added successfully!`, 'success');
+                showToast(toastMessage, 'success');
             }
         }
     };
@@ -2987,7 +3023,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Remove existing handler to avoid duplicates
         if (tableBody._clickHandler) {
             tableBody.removeEventListener('click', tableBody._clickHandler);
         }
@@ -2996,7 +3031,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = e.target.closest('tr[data-id]');
             if (!row) return;
 
-            // Ignore clicks on interactive elements
             if (e.target.closest('.progress-wrapper') ||
                 e.target.closest('.badge') ||
                 e.target.closest('a') ||
@@ -3038,7 +3072,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function init() {
         console.log('🚀 Initializing...');
         
-        // Make sure modal starts hidden
         const modal = document.getElementById('addAnimeModal');
         if (modal) {
             modal.setAttribute('hidden', '');
@@ -3046,13 +3079,11 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.remove('show', 'active');
         }
         
-        // Setup all handlers
         setupModalHandlers();
         setupAddAnimeButton();
         setupFloatingButton();
         setupFormSubmit();
         
-        // Attach table click handler
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(attachTableClickHandler, 300);
@@ -3067,7 +3098,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('💡 Click X or Cancel to close modal');
     }
 
-    // Run init when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
@@ -3080,7 +3110,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // MAKE SURE GLOBAL FUNCTIONS EXIST
 // =============================================
 
-// These are already defined in your main.js, but ensuring they're available
 window.editAnime = window.editAnime || function(id) {
     console.log('Edit anime called with ID:', id);
 };
@@ -3096,8 +3125,19 @@ window.handleAddAnime = window.handleAddAnime || function(e) {
 
 console.log('✅ All functions are ready!');
 
+function getFormattedTimestamp() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const h = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    return y + '-' + m + '-' + d + ' ' + h + ':' + min + ':' + s;
+}
+
 // ============================================
-// FLOATING ADD ANIME BUTTON - GUARANTEED WORKING
+// FLOATING ADD ANIME BUTTON 
 // ============================================
 
 (function setupFloatingButton() {

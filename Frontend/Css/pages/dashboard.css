@@ -760,7 +760,7 @@
 
 .stat-change.negative {
   color: var(--clr-danger-400);
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(129, 48, 48, 0.1);
   border-color: rgba(239, 68, 68, 0.2);
 }
 
@@ -845,13 +845,13 @@
 }
 
 .stat-change.negative {
-    color: #c53333 !important;
-    background: rgba(216, 67, 67, 0.43) !important;
+    color: #bcbcbc !important;
+    background: rgba(175, 15, 15, 0.472) !important;
     border-color: rgba(239, 68, 68, 0.232) !important;
 }
 
 .stat-change.neutral {
-    color: rgba(249, 248, 248, 0.534) !important;
+    color: #bcbcbc !important;
     background: rgba(43, 44, 44, 0.276) !important;
     border-color: rgba(255, 255, 255, 0.194) !important;
 }
