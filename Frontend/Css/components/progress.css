@@ -1,36 +1,71 @@
 /* ============================================
-   PROGRESS COMPONENTS
+   PROGRESS COMPONENTS - PREMIUM ENHANCED
    ============================================ */
 
-/* ===== PROGRESS BAR ===== */
+/* ============================================
+   PROGRESS BAR - MAIN
+   ============================================ */
 .progress-container {
     width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-full);
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50px;
     overflow: hidden;
     position: relative;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+.progress-container:hover {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .progress-bar {
     height: 100%;
-    background: var(--gradient-primary);
-    border-radius: var(--radius-full);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA);
+    border-radius: 50px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
 }
 
-/* Shimmer effect */
+/* ============================================
+   SHIMMER ANIMATION - Premium
+   ============================================ */
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.15),
+        rgba(255, 255, 255, 0.05),
+        transparent
+    );
+    animation: progressShimmer 2.5s ease-in-out infinite;
+}
+
 .progress-bar::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-    animation: progressShimmer 1.5s infinite;
+    height: 50%;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.15),
+        transparent
+    );
+    border-radius: 50px 50px 0 0;
 }
 
 @keyframes progressShimmer {
@@ -38,47 +73,95 @@
     100% { transform: translateX(100%); }
 }
 
-/* ===== PROGRESS BAR VARIANTS ===== */
+/* ============================================
+   PROGRESS BAR - COMPLETE GLOW
+   ============================================ */
+.progress-bar.complete {
+    background: linear-gradient(90deg, #10B981, #059669, #34D399);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.25), 0 0 60px rgba(16, 185, 129, 0.1);
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    }
+    50% { 
+        box-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
+    }
+}
+
+/* ============================================
+   PROGRESS BAR VARIANTS - Enhanced
+   ============================================ */
 .progress-bar.success {
-    background: var(--gradient-success);
+    background: linear-gradient(90deg, #10B981, #059669, #34D399);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+.progress-bar.success::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
 .progress-bar.warning {
-    background: var(--gradient-warning);
+    background: linear-gradient(90deg, #F59E0B, #D97706, #FBBF24);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
 }
 
 .progress-bar.danger {
-    background: var(--gradient-danger);
+    background: linear-gradient(90deg, #EF4444, #DC2626, #F87171);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
 }
 
 .progress-bar.info {
-    background: var(--gradient-info);
+    background: linear-gradient(90deg, #3B82F6, #2563EB, #60A5FA);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
 }
 
-/* ===== PROGRESS TEXT ===== */
+.progress-bar.primary {
+    background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+/* ============================================
+   PROGRESS TEXT - Enhanced
+   ============================================ */
 .progress-text {
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-    margin-top: var(--space-1);
+    font-size: 0.7rem;
+    color: var(--text-muted, #94A3B8);
+    margin-top: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-weight: 500;
+    letter-spacing: 0.3px;
 }
 
 .progress-text .current {
-    font-weight: var(--font-bold);
-    color: var(--text-primary);
+    font-weight: 700;
+    color: var(--text-primary, #F1F5F9);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 2px 12px;
+    border-radius: 30px;
+    border: 1px solid rgba(139, 92, 246, 0.06);
+    font-size: 0.65rem;
 }
 
 .progress-text .percentage {
-    font-weight: var(--font-semibold);
-    color: var(--clr-secondary-light);
+    font-weight: 700;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 0.75rem;
 }
 
-/* ===== SKELETON LOADING ===== */
+/* ============================================
+   SKELETON LOADING
+   ============================================ */
 .skeleton {
-    background: var(--bg-tertiary);
-    border-radius: var(--radius-md);
+    background: var(--bg-tertiary, rgba(255,255,255,0.03));
+    border-radius: 12px;
     position: relative;
     overflow: hidden;
 }
@@ -100,10 +183,10 @@
 }
 
 .skeleton-text {
-    height: var(--space-4);
+    height: 16px;
     width: 100%;
-    margin-bottom: var(--space-2);
-    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    border-radius: 6px;
 }
 
 .skeleton-avatar {
@@ -114,7 +197,7 @@
 
 .skeleton-card {
     height: 200px;
-    border-radius: var(--radius-lg);
+    border-radius: 16px;
 }
 
 /* ============================================
@@ -123,19 +206,21 @@
 .achievement-progress-bar {
     width: 100%;
     height: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50px;
     overflow: hidden;
-    margin-top: var(--space-3);
+    margin-top: 12px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .achievement-progress {
     height: 100%;
-    background: var(--gradient-secondary);
-    border-radius: var(--radius-full);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, #F59E0B, #FBBF24, #FCD34D);
+    border-radius: 50px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
 }
 
 .achievement-progress::after {
@@ -144,52 +229,57 @@
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-    animation: progressShimmer 1.5s infinite;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent);
+    border-radius: 50px 50px 0 0;
 }
 
 /* ============================================
    QUEUE PROGRESS (Settings)
    ============================================ */
 .queue-progress {
-    margin-top: var(--space-3);
+    margin-top: 12px;
 }
 
 .queue-progress .progress-track {
     width: 100%;
     height: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50px;
     overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .queue-progress .progress-fill {
     height: 100%;
-    background: var(--gradient-secondary);
-    border-radius: var(--radius-full);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, #8B5CF6, #6366F1, #A78BFA);
+    border-radius: 50px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
 }
 
-.queue-progress .progress-fill::after {
+.queue-progress .progress-fill::before {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    animation: progressShimmer 1.5s infinite;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    animation: progressShimmer 2.5s ease-in-out infinite;
 }
 
 .queue-percent {
     display: block;
-    margin-top: var(--space-2);
-    font-size: var(--text-xs);
-    font-weight: var(--font-semibold);
-    color: var(--clr-secondary-light);
+    margin-top: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-align: right;
 }
 
@@ -197,24 +287,37 @@
    LEVEL PROGRESS (Settings/Profile)
    ============================================ */
 .level-progress {
-    margin: var(--space-4) 0;
+    margin: 16px 0;
 }
 
 .level-progress .progress-track {
     width: 100%;
     height: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50px;
     overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .level-progress .progress-fill {
     height: 100%;
-    background: var(--gradient-primary);
-    border-radius: var(--radius-full);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA);
+    border-radius: 50px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+.level-progress .progress-fill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    animation: progressShimmer 2.5s ease-in-out infinite;
 }
 
 .level-progress .progress-fill::after {
@@ -223,31 +326,32 @@
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    animation: progressShimmer 1.5s infinite;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), transparent);
+    border-radius: 50px 50px 0 0;
 }
 
 .progress-row {
     display: flex;
     justify-content: space-between;
-    margin-top: var(--space-2);
-    font-size: var(--text-sm);
-    color: var(--text-muted);
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted, #94A3B8);
 }
 
 .progress-stats .current {
-    color: var(--text-primary);
-    font-weight: var(--font-bold);
+    color: var(--text-primary, #F1F5F9);
+    font-weight: 700;
 }
 
 .progress-stats .next {
-    color: var(--text-muted);
+    color: var(--text-muted, #94A3B8);
 }
 
 .progress-percent {
-    color: var(--clr-secondary-light);
-    font-weight: var(--font-semibold);
+    color: #A78BFA;
+    font-weight: 700;
+    font-size: 0.75rem;
 }
 
 /* ============================================
@@ -255,19 +359,108 @@
    ============================================ */
 .xp-delta {
     display: none;
-    font-size: var(--text-xs);
-    font-weight: var(--font-semibold);
-    color: var(--clr-success);
-    margin-top: var(--space-1);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #10B981;
+    margin-top: 4px;
     animation: fadeInUp 0.3s ease;
+    padding: 2px 12px;
+    border-radius: 30px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    display: inline-block;
 }
 
 .xp-delta.visible {
-    display: block;
+    display: inline-block;
 }
 
 .xp-delta.negative {
-    color: var(--clr-danger);
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.1);
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   ANIME CARD PROGRESS (Currently Watching)
+   ============================================ */
+.anime-card .progress-bar-container {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50px;
+    overflow: hidden;
+    margin-top: 8px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.anime-card:hover .progress-bar-container {
+    height: 5px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.anime-card .progress-bar {
+    height: 100%;
+    border-radius: 50px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+}
+
+.anime-card .progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    animation: progressShimmer 2.5s ease-in-out infinite;
+}
+
+.anime-card .progress-bar.completed {
+    background: linear-gradient(90deg, #10B981, #059669, #34D399);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+.anime-card .progress-bar.watching {
+    background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.anime-card .progress-bar.planning {
+    background: linear-gradient(90deg, #F59E0B, #D97706, #FBBF24);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+}
+
+.anime-card .progress-bar.dropped {
+    background: linear-gradient(90deg, #EF4444, #DC2626, #F87171);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+}
+
+.anime-card .progress-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 4px;
+}
+
+.anime-card .progress-text .percentage-text {
+    font-weight: 900;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* ============================================
@@ -275,28 +468,94 @@
    ============================================ */
 @media (max-width: 768px) {
     .progress-container {
-        height: 5px;
-    }
-    
-    .progress-text {
-        font-size: var(--text-xs);
-    }
-    
-    .level-progress .progress-track {
         height: 6px;
     }
-}
-
-@media (max-width: 480px) {
-    .progress-container {
-        height: 4px;
+    
+    .progress-container:hover {
+        height: 8px;
     }
     
     .progress-text {
         font-size: 0.65rem;
     }
     
+    .progress-text .current {
+        font-size: 0.6rem;
+        padding: 1px 10px;
+    }
+    
+    .progress-text .percentage {
+        font-size: 0.65rem;
+    }
+    
+    .level-progress .progress-track {
+        height: 6px;
+    }
+    
+    .queue-progress .progress-track {
+        height: 6px;
+    }
+    
+    .anime-card .progress-bar-container {
+        height: 3px;
+    }
+    
+    .anime-card .progress-text {
+        font-size: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .progress-container {
+        height: 5px;
+    }
+    
+    .progress-text {
+        font-size: 0.55rem;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    
+    .progress-text .current {
+        font-size: 0.5rem;
+        padding: 1px 8px;
+    }
+    
+    .progress-text .percentage {
+        font-size: 0.55rem;
+    }
+    
     .level-progress .progress-track {
         height: 5px;
     }
+    
+    .queue-progress .progress-track {
+        height: 5px;
+    }
+    
+    .anime-card .progress-bar-container {
+        height: 3px;
+    }
+}
+
+/* ============================================
+   LIGHT THEME SUPPORT
+   ============================================ */
+[data-theme="light"] .progress-container {
+    background: rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .progress-text .current {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.04);
+    color: #1a1f2e;
+}
+
+[data-theme="light"] .anime-card .progress-bar-container {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .anime-card .progress-text {
+    color: rgba(0, 0, 0, 0.3);
 }

@@ -6454,7 +6454,7 @@ window.updateAnimeDisplay = function () {
 };
 
 // =============================================
-// CURRENTLY WATCHING DASHBOARD MODULE (auto-hide if empty)
+// CURRENTLY WATCHING DASHBOARD MODULE - ENHANCED
 // =============================================
 (function () {
     document.addEventListener('DOMContentLoaded', () => {
@@ -6494,9 +6494,8 @@ window.updateAnimeDisplay = function () {
             }
 
             console.log('📊 Currently Watching - Total anime in data:', dataToUse.length);
-            console.log('📊 Anime data sample:', dataToUse.slice(0, 3).map(a => ({ title: a.title, status: a.userStatus })));
 
-            // Filter for "Watching" status (exact match on userStatus property)
+            // Filter for "Watching" status
             const watchingList = dataToUse.filter(a => {
                 const status = a.userStatus;
                 const isWatching = status === 'Watching';
@@ -6508,13 +6507,13 @@ window.updateAnimeDisplay = function () {
 
             console.log(`🎬 Currently Watching - Found ${watchingList.length} anime with "Watching" status`);
 
-            // 🟢 Hide or show the whole section
+            // Hide or show the section
             if (watchingList.length === 0) {
                 section.style.display = 'none';
                 section.style.visibility = 'hidden';
                 section.classList.add('hidden');
                 container.innerHTML = '';
-                console.log('✅ Currently Watching section HIDDEN (no anime in Watching status)');
+                console.log('✅ Currently Watching section HIDDEN');
                 return;
             } else {
                 section.style.display = 'block';
@@ -6523,28 +6522,41 @@ window.updateAnimeDisplay = function () {
                 console.log(`✅ Currently Watching section SHOWN (${watchingList.length} anime)`);
             }
 
-            // 🟡 Populate the grid
+            // Populate the grid with enhanced progress bar
             container.innerHTML = watchingList.map(a => {
                 const { current, total } = getEpisodeProgress(a);
                 const percent = (total && current)
                     ? Math.min(100, Math.round((current / total) * 100))
                     : 0;
 
+                // Format episodes text
+                const episodesText = total ? `${current}/${total} eps` : `${current} eps`;
+                
+                // ✅ Show percentage inside bar only if > 15%
+                const showPercentage = percent > 15;
+                const percentageText = showPercentage ? `${percent}%` : '';
+
                 return `
                     <div class="anime-card fade-in" onclick="editAnime && editAnime('${a.id}')">
-                        <div class="anime-img-wrapper">
-                            <img src="${a.cover || 'https://via.placeholder.com/300x400/6a5acd/ffffff?text=No+Image'}"
-                                alt="${a.title}" class="anime-cover">
-                            ${a.score ? `<div class="rating-badge">${a.score}</div>` : ''}
+                        <div class="anime-img-wrapper" style="position:relative;">
+                            <img src="${a.cover || 'https://placehold.co/300x400/6a5acd/white?text=No+Image'}"
+                                alt="${a.title}" 
+                                class="anime-cover"
+                                loading="lazy"
+                                onerror="this.src='https://placehold.co/300x400/6a5acd/white?text=No+Image'">
+                            ${a.score ? `<div class="rating-badge"> ${a.score}</div>` : ''}
                         </div>
                         <div class="anime-info">
-                            <div class="anime-title">${a.title}</div>
-                            <div class="anime-meta">
-                                <span>${current}${total ? `/${total}` : ''} eps</span>
-                                ${a.type ? `<span class="anime-type">${a.type}</span>` : ''}
-                            </div>
+                            <div class="anime-title" title="${a.title}">${a.title}</div>
+                            <!-- ✅ Enhanced Progress Bar with Percentage -->
                             <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: ${percent}%;"></div>
+                                <div class="progress-bar blue" style="width: ${percent}%;">
+                                    <span class="progress-percentage">${percentageText}</span>
+                                </div>
+                            </div>
+                            <div class="progress-text">
+                                <span class="episodes-text">${episodesText}</span>
+                                <span class="percentage-text">${percent}%</span>
                             </div>
                         </div>
                     </div>
@@ -6556,10 +6568,9 @@ window.updateAnimeDisplay = function () {
         window.updateCurrentlyWatching = updateCurrentlyWatching;
     });
 })();
+
 // =============================================
-// COMPLETE ACTIVITY HEATMAP - FULLY FIXED
-// Handles all date formats (ISO, YYYY-MM, YYYY-MM-DD, timestamps)
-// Shows correct completion dates, no duplication, no cross-year contamination
+// COMPLETE ACTIVITY HEATMAP
 // =============================================
 
 class ActivityHeatmap {
