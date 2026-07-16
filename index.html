@@ -1,726 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="AniPulse is currently under maintenance. We're upgrading your anime tracking experience." />
-  <title>AniPulse · Under Maintenance</title>
-  <!-- Font Awesome 6 (free) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google Fonts (Inter + Poppins) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    /* ----- reset & base (matches landingpage vibe) ----- */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --primary: #8B5CF6;
-      --primary-dark: #7C3AED;
-      --bg-deep: #090B10;
-      --surface: #141824;
-      --text-light: #F1F5F9;
-      --text-muted: #9CA3AF;
-      --gradient: linear-gradient(135deg, #8B5CF6, #D946EF);
-      --glow-color: rgba(139, 92, 246, 0.25);
-    }
-
-    body {
-      font-family: 'Inter', 'Poppins', sans-serif;
-      background: var(--bg-deep);
-      color: var(--text-light);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
-      position: relative;
-      padding: 0;
-      margin: 0;
-      width: 100%;
-    }
-
-    /* ---- full width animated glow background (enhanced) ---- */
-    .bg-glow {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    .glow-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.45;
-      animation: floatGlow 14s infinite alternate ease-in-out;
-    }
-
-    .orb-1 {
-      width: 600px;
-      height: 600px;
-      background: #8B5CF6;
-      top: -15%;
-      left: -10%;
-      animation-delay: 0s;
-    }
-
-    .orb-2 {
-      width: 700px;
-      height: 700px;
-      background: #D946EF;
-      bottom: -20%;
-      right: -10%;
-      animation-delay: 4s;
-    }
-
-    .orb-3 {
-      width: 500px;
-      height: 500px;
-      background: #3B82F6;
-      top: 40%;
-      left: 50%;
-      transform: translateX(-50%);
-      animation-delay: 8s;
-      opacity: 0.25;
-    }
-
-    .orb-4 {
-      width: 400px;
-      height: 400px;
-      background: #F59E0B;
-      top: 10%;
-      right: 15%;
-      animation-delay: 2s;
-      opacity: 0.15;
-    }
-
-    @keyframes floatGlow {
-      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-      33% { transform: translate(40px, -60px) scale(1.15) rotate(5deg); }
-      66% { transform: translate(-30px, 40px) scale(0.9) rotate(-3deg); }
-      100% { transform: translate(30px, -30px) scale(1.05) rotate(2deg); }
-    }
-
-    /* ---- full width main card (glass) with better spacing ---- */
-    .maintenance-wrapper {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      max-width: 820px;
-      padding: 1.5rem;
-      margin: 1.5rem;
-    }
-
-    .maintenance-card {
-      width: 100%;
-      background: rgba(20, 24, 40, 0.6);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 56px;
-      padding: 3.5rem 3rem;
-      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(139, 92, 246, 0.12), inset 0 1px 0 rgba(255,255,255,0.05);
-      text-align: center;
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
-      animation: cardEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes cardEntrance {
-      0% { opacity: 0; transform: translateY(60px) scale(0.94); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .maintenance-card:hover {
-      box-shadow: 0 60px 100px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(139, 92, 246, 0.25), inset 0 1px 0 rgba(255,255,255,0.08);
-      transform: translateY(-4px);
-    }
-
-    /* ---- logo / header (matches AniPulse) ---- */
-    .logo-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      margin-bottom: 2rem;
-    }
-
-    .logo-icon {
-      width: 60px;
-      height: 60px;
-      background: var(--gradient);
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-      color: white;
-      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-      animation: logoPulse 3s infinite alternate;
-    }
-
-    @keyframes logoPulse {
-      0% { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4); }
-      100% { box-shadow: 0 20px 50px rgba(139, 92, 246, 0.8); }
-    }
-
-    .logo-icon:hover {
-      transform: rotate(-8deg) scale(1.08);
-    }
-
-    .logo-text {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 2.4rem;
-      letter-spacing: -0.02em;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 40px rgba(139, 92, 246, 0.2);
-    }
-
-    /* ---- icon animation (pulse + spin + float) ---- */
-    .main-icon {
-      font-size: 6rem;
-      margin: 0.5rem 0 1.2rem;
-      color: var(--primary);
-      display: inline-block;
-      animation: iconPulse 2.8s infinite ease-in-out, floatSoft 4.5s infinite alternate;
-      filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.6));
-    }
-
-    @keyframes iconPulse {
-      0% { transform: scale(1) rotate(0deg); }
-      50% { transform: scale(1.12) rotate(5deg); }
-      100% { transform: scale(1) rotate(0deg); }
-    }
-
-    @keyframes floatSoft {
-      0% { transform: translateY(0px); }
-      100% { transform: translateY(-14px); }
-    }
-
-    /* ---- typography ---- */
-    .title {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 800;
-      font-size: 2.8rem;
-      line-height: 1.15;
-      margin: 0.5rem 0 0.8rem;
-      background: linear-gradient(135deg, #F1F5F9 0%, #C4B5FD 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: -0.02em;
-    }
-
-    .subtitle {
-      font-size: 1.15rem;
-      color: var(--text-muted);
-      max-width: 500px;
-      margin: 0 auto 2rem;
-      line-height: 1.7;
-      font-weight: 400;
-    }
-
-    .subtitle i {
-      color: var(--primary);
-      margin: 0 4px;
-    }
-
-    /* ---- animated status / progress (better) ---- */
-    .status-pulse {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      background: rgba(139, 92, 246, 0.08);
-      padding: 0.9rem 2.2rem;
-      border-radius: 60px;
-      border: 1px solid rgba(139, 92, 246, 0.15);
-      backdrop-filter: blur(4px);
-      width: fit-content;
-      margin: 0 auto 2.2rem;
-      font-weight: 500;
-      font-size: 1rem;
-      color: #C4B5FD;
-      transition: all 0.3s;
-    }
-
-    .status-pulse:hover {
-      background: rgba(139, 92, 246, 0.15);
-      border-color: rgba(139, 92, 246, 0.3);
-    }
-
-    .pulse-dot {
-      width: 16px;
-      height: 16px;
-      background: #D946EF;
-      border-radius: 50%;
-      display: inline-block;
-      animation: dotPulse 1.6s infinite;
-      box-shadow: 0 0 20px #D946EF;
-    }
-
-    @keyframes dotPulse {
-      0% { opacity: 0.3; transform: scale(0.7); }
-      50% { opacity: 1; transform: scale(1.2); }
-      100% { opacity: 0.3; transform: scale(0.7); }
-    }
-
-    .status-text {
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      font-weight: 700;
-    }
-
-    /* ---- animated progress bars (enhanced) ---- */
-    .progress-lines {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 1.8rem 0 2.4rem;
-      height: 40px;
-      align-items: flex-end;
-      padding: 0 0.5rem;
-    }
-
-    .prog-bar {
-      width: 14px;
-      border-radius: 40px;
-      background: rgba(139, 92, 246, 0.15);
-      transition: all 0.3s;
-      animation: barWave 3s infinite alternate ease-in-out;
-      transform-origin: bottom;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .prog-bar::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--gradient);
-      border-radius: 40px;
-      opacity: 0;
-      animation: barGlow 3s infinite alternate;
-    }
-
-    @keyframes barGlow {
-      0% { opacity: 0; }
-      100% { opacity: 0.6; }
-    }
-
-    .prog-bar:nth-child(1) { height: 22px; animation-delay: 0s; }
-    .prog-bar:nth-child(2) { height: 48px; animation-delay: 0.2s; }
-    .prog-bar:nth-child(3) { height: 34px; animation-delay: 0.4s; }
-    .prog-bar:nth-child(4) { height: 56px; animation-delay: 0.6s; background: rgba(139, 92, 246, 0.3); }
-    .prog-bar:nth-child(5) { height: 40px; animation-delay: 0.8s; }
-    .prog-bar:nth-child(6) { height: 52px; animation-delay: 1.0s; background: rgba(139, 92, 246, 0.25); }
-    .prog-bar:nth-child(7) { height: 28px; animation-delay: 1.2s; }
-    .prog-bar:nth-child(8) { height: 60px; animation-delay: 1.4s; background: rgba(217, 70, 239, 0.3); }
-    .prog-bar:nth-child(9) { height: 36px; animation-delay: 1.6s; }
-    .prog-bar:nth-child(10) { height: 44px; animation-delay: 1.8s; }
-    .prog-bar:nth-child(11) { height: 30px; animation-delay: 2.0s; }
-    .prog-bar:nth-child(12) { height: 50px; animation-delay: 2.2s; background: rgba(139, 92, 246, 0.2); }
-
-    @keyframes barWave {
-      0% { transform: scaleY(0.5); opacity: 0.4; }
-      100% { transform: scaleY(1.3); opacity: 1; }
-    }
-
-    /* ---- buttons (better) ---- */
-    .btn-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 18px;
-      justify-content: center;
-      margin-top: 1.2rem;
-    }
-
-    .btn-primary, .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 1rem 2.6rem;
-      border-radius: 60px;
-      font-weight: 600;
-      font-size: 1.05rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      text-decoration: none;
-      background: var(--gradient);
-      color: white;
-      box-shadow: 0 8px 30px rgba(139, 92, 246, 0.35);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
-      opacity: 0;
-      transition: opacity 0.4s;
-    }
-
-    .btn-primary:hover::before {
-      opacity: 1;
-    }
-
-    .btn-primary:hover {
-      transform: scale(1.06) translateY(-4px);
-      box-shadow: 0 16px 40px rgba(139, 92, 246, 0.55);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #E5E7EB;
-      box-shadow: none;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.14);
-      border-color: rgba(139, 92, 246, 0.4);
-      transform: scale(1.04) translateY(-3px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-    }
-
-    /* ---- footer note (better) ---- */
-    .footnote {
-      margin-top: 2.6rem;
-      font-size: 0.95rem;
-      color: #6B7280;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      flex-wrap: wrap;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(255,255,255,0.04);
-    }
-
-    .footnote i {
-      color: var(--primary);
-      opacity: 0.6;
-    }
-
-    .social-mini {
-      display: flex;
-      gap: 18px;
-    }
-
-    .social-mini a {
-      color: #6B7280;
-      transition: all 0.25s;
-      font-size: 1.2rem;
-    }
-
-    .social-mini a:hover {
-      color: var(--primary);
-      transform: translateY(-4px) scale(1.1);
-    }
-
-    /* ---- floating particles (extra) ---- */
-    .particles {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      background: rgba(139, 92, 246, 0.2);
-      border-radius: 50%;
-      animation: particleFloat 20s infinite linear;
-    }
-
-    @keyframes particleFloat {
-      0% { transform: translateY(100vh) scale(0); opacity: 0; }
-      10% { opacity: 0.6; }
-      90% { opacity: 0.6; }
-      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-    }
-
-    /* ---- responsive (full width, better spacing) ---- */
-    @media (max-width: 768px) {
-      .maintenance-wrapper {
-        padding: 1rem;
-        margin: 0.5rem;
-      }
-      .maintenance-card {
-        padding: 2.5rem 1.8rem;
-        border-radius: 40px;
-      }
-      .logo-text {
-        font-size: 2rem;
-      }
-      .logo-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 24px;
-      }
-      .title {
-        font-size: 2.2rem;
-      }
-      .main-icon {
-        font-size: 4.5rem;
-      }
-      .subtitle {
-        font-size: 1rem;
-        max-width: 100%;
-      }
-      .btn-primary, .btn-secondary {
-        padding: 0.85rem 1.8rem;
-        font-size: 0.95rem;
-        width: 100%;
-        justify-content: center;
-      }
-      .btn-group {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .status-pulse {
-        padding: 0.7rem 1.4rem;
-        font-size: 0.9rem;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .progress-lines {
-        gap: 6px;
-        height: 32px;
-      }
-      .prog-bar {
-        width: 10px;
-      }
-      .footnote {
-        flex-direction: column;
-        gap: 12px;
-        font-size: 0.85rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .maintenance-card {
-        padding: 2rem 1.2rem;
-        border-radius: 32px;
-      }
-      .logo-text {
-        font-size: 1.6rem;
-      }
-      .title {
-        font-size: 1.8rem;
-      }
-      .main-icon {
-        font-size: 3.5rem;
-      }
-      .logo-icon {
-        width: 44px;
-        height: 44px;
-        font-size: 20px;
-      }
-      .progress-lines {
-        gap: 4px;
-        height: 28px;
-      }
-      .prog-bar {
-        width: 8px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="AniPulse - The ultimate anime tracking and analytics dashboard. Track your watchlist, analyze viewing habits, and connect with the anime community.">
+    <meta name="keywords"
+        content="anime tracker, anime dashboard, watchlist, anime stats, anime analytics, anime community, anime statistics">
+    <title>AniPulse | Ultimate Anime Tracker & Analytics Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="shortcut icon" href="https://www.pngall.com/wp-content/uploads/13/Anime-Logo-PNG-Cutout.png"
+        type="image/x-icon">
+    <link rel="stylesheet" href="Frontend/Css/pages/landingpage.css">
 </head>
+
 <body>
 
-  <!-- full width glow orbs (enhanced) -->
-  <div class="bg-glow">
-    <div class="glow-orb orb-1"></div>
-    <div class="glow-orb orb-2"></div>
-    <div class="glow-orb orb-3"></div>
-    <div class="glow-orb orb-4"></div>
-  </div>
-
-  <!-- floating particles (extra animation) -->
-  <div class="particles" id="particles"></div>
-
-  <!-- main wrapper (full width) -->
-  <div class="maintenance-wrapper">
-    <div class="maintenance-card">
-
-      <!-- logo -->
-      <div class="logo-wrap">
-        <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
-        <span class="logo-text">AniPulse</span>
-      </div>
-
-      <!-- animated icon -->
-      <div class="main-icon">
-        <i class="fas fa-screwdriver-wrench"></i>
-      </div>
-
-      <!-- title & subtitle -->
-      <h1 class="title">Under Maintenance</h1>
-      <p class="subtitle">
-        <i class="fas fa-rotate-right fa-fw"></i> We're upgrading the dashboard to serve you better.
-        <br />New features, faster insights, and more anime magic.
-      </p>
-
-      <!-- status pulse + dot with dynamic progress -->
-      <div class="status-pulse">
-        <span class="pulse-dot"></span>
-        <span>Progress: <span class="status-text" id="progressValue">3%</span> — optimizing engine</span>
-        <i class="fas fa-arrow-right" style="color: #8B5CF6; opacity:0.7;"></i>
-      </div>
-
-      <!-- animated bars (like mini chart) -->
-      <div class="progress-lines">
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-        <span class="prog-bar"></span>
-      </div>
-
-      <!-- actions -->
-      <div class="btn-group">
-        <a href="#" class="btn-primary" onclick="alert('We\'ll notify you when we\'re back! 🚀'); return false;">
-          <i class="fas fa-bell"></i> Notify Me
-        </a>
-        <a href="#" class="btn-secondary" onclick="window.location.href='/'; return false;">
-          <i class="fas fa-arrow-left"></i> Return Home
-        </a>
-      </div>
-
-      <!-- footer with social (same vibe) -->
-      <div class="footnote">
-        <span><i class="fas fa-clock"></i> ETA ~ 5-6 hours</span>
-        <span>•</span>
-        <span><i class="fas fa-code"></i> v3.1 (Part 1)  </span>
-        <span>•</span>
-        <div class="social-mini">
-          <a href="https://www.facebook.com/yamanjrexe" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-          <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
-          <a href="https://github.com/yamanjr10" aria-label="GitHub"><i class="fab fa-github"></i></a>
-          <a href="https://www.instagram.com/yamanjr.exe" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        </div>
-      </div>
+    <div class="bg-glow">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
     </div>
-  </div>
 
-  <script>
-    // ---- Generate floating particles ----
-    (function createParticles() {
-      const container = document.getElementById('particles');
-      if (!container) return;
-      const count = 35;
-      for (let i = 0; i < count; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        const size = 4 + Math.random() * 8;
-        p.style.width = size + 'px';
-        p.style.height = size + 'px';
-        p.style.left = Math.random() * 100 + '%';
-        p.style.animationDuration = (15 + Math.random() * 20) + 's';
-        p.style.animationDelay = (Math.random() * 15) + 's';
-        p.style.opacity = 0.2 + Math.random() * 0.3;
-        p.style.background = `radial-gradient(circle, rgba(139,92,246,0.4), rgba(217,70,239,0.2))`;
-        container.appendChild(p);
-      }
-    })();
+    <header class="landing-header" id="header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><i class="fas fa-heartbeat" style="color: white;"></i></div>
+                <span class="logo-text">AniPulse</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#stats" class="nav-link">Stats</a>
+                <a href="#community" class="nav-link">Community</a>
+                <a href="dashboard.html" class="cta-button">Launch App</a>
+            </nav>
+        </div>
+    </header>
 
-    // ---- Animate the bars randomly on load (extra sparkle) ----
-    document.addEventListener('DOMContentLoaded', () => {
-      const bars = document.querySelectorAll('.prog-bar');
-      bars.forEach((bar) => {
-        const randomDelay = (Math.random() * 0.8).toFixed(2);
-        bar.style.animationDelay = randomDelay + 's';
-        const h = 20 + Math.floor(Math.random() * 42);
-        bar.style.setProperty('height', h + 'px', 'important');
-      });
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <div class="hero-tag"><i class="fas fa-rocket"></i> VERSION 3 (Part 1) LAUNCHED</div>
+                <h1 class="hero-title">Your Anime Journey,<br><span style="color: var(--primary);">Visualized &
+                        Analyzed</span></h1>
+                <p class="hero-subtitle">AniPulse is more than an anime tracker—it's your personal anime analytics
+                    dashboard. Track every episode, analyze habits, discover patterns, and connect with a community that
+                    shares your passion.</p>
+                <div class="hero-features">
+                    <div class="feature-item"><i class="fas fa-check-circle feature-check"></i><span>Real-time
+                            Progress</span></div>
+                    <div class="feature-item"><i class="fas fa-check-circle feature-check"></i><span>Advanced
+                            Analytics</span></div>
+                    <div class="feature-item"><i class="fas fa-check-circle feature-check"></i><span>AI
+                            Recommendations</span></div>
+                </div>
+                <div class="hero-buttons">
+                    <button onclick="window.location.href='/login.html?register=true'" class="btn-primary">
+                        <i class="fas fa-play-circle"></i> Start Free Trial
+                    </button>
+                    <button onclick="window.location.href='#features'" class="btn-secondary"><i
+                            class="fas fa-chart-line"></i> Explore Features</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="dashboard-preview floating">
+                    <div class="preview-header">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 32px; height: 32px; background: var(--gradient); border-radius: 10px;">
+                            </div><span style="font-weight: 700;"> AniPulse</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <div
+                                style="width: 30px; height: 30px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 30px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preview-stats">
+                        <div class="stats-grid-preview">
+                            <div class="stat-preview">
+                                <div style="color:#aaa;">Completed</div>
+                                <div style="font-size:1.7rem; font-weight:800;">42</div>
+                            </div>
+                            <div class="stat-preview">
+                                <div style="color:#aaa;">Hours</div>
+                                <div style="font-size:1.7rem; font-weight:800;">328</div>
+                            </div>
+                            <div class="stat-preview">
+                                <div style="color:#aaa;">Episodes</div>
+                                <div style="font-size:1.7rem; font-weight:800;">1,240</div>
+                            </div>
+                            <div class="stat-preview">
+                                <div style="color:#aaa;">Score Avg</div>
+                                <div style="font-size:1.7rem; font-weight:800;">8.2</div>
+                            </div>
+                        </div>
+                        <div class="preview-chart">
+                            <div class="chart-bar" style="height: 75%; --h:75%"></div>
+                            <div class="chart-bar" style="height: 60%; --h:60%"></div>
+                            <div class="chart-bar" style="height: 90%; --h:90%"></div>
+                            <div class="chart-bar" style="height: 45%; --h:45%"></div>
+                            <div class="chart-bar" style="height: 80%; --h:80%"></div>
+                            <div class="chart-bar" style="height: 70%; --h:70%"></div>
+                            <div class="chart-bar" style="height: 55%; --h:55%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-      // ---- PROGRESS INCREASE LOGIC: +3% every 1 hour (3600000 ms) ----
-      const progressElement = document.getElementById('progressValue');
-      let currentProgress = 3; // starting at 27%
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">POWERFUL FEATURES</span>
+                <h2 class="section-title">Everything You Need in One Dashboard</h2>
+                <p class="section-subtitle">Tracking, analytics, and community features combined for anime lovers.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">Deep insights into watching habits, genre preferences, interactive
+                        charts.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Monthly progress</li>
+                        <li><i class="fas fa-check"></i> Genre distribution</li>
+                        <li><i class="fas fa-check"></i> Watch time stats</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-heart-circle-check"></i></div>
+                    <h3 class="feature-title">Smart Watchlist</h3>
+                    <p class="feature-description">Organize anime with custom status, priority, episode tracking.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Custom categories</li>
+                        <li><i class="fas fa-check"></i> Priority sorting</li>
+                        <li><i class="fas fa-check"></i> Seasonal planning</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-trophy"></i></div>
+                    <h3 class="feature-title">Achievements</h3>
+                    <p class="feature-description">Unlock badges, celebrate milestones, join seasonal challenges.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> 50+ badges</li>
+                        <li><i class="fas fa-check"></i> Progress milestones</li>
+                        <li><i class="fas fa-check"></i> Achievement showcase</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-calendar-day"></i></div>
+                    <h3 class="feature-title">Activity Heatmaps</h3>
+                    <p class="feature-description">Yearly activity visualization, daily patterns, seasonal trends.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Heatmap calendar</li>
+                        <li><i class="fas fa-check"></i> Watching patterns</li>
+                        <li><i class="fas fa-check"></i> Custom ranges</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                    <h3 class="feature-title">AI Recommendations</h3>
+                    <p class="feature-description">Personalized anime suggestions based on your taste and ratings.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Smart matching</li>
+                        <li><i class="fas fa-check"></i> Hidden gems</li>
+                        <li><i class="fas fa-check"></i> Seasonal picks</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <h3 class="feature-title">Community Hub</h3>
+                    <p class="feature-description">Connect with fans, share progress, join discussions and challenges.
+                    </p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> User profiles</li>
+                        <li><i class="fas fa-check"></i> Discussion forums</li>
+                        <li><i class="fas fa-check"></i> Shared watchlists</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
 
-      function updateProgress() {
-        // Increase by 3%, cap at 100%
-        currentProgress = Math.min(currentProgress + 3, 100);
-        progressElement.textContent = currentProgress + '%';
+    <section id="stats" class="stats-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">BY THE NUMBERS</span>
+                <h2 class="section-title">Trusted by Anime Enthusiasts</h2>
+                <p class="section-subtitle">Join thousands who transformed their tracking experience.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">1K+</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1K+</div>
+                    <div class="stat-label">Anime Entries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">User Satisfaction</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4.8★</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        // Optional: change message when reaching certain thresholds
-        const statusPulse = document.querySelector('.status-pulse span:nth-child(2)');
-        if (currentProgress >= 100) {
-          // If we reach 100%, we could change the message
-          const msgSpan = document.querySelector('.status-pulse span:nth-child(2)');
-          if (msgSpan) {
-            msgSpan.innerHTML = 'Progress: <span class="status-text">100%</span> — almost done! 🚀';
-          }
-          // Stop the interval once we reach 100%
-          clearInterval(progressInterval);
-        } else if (currentProgress >= 75) {
-          const msgSpan = document.querySelector('.status-pulse span:nth-child(2)');
-          if (msgSpan) {
-            msgSpan.innerHTML = `Progress: <span class="status-text">${currentProgress}%</span> — finalizing upgrades ✨`;
-          }
-        } else if (currentProgress >= 50) {
-          const msgSpan = document.querySelector('.status-pulse span:nth-child(2)');
-          if (msgSpan) {
-            msgSpan.innerHTML = `Progress: <span class="status-text">${currentProgress}%</span> — optimizing engine ⚡`;
-          }
-        }
-      }
+    <section id="community" class="cta-section">
+        <div class="container">
+            <div class="cta-card">
+                <h2 class="cta-title">Ready to Transform Your Anime Experience?</h2>
+                <p class="cta-subtitle">Join AniPulse today and start tracking, analyzing, and celebrating your anime
+                    journey.</p>
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="window.location.href='/login.html?register=true'" class="btn-primary"
+                        style="background: white; color: #8B5CF6;">
+                        <i class="fas fa-user-plus"></i> Create Free Account
+                    </button>
+                    <button onclick="window.location.href='login.html'" class="btn-secondary"
+                        style="background: rgba(0,0,0,0.3); border-color:white;"><i class="fas fa-sign-in-alt"></i> Sign
+                        In to Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
-      // Set initial message based on starting progress
-      function setInitialMessage() {
-        const msgSpan = document.querySelector('.status-pulse span:nth-child(2)');
-        if (msgSpan) {
-          if (currentProgress >= 75) {
-            msgSpan.innerHTML = `Progress: <span class="status-text">${currentProgress}%</span> — finalizing upgrades ✨`;
-          } else if (currentProgress >= 50) {
-            msgSpan.innerHTML = `Progress: <span class="status-text">${currentProgress}%</span> — optimizing engine ⚡`;
-          } else {
-            msgSpan.innerHTML = `Progress: <span class="status-text">${currentProgress}%</span> — optimizing engine`;
-          }
-        }
-      }
-      setInitialMessage();
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3><i class="fas fa-heartbeat" style="color:var(--primary);"></i> AniPulse</h3>
+                    <p style="color:#9CA3AF;">Ultimate anime tracking & analytics platform.</p>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/yamanjrexe"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                        <a href="https://github.com/yamanjr10"><i class="fab fa-github"></i></a>
+                        <a href="https://www.instagram.com/yamanjr.exe"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Features</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Anime Tracking</a></li>
+                        <li><a href="#">Analytics</a></li>
+                        <li><a href="#">Watchlist</a></li>
+                        <li><a href="#">Achievements</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Access</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Community</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Discord</a></li>
+                        <li><a href="#">Forums</a></li>
+                        <li><a href="#">Challenges</a></li>
+                        <li><a href="#">Top Users</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AniPulse. All rights reserved. Anime data via Jikan API • fan-made project</p>
+            </div>
+        </div>
+    </footer>
 
-      // Run the update every hour (3600000 ms)
-      // For demo/testing purposes, you can change to a shorter interval (e.g., 5000 ms = 5 seconds)
-      // But the requirement says "every 1 hr with 3%", so we use 3600000 ms.
-      const progressInterval = setInterval(updateProgress, 3600000); // 1 hour
+    <script>
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.landing-header');
+            if (window.scrollY > 50) {
+                header.style.padding = '12px 0';
+                header.style.background = 'rgba(9, 11, 16, 0.95)';
+                header.style.backdropFilter = 'blur(20px)';
+            } else {
+                header.style.padding = '20px 0';
+                header.style.background = 'rgba(9, 11, 16, 0.85)';
+            }
+        });
 
-      // Optional: For testing, uncomment the line below to see it faster (every 5 seconds)
-      // const progressInterval = setInterval(updateProgress, 5000);
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
 
-      // Store interval on window so we can clear it if needed (optional)
-      window.progressInterval = progressInterval;
-    });
-  </script>
+        // Reveal animations on scroll
+        const revealElements = document.querySelectorAll('.feature-card, .stat-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
+        revealElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s cubic-bezier(0.2,0.9,0.4,1.1), transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // immediate tiny fix for visible ones
+        setTimeout(() => {
+            revealElements.forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }
+            });
+        }, 200);
+    </script>
 </body>
+
 </html>
