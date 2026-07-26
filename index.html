@@ -13,9 +13,37 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="shortcut icon" href="https://www.pngall.com/wp-content/uploads/13/Anime-Logo-PNG-Cutout.png"
-        type="image/x-icon">
+    
     <link rel="stylesheet" href="Frontend/Css/pages/landingpage.css">
+    
+    <!-- Theme -->
+    <meta name="theme-color" content="#0b1120" />
+    <meta name="color-scheme" content="dark light" />
+
+    <!-- Main Browser Icon -->
+    <link rel="shortcut icon" href="/Frontend/icon/icon-72x72.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/Frontend/icon/icon-72x72.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/Frontend/icon/icon-72x72.png" />
+
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" sizes="72x72" href="/Frontend/icon/icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="96x96" href="/Frontend/icon/icon-96x96.png" />
+    <link rel="apple-touch-icon" sizes="128x128" href="/Frontend/icon/icon-128x128.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/Frontend/icon/icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/Frontend/icon/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/Frontend/icon/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="384x384" href="/Frontend/icon/icon-384x384.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/Frontend/icon/icon-512x512.png" />
+
+    <!-- Windows Tile -->
+    <meta name="msapplication-TileColor" content="#6366F1" />
+    <meta name="msapplication-TileImage" content="icons/icon-192x192.png" />
+
+    <!-- Disable Cache -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
 </head>
 
 <body>
@@ -28,7 +56,7 @@
 
     <header class="landing-header" id="header">
         <div class="container header-content">
-            <a href="index.html" class="logo">
+            <a href="/" class="logo">
                 <div class="logo-icon"><i class="fas fa-heartbeat" style="color: white;"></i></div>
                 <span class="logo-text">AniPulse</span>
             </a>
@@ -36,7 +64,7 @@
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#stats" class="nav-link">Stats</a>
                 <a href="#community" class="nav-link">Community</a>
-                <a href="dashboard.html" class="cta-button">Launch App</a>
+                <a href="/dashboard.html" class="cta-button">Launch App</a>
             </nav>
         </div>
     </header>
@@ -229,7 +257,7 @@
                         style="background: white; color: #8B5CF6;">
                         <i class="fas fa-user-plus"></i> Create Free Account
                     </button>
-                    <button onclick="window.location.href='login.html'" class="btn-secondary"
+                    <button onclick="window.location.href='/login.html'" class="btn-secondary"
                         style="background: rgba(0,0,0,0.3); border-color:white;"><i class="fas fa-sign-in-alt"></i> Sign
                         In to Dashboard</button>
                 </div>
@@ -284,6 +312,7 @@
         </div>
     </footer>
 
+    <script defer src="/js/config.js"></script>
     <script>
         // Header scroll effect
         window.addEventListener('scroll', () => {
