@@ -1,9 +1,10 @@
 // components/search.js
 // ============================================
 // ANIME SEARCH (Jikan, AniList, Kitsu fallback)
+// + Dashboard global search with navigation & filtering
 // ============================================
 
-(function() {
+(function () {
     'use strict';
 
     const SEARCH_CONFIG = {
@@ -254,10 +255,10 @@
                 border-bottom: 1px solid rgba(139, 92, 246, 0.1);
                 transition: all 0.2s ease;
             `;
-            const coverUrl = anime.images?.jpg?.image_url || 
-                            anime.images?.large || 
-                            anime.coverImage?.large ||
-                            'https://placehold.co/45x65/6a5acd/white?text=No+Image';
+            const coverUrl = anime.images?.jpg?.image_url ||
+                anime.images?.large ||
+                anime.coverImage?.large ||
+                'https://placehold.co/45x65/6a5acd/white?text=No+Image';
             item.innerHTML = `
                 <img src="${coverUrl}" 
                      style="width: 45px; height: 65px; object-fit: cover; border-radius: 8px;"
@@ -286,7 +287,7 @@
                 duration: anime.duration || 20,
                 source: anime.source || source || 'unknown'
             };
-            item.onclick = function(e) {
+            item.onclick = function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 if (typeof window.selectAnimeFromSearch === 'function') {
@@ -299,7 +300,7 @@
     }
 
     // --- Select anime from search (fills form) ---
-    window.selectAnimeFromSearch = function(anime) {
+    window.selectAnimeFromSearch = function (anime) {
         console.log('🎯 Selecting anime:', anime.title);
         const titleInput = document.getElementById('animeTitle');
         const typeSelect = document.getElementById('animeType');
@@ -333,11 +334,11 @@
             }
         }
         if (coverInput && anime.images) {
-            const coverUrl = anime.images?.jpg?.image_url || 
-                            anime.images?.large || 
-                            anime.coverImage?.large ||
-                            anime.coverImage?.medium ||
-                            '';
+            const coverUrl = anime.images?.jpg?.image_url ||
+                anime.images?.large ||
+                anime.coverImage?.large ||
+                anime.coverImage?.medium ||
+                '';
             if (coverUrl) coverInput.value = coverUrl;
         }
         if (genresInput && anime.genres) {
@@ -368,8 +369,103 @@
         console.log('✅ Anime selected successfully');
     };
 
-    // --- Search function ---
-    window.searchAnime = async function() {
+    // --- Dashboard Search (global dropdown) ---
+    function setupDashboardSearch() {
+        const searchInput = document.getElementById('dashboardSearch');
+        const animeMenu = document.querySelector('.menu-item[data-page="anime-list"]');
+        if (!searchInput || !animeMenu) return;
+
+        let navigated = false;
+        let savedFilters = null;
+
+        // Helper: get current filter values
+        function getCurrentFilters() {
+            return {
+                status: document.getElementById('statusFilter')?.value || 'all',
+                month: document.getElementById('monthFilter')?.value || 'all',
+                year: document.getElementById('yearFilter')?.value || 'all'
+            };
+        }
+
+        function setFiltersToAll() {
+            ['statusFilter', 'monthFilter', 'yearFilter'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = 'all';
+                    el.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        function restoreFilters(filters) {
+            const statusEl = document.getElementById('statusFilter');
+            const monthEl = document.getElementById('monthFilter');
+            const yearEl = document.getElementById('yearFilter');
+            if (statusEl) { statusEl.value = filters.status || 'all'; statusEl.dispatchEvent(new Event('change')); }
+            if (monthEl) { monthEl.value = filters.month || 'all'; monthEl.dispatchEvent(new Event('change')); }
+            if (yearEl) { yearEl.value = filters.year || 'all'; yearEl.dispatchEvent(new Event('change')); }
+        }
+
+        function filterTable(query) {
+            const rows = document.querySelectorAll('#anime-table-body tr');
+            if (!rows.length) return;
+            rows.forEach(row => {
+                const title = row.cells[0]?.textContent.toLowerCase() || '';
+                row.style.display = !query || title.includes(query) ? '' : 'none';
+            });
+        }
+
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+
+            // Navigate once
+            if (!navigated) {
+                navigated = true;
+                animeMenu.click();
+                // Close the dropdown after navigation
+                const dropdown = document.querySelector('.search-dropdown');
+                if (dropdown) dropdown.classList.remove('open');
+            }
+
+            // Save filters ONCE when search starts
+            if (query && !savedFilters) {
+                savedFilters = getCurrentFilters();
+                setFiltersToAll();
+            }
+
+            // Restore filters when search is cleared
+            if (!query && savedFilters) {
+                restoreFilters(savedFilters);
+                savedFilters = null;
+                navigated = false;
+                return;
+            }
+
+            // Filter after render
+            setTimeout(() => filterTable(query), 150);
+        });
+
+        // Also handle Enter key to immediately apply filter
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const query = this.value.trim().toLowerCase();
+                if (!query) {
+                    // If empty, restore filters and navigate back if needed
+                    if (savedFilters) {
+                        restoreFilters(savedFilters);
+                        savedFilters = null;
+                        navigated = false;
+                    }
+                } else {
+                    filterTable(query);
+                }
+            }
+        });
+    }
+
+    // --- Main search function (for modal) ---
+    window.searchAnime = async function () {
         const searchInput = document.getElementById('animeTitle');
         if (!searchInput) return;
         const query = searchInput.value.trim();
@@ -421,7 +517,7 @@
     };
 
     // --- Close search results ---
-    window.closeSearchResults = function() {
+    window.closeSearchResults = function () {
         const searchResults = document.getElementById('searchResults');
         if (searchResults) {
             searchResults.style.display = 'none';
@@ -434,27 +530,31 @@
     // --- Init search system ---
     function initSearchSystem() {
         console.log('🔍 Initializing search system...');
+
+        // 1. Modal search (add anime)
         const searchInput = document.getElementById('animeTitle');
-        if (!searchInput) {
-            setTimeout(initSearchSystem, 500);
-            return;
-        }
-        // Clone to remove old listeners
-        const newInput = searchInput.cloneNode(true);
-        searchInput.parentNode.replaceChild(newInput, searchInput);
+        if (searchInput) {
+            // Clone to remove old listeners
+            const newInput = searchInput.cloneNode(true);
+            searchInput.parentNode.replaceChild(newInput, searchInput);
 
-        newInput.addEventListener('input', window.searchAnime);
-        newInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (searchTimeout) {
-                    clearTimeout(searchTimeout);
-                    searchTimeout = null;
+            newInput.addEventListener('input', window.searchAnime);
+            newInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (searchTimeout) {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = null;
+                    }
+                    window.searchAnime();
                 }
-                window.searchAnime();
-            }
-        });
+            });
+        }
 
+        // 2. Global dashboard search (dropdown)
+        setupDashboardSearch();
+
+        // 3. Close results on Escape or outside click
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') window.closeSearchResults();
         });
@@ -469,7 +569,7 @@
             }
         });
 
-        // Search dropdown toggle (from extras.js)
+        // 4. Dropdown toggle
         const searchToggle = document.getElementById('searchToggle');
         const searchDropdown = document.querySelector('.search-dropdown');
         const dashboardSearch = document.getElementById('dashboardSearch');
@@ -491,5 +591,4 @@
 
     window.initSearchSystem = initSearchSystem;
 
-    // Auto-init if main doesn't call, but main will.
 })();
