@@ -1,11 +1,11 @@
 // ============================================
-// ANIME LIST PAGE – Table view with filters
+// ANIME LIST – Data‑driven rendering
 // ============================================
 
 (function () {
     'use strict';
 
-    // --- Update table view ---
+    // ─── RENDER TABLE ──────────────────────────────
     window.updateAnimeTableView = function (animeList) {
         const tableBody = document.getElementById('anime-table-body');
         if (!tableBody) return;
@@ -100,22 +100,51 @@
             `;
         }).join('');
 
-        // Re-bind click handler from modal system
-        if (typeof window.attachTableClickHandler === 'function') {
-            // The modal system already attaches one, but we can re-attach if needed.
-            // Modal system handles it via attachTableClickHandler.
-        }
+        // Re‑bind click handler (modal system attaches it)
+        // The modal system uses attachTableClickHandler; we don't need to do it here.
     };
 
-    // --- Update anime display with filters ---
+    // ─── UPDATE DISPLAY (core filter + render) ────
     window.updateAnimeDisplay = function () {
         const statusFilter = document.getElementById('statusFilter')?.value || 'all';
         const sortFilter = document.getElementById('sortFilter')?.value || 'id';
         const monthFilter = document.getElementById('monthFilter')?.value || 'all';
         const yearFilter = document.getElementById('yearFilter')?.value || 'all';
 
+        // Get search query from global search manager
+        const searchQuery = window.AniPulseSearch?.query || '';
+
+        // 1. Start with full dataset
         let filtered = [...(window.animeData || [])];
 
+        // 2. Apply search filter (if any)
+        if (searchQuery) {
+            const lowerQuery = searchQuery.toLowerCase();
+            filtered = filtered.filter(anime => {
+                // Build an array of searchable fields
+                const searchableFields = [
+                    anime.title,
+                    anime.title_english,
+                    anime.title_romaji,
+                    anime.title_japanese,
+                    anime.type,
+                    anime.userStatus,
+                    anime.studio,
+                    anime.synopsis,
+                    ...(anime.genres || []),
+                ];
+                return searchableFields.some(field =>
+                    field && field.toString().toLowerCase().includes(lowerQuery)
+                );
+            });
+        }
+
+        // 3. Apply status filter
+        if (statusFilter !== 'all') {
+            filtered = filtered.filter(a => a.userStatus === statusFilter);
+        }
+
+        // 4. Apply month/year filters (only for completed anime? original logic uses finishDate)
         if (monthFilter !== 'all' || yearFilter !== 'all') {
             filtered = filtered.filter(anime => {
                 const dateToCheck = anime.finishDate || anime.updatedAt || anime.createdAt;
@@ -125,27 +154,26 @@
                 const [year, month] = parts;
                 if (monthFilter !== 'all' && month !== monthFilter) return false;
                 if (yearFilter !== 'all' && year !== yearFilter) return false;
-                if (statusFilter === 'all') return true;
-                return anime.userStatus === statusFilter;
+                return true;
             });
-        } else {
-            if (statusFilter !== 'all') {
-                filtered = filtered.filter(a => a.userStatus === statusFilter);
-            }
         }
 
+        // 5. Apply sorting
         if (sortFilter === 'title') filtered.sort((a, b) => a.title.localeCompare(b.title));
         else if (sortFilter === 'rating') filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
         else if (sortFilter === 'episodes') filtered.sort((a, b) => (b.episodes || 0) - (a.episodes || 0));
         else if (sortFilter === 'updated') filtered.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+        // default: keep original order (by id)
 
+        // 6. Update counter
         const countEl = document.getElementById('anime-count');
         if (countEl) countEl.textContent = `Total Anime: ${filtered.length}`;
 
+        // 7. Render the table
         window.updateAnimeTableView(filtered);
     };
 
-    // --- Restore filters from localStorage ---
+    // ─── RESTORE FILTERS (from localStorage) ──────
     function restoreFilters() {
         const mappings = [
             { elId: 'statusFilter', storageKey: 'animeFilterStatus' },
@@ -170,15 +198,14 @@
                     if (typeof window.updateAnimeDisplay === 'function') window.updateAnimeDisplay();
                 });
             });
+            // Initial render
             if (typeof window.updateAnimeDisplay === 'function') window.updateAnimeDisplay();
         }, 200);
     }
 
-    // --- Init ---
-    function initAnimeList() {
+    // ─── INIT ──────────────────────────────────────
+    window.initAnimeList = function () {
         restoreFilters();
         console.log('✅ Anime List initialized');
-    }
-
-    window.initAnimeList = initAnimeList;
+    };
 })();

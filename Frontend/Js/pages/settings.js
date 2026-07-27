@@ -264,9 +264,9 @@
         async function enableBackup() {
             try {
                 backupHandle = await window.showSaveFilePicker({
-                    suggestedName: 'AnimeTracker_Backup.json',
+                    suggestedName: 'AniPulse_Backup.json',
                     types: [{
-                        description: 'AnimeTracker JSON Backup',
+                        description: 'AniPulse JSON Backup',
                         accept: { 'application/json': ['.json'] },
                     }],
                 });

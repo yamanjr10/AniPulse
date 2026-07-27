@@ -1,12 +1,13 @@
-// components/search.js
 // ============================================
 // ANIME SEARCH (Jikan, AniList, Kitsu fallback)
-// + Dashboard global search with navigation & filtering
+// + Global Search Manager (AniPulseSearch)
+// + Modal search (add anime)
 // ============================================
 
 (function () {
     'use strict';
 
+    // ─── SEARCH CONFIG ────────────────────────────
     const SEARCH_CONFIG = {
         CACHE_DURATION: 10 * 60 * 1000,
         TIMEOUT: 8000,
@@ -16,8 +17,13 @@
         JIKAN_API: 'https://api.jikan.moe/v4/anime',
         ANILIST_API: 'https://graphql.anilist.co',
         KITSU_API: 'https://kitsu.io/api/edge/anime',
+        // Global search
+        GLOBAL_DEBOUNCE: 300,
+        GLOBAL_MIN_QUERY: 1,
+        STORAGE_KEY: 'anipulse_search_query',
     };
 
+    // ─── SEARCH CACHE (modal) ─────────────────────
     const searchCache = new Map();
     let isJikanAvailable = true;
     let apiCheckInProgress = false;
@@ -25,6 +31,228 @@
     let usingFallback = false;
     let searchTimeout = null;
     let isSearching = false;
+
+    // ─── GLOBAL SEARCH STATE ──────────────────────
+    let globalQuery = '';
+    let globalDebounceTimer = null;
+    let isNavigating = false;
+
+    // ─── DOM REFS (lazy) ──────────────────────────
+    function getDashboardSearchInput() {
+        return document.getElementById('dashboardSearch');
+    }
+
+    function getAnimeListPage() {
+        return document.getElementById('anime-list-page');
+    }
+
+    function getAnimeListMenuItem() {
+        return document.querySelector('.menu-item[data-page="anime-list"]');
+    }
+
+    // ─── GLOBAL SEARCH ────────────────────────────
+    function navigateToAnimeList() {
+        if (isNavigating) return;
+        isNavigating = true;
+
+        // Use the central navigation system if available
+        if (typeof navigateTo === 'function') {
+            navigateTo('anime-list');
+            // Wait for page to become active
+            const handler = function (e) {
+                if (e.detail.page === 'anime-list') {
+                    document.removeEventListener('pageChanged', handler);
+                    applyGlobalSearch();
+                    isNavigating = false;
+                }
+            };
+            document.addEventListener('pageChanged', handler);
+            // Fallback: if event doesn't fire, apply after a short delay
+            setTimeout(() => {
+                if (isNavigating) {
+                    isNavigating = false;
+                    applyGlobalSearch();
+                }
+            }, 500);
+        } else {
+            // Fallback: simulate click on menu item
+            const menuItem = getAnimeListMenuItem();
+            if (menuItem) {
+                menuItem.click();
+                // Wait for page change via the old system (if no navigateTo)
+                setTimeout(() => {
+                    applyGlobalSearch();
+                    isNavigating = false;
+                }, 400);
+            } else {
+                isNavigating = false;
+            }
+        }
+    }
+
+    function applyGlobalSearch() {
+        // This triggers a re‑render of the anime table
+        if (typeof window.updateAnimeDisplay === 'function') {
+            window.updateAnimeDisplay();
+        } else {
+            console.warn('updateAnimeDisplay not yet available');
+        }
+    }
+
+    function performGlobalSearch(query) {
+        globalQuery = query.trim();
+        // Save to localStorage for persistence
+        try {
+            localStorage.setItem(SEARCH_CONFIG.STORAGE_KEY, globalQuery);
+        } catch (_) { /* ignore */ }
+
+        // Sync input field
+        const input = getDashboardSearchInput();
+        if (input && input.value !== globalQuery) {
+            input.value = globalQuery;
+        }
+
+        // If query is empty, just refresh the list (clear filter)
+        if (!globalQuery) {
+            applyGlobalSearch();
+            return;
+        }
+
+        // Navigate to anime list if not already there
+        const page = getAnimeListPage();
+        if (!page || page.hidden) {
+            navigateToAnimeList();
+        } else {
+            applyGlobalSearch();
+        }
+    }
+
+    function clearGlobalSearch() {
+        globalQuery = '';
+        try {
+            localStorage.removeItem(SEARCH_CONFIG.STORAGE_KEY);
+        } catch (_) { /* ignore */ }
+        const input = getDashboardSearchInput();
+        if (input) {
+            input.value = '';
+        }
+        applyGlobalSearch();
+    }
+
+    // ─── GLOBAL SEARCH INPUT HANDLERS ─────────────
+    function handleGlobalSearchInput(event) {
+        const query = event.target.value;
+        clearTimeout(globalDebounceTimer);
+        globalDebounceTimer = setTimeout(() => {
+            performGlobalSearch(query);
+        }, SEARCH_CONFIG.GLOBAL_DEBOUNCE);
+    }
+
+    function handleGlobalKeydown(event) {
+        // Ctrl+K / Cmd+K → focus search
+        if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+            event.preventDefault();
+            const input = getDashboardSearchInput();
+            if (input) {
+                input.focus();
+                input.select();
+            }
+            return;
+        }
+
+        // Escape → clear search and blur
+        if (event.key === 'Escape') {
+            const input = getDashboardSearchInput();
+            if (input && document.activeElement === input) {
+                event.preventDefault();
+                clearGlobalSearch();
+                input.blur();
+            }
+        }
+    }
+
+    // ─── PUBLIC GLOBAL SEARCH API ─────────────────
+    const AniPulseSearch = {
+        get query() {
+            return globalQuery;
+        },
+
+        search(query) {
+            const input = getDashboardSearchInput();
+            if (input) {
+                input.value = query;
+            }
+            performGlobalSearch(query);
+        },
+
+        clear() {
+            clearGlobalSearch();
+            const input = getDashboardSearchInput();
+            if (input) {
+                input.focus();
+            }
+        },
+
+        refresh() {
+            applyGlobalSearch();
+        },
+
+        init() {
+            const input = getDashboardSearchInput();
+            if (!input) {
+                console.warn('Global search input #dashboardSearch not found');
+                return;
+            }
+
+            // Restore last query from localStorage
+            let savedQuery = '';
+            try {
+                savedQuery = localStorage.getItem(SEARCH_CONFIG.STORAGE_KEY) || '';
+            } catch (_) { /* ignore */ }
+            if (savedQuery) {
+                input.value = savedQuery;
+                globalQuery = savedQuery;
+                // If anime list is already visible, apply search immediately
+                const page = getAnimeListPage();
+                if (page && !page.hidden) {
+                    applyGlobalSearch();
+                }
+            }
+
+            // Attach event listeners
+            input.addEventListener('input', handleGlobalSearchInput);
+            input.addEventListener('keydown', handleGlobalKeydown);
+
+            // Global keyboard shortcut (also handled in keydown, but need document listener)
+            document.addEventListener('keydown', handleGlobalKeydown);
+
+            // When the anime list page becomes active, re‑apply search
+            document.addEventListener('pageChanged', function (e) {
+                if (e.detail.page === 'anime-list') {
+                    // Ensure input value matches global query
+                    const inp = getDashboardSearchInput();
+                    if (inp && inp.value !== globalQuery) {
+                        inp.value = globalQuery;
+                    }
+                    applyGlobalSearch();
+                }
+            });
+
+            console.log('✅ Global Search System initialized');
+        },
+
+        destroy() {
+            const input = getDashboardSearchInput();
+            if (input) {
+                input.removeEventListener('input', handleGlobalSearchInput);
+                input.removeEventListener('keydown', handleGlobalKeydown);
+            }
+            document.removeEventListener('keydown', handleGlobalKeydown);
+            clearTimeout(globalDebounceTimer);
+        }
+    };
+
+    // ─── MODAL SEARCH FUNCTIONS (preserved) ──────
 
     // --- Check API status ---
     async function checkApiAvailability() {
@@ -164,8 +392,8 @@
         }
     }
 
-    // --- Main search ---
-    async function performSearch(query) {
+    // --- Main search (modal) ---
+    async function performModalSearch(query) {
         const cacheKey = query.toLowerCase().trim();
         const cached = searchCache.get(cacheKey);
         if (cached && (Date.now() - cached.timestamp < SEARCH_CONFIG.CACHE_DURATION)) {
@@ -203,7 +431,7 @@
         }
     }
 
-    // --- Display results ---
+    // --- Display results (modal) ---
     function displaySearchResults(data, searchResults, source) {
         if (!searchResults) return;
         searchResults.innerHTML = '';
@@ -369,101 +597,6 @@
         console.log('✅ Anime selected successfully');
     };
 
-    // --- Dashboard Search (global dropdown) ---
-    function setupDashboardSearch() {
-        const searchInput = document.getElementById('dashboardSearch');
-        const animeMenu = document.querySelector('.menu-item[data-page="anime-list"]');
-        if (!searchInput || !animeMenu) return;
-
-        let navigated = false;
-        let savedFilters = null;
-
-        // Helper: get current filter values
-        function getCurrentFilters() {
-            return {
-                status: document.getElementById('statusFilter')?.value || 'all',
-                month: document.getElementById('monthFilter')?.value || 'all',
-                year: document.getElementById('yearFilter')?.value || 'all'
-            };
-        }
-
-        function setFiltersToAll() {
-            ['statusFilter', 'monthFilter', 'yearFilter'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.value = 'all';
-                    el.dispatchEvent(new Event('change'));
-                }
-            });
-        }
-
-        function restoreFilters(filters) {
-            const statusEl = document.getElementById('statusFilter');
-            const monthEl = document.getElementById('monthFilter');
-            const yearEl = document.getElementById('yearFilter');
-            if (statusEl) { statusEl.value = filters.status || 'all'; statusEl.dispatchEvent(new Event('change')); }
-            if (monthEl) { monthEl.value = filters.month || 'all'; monthEl.dispatchEvent(new Event('change')); }
-            if (yearEl) { yearEl.value = filters.year || 'all'; yearEl.dispatchEvent(new Event('change')); }
-        }
-
-        function filterTable(query) {
-            const rows = document.querySelectorAll('#anime-table-body tr');
-            if (!rows.length) return;
-            rows.forEach(row => {
-                const title = row.cells[0]?.textContent.toLowerCase() || '';
-                row.style.display = !query || title.includes(query) ? '' : 'none';
-            });
-        }
-
-        searchInput.addEventListener('input', function () {
-            const query = this.value.trim().toLowerCase();
-
-            // Navigate once
-            if (!navigated) {
-                navigated = true;
-                animeMenu.click();
-                // Close the dropdown after navigation
-                const dropdown = document.querySelector('.search-dropdown');
-                if (dropdown) dropdown.classList.remove('open');
-            }
-
-            // Save filters ONCE when search starts
-            if (query && !savedFilters) {
-                savedFilters = getCurrentFilters();
-                setFiltersToAll();
-            }
-
-            // Restore filters when search is cleared
-            if (!query && savedFilters) {
-                restoreFilters(savedFilters);
-                savedFilters = null;
-                navigated = false;
-                return;
-            }
-
-            // Filter after render
-            setTimeout(() => filterTable(query), 150);
-        });
-
-        // Also handle Enter key to immediately apply filter
-        searchInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const query = this.value.trim().toLowerCase();
-                if (!query) {
-                    // If empty, restore filters and navigate back if needed
-                    if (savedFilters) {
-                        restoreFilters(savedFilters);
-                        savedFilters = null;
-                        navigated = false;
-                    }
-                } else {
-                    filterTable(query);
-                }
-            }
-        });
-    }
-
     // --- Main search function (for modal) ---
     window.searchAnime = async function () {
         const searchInput = document.getElementById('animeTitle');
@@ -495,7 +628,7 @@
                 searchResults.innerHTML = '';
             }
             try {
-                const result = await performSearch(query);
+                const result = await performModalSearch(query);
                 const source = result?.data?.[0]?.source || (usingFallback ? 'AniList/Kitsu' : 'Jikan');
                 displaySearchResults(result, searchResults, source);
             } catch (error) {
@@ -516,7 +649,7 @@
         }, SEARCH_CONFIG.DEBOUNCE_DELAY);
     };
 
-    // --- Close search results ---
+    // --- Close search results (modal) ---
     window.closeSearchResults = function () {
         const searchResults = document.getElementById('searchResults');
         if (searchResults) {
@@ -527,7 +660,7 @@
         if (searchLoading) searchLoading.style.display = 'none';
     };
 
-    // --- Init search system ---
+    // --- Init search system (modal + global) ---
     function initSearchSystem() {
         console.log('🔍 Initializing search system...');
 
@@ -551,10 +684,10 @@
             });
         }
 
-        // 2. Global dashboard search (dropdown)
-        setupDashboardSearch();
+        // 2. Global search (dashboard)
+        AniPulseSearch.init();
 
-        // 3. Close results on Escape or outside click
+        // 3. Close results on Escape or outside click (modal)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') window.closeSearchResults();
         });
@@ -569,7 +702,7 @@
             }
         });
 
-        // 4. Dropdown toggle
+        // 4. Dropdown toggle (dashboard search)
         const searchToggle = document.getElementById('searchToggle');
         const searchDropdown = document.querySelector('.search-dropdown');
         const dashboardSearch = document.getElementById('dashboardSearch');
@@ -590,5 +723,6 @@
     }
 
     window.initSearchSystem = initSearchSystem;
+    window.AniPulseSearch = AniPulseSearch;
 
 })();
