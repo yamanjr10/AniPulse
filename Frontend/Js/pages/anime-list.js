@@ -108,11 +108,18 @@
     window.updateAnimeDisplay = function () {
         const statusFilter = document.getElementById('statusFilter')?.value || 'all';
         const sortFilter = document.getElementById('sortFilter')?.value || 'id';
-        const monthFilter = document.getElementById('monthFilter')?.value || 'all';
-        const yearFilter = document.getElementById('yearFilter')?.value || 'all';
+        let monthFilter = document.getElementById('monthFilter')?.value || 'all';
+        let yearFilter = document.getElementById('yearFilter')?.value || 'all';
 
         // Get search query from global search manager
         const searchQuery = window.AniPulseSearch?.query || '';
+
+        // ✅ If search is active, ignore month/year filters
+        // This allows searching across ALL dates regardless of the selected month/year
+        if (searchQuery.trim() !== '') {
+            monthFilter = 'all';
+            yearFilter = 'all';
+        }
 
         // 1. Start with full dataset
         let filtered = [...(window.animeData || [])];
@@ -144,7 +151,7 @@
             filtered = filtered.filter(a => a.userStatus === statusFilter);
         }
 
-        // 4. Apply month/year filters (only for completed anime? original logic uses finishDate)
+        // 4. Apply month/year filters (now possibly overridden to 'all' by search)
         if (monthFilter !== 'all' || yearFilter !== 'all') {
             filtered = filtered.filter(anime => {
                 const dateToCheck = anime.finishDate || anime.updatedAt || anime.createdAt;
