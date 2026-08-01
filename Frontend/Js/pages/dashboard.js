@@ -57,7 +57,11 @@
             if (elements.completed) elements.completed.textContent = monthlyStats.completed;
             if (elements.movies) elements.movies.textContent = monthlyStats.movies;
             if (elements.episodes) elements.episodes.textContent = monthlyStats.episodes;
-            if (elements.hours) elements.hours.textContent = monthlyStats.hours;
+            // 🔹 FIX: Floor hours (e.g., 4.8 → 4, not 5)
+            if (elements.hours) {
+                const hoursNum = parseFloat(monthlyStats.hours);
+                elements.hours.textContent = isNaN(hoursNum) ? '0' : Math.floor(hoursNum);
+            }
 
             const completedEl = elements.completed;
             if (completedEl) {
@@ -96,7 +100,11 @@
             if (els.completed) els.completed.textContent = stats.completed;
             if (els.movies) els.movies.textContent = stats.movies;
             if (els.episodes) els.episodes.textContent = stats.episodes;
-            if (els.hours) els.hours.textContent = stats.hours;
+            // 🔹 Floor hours here too
+            if (els.hours) {
+                const hoursNum = parseFloat(stats.hours);
+                els.hours.textContent = isNaN(hoursNum) ? '0' : Math.floor(hoursNum);
+            }
         }
     };
 
@@ -113,7 +121,10 @@
                     if (id === 'completed-count') expected = _lastStatsValues.completed;
                     else if (id === 'movies-count') expected = _lastStatsValues.movies;
                     else if (id === 'episodes-count') expected = _lastStatsValues.episodes;
-                    else if (id === 'total-hours-count') expected = parseFloat(_lastStatsValues.hours);
+                    else if (id === 'total-hours-count') {
+                        const raw = parseFloat(_lastStatsValues.hours);
+                        expected = isNaN(raw) ? 0 : Math.floor(raw);
+                    }
                     if (current !== expected && expected !== undefined) {
                         console.warn(`⚠️ Stat ${id} was reset to ${current}, restoring to ${expected}`);
                         el.textContent = expected;
@@ -389,6 +400,124 @@
             setTimeout(() => el.classList.remove('dna-updated'), 500);
         });
     };
+
+    // ============================================
+    // QUICK ACTIONS – Import / Export / Stats
+    // ============================================
+
+    function initQuickActions() {
+        // --- Import: open modal ---
+        const importBtn = document.getElementById('importBtn');
+        if (importBtn) {
+            importBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const importModal = document.getElementById('importModal');
+                if (importModal && typeof window.openModal === 'function') {
+                    window.openModal(importModal);
+                } else {
+                    if (typeof showToast === 'function') showToast('Import modal not available', 'error');
+                }
+            });
+        }
+
+        // --- Export: call window.exportData (from settings.js) ---
+        const exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (typeof window.exportData === 'function') {
+                    window.exportData();
+                } else {
+                    // Fallback if exportData is missing
+                    const data = window.animeData || [];
+                    if (data.length === 0) {
+                        if (typeof showToast === 'function') showToast('No data to export', 'error');
+                        return;
+                    }
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'AniPulse_Backup.json';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    if (typeof showToast === 'function') showToast('Data exported successfully!', 'success');
+                }
+            });
+        }
+
+        // --- Stats: navigate to Statistics page ---
+        const statsBtn = document.getElementById('statsBtn');
+        if (statsBtn) {
+            statsBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const statsMenuItem = document.querySelector('.menu-item[data-page="statistics"]');
+                if (statsMenuItem) {
+                    statsMenuItem.click();
+                } else if (typeof navigateTo === 'function') {
+                    navigateTo('statistics');
+                } else {
+                    if (typeof showToast === 'function') showToast('Statistics page not available', 'error');
+                }
+            });
+        }
+
+        // --- Import Data: process the selected file (inside modal) ---
+        const importDataBtn = document.getElementById('importDataBtn');
+        if (importDataBtn) {
+            importDataBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const fileInput = document.getElementById('importFile');
+                const file = fileInput?.files?.[0];
+                if (!file) {
+                    if (typeof showToast === 'function') showToast('Please select a JSON file', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (ev) {
+                    try {
+                        const importedData = JSON.parse(ev.target.result);
+                        if (!Array.isArray(importedData)) {
+                            if (typeof showToast === 'function') showToast('Invalid JSON: expected an array', 'error');
+                            return;
+                        }
+
+                        // Deduplicate – keep existing IDs, avoid duplicates
+                        const existingIds = new Set(window.animeData.map(a => a.id));
+                        const newAnime = importedData.filter(item => !existingIds.has(item.id));
+                        if (newAnime.length === 0) {
+                            if (typeof showToast === 'function') showToast('No new anime found (all already exist)', 'info');
+                            return;
+                        }
+
+                        // Add new entries
+                        window.animeData.push(...newAnime);
+                        if (typeof window.saveData === 'function') window.saveData();
+                        if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
+                        if (typeof showToast === 'function') showToast(`Imported ${newAnime.length} new anime!`, 'success');
+
+                        // Close modal and reset file input
+                        const importModal = document.getElementById('importModal');
+                        if (importModal && typeof window.closeModal === 'function') {
+                            window.closeModal(importModal);
+                        }
+                        fileInput.value = ''; // clear the input
+
+                    } catch (err) {
+                        if (typeof showToast === 'function') showToast('Failed to parse JSON file', 'error');
+                        console.error('Import error:', err);
+                    }
+                };
+                reader.onerror = function () {
+                    if (typeof showToast === 'function') showToast('Failed to read file', 'error');
+                };
+                reader.readAsText(file);
+            });
+        }
+    }
 
     // ============================================
     // SIDEBAR USER INFO – FORCEFUL LOCK with guard
@@ -766,6 +895,11 @@
                 window.restoreStats();
             }
         }, 3000);
+
+        // ============================================
+        // QUICK ACTIONS – Initialize
+        // ============================================
+        initQuickActions();
 
         console.log('✅ Dashboard initialized');
     }

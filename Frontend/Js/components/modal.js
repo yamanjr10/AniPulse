@@ -1,5 +1,5 @@
 // ============================================
-// ADD/EDIT/DELETE ANIME MODAL SYSTEM
+// ADD/EDIT/DELETE ANIME MODAL SYSTEM (FIXED)
 // ============================================
 
 (function () {
@@ -7,9 +7,17 @@
 
     // Dependencies: window.animeData, window.saveData, window.logActivity, window.getNextId, etc.
 
-    // --- Modal open/close ---
+    // Store scroll position per modal (by id)
+    let modalScrollPositions = {};
+
+    // --- Modal open/close (with scroll preservation) ---
     window.openModal = function (modalElement) {
         if (!modalElement) return;
+        // Store current scroll position
+        const scrollY = window.scrollY;
+        const modalId = modalElement.id || 'modal';
+        modalScrollPositions[modalId] = scrollY;
+
         modalElement.removeAttribute('hidden');
         modalElement.style.display = 'flex';
         modalElement.style.visibility = 'visible';
@@ -22,12 +30,15 @@
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
         document.body.style.height = '100%';
-        document.body.style.top = '0';
+        document.body.style.top = `-${scrollY}px`;
         console.log('✅ Modal opened');
     };
 
     window.closeModal = function (modalElement) {
         if (!modalElement) return;
+        const modalId = modalElement.id || 'modal';
+        const scrollY = modalScrollPositions[modalId] || 0;
+
         modalElement.style.display = 'none';
         modalElement.style.visibility = 'hidden';
         modalElement.style.opacity = '0';
@@ -39,17 +50,27 @@
         document.body.style.width = '';
         document.body.style.height = '';
         document.body.style.top = '';
+
+        // Restore scroll position
+        if (scrollY > 0) {
+            window.scrollTo({ top: scrollY, behavior: 'auto' });
+        }
+        delete modalScrollPositions[modalId];
         console.log('✅ Modal closed');
     };
 
-    // --- Reset editing state ---
+    // --- Reset editing state (now sets year/month to current date) ---
     function resetEditingState() {
         window.isEditing = false;
         window.currentEditId = null;
         const submitBtn = document.getElementById('submitBtn');
         const deleteBtn = document.getElementById('deleteBtn');
         if (submitBtn) submitBtn.textContent = 'Add Anime';
-        if (deleteBtn) deleteBtn.style.display = 'none';
+        if (deleteBtn) {
+            deleteBtn.style.display = 'none';
+            deleteBtn.disabled = false;
+            deleteBtn.style.pointerEvents = 'auto';
+        }
         const form = document.getElementById('addAnimeForm');
         if (form) {
             form.reset();
@@ -62,11 +83,24 @@
             if (prog) prog.value = 0;
             if (status) status.value = 'Plan to Watch';
         }
+        // Set year/month dropdowns to current date
+        const yearSelect = document.getElementById('animeYear');
+        const monthSelect = document.getElementById('animeMonth');
+        if (yearSelect && monthSelect) {
+            const now = new Date();
+            yearSelect.value = now.getFullYear().toString();
+            monthSelect.value = String(now.getMonth() + 1).padStart(2, '0');
+        }
         const searchResults = document.getElementById('searchResults');
         if (searchResults) {
             searchResults.style.display = 'none';
             searchResults.innerHTML = '';
         }
+        // Re-enable cover/genre fields (they may have been disabled)
+        const coverInput = document.getElementById('animeCover');
+        const genresInput = document.getElementById('animeGenres');
+        if (coverInput) coverInput.disabled = false;
+        if (genresInput) genresInput.disabled = false;
     }
 
     // --- Edit anime ---
@@ -111,14 +145,16 @@
         if (animeCover) animeCover.value = anime.cover || '';
         if (animeGenres) animeGenres.value = anime.genres ? anime.genres.join(', ') : '';
 
+        // Populate year/month from existing finishDate, if available
         if (anime.finishDate && animeYear && animeMonth) {
             const [year, month] = anime.finishDate.split('-');
             animeYear.value = year;
             animeMonth.value = month;
         } else if (animeYear && animeMonth) {
+            // Fallback to current date
             const now = new Date();
             animeYear.value = now.getFullYear().toString();
-            animeMonth.value = (now.getMonth() + 1).toString().padStart(2, '0');
+            animeMonth.value = String(now.getMonth() + 1).padStart(2, '0');
         }
 
         if (durationInput) {
@@ -126,7 +162,11 @@
         }
 
         if (submitButton) submitButton.textContent = 'Update Anime';
-        if (deleteButton) deleteButton.style.display = 'inline-block';
+        if (deleteButton) {
+            deleteButton.style.display = 'inline-block';
+            deleteButton.disabled = false;
+            deleteButton.style.pointerEvents = 'auto';
+        }
 
         if (searchResultsDiv) {
             searchResultsDiv.style.display = 'none';
@@ -162,7 +202,7 @@
         if (typeof showToast === 'function') showToast('Anime deleted successfully!', 'success');
     };
 
-    // --- Handle add/update form submit ---
+    // --- Handle add/update form submit (FIXED: actualFinishDate = today, finishDate = selected month) ---
     window.handleAddAnime = function (e) {
         e.preventDefault();
 
@@ -189,40 +229,36 @@
         const nowTimestamp = typeof window.getFormattedTimestamp === 'function'
             ? window.getFormattedTimestamp()
             : new Date().toISOString();
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-        const currentDay = String(now.getDate()).padStart(2, '0');
 
         let finishDate = null;
         let actualFinishDate = null;
 
+        // When status is Completed:
+        // - finishDate uses the selected year-month (for grouping)
+        // - actualFinishDate is set to today's date (local device date)
         if (status === 'Completed') {
-            if (window.isEditing && window.currentEditId) {
-                const existing = window.animeData.find(a => a.id == window.currentEditId);
-                if (existing && existing.userStatus === 'Completed' && existing.finishDate) {
-                    finishDate = existing.finishDate;
-                    actualFinishDate = existing.actualFinishDate;
-                } else if (existing && existing.actualFinishDate) {
-                    actualFinishDate = existing.actualFinishDate;
-                    finishDate = existing.finishDate || actualFinishDate.substring(0, 7);
-                } else if (year && month) {
-                    const y = parseInt(year);
-                    const m = parseInt(month);
-                    const lastDay = new Date(y, m, 0).getDate();
-                    actualFinishDate = `${year}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+            // 1. finishDate = selected year-month
+            if (year && month) {
+                const y = parseInt(year);
+                const m = parseInt(month);
+                if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
                     finishDate = `${year}-${String(m).padStart(2, '0')}`;
                 } else {
-                    actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
-                    finishDate = `${currentYear}-${currentMonth}`;
+                    // fallback to current month
+                    const now = new Date();
+                    finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                 }
             } else {
-                const dateInfo = typeof window.getCompletionDate === 'function'
-                    ? window.getCompletionDate()
-                    : { finishDate: `${currentYear}-${currentMonth}`, actualFinishDate: `${currentYear}-${currentMonth}-${currentDay}` };
-                finishDate = dateInfo.finishDate;
-                actualFinishDate = dateInfo.actualFinishDate;
+                const now = new Date();
+                finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             }
+
+            // 2. actualFinishDate = today's date (user's local date)
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+            const currentDay = String(now.getDate()).padStart(2, '0');
+            actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
         }
 
         let logAction = 'added';
@@ -333,7 +369,7 @@
         tableBody._clickHandler = clickHandler;
     }
 
-    // --- Setup modal close handlers ---
+    // --- Setup modal close handlers (and DELETE button) ---
     function setupModalHandlers() {
         const addModal = document.getElementById('addAnimeModal');
         if (!addModal) return;
@@ -364,6 +400,15 @@
                 window.closeModal(document.getElementById('addAnimeModal'));
                 resetEditingState();
             });
+        }
+
+        // Attach delete button event listener
+        const deleteBtn = document.getElementById('deleteBtn');
+        if (deleteBtn) {
+            // Remove any previous listeners
+            const newDeleteBtn = deleteBtn.cloneNode(true);
+            deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
+            newDeleteBtn.addEventListener('click', window.deleteAnime);
         }
     }
 
