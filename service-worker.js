@@ -2,12 +2,12 @@
 // SERVICE WORKER - NETWORK FIRST VERSION
 // ============================================
 
-const CACHE_NAME = 'anipulse-v9';
-const VERSION = '2.0.0';
+const CACHE_NAME = 'anipulse-v10';
+const VERSION = '2.1.0';
 
 // ONLY cache local files - NO external CDNs!
 const OFFLINE_FALLBACKS = [
-    '/public/offline.html',
+    '/offline.html',        // now served from root (or public/ but at root URL)
     '/dashboard.html'
 ];
 
@@ -72,7 +72,7 @@ self.addEventListener('fetch', (event) => {
                 headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
             }).catch(async () => {
                 console.log('[SW] Network failed, serving offline page');
-                const cachedResponse = await caches.match('/public/offline.html');
+                const cachedResponse = await caches.match('/offline.html');
                 if (cachedResponse) return cachedResponse;
                 return new Response('Offline - Please check your connection', {
                     status: 200,
@@ -96,11 +96,11 @@ self.addEventListener('fetch', (event) => {
         }
     }
 
-    // For manifest.json
+    // For manifest.json (now at root)
     if (url.pathname.includes('manifest.json')) {
         event.respondWith(
-            fetch('/public/manifest.json', { cache: 'no-store' }).catch(() => {
-                return caches.match('/public/manifest.json');
+            fetch('/manifest.json', { cache: 'no-store' }).catch(() => {
+                return caches.match('/manifest.json');
             })
         );
         return;
