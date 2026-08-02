@@ -15,9 +15,8 @@
         MIN_QUERY_LENGTH: 2,
         MAX_RESULTS: 10,
         JIKAN_API: 'https://api.jikan.moe/v4/anime',
-        ANILIST_API: 'https://graphql.anilist.co',
-        KITSU_API: 'https://kitsu.io/api/edge/anime',
-        // Global search
+        ANILIST_PROXY: `${window.API_BASE_URL}/api/proxy/anilist`,  
+        KITSU_PROXY: `${window.API_BASE_URL}/api/proxy/kitsu`,      
         GLOBAL_DEBOUNCE: 300,
         GLOBAL_MIN_QUERY: 1,
         STORAGE_KEY: 'anipulse_search_query',
@@ -55,10 +54,8 @@
         if (isNavigating) return;
         isNavigating = true;
 
-        // Use the central navigation system if available
         if (typeof navigateTo === 'function') {
             navigateTo('anime-list');
-            // Wait for page to become active
             const handler = function (e) {
                 if (e.detail.page === 'anime-list') {
                     document.removeEventListener('pageChanged', handler);
@@ -67,7 +64,6 @@
                 }
             };
             document.addEventListener('pageChanged', handler);
-            // Fallback: if event doesn't fire, apply after a short delay
             setTimeout(() => {
                 if (isNavigating) {
                     isNavigating = false;
@@ -75,11 +71,9 @@
                 }
             }, 500);
         } else {
-            // Fallback: simulate click on menu item
             const menuItem = getAnimeListMenuItem();
             if (menuItem) {
                 menuItem.click();
-                // Wait for page change via the old system (if no navigateTo)
                 setTimeout(() => {
                     applyGlobalSearch();
                     isNavigating = false;
@@ -91,7 +85,6 @@
     }
 
     function applyGlobalSearch() {
-        // This triggers a re‑render of the anime table
         if (typeof window.updateAnimeDisplay === 'function') {
             window.updateAnimeDisplay();
         } else {
@@ -101,24 +94,20 @@
 
     function performGlobalSearch(query) {
         globalQuery = query.trim();
-        // Save to localStorage for persistence
         try {
             localStorage.setItem(SEARCH_CONFIG.STORAGE_KEY, globalQuery);
         } catch (_) { /* ignore */ }
 
-        // Sync input field
         const input = getDashboardSearchInput();
         if (input && input.value !== globalQuery) {
             input.value = globalQuery;
         }
 
-        // If query is empty, just refresh the list (clear filter)
         if (!globalQuery) {
             applyGlobalSearch();
             return;
         }
 
-        // Navigate to anime list if not already there
         const page = getAnimeListPage();
         if (!page || page.hidden) {
             navigateToAnimeList();
@@ -139,7 +128,6 @@
         applyGlobalSearch();
     }
 
-    // ─── GLOBAL SEARCH INPUT HANDLERS ─────────────
     function handleGlobalSearchInput(event) {
         const query = event.target.value;
         clearTimeout(globalDebounceTimer);
@@ -149,7 +137,6 @@
     }
 
     function handleGlobalKeydown(event) {
-        // Ctrl+K / Cmd+K → focus search
         if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
             event.preventDefault();
             const input = getDashboardSearchInput();
@@ -160,7 +147,6 @@
             return;
         }
 
-        // Escape → clear search and blur
         if (event.key === 'Escape') {
             const input = getDashboardSearchInput();
             if (input && document.activeElement === input) {
@@ -204,7 +190,6 @@
                 return;
             }
 
-            // Restore last query from localStorage
             let savedQuery = '';
             try {
                 savedQuery = localStorage.getItem(SEARCH_CONFIG.STORAGE_KEY) || '';
@@ -212,24 +197,19 @@
             if (savedQuery) {
                 input.value = savedQuery;
                 globalQuery = savedQuery;
-                // If anime list is already visible, apply search immediately
                 const page = getAnimeListPage();
                 if (page && !page.hidden) {
                     applyGlobalSearch();
                 }
             }
 
-            // Attach event listeners
             input.addEventListener('input', handleGlobalSearchInput);
             input.addEventListener('keydown', handleGlobalKeydown);
 
-            // Global keyboard shortcut (also handled in keydown, but need document listener)
             document.addEventListener('keydown', handleGlobalKeydown);
 
-            // When the anime list page becomes active, re‑apply search
             document.addEventListener('pageChanged', function (e) {
                 if (e.detail.page === 'anime-list') {
-                    // Ensure input value matches global query
                     const inp = getDashboardSearchInput();
                     if (inp && inp.value !== globalQuery) {
                         inp.value = globalQuery;
@@ -252,9 +232,9 @@
         }
     };
 
-    // ─── MODAL SEARCH FUNCTIONS (preserved) ──────
+    // ─── MODAL SEARCH FUNCTIONS (using proxy) ─────
 
-    // --- Check API status ---
+    // --- Check API status (optional, kept for Jikan) ---
     async function checkApiAvailability() {
         const now = Date.now();
         if (now - lastApiCheck < 30000) return isJikanAvailable;
@@ -283,7 +263,7 @@
         return isJikanAvailable;
     }
 
-    // --- Search with AniList ---
+    // --- Search with AniList (via proxy) ---
     async function searchAnilist(query) {
         const graphqlQuery = `
             query ($search: String) {
@@ -304,19 +284,29 @@
             }
         `;
         try {
-            const response = await fetch(SEARCH_CONFIG.ANILIST_API, {
+            const response = await fetch(SEARCH_CONFIG.ANILIST_PROXY, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
                     query: graphqlQuery,
                     variables: { search: query }
                 })
             });
-            if (!response.ok) throw new Error('AniList API error');
-            const data = await response.json();
-            if (!data.data?.Page?.media) return null;
+
+            if (!response.ok) throw new Error('Proxy request failed');
+            const result = await response.json();
+
+            if (result.errors) {
+                console.warn('AniList GraphQL errors:', result.errors);
+                return null;
+            }
+
+            if (!result.data?.Page?.media) return null;
+
             return {
-                data: data.data.Page.media.map(media => ({
+                data: result.data.Page.media.map(media => ({
                     title: media.title.english || media.title.romaji || media.title.native || 'Unknown',
                     title_english: media.title.english || '',
                     title_romaji: media.title.romaji || '',
@@ -332,21 +322,21 @@
                 }))
             };
         } catch (error) {
-            console.warn('AniList search failed:', error);
+            console.warn('AniList search via proxy failed:', error);
             return null;
         }
     }
 
-    // --- Search with Kitsu ---
+    // --- Search with Kitsu (via proxy) ---
     async function searchKitsu(query) {
         try {
-            const response = await fetch(
-                `${SEARCH_CONFIG.KITSU_API}?filter[text]=${encodeURIComponent(query)}&page[limit]=10&sort=-averageRating`,
-                { headers: { 'Accept': 'application/json' } }
-            );
-            if (!response.ok) throw new Error('Kitsu API error');
+            const response = await fetch(`${SEARCH_CONFIG.KITSU_PROXY}?q=${encodeURIComponent(query)}`);
+
+            if (!response.ok) throw new Error('Kitsu proxy request failed');
             const data = await response.json();
+
             if (!data.data || data.data.length === 0) return null;
+
             return {
                 data: data.data.map(item => {
                     const attrs = item.attributes;
@@ -367,12 +357,12 @@
                 })
             };
         } catch (error) {
-            console.warn('Kitsu search failed:', error);
+            console.warn('Kitsu search via proxy failed:', error);
             return null;
         }
     }
 
-    // --- Search with Jikan ---
+    // --- Search with Jikan (direct, kept as fallback) ---
     async function searchJikan(query) {
         try {
             const controller = new AbortController();
@@ -414,16 +404,21 @@
                     usingFallback = true;
                 }
             }
+
+            // Try AniList via proxy
             const anilistData = await searchAnilist(query);
             if (anilistData && anilistData.data && anilistData.data.length > 0) {
                 searchCache.set(cacheKey, { data: anilistData, timestamp: Date.now() });
                 return anilistData;
             }
+
+            // Try Kitsu via proxy
             const kitsuData = await searchKitsu(query);
             if (kitsuData && kitsuData.data && kitsuData.data.length > 0) {
                 searchCache.set(cacheKey, { data: kitsuData, timestamp: Date.now() });
                 return kitsuData;
             }
+
             return null;
         } catch (error) {
             console.error('All search methods failed:', error);
@@ -555,10 +550,10 @@
         if (durationInput) {
             if (anime.type === 'Movie') {
                 durationInput.value = anime.duration ? Math.round(parseInt(anime.duration) || 120) : '120';
-                durationInput.readOnly = false;
+                durationInput.disabled = false;
             } else {
                 durationInput.value = anime.duration || '20';
-                durationInput.readOnly = true;
+                durationInput.disabled = true;
             }
         }
         if (coverInput && anime.images) {
@@ -667,7 +662,6 @@
         // 1. Modal search (add anime)
         const searchInput = document.getElementById('animeTitle');
         if (searchInput) {
-            // Clone to remove old listeners
             const newInput = searchInput.cloneNode(true);
             searchInput.parentNode.replaceChild(newInput, searchInput);
 

@@ -14,7 +14,11 @@ const syncRoutes = require('./routes/sync');
 const rankingRoutes = require('./routes/ranking');
 const friendsRoutes = require('./routes/friends');
 const userRoutes = require('./routes/user');
+const proxyRoutes = require('./routes/proxy');
 
+// ============================================
+// CREATE EXPRESS APP – MUST COME FIRST
+// ============================================
 const app = express();
 
 // ============================================
@@ -66,19 +70,26 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
 // ============================================
-// STATIC FILES – UPDATED FOR NEW STRUCTURE
+// STATIC FILES – WORKS WITH YOUR CURRENT STRUCTURE
 // ============================================
 
-// Serve Frontend folder as root (so /css, /js, /index.html, /dashboard.html, /login.html work)
+// 1. Serve root folder (for index.html, dashboard.html, login.html, manifest.json, service-worker.js)
+app.use(express.static(path.join(__dirname, '..')));
+
+// 2. Serve Frontend folder (for css/, js/, icon/)
 app.use(express.static(path.join(__dirname, '..', 'Frontend')));
 
-// Serve public folder for static assets (manifest, 404, offline, etc.)
-app.use('/public', express.static(path.join(__dirname, '..', 'public')));
+// 3. Serve public folder (for any extra assets like offline.html)
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// ============================================
+// PROXY ROUTES
+// ============================================
+app.use('/api/proxy', proxyRoutes);
 
 // ============================================
 // API ROUTES
 // ============================================
-
 app.use('/api/auth', authRoutes);
 app.use('/api/anime', animeRoutes);
 app.use('/api/sync', syncRoutes);
@@ -89,7 +100,6 @@ app.use('/api/user', userRoutes);
 // ============================================
 // HEALTH CHECK
 // ============================================
-
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
@@ -99,25 +109,23 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================
-// HTML PAGE ROUTES – NOW POINT TO Frontend/
+// HTML PAGE ROUTES (optional, but explicit)
 // ============================================
-
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'Frontend', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 app.get('/dashboard.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'Frontend', 'dashboard.html'));
+    res.sendFile(path.join(__dirname, '..', 'dashboard.html'));
 });
 
 app.get('/login.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'Frontend', 'login.html'));
+    res.sendFile(path.join(__dirname, '..', 'login.html'));
 });
 
 // ============================================
 // 404 HANDLER
 // ============================================
-
 app.use((req, res) => {
     const possiblePaths = [
         path.join(__dirname, '..', 'public', '404.html'),
@@ -156,7 +164,6 @@ app.use((req, res) => {
 // ============================================
 // ERROR HANDLING
 // ============================================
-
 app.use((err, req, res, next) => {
     console.error('❌ Error:', err.message);
     if (err.message === 'Not allowed by CORS') {
@@ -171,11 +178,11 @@ app.use((err, req, res, next) => {
 // ============================================
 // START SERVER
 // ============================================
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`\n🚀 Server running on http://localhost:${PORT}`);
     console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📁 Root: ${path.join(__dirname, '..')}`);
     console.log(`📁 Frontend: ${path.join(__dirname, '..', 'Frontend')}`);
     console.log(`📁 Public: ${path.join(__dirname, '..', 'public')}`);
     console.log(`📦 Payload limit: 50mb\n`);

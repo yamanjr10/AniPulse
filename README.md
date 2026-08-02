@@ -1,6 +1,6 @@
 # 💖 AniPulse - Anime Tracker & Stats Dashboard
 
-![AniPulse](https://img.shields.io/badge/Version-2.0.0-blueviolet?style=flat-square)
+![AniPulse](https://img.shields.io/badge/Version-3.0.0-blueviolet?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Platform](https://img.shields.io/badge/Platform-Web-orange?style=flat-square)
 
@@ -506,23 +506,110 @@ None currently reported. Please report any bugs on GitHub!
 
 ---
 
-## 📝 Project Structure
-
-```
 AniPulse/
-├── index.html # Main HTML structure
+├── index.html                     # Main dashboard page
+├── dashboard.html                 # Dashboard (aliased from index)
+├── login.html                     # Login page
+├── manifest.json                  # PWA manifest
+├── service-worker.js              # Service worker (PWA)
+├── README.md                      # Project documentation
+├── .gitignore                     # Git ignore rules
 │
-├── Js/ # JavaScript source files
-│ ├── main.js # Core application logic
-│ └── extras.js # Additional features & utilities
+├── Backend/                       # Node.js server
+│   ├── config/                    # Configuration files
+│   ├── middleware/                # Auth, error handlers
+│   ├── routes/                    # API route handlers
+│   ├── scripts/                   # Utility scripts
+│   ├── services/                  # Firebase, database services
+│   ├── utils/                     # Helpers, validators, constants
+│   ├── server.js                  # Entry point
+│   ├── package.json               # Backend dependencies
+│   ├── package-lock.json
+│                      
 │
-├── Css/ # Styling files
-│ ├── style.css # Main styling
-│ └── responsive.css # Mobile responsive styles
+├── Frontend/                      # Frontend source files
+│   ├── Css/                       # Modular CSS (components, pages, responsive)
+│   │   ├── variables.css
+│   │   ├── reset.css
+│   │   ├── typography.css
+│   │   ├── utilities.css
+│   │   ├── layout/
+│   │   │   └── layout.css
+│   │   ├── components/
+│   │   │   ├── header.css
+│   │   │   ├── sidebar.css
+│   │   │   ├── cards.css
+│   │   │   ├── buttons.css
+│   │   │   ├── forms.css
+│   │   │   ├── modals.css
+│   │   │   ├── charts.css
+│   │   │   ├── badges.css
+│   │   │   ├── progress.css
+│   │   │   ├── animations.css
+│   │   │   ├── level-system.css
+│   │   │   ├── toast.css
+│   │   │   └── loading.css
+│   │   ├── pages/
+│   │   │   ├── dashboard.css
+│   │   │   ├── statistics.css
+│   │   │   ├── watchlist.css
+│   │   │   ├── anime-list.css
+│   │   │   ├── achievements.css
+│   │   │   ├── community.css
+│   │   │   ├── settings.css
+│   │   │   └── recap.css
+│   │   └── responsive/
+│   │       ├── tablet.css
+│   │       ├── mobile.css
+│   │       └── small-mobile.css
+│   │
+│   ├── Js/                        # Modular JavaScript
+│   │   ├── main.js                # App orchestrator
+│   │   ├── services/              # API, config, storage, sync
+│   │   │   ├── config.js
+│   │   │   ├── api.js
+│   │   │   ├── level-system.js
+│   │   │   ├── dual-storage.js
+│   │   │   └── sync-manager.js
+│   │   ├── core/                  # Helpers, data
+│   │   │   ├── helpers.js
+│   │   │   └── data.js
+│   │   ├── components/            # UI components
+│   │   │   ├── theme.js
+│   │   │   ├── loader.js
+│   │   │   ├── toast.js
+│   │   │   ├── search.js
+│   │   │   ├── modal.js
+│   │   │   ├── notifications.js
+│   │   │   ├── avatar.js
+│   │   │   ├── name-entry.js
+│   │   │   └── pwa.js
+│   │   ├── pages/                 # Page logic
+│   │   │   ├── statistics.js
+│   │   │   ├── dashboard.js
+│   │   │   ├── anime-list.js
+│   │   │   ├── watchlist.js
+│   │   │   ├── achievements.js
+│   │   │   ├── community.js
+│   │   │   ├── settings.js
+│   │   │   └── recap.js
+│   │   └── utils/                 # Heatmap, state manager
+│   │       ├── heatmap.js
+│   │       └── state-manager.js
+│   │
+│   └── icon/                      # PWA icons
+│       ├── icon-72x72.png
+│       ├── icon-96x96.png
+│       ├── icon-128x128.png
+│       ├── icon-144x144.png
+│       ├── icon-152x152.png
+│       ├── icon-192x192.png
+│       ├── icon-384x384.png
+│       └── icon-512x512.png
 │
-├── autopush.ps1 # Git automation script
-└── README.md # Project documentation
-```
+├── public/                        # Static assets (offline fallback, 404)
+│   ├── 404.html
+│   └── offline.html
 
 ---
 
