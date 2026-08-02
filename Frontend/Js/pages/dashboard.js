@@ -8,6 +8,8 @@
 
     let _updatingStats = false;
     let _lastStatsValues = null;
+    let _sidebarToggleInterval = null;
+    let _sidebarCurrentStat = 'hours';
 
     // --- Update stats (with retry, verification, and auto-restore) ---
     window.updateStats = function (retries = 0) {
@@ -57,7 +59,7 @@
             if (elements.completed) elements.completed.textContent = monthlyStats.completed;
             if (elements.movies) elements.movies.textContent = monthlyStats.movies;
             if (elements.episodes) elements.episodes.textContent = monthlyStats.episodes;
-            // 🔹 FIX: Floor hours (e.g., 4.8 → 4, not 5)
+            // Floor hours
             if (elements.hours) {
                 const hoursNum = parseFloat(monthlyStats.hours);
                 elements.hours.textContent = isNaN(hoursNum) ? '0' : Math.floor(hoursNum);
@@ -100,7 +102,6 @@
             if (els.completed) els.completed.textContent = stats.completed;
             if (els.movies) els.movies.textContent = stats.movies;
             if (els.episodes) els.episodes.textContent = stats.episodes;
-            // 🔹 Floor hours here too
             if (els.hours) {
                 const hoursNum = parseFloat(stats.hours);
                 els.hours.textContent = isNaN(hoursNum) ? '0' : Math.floor(hoursNum);
@@ -428,7 +429,6 @@
                 if (typeof window.exportData === 'function') {
                     window.exportData();
                 } else {
-                    // Fallback if exportData is missing
                     const data = window.animeData || [];
                     if (data.length === 0) {
                         if (typeof showToast === 'function') showToast('No data to export', 'error');
@@ -464,7 +464,7 @@
             });
         }
 
-        // --- Import Data: process the selected file (FIXED: merge/update existing) ---
+        // --- Import Data: merge/update ---
         const importDataBtn = document.getElementById('importDataBtn');
         if (importDataBtn) {
             importDataBtn.addEventListener('click', function (e) {
@@ -485,7 +485,6 @@
                             return;
                         }
 
-                        // Build a map of existing anime by id
                         const existingMap = new Map();
                         window.animeData.forEach(a => existingMap.set(a.id, a));
 
@@ -495,7 +494,6 @@
                         importedData.forEach(imported => {
                             const existing = existingMap.get(imported.id);
                             if (existing) {
-                                // Update existing entry with all fields from imported (except id)
                                 Object.keys(imported).forEach(key => {
                                     if (key !== 'id') {
                                         existing[key] = imported[key];
@@ -503,7 +501,6 @@
                                 });
                                 updatedCount++;
                             } else {
-                                // New entry – add it
                                 window.animeData.push(imported);
                                 addedCount++;
                             }
@@ -522,7 +519,6 @@
                         if (updatedCount > 0) message += `Updated ${updatedCount} existing anime.`;
                         if (typeof showToast === 'function') showToast(`Import successful! ${message}`, 'success');
 
-                        // Close modal and reset file input
                         const importModal = document.getElementById('importModal');
                         if (importModal && typeof window.closeModal === 'function') {
                             window.closeModal(importModal);
@@ -543,8 +539,9 @@
     }
 
     // ============================================
-    // SIDEBAR USER INFO – FORCEFUL LOCK with guard
+    // SIDEBAR USER INFO – WITH HOURS ↔ EPISODES TOGGLE (SINGLE ELEMENT)
     // ============================================
+
     window.updateSidebarUserInfo = function () {
         const sidebarAvatar = document.querySelector('.sidebar-avatar');
         const sidebarUsername = document.querySelector('.sidebar-username');
@@ -570,31 +567,24 @@
             if (savedTitle) currentTitle = savedTitle;
         }
 
-        // Update avatar and username
         if (sidebarAvatar) {
             sidebarAvatar.src = savedAvatar;
             sidebarAvatar.alt = savedName;
         }
         if (sidebarUsername) sidebarUsername.textContent = savedName;
 
-        // ✅ FORCE SET the sidebar level container – replace all content with inline styles
-        const sidebarLevel = document.getElementById('sidebarLevel');
-        if (sidebarLevel) {
-            // Clear any existing content and set new HTML with inline styles
-            sidebarLevel.innerHTML = `
-                <span class="level-badge" style="display:inline-block;font-weight:700;color:#8b5cf6;background:rgba(139,92,246,0.15);padding:0 8px;border-radius:12px;font-size:0.75rem;line-height:1.6;">Lv.${currentLevel}</span>
-                <span class="level-title" style="display:inline-block;font-weight:500;color:#c4b5fd;margin-left:4px;">${currentTitle}</span>
-            `;
-            console.log('✅ Sidebar level forced to: Lv.' + currentLevel + ' ' + currentTitle);
-        } else {
-            console.warn('⚠️ sidebarLevel container not found!');
-        }
+        const badgeEl = document.getElementById('levelBadgeText');
+        const titleEl = document.getElementById('levelTitleText');
+        if (badgeEl) badgeEl.textContent = `Lv.${currentLevel}`;
+        if (titleEl) titleEl.textContent = currentTitle;
 
-        // Update stats
+        // ---- Calculate stats ----
         const data = window.animeData || [];
         const totalAnime = data.length;
         const totalHours = typeof window.calculateTotalHours === 'function' ? window.calculateTotalHours() : 0;
+        const totalEpisodes = typeof window.calculateTotalEpisodes === 'function' ? window.calculateTotalEpisodes() : 0;
 
+        // ---- Build sidebar stats with a single toggle item ----
         if (sidebarUserStats) {
             const formatShort = window.formatNumberShort || ((n) => n.toString());
             sidebarUserStats.innerHTML = `
@@ -604,15 +594,18 @@
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat-item" id="toggleStat">
-                    <span class="stat-number" id="toggleNumber" title="${totalHours.toLocaleString()} Hours">
+                    <span class="stat-number toggle-number" id="toggleNumber" title="${totalHours.toLocaleString()} Hours">
                         ${formatShort(totalHours)}
                     </span>
-                    <span class="stat-label" id="toggleLabel">Hours</span>
+                    <span class="stat-label toggle-label" id="toggleLabel">Hours</span>
                 </div>
             `;
         }
 
-        // Settings page level display
+        // ---- Start auto-toggle ----
+        startSidebarStatToggle(totalHours, totalEpisodes);
+
+        // ---- Settings page level display ----
         const settingsLevelNum = document.getElementById('settingsLevelNumber');
         const settingsLevelTitle = document.getElementById('settingsLevelTitle');
         if (settingsLevelNum) settingsLevelNum.textContent = `Level ${currentLevel}`;
@@ -623,29 +616,70 @@
         if (topAvatar) topAvatar.src = savedAvatar;
         if (topName) topName.textContent = savedName;
 
-        // ✅ Set up a MutationObserver to guard the sidebarLevel from external changes
         setupSidebarGuard();
     };
+
+    // ---- Toggle function with single element (no display issues) ----
+    function startSidebarStatToggle(totalHours, totalEpisodes) {
+        if (_sidebarToggleInterval) {
+            clearInterval(_sidebarToggleInterval);
+            _sidebarToggleInterval = null;
+        }
+
+        const numberEl = document.getElementById('toggleNumber');
+        const labelEl = document.getElementById('toggleLabel');
+        if (!numberEl || !labelEl) return;
+
+        const formatShort = window.formatNumberShort || ((n) => n.toString());
+        let currentStat = 'hours';
+
+        const setStat = (stat) => {
+            if (stat === 'hours') {
+                numberEl.textContent = formatShort(totalHours);
+                numberEl.title = `${totalHours.toLocaleString()} Hours`;
+                labelEl.textContent = 'Hours';
+                currentStat = 'hours';
+            } else {
+                numberEl.textContent = formatShort(totalEpisodes);
+                numberEl.title = `${totalEpisodes.toLocaleString()} Episodes`;
+                labelEl.textContent = 'Eps';
+                currentStat = 'episodes';
+            }
+            // Apply fade animation
+            numberEl.style.animation = 'none';
+            labelEl.style.animation = 'none';
+            requestAnimationFrame(() => {
+                numberEl.style.animation = 'fadeIn 0.6s ease';
+                labelEl.style.animation = 'fadeIn 0.6s ease';
+            });
+        };
+
+        // Start with hours
+        setStat('hours');
+
+        _sidebarToggleInterval = setInterval(() => {
+            if (currentStat === 'hours') {
+                setStat('episodes');
+            } else {
+                setStat('hours');
+            }
+        }, 15000);
+    }
 
     // --- Guard the sidebarLevel container from being overwritten ---
     function setupSidebarGuard() {
         const sidebarLevel = document.getElementById('sidebarLevel');
         if (!sidebarLevel) return;
-        // If already observed, disconnect old observer to avoid duplicates
         if (sidebarLevel._guardObserver) {
             sidebarLevel._guardObserver.disconnect();
         }
         const observer = new MutationObserver(function (mutations) {
             mutations.forEach(function (mutation) {
-                // If the content changed and it wasn't our own update (we can check a flag)
                 if (mutation.type === 'childList' || mutation.type === 'characterData') {
-                    // Check if the content still has our expected structure
                     const badge = sidebarLevel.querySelector('.level-badge');
                     const title = sidebarLevel.querySelector('.level-title');
-                    // If badge missing or title missing, or the badge doesn't start with "Lv.", restore
                     if (!badge || !title || !badge.textContent.trim().startsWith('Lv.')) {
                         console.warn('⚠️ Sidebar level was overwritten – restoring...');
-                        // Re-run the update function to restore
                         window.updateSidebarUserInfo();
                     }
                 }
@@ -858,7 +892,6 @@
     function initDashboard() {
         initGreeting();
         initProfileDropdown();
-
         setupStatWatcher();
 
         window.addEventListener('animeUpdate', function () {
@@ -876,7 +909,6 @@
             }
         });
 
-        // Initialize chart if not already
         if (typeof window.initCharts === 'function') {
             const canvas = document.getElementById('monthlyProgressChart');
             if (canvas && !window.monthlyProgressChart) {
@@ -884,24 +916,17 @@
             }
         }
 
-        // ✅ Force sidebar update first
+        // Force sidebar update first (will also start the toggle)
         if (typeof window.updateSidebarUserInfo === 'function') {
             window.updateSidebarUserInfo();
         }
 
-        // ❌ DO NOT call updateAllLevelUI – it interferes with the sidebar
-        // if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
-        //     window.AniPulseLevelSystem.updateAllLevelUI();
-        // }
-
-        // Then load all components
         setTimeout(() => {
             if (typeof window.updateAllComponents === 'function') {
                 window.updateAllComponents();
             }
         }, 400);
 
-        // Second refresh
         setTimeout(() => {
             console.log('🔄 Performing second refresh to ensure stats are loaded...');
             if (typeof window.updateAllComponents === 'function') {
@@ -912,18 +937,13 @@
             }
         }, 1500);
 
-        // Final safety restore
         setTimeout(() => {
             if (typeof window.restoreStats === 'function') {
                 window.restoreStats();
             }
         }, 3000);
 
-        // ============================================
-        // QUICK ACTIONS – Initialize
-        // ============================================
         initQuickActions();
-
         console.log('✅ Dashboard initialized');
     }
 

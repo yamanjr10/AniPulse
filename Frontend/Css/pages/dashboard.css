@@ -4001,3 +4001,26 @@
         padding: var(--space-0-5) var(--space-2);
     }
 }
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.toggle-stat-container .toggle-stat {
+    transition: opacity 0.3s ease;
+}
+
+/* Optional: ensure numbers and labels are inline-block */
+.toggle-stat-container .stat-number,
+.toggle-stat-container .stat-label {
+    display: inline-block;
+}
+
