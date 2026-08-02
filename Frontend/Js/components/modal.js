@@ -102,14 +102,13 @@
             const type = document.getElementById('animeType');
             if (eps) eps.value = 1;
             if (dur) {
-                dur.value = 20;           // Default for TV
-                dur.disabled = true;      // Non-editable for default type
+                dur.value = 20;
+                dur.disabled = true;
             }
             if (prog) prog.value = 0;
             if (status) status.value = 'Plan to Watch';
             if (type) {
                 type.value = 'TV';
-                // Trigger type change to set correct duration state
                 const event = new Event('change');
                 type.dispatchEvent(event);
             }
@@ -130,8 +129,8 @@
         // Re-enable cover/genre fields
         const coverInput = document.getElementById('animeCover');
         const genresInput = document.getElementById('animeGenres');
-        if (coverInput) coverInput.disabled = true;
-        if (genresInput) genresInput.disabled = true;
+        if (coverInput) coverInput.disabled = false;
+        if (genresInput) genresInput.disabled = false;
 
         // Reset progress max attribute
         const progressInput = document.getElementById('animeProgress');
@@ -192,8 +191,6 @@
         if (animeEpisodes) animeEpisodes.value = anime.episodes || 0;
         if (animeDuration) {
             const type = anime.type || 'TV';
-            // For non-movies, we keep the stored value but disable the field.
-            // For movies, we enable it.
             animeDuration.value = anime.duration || getDefaultDuration(type);
             animeDuration.disabled = !isDurationEditable(type);
         }
@@ -275,7 +272,6 @@
         const type = document.getElementById('animeType')?.value || 'TV';
         const episodes = parseInt(document.getElementById('animeEpisodes')?.value) || 0;
         let duration = parseInt(document.getElementById('animeDuration')?.value) || 0;
-        // If duration is 0 or invalid, set default for the type
         if (!duration) duration = getDefaultDuration(type);
         const status = document.getElementById('animeStatus')?.value || 'Plan to Watch';
         let progress = parseInt(document.getElementById('animeProgress')?.value) || 0;
@@ -424,7 +420,6 @@
             if (!editable) {
                 durationInput.value = defaultDur;
             }
-            // For editable (Movie), leave current value unless it's zero
         }
 
         durationInput.disabled = !editable;
@@ -594,4 +589,78 @@
     }
 
     window.initModalSystem = initModalSystem;
+
+    // ============================================
+    // SELECT ANIME FROM SEARCH (FIXED)
+    // ============================================
+    window.selectAnimeFromSearch = function (anime) {
+        console.log('🎯 Selecting anime:', anime.title);
+        const titleInput = document.getElementById('animeTitle');
+        const typeSelect = document.getElementById('animeType');
+        const episodesInput = document.getElementById('animeEpisodes');
+        const durationInput = document.getElementById('animeDuration');
+        const coverInput = document.getElementById('animeCover');
+        const genresInput = document.getElementById('animeGenres');
+        const scoreInput = document.getElementById('animeScore');
+        const searchResults = document.getElementById('searchResults');
+
+        if (titleInput) {
+            titleInput.value = anime.title || '';
+            titleInput.style.border = '2px solid #10B981';
+            setTimeout(() => { titleInput.style.border = ''; }, 1000);
+        }
+        if (typeSelect) {
+            typeSelect.value = anime.type || 'TV';
+            const changeEvent = new Event('change');
+            typeSelect.dispatchEvent(changeEvent);
+        }
+        if (episodesInput) {
+            episodesInput.value = anime.episodes || 1;
+            // ✅ FIX: Immediately sync progress max so the progress field respects the new total
+            syncProgressMax();
+        }
+        if (durationInput) {
+            if (anime.type === 'Movie') {
+                durationInput.value = anime.duration ? Math.round(parseInt(anime.duration) || 120) : '120';
+                durationInput.disabled = false;
+            } else {
+                durationInput.value = anime.duration || '20';
+                durationInput.disabled = true;
+            }
+        }
+        if (coverInput && anime.images) {
+            const coverUrl = anime.images?.jpg?.image_url ||
+                anime.images?.large ||
+                anime.coverImage?.large ||
+                anime.coverImage?.medium ||
+                '';
+            if (coverUrl) coverInput.value = coverUrl;
+        }
+        if (genresInput && anime.genres) {
+            let genreString = '';
+            if (Array.isArray(anime.genres)) {
+                if (anime.genres.length > 0 && typeof anime.genres[0] === 'object') {
+                    genreString = anime.genres.filter(g => g.name !== 'Award Winning').map(g => g.name).join(', ');
+                } else {
+                    genreString = anime.genres.join(', ');
+                }
+            } else if (typeof anime.genres === 'string') {
+                genreString = anime.genres;
+            }
+            genresInput.value = genreString;
+        }
+        if (scoreInput && anime.score) {
+            const score = typeof anime.score === 'number' ? anime.score : parseFloat(anime.score);
+            if (!isNaN(score)) scoreInput.value = score;
+        }
+        if (searchResults) {
+            searchResults.style.display = 'none';
+            searchResults.innerHTML = '';
+        }
+        if (typeof showToast === 'function') {
+            const genreCount = Array.isArray(anime.genres) ? anime.genres.length : 0;
+            showToast(`✓ Selected: ${anime.title} (${genreCount} genres)`, 'success');
+        }
+        console.log('✅ Anime selected successfully');
+    };
 })();
