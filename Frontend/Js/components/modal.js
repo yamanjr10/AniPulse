@@ -259,7 +259,7 @@
         if (typeof showToast === 'function') showToast('Anime deleted successfully!', 'success');
     };
 
-    // --- Handle add/update form submit ---
+    // --- Handle add/update form submit (FIXED: preserve actualFinishDate on edit) ---
     window.handleAddAnime = function (e) {
         e.preventDefault();
 
@@ -291,28 +291,6 @@
 
         let finishDate = null;
         let actualFinishDate = null;
-
-        if (status === 'Completed') {
-            if (year && month) {
-                const y = parseInt(year);
-                const m = parseInt(month);
-                if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
-                    finishDate = `${year}-${String(m).padStart(2, '0')}`;
-                } else {
-                    const now = new Date();
-                    finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                }
-            } else {
-                const now = new Date();
-                finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-            }
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-            const currentDay = String(now.getDate()).padStart(2, '0');
-            actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
-        }
-
         let logAction = 'added';
         let toastMessage = `"${title}" added successfully!`;
 
@@ -322,6 +300,7 @@
                 if (typeof showToast === 'function') showToast('Anime not found', 'error');
                 return;
             }
+
             const wasCompleted = existing.userStatus === 'Completed';
             const isNowCompleted = status === 'Completed';
 
@@ -336,6 +315,7 @@
                 toastMessage = `"${title}" updated successfully!`;
             }
 
+            // ---- Update all fields (except dates) ----
             existing.title = title;
             existing.type = type;
             existing.episodes = episodes;
@@ -345,17 +325,59 @@
             existing.score = score;
             existing.cover = cover;
             existing.genres = genres;
-            existing.finishDate = finishDate;
-            existing.actualFinishDate = actualFinishDate;
             existing.updatedAt = nowTimestamp;
+
+            // ---- Date handling: only set if status changes to Completed ----
+            if (isNowCompleted && !wasCompleted) {
+                // Newly completed → set finishDate and actualFinishDate
+                if (year && month) {
+                    const y = parseInt(year);
+                    const m = parseInt(month);
+                    if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
+                        existing.finishDate = `${year}-${String(m).padStart(2, '0')}`;
+                    } else {
+                        const now = new Date();
+                        existing.finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                    }
+                } else {
+                    const now = new Date();
+                    existing.finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                }
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+                const currentDay = String(now.getDate()).padStart(2, '0');
+                existing.actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
+            }
+            // If already completed → dates are left untouched (preserve original completion)
 
             if (typeof window.saveData === 'function') window.saveData();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
         } else {
+            // ---- Add new anime ----
             if (status === 'Completed') {
                 logAction = 'completed';
                 toastMessage = `"${title}" added and marked as completed! 🎉`;
+                // Set dates for new completed anime
+                if (year && month) {
+                    const y = parseInt(year);
+                    const m = parseInt(month);
+                    if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
+                        finishDate = `${year}-${String(m).padStart(2, '0')}`;
+                    } else {
+                        const now = new Date();
+                        finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                    }
+                } else {
+                    const now = new Date();
+                    finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                }
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+                const currentDay = String(now.getDate()).padStart(2, '0');
+                actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
             } else if (status === 'Watching') {
                 logAction = 'watching';
                 toastMessage = `"${title}" added to your watching list! 📺`;
@@ -591,7 +613,7 @@
     window.initModalSystem = initModalSystem;
 
     // ============================================
-    // SELECT ANIME FROM SEARCH (FIXED)
+    // SELECT ANIME FROM SEARCH (FIXED: sync progress)
     // ============================================
     window.selectAnimeFromSearch = function (anime) {
         console.log('🎯 Selecting anime:', anime.title);
@@ -616,7 +638,7 @@
         }
         if (episodesInput) {
             episodesInput.value = anime.episodes || 1;
-            // ✅ FIX: Immediately sync progress max so the progress field respects the new total
+            // ✅ Immediately sync progress max so the progress field respects the new total
             syncProgressMax();
         }
         if (durationInput) {
