@@ -1,19 +1,32 @@
 // ============================================
-// ADD/EDIT/DELETE ANIME MODAL SYSTEM (FIXED)
+// ADD/EDIT/DELETE ANIME MODAL SYSTEM
 // ============================================
 
 (function () {
     'use strict';
 
-    // Dependencies: window.animeData, window.saveData, window.logActivity, window.getNextId, etc.
-
-    // Store scroll position per modal (by id)
+    // --- Store scroll position per modal (by id) ---
     let modalScrollPositions = {};
+
+    // --- Helpers for duration defaults ---
+    function getDefaultDuration(type) {
+        switch (type) {
+            case 'Movie': return 120;
+            case 'TV': return 24;
+            case 'OVA': return 24;
+            case 'ONA': return 20;
+            case 'Special': return 15;
+            default: return 20;
+        }
+    }
+
+    function isDurationEditable(type) {
+        return type === 'Movie';
+    }
 
     // --- Modal open/close (with scroll preservation) ---
     window.openModal = function (modalElement) {
         if (!modalElement) return;
-        // Store current scroll position
         const scrollY = window.scrollY;
         const modalId = modalElement.id || 'modal';
         modalScrollPositions[modalId] = scrollY;
@@ -51,7 +64,6 @@
         document.body.style.height = '';
         document.body.style.top = '';
 
-        // Restore scroll position
         if (scrollY > 0) {
             window.scrollTo({ top: scrollY, behavior: 'auto' });
         }
@@ -65,12 +77,21 @@
         window.currentEditId = null;
         const submitBtn = document.getElementById('submitBtn');
         const deleteBtn = document.getElementById('deleteBtn');
+        const modalTitle = document.getElementById('addAnimeTitle');
+        const titleInput = document.getElementById('animeTitle');
+
         if (submitBtn) submitBtn.textContent = 'Add Anime';
         if (deleteBtn) {
             deleteBtn.style.display = 'none';
             deleteBtn.disabled = false;
             deleteBtn.style.pointerEvents = 'auto';
         }
+        if (modalTitle) modalTitle.textContent = 'Add New Anime';
+        if (titleInput) {
+            titleInput.disabled = false;
+            titleInput.placeholder = 'Search for an anime...';
+        }
+
         const form = document.getElementById('addAnimeForm');
         if (form) {
             form.reset();
@@ -78,10 +99,20 @@
             const dur = document.getElementById('animeDuration');
             const prog = document.getElementById('animeProgress');
             const status = document.getElementById('animeStatus');
+            const type = document.getElementById('animeType');
             if (eps) eps.value = 1;
-            if (dur) dur.value = 20;
+            if (dur) {
+                dur.value = 20;           // Default for TV
+                dur.disabled = true;      // Non-editable for default type
+            }
             if (prog) prog.value = 0;
             if (status) status.value = 'Plan to Watch';
+            if (type) {
+                type.value = 'TV';
+                // Trigger type change to set correct duration state
+                const event = new Event('change');
+                type.dispatchEvent(event);
+            }
         }
         // Set year/month dropdowns to current date
         const yearSelect = document.getElementById('animeYear');
@@ -96,11 +127,22 @@
             searchResults.style.display = 'none';
             searchResults.innerHTML = '';
         }
-        // Re-enable cover/genre fields (they may have been disabled)
+        // Re-enable cover/genre fields
         const coverInput = document.getElementById('animeCover');
         const genresInput = document.getElementById('animeGenres');
-        if (coverInput) coverInput.disabled = false;
-        if (genresInput) genresInput.disabled = false;
+        if (coverInput) coverInput.disabled = true;
+        if (genresInput) genresInput.disabled = true;
+
+        // Reset progress max attribute
+        const progressInput = document.getElementById('animeProgress');
+        const episodesInput = document.getElementById('animeEpisodes');
+        if (progressInput && episodesInput) {
+            const maxEps = parseInt(episodesInput.value) || 0;
+            progressInput.max = maxEps;
+            if (parseInt(progressInput.value) > maxEps) {
+                progressInput.value = maxEps;
+            }
+        }
     }
 
     // --- Edit anime ---
@@ -133,12 +175,28 @@
         const deleteButton = document.getElementById('deleteBtn');
         const addModal = document.getElementById('addAnimeModal');
         const searchResultsDiv = document.getElementById('searchResults');
+        const modalTitle = document.getElementById('addAnimeTitle');
+
+        // ---- Lock title field when editing (disabled, no cursor) ----
+        if (animeTitle) {
+            animeTitle.disabled = true;
+            animeTitle.placeholder = 'Title is locked (click row to edit)';
+        }
+
+        // ---- Change modal title ----
+        if (modalTitle) modalTitle.textContent = 'Edit Anime';
 
         if (animeIdInput) animeIdInput.value = anime.id;
         if (animeTitle) animeTitle.value = anime.title;
         if (animeType) animeType.value = anime.type || 'TV';
         if (animeEpisodes) animeEpisodes.value = anime.episodes || 0;
-        if (animeDuration) animeDuration.value = anime.duration || (anime.type === 'Movie' ? 120 : 20);
+        if (animeDuration) {
+            const type = anime.type || 'TV';
+            // For non-movies, we keep the stored value but disable the field.
+            // For movies, we enable it.
+            animeDuration.value = anime.duration || getDefaultDuration(type);
+            animeDuration.disabled = !isDurationEditable(type);
+        }
         if (animeStatus) animeStatus.value = anime.userStatus || 'Plan to Watch';
         if (animeProgress) animeProgress.value = anime.progress || 0;
         if (animeScore) animeScore.value = anime.score || '';
@@ -151,14 +209,13 @@
             animeYear.value = year;
             animeMonth.value = month;
         } else if (animeYear && animeMonth) {
-            // Fallback to current date
             const now = new Date();
             animeYear.value = now.getFullYear().toString();
             animeMonth.value = String(now.getMonth() + 1).padStart(2, '0');
         }
 
         if (durationInput) {
-            durationInput.readOnly = (anime.type !== 'Movie');
+            durationInput.disabled = !isDurationEditable(anime.type || 'TV');
         }
 
         if (submitButton) submitButton.textContent = 'Update Anime';
@@ -172,6 +229,9 @@
             searchResultsDiv.style.display = 'none';
             searchResultsDiv.innerHTML = '';
         }
+
+        // ---- Sync progress max with episodes ----
+        syncProgressMax();
 
         if (addModal) {
             window.openModal(addModal);
@@ -202,7 +262,7 @@
         if (typeof showToast === 'function') showToast('Anime deleted successfully!', 'success');
     };
 
-    // --- Handle add/update form submit (FIXED: actualFinishDate = today, finishDate = selected month) ---
+    // --- Handle add/update form submit ---
     window.handleAddAnime = function (e) {
         e.preventDefault();
 
@@ -214,9 +274,12 @@
 
         const type = document.getElementById('animeType')?.value || 'TV';
         const episodes = parseInt(document.getElementById('animeEpisodes')?.value) || 0;
-        const duration = parseInt(document.getElementById('animeDuration')?.value) || 20;
+        let duration = parseInt(document.getElementById('animeDuration')?.value) || 0;
+        // If duration is 0 or invalid, set default for the type
+        if (!duration) duration = getDefaultDuration(type);
         const status = document.getElementById('animeStatus')?.value || 'Plan to Watch';
-        const progress = parseInt(document.getElementById('animeProgress')?.value) || 0;
+        let progress = parseInt(document.getElementById('animeProgress')?.value) || 0;
+        if (progress > episodes) progress = episodes;
         const score = parseFloat(document.getElementById('animeScore')?.value) || null;
         const cover = document.getElementById('animeCover')?.value || '';
         const genres = (document.getElementById('animeGenres')?.value || '')
@@ -233,18 +296,13 @@
         let finishDate = null;
         let actualFinishDate = null;
 
-        // When status is Completed:
-        // - finishDate uses the selected year-month (for grouping)
-        // - actualFinishDate is set to today's date (local device date)
         if (status === 'Completed') {
-            // 1. finishDate = selected year-month
             if (year && month) {
                 const y = parseInt(year);
                 const m = parseInt(month);
                 if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
                     finishDate = `${year}-${String(m).padStart(2, '0')}`;
                 } else {
-                    // fallback to current month
                     const now = new Date();
                     finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                 }
@@ -252,8 +310,6 @@
                 const now = new Date();
                 finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             }
-
-            // 2. actualFinishDate = today's date (user's local date)
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
@@ -273,7 +329,6 @@
             const wasCompleted = existing.userStatus === 'Completed';
             const isNowCompleted = status === 'Completed';
 
-            // Determine log action
             if (isNowCompleted && !wasCompleted) {
                 logAction = 'completed';
                 toastMessage = `"${title}" marked as completed! 🎉`;
@@ -285,7 +340,6 @@
                 toastMessage = `"${title}" updated successfully!`;
             }
 
-            // Update existing
             existing.title = title;
             existing.type = type;
             existing.episodes = episodes;
@@ -303,7 +357,6 @@
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
         } else {
-            // Add new
             if (status === 'Completed') {
                 logAction = 'completed';
                 toastMessage = `"${title}" added and marked as completed! 🎉`;
@@ -338,6 +391,44 @@
         if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
         if (typeof showToast === 'function') showToast(toastMessage, 'success');
     };
+
+    // --- Sync progress max with total episodes ---
+    function syncProgressMax() {
+        const episodesInput = document.getElementById('animeEpisodes');
+        const progressInput = document.getElementById('animeProgress');
+        if (episodesInput && progressInput) {
+            const maxEps = parseInt(episodesInput.value) || 0;
+            progressInput.max = maxEps;
+            if (parseInt(progressInput.value) > maxEps) {
+                progressInput.value = maxEps;
+            }
+        }
+    }
+
+    // --- Handle type change to adjust duration field ---
+    function handleTypeChange() {
+        const typeSelect = document.getElementById('animeType');
+        const durationInput = document.getElementById('animeDuration');
+        if (!typeSelect || !durationInput) return;
+
+        const type = typeSelect.value;
+        const defaultDur = getDefaultDuration(type);
+        const editable = isDurationEditable(type);
+
+        // If the field is empty or not a number, set default
+        const currentVal = parseInt(durationInput.value);
+        if (isNaN(currentVal) || currentVal === 0) {
+            durationInput.value = defaultDur;
+        } else {
+            // For non-editable types, force the default value (overwrite)
+            if (!editable) {
+                durationInput.value = defaultDur;
+            }
+            // For editable (Movie), leave current value unless it's zero
+        }
+
+        durationInput.disabled = !editable;
+    }
 
     // --- Table row click handler ---
     function attachTableClickHandler() {
@@ -405,10 +496,24 @@
         // Attach delete button event listener
         const deleteBtn = document.getElementById('deleteBtn');
         if (deleteBtn) {
-            // Remove any previous listeners
             const newDeleteBtn = deleteBtn.cloneNode(true);
             deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
             newDeleteBtn.addEventListener('click', window.deleteAnime);
+        }
+
+        // ---- Sync progress when total episodes changes ----
+        const episodesInput = document.getElementById('animeEpisodes');
+        if (episodesInput) {
+            episodesInput.addEventListener('input', syncProgressMax);
+            episodesInput.addEventListener('change', syncProgressMax);
+        }
+
+        // ---- Handle type change for duration ----
+        const typeSelect = document.getElementById('animeType');
+        if (typeSelect) {
+            typeSelect.addEventListener('change', handleTypeChange);
+            // Also trigger on load to set initial state
+            setTimeout(handleTypeChange, 100);
         }
     }
 
@@ -439,7 +544,7 @@
         });
     }
 
-    // --- Open add anime modal (for floating button) ---
+    // --- Open add anime modal ---
     window.openAddAnimeModal = function () {
         const addModal = document.getElementById('addAnimeModal');
         if (!addModal) {
@@ -488,8 +593,5 @@
         console.log('✅ Modal system initialized');
     }
 
-    // Expose init
     window.initModalSystem = initModalSystem;
-
-    // Auto-init if main.js doesn't call it, but main will.
 })();
