@@ -464,7 +464,7 @@
             });
         }
 
-        // --- Import Data: process the selected file (inside modal) ---
+        // --- Import Data: process the selected file (FIXED: merge/update existing) ---
         const importDataBtn = document.getElementById('importDataBtn');
         if (importDataBtn) {
             importDataBtn.addEventListener('click', function (e) {
@@ -485,26 +485,49 @@
                             return;
                         }
 
-                        // Deduplicate – keep existing IDs, avoid duplicates
-                        const existingIds = new Set(window.animeData.map(a => a.id));
-                        const newAnime = importedData.filter(item => !existingIds.has(item.id));
-                        if (newAnime.length === 0) {
-                            if (typeof showToast === 'function') showToast('No new anime found (all already exist)', 'info');
+                        // Build a map of existing anime by id
+                        const existingMap = new Map();
+                        window.animeData.forEach(a => existingMap.set(a.id, a));
+
+                        let addedCount = 0;
+                        let updatedCount = 0;
+
+                        importedData.forEach(imported => {
+                            const existing = existingMap.get(imported.id);
+                            if (existing) {
+                                // Update existing entry with all fields from imported (except id)
+                                Object.keys(imported).forEach(key => {
+                                    if (key !== 'id') {
+                                        existing[key] = imported[key];
+                                    }
+                                });
+                                updatedCount++;
+                            } else {
+                                // New entry – add it
+                                window.animeData.push(imported);
+                                addedCount++;
+                            }
+                        });
+
+                        if (addedCount === 0 && updatedCount === 0) {
+                            if (typeof showToast === 'function') showToast('No changes detected', 'info');
                             return;
                         }
 
-                        // Add new entries
-                        window.animeData.push(...newAnime);
                         if (typeof window.saveData === 'function') window.saveData();
                         if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
-                        if (typeof showToast === 'function') showToast(`Imported ${newAnime.length} new anime!`, 'success');
+
+                        let message = '';
+                        if (addedCount > 0) message += `Added ${addedCount} new anime. `;
+                        if (updatedCount > 0) message += `Updated ${updatedCount} existing anime.`;
+                        if (typeof showToast === 'function') showToast(`Import successful! ${message}`, 'success');
 
                         // Close modal and reset file input
                         const importModal = document.getElementById('importModal');
                         if (importModal && typeof window.closeModal === 'function') {
                             window.closeModal(importModal);
                         }
-                        fileInput.value = ''; // clear the input
+                        fileInput.value = '';
 
                     } catch (err) {
                         if (typeof showToast === 'function') showToast('Failed to parse JSON file', 'error');

@@ -2043,10 +2043,9 @@
 
     <!-- Application Bootstrap -->
     <script>
-    // ============================================
+     // ============================================
     // PAGE TITLES MAPPING
     // ============================================
-    // 👉 Define custom titles for each page
     const pageTitles = {
         dashboard: 'Home - AniPulse',
         'anime-list': 'Anime List - AniPulse',
@@ -2061,9 +2060,28 @@
     // PAGE NAVIGATION & LOGOUT
     // ============================================
 
+    // Helper: get currently active page ID
+    function getActivePageId() {
+        const activeMenuItem = document.querySelector('.menu-item.active');
+        return activeMenuItem ? activeMenuItem.dataset.page : null;
+    }
+
+    // Helper: save scroll position for a given page
+    function saveScrollPosition(pageId) {
+        if (!pageId) return;
+        localStorage.setItem(`scrollPosition_${pageId}`, window.scrollY);
+    }
+
+    // Helper: restore scroll position for a given page
+    function restoreScrollPosition(pageId) {
+        if (!pageId) return;
+        const pos = parseInt(localStorage.getItem(`scrollPosition_${pageId}`)) || 0;
+        window.scrollTo({ top: pos, behavior: 'smooth' });
+    }
+
     document.querySelectorAll(".menu-item").forEach((item) => {
         item.addEventListener("click", function (e) {
-            // ✅ Handle logout separately – no early return
+            // ✅ Handle logout separately
             if (this.id === "logoutBtn") {
                 handleLogout();
                 return;
@@ -2072,21 +2090,25 @@
             const pageId = this.getAttribute("data-page");
             if (!pageId) return;
 
-            // Save current page to localStorage
-            localStorage.setItem("lastActivePage", pageId);
-            localStorage.setItem("lastScrollPosition", window.scrollY);
+            // 1. Save scroll of the currently active page
+            const currentPageId = getActivePageId();
+            if (currentPageId) {
+                saveScrollPosition(currentPageId);
+            }
 
-            // Remove active class from all menu items
+            // 2. Save current page to localStorage (for reload)
+            localStorage.setItem("lastActivePage", pageId);
+
+            // 3. Update menu active state
             document.querySelectorAll(".menu-item").forEach((i) => i.classList.remove("active"));
             this.classList.add("active");
 
-            // Hide all pages
+            // 4. Hide all pages, show selected
             document.querySelectorAll(".page").forEach((page) => {
                 page.classList.remove("active");
                 page.hidden = true;
             });
 
-            // Show selected page
             const activePage = document.getElementById(`${pageId}-page`);
             if (activePage) {
                 activePage.classList.add("active");
@@ -2101,14 +2123,13 @@
                 }
             }
 
-            // 👉 Set document title based on page
+            // 5. Set document title based on page
             document.title = pageTitles[pageId] || 'AniPulse';
 
-            // Scroll to saved position or top
-            const savedScroll = parseInt(localStorage.getItem("lastScrollPosition")) || 0;
-            window.scrollTo({ top: savedScroll, behavior: "smooth" });
+            // 6. Restore saved scroll position for the new page
+            restoreScrollPosition(pageId);
 
-            // Initialize page-specific content
+            // 7. Initialize page-specific content (unchanged)
             if (pageId === "statistics") {
                 setTimeout(() => {
                     if (typeof initStatisticsCharts === "function") initStatisticsCharts();
@@ -2163,22 +2184,16 @@
     // ============================================
 
     function handleLogout() {
-        // Show a toast notification if available
         if (typeof showToast === "function") {
             showToast("Logging out...", "info");
         }
-
-        // Clear all authentication data from localStorage
         localStorage.removeItem("authToken");
         localStorage.removeItem("user");
         localStorage.removeItem("userProfile");
         localStorage.removeItem("userName");
-
-        // Optionally call the API logout endpoint (if backend supports it)
         if (window.api && typeof window.api.logout === "function") {
             window.api.logout();
         } else {
-            // Fallback: redirect to login page
             window.location.href = "/login.html";
         }
     }
@@ -2193,17 +2208,29 @@
             page.hidden = true;
         });
 
-        // Show dashboard page
-        const dashboardPage = document.getElementById("dashboard-page");
-        if (dashboardPage) {
-            dashboardPage.hidden = false;
-            dashboardPage.classList.add("active");
+        // Determine which page to show (from localStorage or default)
+        const savedPage = localStorage.getItem("lastActivePage") || 'dashboard';
+
+        // Show the saved page
+        const activePage = document.getElementById(`${savedPage}-page`);
+        if (activePage) {
+            activePage.hidden = false;
+            activePage.classList.add("active");
         }
 
-        // 👉 Set initial page title (Dashboard)
-        document.title = pageTitles.dashboard || 'AniPulse';
+        // Set active menu item
+        const menuItem = document.querySelector(`.menu-item[data-page="${savedPage}"]`);
+        if (menuItem) {
+            menuItem.classList.add("active");
+        }
 
-        // Ensure level UI is in sync on initial load
+        // Set document title
+        document.title = pageTitles[savedPage] || 'AniPulse';
+
+        // Restore saved scroll position for the initial page
+        restoreScrollPosition(savedPage);
+
+        // Ensure level UI is in sync
         if (
             window.AniPulseLevelSystem &&
             typeof window.AniPulseLevelSystem.updateAllLevelUI === "function"
@@ -2211,22 +2238,42 @@
             window.AniPulseLevelSystem.updateAllLevelUI();
         }
 
-        // Set active menu item
-        const dashboardMenuItem = document.querySelector(
-            '.menu-item[data-page="dashboard"]'
-        );
-        if (dashboardMenuItem) {
-            dashboardMenuItem.classList.add("active");
-        }
-
-        // Initialize dashboard data
+        // Initialize the shown page’s data (use a switch or call appropriate functions)
         setTimeout(() => {
-            if (typeof updateStats === "function") updateStats();
-            if (typeof updateTopRatedAnime === "function") updateTopRatedAnime();
-            if (typeof updateCurrentMonthAnime === "function") updateCurrentMonthAnime();
-            if (typeof updateRecentActivity === "function") updateRecentActivity();
-            if (typeof updateCurrentlyWatching === "function") updateCurrentlyWatching();
-            if (typeof renderAnimeDNA === "function") renderAnimeDNA();
+            if (savedPage === "dashboard") {
+                if (typeof updateStats === "function") updateStats();
+                if (typeof updateTopRatedAnime === "function") updateTopRatedAnime();
+                if (typeof updateCurrentMonthAnime === "function") updateCurrentMonthAnime();
+                if (typeof updateRecentActivity === "function") updateRecentActivity();
+                if (typeof updateCurrentlyWatching === "function") updateCurrentlyWatching();
+                if (typeof renderAnimeDNA === "function") renderAnimeDNA();
+            } else if (savedPage === "anime-list") {
+                if (typeof updateAnimeDisplay === "function") updateAnimeDisplay();
+            } else if (savedPage === "watchlist") {
+                if (typeof updateWatchlist === "function") updateWatchlist("all", 1);
+            } else if (savedPage === "statistics") {
+                if (typeof initStatisticsCharts === "function") initStatisticsCharts();
+                if (typeof updateStatisticsTables === "function") updateStatisticsTables();
+                if (typeof refreshAllCharts === "function") refreshAllCharts();
+            } else if (savedPage === "achievements") {
+                if (typeof updateAchievements === "function") updateAchievements();
+            } else if (savedPage === "community") {
+                if (typeof initCommunityPage === "function") initCommunityPage();
+                if (typeof loadFriends === "function") loadFriends();
+                if (typeof loadFriendRequests === "function") loadFriendRequests();
+            } else if (savedPage === "settings") {
+                if (typeof initSettings === "function") initSettings();
+                if (typeof initSyncUI === "function") initSyncUI();
+                if (typeof initAvatarSystem === "function") initAvatarSystem();
+                if (
+                    window.AniPulseLevelSystem &&
+                    typeof window.AniPulseLevelSystem.updateAllLevelUI === "function"
+                ) {
+                    window.AniPulseLevelSystem.updateAllLevelUI();
+                }
+            }
+
+            // Common updates
             if (typeof updateAnimeDisplay === "function") updateAnimeDisplay();
             if (typeof updateSidebarUserInfo === "function") updateSidebarUserInfo();
             if (typeof updateCurrentDate === "function") updateCurrentDate();
@@ -2242,10 +2289,7 @@
             navigator.serviceWorker
                 .register("/service-worker.js")
                 .then((registration) => {
-                    console.log(
-                        "✅ ServiceWorker registered successfully:",
-                        registration.scope
-                    );
+                    console.log("✅ ServiceWorker registered successfully:", registration.scope);
                 })
                 .catch((error) => {
                     console.log("❌ ServiceWorker registration failed:", error);

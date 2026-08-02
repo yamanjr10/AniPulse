@@ -349,7 +349,7 @@
                 const currentDay = String(now.getDate()).padStart(2, '0');
                 existing.actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
             }
-            // If already completed → dates are left untouched (preserve original completion)
+            // If already completed → dates are left untouched
 
             if (typeof window.saveData === 'function') window.saveData();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
@@ -433,12 +433,10 @@
         const defaultDur = getDefaultDuration(type);
         const editable = isDurationEditable(type);
 
-        // If the field is empty or not a number, set default
         const currentVal = parseInt(durationInput.value);
         if (isNaN(currentVal) || currentVal === 0) {
             durationInput.value = defaultDur;
         } else {
-            // For non-editable types, force the default value (overwrite)
             if (!editable) {
                 durationInput.value = defaultDur;
             }
@@ -477,60 +475,84 @@
         tableBody._clickHandler = clickHandler;
     }
 
-    // --- Setup modal close handlers (and DELETE button) ---
+    // --- Setup modal close handlers for both modals (with direct listeners) ---
     function setupModalHandlers() {
+        // --------------------------------------------------------
+        // 1. Add Anime Modal
+        // --------------------------------------------------------
         const addModal = document.getElementById('addAnimeModal');
-        if (!addModal) return;
-        addModal.setAttribute('hidden', '');
-        addModal.style.display = 'none';
-        addModal.classList.remove('show', 'active');
+        if (addModal) {
+            addModal.setAttribute('hidden', '');
+            addModal.style.display = 'none';
+            addModal.classList.remove('show', 'active');
 
-        addModal.addEventListener('click', function (e) {
-            if (e.target === this) {
-                window.closeModal(this);
-                resetEditingState();
+            // Click outside to close
+            addModal.addEventListener('click', function (e) {
+                if (e.target === this) {
+                    window.closeModal(this);
+                    resetEditingState();
+                }
+            });
+
+            // Direct listeners for X and Cancel buttons (to be safe)
+            const closeButtons = addModal.querySelectorAll('.close-modal, .btn-secondary.close-modal');
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.closeModal(addModal);
+                    resetEditingState();
+                });
+            });
+
+            // Delete button
+            const deleteBtn = document.getElementById('deleteBtn');
+            if (deleteBtn) {
+                const newDeleteBtn = deleteBtn.cloneNode(true);
+                deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
+                newDeleteBtn.addEventListener('click', window.deleteAnime);
             }
-        });
-        const closeX = addModal.querySelector('.close-modal');
-        if (closeX) {
-            closeX.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                window.closeModal(document.getElementById('addAnimeModal'));
-                resetEditingState();
+
+            // Sync progress when episodes change
+            const episodesInput = document.getElementById('animeEpisodes');
+            if (episodesInput) {
+                episodesInput.addEventListener('input', syncProgressMax);
+                episodesInput.addEventListener('change', syncProgressMax);
+            }
+
+            // Type change → duration
+            const typeSelect = document.getElementById('animeType');
+            if (typeSelect) {
+                typeSelect.addEventListener('change', handleTypeChange);
+                setTimeout(handleTypeChange, 100);
+            }
+        }
+
+        // --------------------------------------------------------
+        // 2. Import Modal
+        // --------------------------------------------------------
+        const importModal = document.getElementById('importModal');
+        if (importModal) {
+            importModal.setAttribute('hidden', '');
+            importModal.style.display = 'none';
+            importModal.classList.remove('show', 'active');
+
+            // Click outside to close
+            importModal.addEventListener('click', function (e) {
+                if (e.target === this) {
+                    window.closeModal(this);
+                }
             });
-        }
-        const cancelBtn = addModal.querySelector('.btn-secondary.close-modal');
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                window.closeModal(document.getElementById('addAnimeModal'));
-                resetEditingState();
+
+            // Direct listeners for X and Cancel buttons
+            const closeButtons = importModal.querySelectorAll('.close-modal, .btn-secondary.close-modal');
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.closeModal(importModal);
+                });
             });
-        }
-
-        // Attach delete button event listener
-        const deleteBtn = document.getElementById('deleteBtn');
-        if (deleteBtn) {
-            const newDeleteBtn = deleteBtn.cloneNode(true);
-            deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
-            newDeleteBtn.addEventListener('click', window.deleteAnime);
-        }
-
-        // ---- Sync progress when total episodes changes ----
-        const episodesInput = document.getElementById('animeEpisodes');
-        if (episodesInput) {
-            episodesInput.addEventListener('input', syncProgressMax);
-            episodesInput.addEventListener('change', syncProgressMax);
-        }
-
-        // ---- Handle type change for duration ----
-        const typeSelect = document.getElementById('animeType');
-        if (typeSelect) {
-            typeSelect.addEventListener('change', handleTypeChange);
-            // Also trigger on load to set initial state
-            setTimeout(handleTypeChange, 100);
         }
     }
 
@@ -638,7 +660,6 @@
         }
         if (episodesInput) {
             episodesInput.value = anime.episodes || 1;
-            // ✅ Immediately sync progress max so the progress field respects the new total
             syncProgressMax();
         }
         if (durationInput) {
