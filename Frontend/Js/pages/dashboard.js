@@ -539,7 +539,7 @@
     }
 
     // ============================================
-    // SIDEBAR USER INFO – WITH HOURS ↔ EPISODES TOGGLE (SINGLE ELEMENT)
+    // SIDEBAR USER INFO – WITH HOURS ↔ EPISODES TOGGLE
     // ============================================
 
     window.updateSidebarUserInfo = function () {

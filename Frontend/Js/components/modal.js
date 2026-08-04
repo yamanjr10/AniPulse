@@ -129,8 +129,8 @@
         // Re-enable cover/genre fields
         const coverInput = document.getElementById('animeCover');
         const genresInput = document.getElementById('animeGenres');
-        if (coverInput) coverInput.disabled = false;
-        if (genresInput) genresInput.disabled = false;
+        if (coverInput) coverInput.disabled = true;
+        if (genresInput) genresInput.disabled = true;
 
         // Reset progress max attribute
         const progressInput = document.getElementById('animeProgress');
