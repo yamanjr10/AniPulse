@@ -1,5 +1,4 @@
 ﻿﻿const admin = require('firebase-admin');
-const path = require('path');
 
 const serviceAccount = {
   type: "service_account",
@@ -11,13 +10,12 @@ const serviceAccount = {
   auth_uri: "https://accounts.google.com/o/oauth2/auth",
   token_uri: "https://oauth2.googleapis.com/token",
   auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-  client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL || `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`
+  client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL ||
+    `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`
 };
 
-// Check if we have the required credentials
 if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
   console.error('❌ Missing Firebase credentials in environment variables!');
-  console.error('Please set: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY');
 } else {
   console.log('✅ Firebase credentials found');
 }
@@ -25,6 +23,7 @@ if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !p
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
+    // No storageBucket – we store avatars in Firestore
   });
 }
 
@@ -44,7 +43,7 @@ const COLLECTIONS = {
   FRIEND_REQUESTS: 'friendRequests'
 };
 
-console.log('✅ Firebase Admin SDK initialized');
+console.log('✅ Firebase Admin SDK initialized (Firestore only)');
 console.log(`📁 Collections: ${Object.keys(COLLECTIONS).join(', ')}`);
 
 module.exports = { admin, db, auth, COLLECTIONS };

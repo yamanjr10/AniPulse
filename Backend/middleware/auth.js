@@ -1,35 +1,20 @@
 ﻿const { auth } = require('../services/firebase');
 
 async function verifyToken(req, res, next) {
-  const token = req.headers.authorization?.split('Bearer ')[1];
-  
-  if (!token) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'No token provided' });
   }
-  
+  const token = authHeader.split(' ')[1];
   try {
-    const decodedToken = await auth.verifyIdToken(token);
-    req.user = decodedToken;
+    const decoded = await auth.verifyIdToken(token);
+    req.user = decoded;          // contains uid, email, name, picture, etc.
+    req.userId = decoded.uid;    // convenience
     next();
   } catch (error) {
-    console.error('Auth error:', error);
-    res.status(401).json({ error: 'Invalid token' });
+    console.error('Token verification failed:', error);
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 
-function optionalAuth(req, res, next) {
-  const token = req.headers.authorization?.split('Bearer ')[1];
-  
-  if (token) {
-    auth.verifyIdToken(token)
-      .then(decodedToken => {
-        req.user = decodedToken;
-        next();
-      })
-      .catch(() => next());
-  } else {
-    next();
-  }
-}
-
-module.exports = { verifyToken, optionalAuth };
+module.exports = { verifyToken };

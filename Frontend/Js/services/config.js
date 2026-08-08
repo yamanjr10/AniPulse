@@ -1,22 +1,24 @@
 // ============================================
-// CONFIG.JS - WITH RATE LIMITING & OPTIMIZATIONS
+// CONFIG.JS – Environment, API Base & Rate Limiting
 // ============================================
 
-// Use a unique global variable to track if already initialized
-if (!window._apiConfigInitialized) {
+(function () {
+    'use strict';
 
-    const currentHost = window.location.hostname;
-    const isProduction = currentHost !== 'localhost' && currentHost !== '127.0.0.1';
+    // Prevent double initialization
+    if (window._apiConfigInitialized) return;
+    window._apiConfigInitialized = true;
 
-    const API_BASE_URL = isProduction
-        ? 'https://anipulse-63jv.onrender.com'
-        : 'http://localhost:3000';
+    // ---- Determine environment and set API base URL ----
+    const host = window.location.hostname;
+    const isLocal = host === 'localhost' || host === '127.0.0.1';
 
-    // Store on window object
-    window.API_BASE_URL = API_BASE_URL;
+    window.API_BASE_URL = isLocal
+        ? 'http://localhost:3000'
+        : 'https://anipulse-63jv.onrender.com';
 
-    console.log('🔧 Environment:', isProduction ? 'Production' : 'Development');
-    console.log('📡 API Base URL:', API_BASE_URL);
+    console.log('🔧 Environment:', isLocal ? 'Development' : 'Production');
+    console.log('📡 API Base URL:', window.API_BASE_URL);
 
     // ============================================
     // RATE LIMITER SYSTEM
@@ -141,23 +143,24 @@ if (!window._apiConfigInitialized) {
 
         window.fetch = async function (url, options = {}) {
             // ------------------------------------------------------------
-            // 🔥 NEW: Bypass rate limiting and caching for proxy routes
+            // Bypass rate limiting and caching for proxy routes
             // ------------------------------------------------------------
             if (typeof url === 'string' && url.includes('/api/proxy/')) {
-                // Let the request go directly to the backend without interception
                 return originalFetch(url, options);
             }
 
-            // Handle URL conversion for localhost
+            // Normalize URL – ensure it uses the correct base
             let finalUrl = url;
-            if (typeof url === 'string' && url.includes('localhost:3000')) {
+            if (typeof url === 'string' && url.startsWith('/')) {
+                // If relative path, prepend API_BASE_URL
+                finalUrl = window.API_BASE_URL + url;
+            } else if (typeof url === 'string' && url.includes('localhost:3000')) {
                 finalUrl = url.replace('http://localhost:3000', window.API_BASE_URL);
             }
 
             // Extract endpoint for rate limiting
             let endpoint = 'unknown';
             if (typeof finalUrl === 'string') {
-                // Extract API endpoint path
                 const match = finalUrl.match(/\/api\/([^?]+)/);
                 if (match) {
                     endpoint = match[1];
@@ -192,11 +195,9 @@ if (!window._apiConfigInitialized) {
 
             // Apply rate limiting only to API calls
             if (isApiCall && !isStaticAsset) {
-                // Different rate limits for different endpoints
                 let limit = 30;
                 let windowMs = 60000;
 
-                // Stricter limits for certain endpoints
                 if (endpoint.includes('search')) {
                     limit = 10;
                     windowMs = 60000;
@@ -212,7 +213,6 @@ if (!window._apiConfigInitialized) {
                     const status = window.rateLimiter.getStatus(endpoint);
                     console.warn(`🚫 Rate limited: ${endpoint}. ${status.remaining} remaining`);
 
-                    // Return cached response if available
                     const cached = window.rateLimiter.getCache(`${finalUrl}_error`);
                     if (cached) {
                         return new Response(JSON.stringify(cached), {
@@ -221,7 +221,6 @@ if (!window._apiConfigInitialized) {
                         });
                     }
 
-                    // Return rate limit error
                     return new Response(JSON.stringify({
                         error: 'Rate limit exceeded. Please try again later.',
                         retryAfter: Math.ceil(status.resetIn / 1000)
@@ -241,17 +240,13 @@ if (!window._apiConfigInitialized) {
                     const clone = response.clone();
                     clone.json().then(data => {
                         window.rateLimiter.setCache(finalUrl, data);
-                    }).catch(() => {
-                        // Not JSON, don't cache
-                    });
+                    }).catch(() => { });
                 }
 
                 return response;
-
             } catch (error) {
                 console.error(`❌ Fetch failed for ${endpoint}:`, error);
 
-                // Return cached error response if available
                 const cached = window.rateLimiter.getCache(`${finalUrl}_error`);
                 if (cached) {
                     return new Response(JSON.stringify(cached), {
@@ -259,7 +254,6 @@ if (!window._apiConfigInitialized) {
                         headers: { 'Content-Type': 'application/json' }
                     });
                 }
-
                 throw error;
             }
         };
@@ -271,12 +265,10 @@ if (!window._apiConfigInitialized) {
     // OPTIMIZED API CALL WRAPPERS
     // ============================================
 
-    // Debounced API call helper
     window.debouncedApiCall = function (endpoint, apiCall, delay = 500) {
         return window.rateLimiter.debounce(endpoint, apiCall, delay);
     };
 
-    // Throttled API call helper
     window.throttledApiCall = async function (endpoint, apiCall, minInterval = 1000) {
         const key = `throttle_${endpoint}`;
         const lastCall = window.rateLimiter.calls.get(key)?.lastCall || 0;
@@ -302,7 +294,6 @@ if (!window._apiConfigInitialized) {
     window.activeIntervals = new Map();
 
     window.setOptimizedInterval = function (callback, interval, id) {
-        // Clear existing interval
         if (window.activeIntervals.has(id)) {
             clearInterval(window.activeIntervals.get(id));
         }
@@ -310,7 +301,6 @@ if (!window._apiConfigInitialized) {
         let isRunning = true;
 
         const intervalId = setInterval(() => {
-            // Only run when page is visible
             if (!document.hidden && isRunning) {
                 callback();
             }
@@ -318,7 +308,6 @@ if (!window._apiConfigInitialized) {
 
         window.activeIntervals.set(id, intervalId);
 
-        // Return cleanup function
         return () => {
             isRunning = false;
             clearInterval(intervalId);
@@ -335,9 +324,7 @@ if (!window._apiConfigInitialized) {
             console.log('📱 Page hidden - pausing background API calls');
         } else {
             console.log('📱 Page visible - resuming');
-            // Trigger refresh of critical data
             setTimeout(() => {
-                // Clear some cache to get fresh data
                 window.rateLimiter.clearCache();
             }, 1000);
         }
@@ -368,7 +355,6 @@ if (!window._apiConfigInitialized) {
         } catch (error) {
             console.error('Batch stats failed:', error);
         }
-
         return [];
     };
 
@@ -376,7 +362,9 @@ if (!window._apiConfigInitialized) {
     // DEBUG HELPERS (only in development)
     // ============================================
 
-    if (!isProduction) {
+    if (!isLocal) {
+        // In production, remove debug helpers
+    } else {
         window.debugRateLimiter = {
             status: () => console.log('Rate Limiter Status:', window.rateLimiter.calls),
             reset: (endpoint) => window.rateLimiter.reset(endpoint),
@@ -386,8 +374,5 @@ if (!window._apiConfigInitialized) {
         console.log('🐛 Debug helpers available: debugRateLimiter');
     }
 
-    // Mark as initialized
-    window._apiConfigInitialized = true;
-
     console.log('✅ Rate limiting and optimizations enabled');
-}
+})();

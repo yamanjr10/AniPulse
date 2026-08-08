@@ -18,7 +18,7 @@
         friendsList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading friends...</div>';
 
         try {
-            const response = await fetch('http://localhost:3000/api/friends/list', {
+            const response = await fetch(`${window.API_BASE_URL}/api/friends/list`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Failed to load friends');

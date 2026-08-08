@@ -30,7 +30,7 @@
             const token = localStorage.getItem('authToken');
             if (!token) return;
             try {
-                const response = await fetch('http://localhost:3000/api/user/notifications', {
+                const response = await fetch(`${window.API_BASE_URL}/api/user/notifications`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -54,7 +54,7 @@
             const token = localStorage.getItem('authToken');
             if (!token) return;
             try {
-                const response = await fetch('http://localhost:3000/api/friends/requests', {
+                const response = await fetch(`${window.API_BASE_URL}/api/friends/requests`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -212,7 +212,7 @@
             const token = localStorage.getItem('authToken');
             if (!token) return;
             try {
-                await fetch('http://localhost:3000/api/user/notifications/mark-read', {
+                await fetch(`${window.API_BASE_URL}/api/user/notifications/mark-read`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -235,7 +235,7 @@
             const acceptBtn = document.querySelector(`.notification-item[data-id="${notificationId}"] .accept`);
             if (acceptBtn) { acceptBtn.textContent = 'Accepting...'; acceptBtn.disabled = true; }
             try {
-                const response = await fetch(`http://localhost:3000/api/friends/accept/${requestId}`, {
+                const response = await fetch(`${window.API_BASE_URL}/api/friends/accept/${requestId}`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -281,7 +281,7 @@
             const declineBtn = document.querySelector(`.notification-item[data-id="${notificationId}"] .decline`);
             if (declineBtn) { declineBtn.textContent = 'Declining...'; declineBtn.disabled = true; }
             try {
-                const response = await fetch(`http://localhost:3000/api/friends/decline/${requestId}`, {
+                const response = await fetch(`${window.API_BASE_URL}/api/friends/decline/${requestId}`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });

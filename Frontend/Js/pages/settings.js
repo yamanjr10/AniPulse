@@ -202,7 +202,7 @@
         let saveTimeout = null;
         const SAVE_DELAY = 800;
 
-        // ---------- Update status (only used for success / initial messages) ----------
+        // ---------- Update status ----------
         function updateBackupStatus(message, type = 'info') {
             const statusEl = document.getElementById('backupStatus');
             if (!statusEl) return;
@@ -218,7 +218,6 @@
             if (!backupHandle) return;
 
             try {
-                // Check permission – if denied, clear handle and stop
                 const perm = await backupHandle.queryPermission({ mode: 'readwrite' });
                 if (perm === 'denied') {
                     console.warn('Backup permission denied.');
@@ -230,19 +229,15 @@
                     return;
                 }
 
-                // Attempt to write – this may throw if permission not granted
                 const writable = await backupHandle.createWritable();
                 await writable.write(JSON.stringify(window.animeData || [], null, 2));
                 await writable.close();
 
                 const time = new Date().toLocaleTimeString();
                 console.log('✅ Auto-backup updated at', time);
-                // Only update status on success (like main.js)
                 updateBackupStatus(`✅ Auto-backup enabled and file selected.`, 'success');
             } catch (err) {
-                // Log error to console, do NOT update status (like main.js)
                 console.error('❌ Backup save error:', err);
-                // If file is missing, clear handle (like main.js does when NotFoundError)
                 if (err.name === 'NotFoundError') {
                     backupHandle = null;
                     await deleteHandle();
@@ -250,7 +245,6 @@
                         showToast('Backup file lost. Re‑enable in Settings.', 'error');
                     }
                 }
-                // For SecurityError/NotAllowedError, keep handle but don't update status
             }
         }
 
@@ -260,7 +254,7 @@
             saveTimeout = setTimeout(saveBackupToFile, SAVE_DELAY);
         }
 
-        // ---------- Enable backup – always shows file picker ----------
+        // ---------- Enable backup ----------
         async function enableBackup() {
             try {
                 backupHandle = await window.showSaveFilePicker({
@@ -296,7 +290,6 @@
                 backupHandle = saved;
                 updateBackupStatus('✅ Auto-backup enabled and file selected.', 'success');
                 console.log('🔁 Restored backup handle from IndexedDB.');
-                // Try an immediate backup – if permission missing, it will log error but keep status
                 triggerBackupSave();
             } else {
                 updateBackupStatus('ℹ️ No backup file selected. Click "Enable Backup" to set one up.', 'info');

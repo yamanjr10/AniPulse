@@ -44,6 +44,13 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
+    <!-- ========================================== -->
+    <!--  FIREBASE SDK – loads dynamically from backend -->
+    <!-- ========================================== -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="/Frontend/Js/firebase-init.js" defer></script>
+
 </head>
 
 <body>
@@ -312,7 +319,8 @@
         </div>
     </footer>
 
-    <script defer src="/js/config.js"></script>
+    <!-- Your existing scripts -->
+    <script defer src="/Frontend/Js/services/config.js"></script>
     <script>
         // Header scroll effect
         window.addEventListener('scroll', () => {
@@ -364,6 +372,25 @@
             });
         }, 200);
     </script>
+
+    <!-- ========================================== -->
+    <!--  AUTO‑REDIRECT IF ALREADY LOGGED IN         -->
+    <!-- ========================================== -->
+    <script>
+        (function () {
+            // Check every 500ms for a Firebase auth token
+            const checkInterval = setInterval(() => {
+                if (localStorage.getItem('authToken')) {
+                    clearInterval(checkInterval);
+                    window.location.href = '/dashboard.html';
+                }
+            }, 500);
+
+            // Stop checking after 5 seconds (user stays on landing page)
+            setTimeout(() => clearInterval(checkInterval), 5000);
+        })();
+    </script>
+
 </body>
 
 </html>

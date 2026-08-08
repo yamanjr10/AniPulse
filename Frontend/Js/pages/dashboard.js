@@ -326,7 +326,7 @@
                              class="anime-cover"
                              loading="lazy"
                              onerror="this.src='https://placehold.co/300x400/6a5acd/white?text=No+Image'">
-                        ${a.score ? `<div class="rating-badge">⭐ ${a.score}</div>` : ''}
+                        ${a.score ? `<div class="rating-badge"> ${a.score}</div>` : ''}
                     </div>
                     <div class="anime-info">
                         <div class="anime-title" title="${window.escapeHtml(a.title)}">${window.escapeHtml(a.title)}</div>

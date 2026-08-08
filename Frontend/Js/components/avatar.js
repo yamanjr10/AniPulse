@@ -1,11 +1,11 @@
 // ============================================
-// AVATAR SYSTEM (Upload, Compress, Sync)
+// AVATAR SYSTEM – Base64 to Firestore
 // ============================================
 
 (function () {
     'use strict';
 
-    // --- Compress image ---
+    // --- Compress image (unchanged) ---
     async function compressImage(file, maxSizeKB = 500, maxWidth = 200, maxHeight = 200) {
         return new Promise((resolve, reject) => {
             if (file.size > 5 * 1024 * 1024) {
@@ -57,7 +57,7 @@
         });
     }
 
-    // --- Generate default avatar ---
+    // --- Generate default avatar (unchanged) ---
     window.generateDefaultAvatar = function (username) {
         const colors = ['6366F1', '8B5CF6', 'EC4899', 'F43F5E', 'EF4444', 'F97316', 'F59E0B', '10B981', '14B8A6', '06B6D4', '3B82F6'];
         const randomColor = colors[Math.floor(Math.random() * colors.length)];
@@ -65,19 +65,18 @@
         return `https://ui-avatars.com/api/?name=${encodedName}&background=${randomColor}&color=fff&bold=true&length=2&size=200&rounded=true`;
     };
 
-    // --- Update all avatars ---
+    // --- Update all avatars (unchanged) ---
     window.updateAllAvatars = function (avatarUrl) {
         const avatars = document.querySelectorAll('.user-avatar, .sidebar-avatar, .profile-preview-avatar, #avatarPreview, .profile-modal-avatar, .leaderboard-avatar, .friend-avatar, .friend-request-avatar, .search-result-avatar');
         avatars.forEach(img => { if (img) img.src = avatarUrl; });
     };
 
-    // --- Save avatar to cloud ---
+    // --- ✅ NEW: Save avatar via JSON (base64) to Firestore ---
     async function saveAvatarToCloud(avatarDataUrl) {
         const token = localStorage.getItem('authToken');
         if (!token) throw new Error('Not logged in');
-        const sizeKB = Math.round(avatarDataUrl.length / 1024);
-        console.log(`📤 Uploading avatar (${sizeKB}KB) to cloud...`);
-        const response = await fetch('http://localhost:3000/api/user/avatar', {
+
+        const response = await fetch(`${window.API_BASE_URL}/api/upload/avatar`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -85,11 +84,14 @@
             },
             body: JSON.stringify({ avatar: avatarDataUrl })
         });
+
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || 'Upload failed');
         }
-        return await response.json();
+
+        const data = await response.json();
+        return data.avatarUrl;
     }
 
     // --- Upload custom avatar ---
@@ -104,16 +106,26 @@
             if (typeof showToast === 'function') showToast('Please select an image file (JPEG, PNG, GIF, WebP)', 'error');
             return false;
         }
+
         if (typeof showToast === 'function') showToast('Processing image...', 'info');
+
         try {
+            // 1. Compress
             const compressedDataUrl = await compressImage(file, 500, 200, 200);
             const finalSizeKB = Math.round(compressedDataUrl.length / 1024);
-            window.updateAllAvatars(compressedDataUrl);
-            await saveAvatarToCloud(compressedDataUrl);
+
+            // 2. Upload to backend (saves to Firestore)
+            const avatarUrl = await saveAvatarToCloud(compressedDataUrl);
+
+            // 3. Update UI
+            window.updateAllAvatars(avatarUrl);
+
+            // 4. Save to localStorage
             const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-            userProfile.avatar = compressedDataUrl;
+            userProfile.avatar = avatarUrl;
             userProfile.customAvatar = true;
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
             if (typeof showToast === 'function') showToast(`Avatar saved! (${finalSizeKB}KB)`, 'success');
             if (typeof window.updateSidebarUserInfo === 'function') window.updateSidebarUserInfo();
             if (window.dualStorage) window.dualStorage.syncToCloud();
@@ -125,18 +137,19 @@
         }
     };
 
-    // --- Reset to default avatar ---
+    // --- Reset to default avatar (unchanged) ---
     window.resetToDefaultAvatar = async function () {
         const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const username = userProfile.name || user.username || 'User';
         const defaultAvatar = window.generateDefaultAvatar(username);
+
         try {
-            await saveAvatarToCloud(defaultAvatar);
-            userProfile.avatar = defaultAvatar;
+            const avatarUrl = await saveAvatarToCloud(defaultAvatar);
+            userProfile.avatar = avatarUrl;
             userProfile.customAvatar = false;
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            window.updateAllAvatars(defaultAvatar);
+            window.updateAllAvatars(avatarUrl);
             if (typeof showToast === 'function') showToast('Avatar reset to default', 'success');
             if (typeof window.updateSidebarUserInfo === 'function') window.updateSidebarUserInfo();
             if (window.dualStorage) window.dualStorage.syncToCloud();
@@ -146,7 +159,7 @@
         }
     };
 
-    // --- Load avatar from cloud ---
+    // --- Load avatar from cloud (unchanged) ---
     async function loadAvatarFromCloud() {
         const token = localStorage.getItem('authToken');
         if (!token) { loadAvatarFromLocal(); return; }
@@ -154,15 +167,15 @@
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             const userId = user.uid;
             if (!userId) { loadAvatarFromLocal(); return; }
-            const response = await fetch(`http://localhost:3000/api/user/avatar/${userId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/api/upload/avatar/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
                 const data = await response.json();
-                if (data.avatar) {
-                    window.updateAllAvatars(data.avatar);
+                if (data.avatarUrl) {
+                    window.updateAllAvatars(data.avatarUrl);
                     const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-                    userProfile.avatar = data.avatar;
+                    userProfile.avatar = data.avatarUrl;
                     userProfile.customAvatar = data.hasCustom;
                     localStorage.setItem('userProfile', JSON.stringify(userProfile));
                     return;
@@ -179,9 +192,7 @@
         const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const username = userProfile.name || user.username || 'User';
-        if (userProfile.avatar && userProfile.avatar.startsWith('data:image')) {
-            window.updateAllAvatars(userProfile.avatar);
-        } else if (userProfile.avatar && userProfile.avatar.startsWith('http')) {
+        if (userProfile.avatar) {
             window.updateAllAvatars(userProfile.avatar);
         } else {
             const defaultAvatar = window.generateDefaultAvatar(username);
@@ -191,7 +202,7 @@
         }
     }
 
-    // --- Init avatar system ---
+    // --- Init avatar system (unchanged) ---
     function initAvatarSystem() {
         const avatarInput = document.getElementById('avatarInput');
         const resetAvatarBtn = document.getElementById('resetAvatar');
@@ -205,9 +216,6 @@
             newInput.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => { window.updateAllAvatars(event.target.result); };
-                    reader.readAsDataURL(file);
                     await window.uploadCustomAvatar(file);
                 }
                 newInput.value = '';
@@ -226,14 +234,6 @@
                 if (newName) {
                     const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
                     userProfile.name = newName;
-                    if (!userProfile.avatar || (!userProfile.avatar.startsWith('data:image') && userProfile.avatar.includes('ui-avatars.com'))) {
-                        const newAvatar = window.generateDefaultAvatar(newName);
-                        userProfile.avatar = newAvatar;
-                        window.updateAllAvatars(newAvatar);
-                        if (localStorage.getItem('authToken')) {
-                            await saveAvatarToCloud(newAvatar);
-                        }
-                    }
                     localStorage.setItem('userProfile', JSON.stringify(userProfile));
                     const user = JSON.parse(localStorage.getItem('user') || '{}');
                     user.username = newName;
@@ -243,7 +243,7 @@
             });
         }
 
-        console.log('✅ Avatar system initialized');
+        console.log('✅ Avatar system initialized (Firestore storage)');
     }
 
     window.initAvatarSystem = initAvatarSystem;

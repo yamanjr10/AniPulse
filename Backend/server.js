@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const dotenv = require('dotenv');
+const rateLimit = require('express-rate-limit');
 
 // Load environment variables
 dotenv.config();
@@ -15,9 +16,10 @@ const rankingRoutes = require('./routes/ranking');
 const friendsRoutes = require('./routes/friends');
 const userRoutes = require('./routes/user');
 const proxyRoutes = require('./routes/proxy');
+const uploadRoutes = require('./routes/upload');
 
 // ============================================
-// CREATE EXPRESS APP – MUST COME FIRST
+// CREATE EXPRESS APP
 // ============================================
 const app = express();
 
@@ -69,17 +71,41 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
-// ============================================
-// STATIC FILES – WORKS WITH YOUR CURRENT STRUCTURE
-// ============================================
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use('/api/', limiter);
 
-// 1. Serve root folder (for index.html, dashboard.html, login.html, manifest.json, service-worker.js)
-app.use(express.static(path.join(__dirname, '..')));
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
 
-// 2. Serve Frontend folder (for css/, js/, icon/)
+// ============================================
+// 🔥 NEW: FIREBASE CLIENT CONFIG ENDPOINT
+// ============================================
+app.get('/api/firebase-config', (req, res) => {
+    const config = {
+        apiKey: process.env.FIREBASE_API_KEY,
+        authDomain: process.env.FIREBASE_AUTH_DOMAIN || `${process.env.FIREBASE_PROJECT_ID}.firebaseapp.com`,
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${process.env.FIREBASE_PROJECT_ID}.appspot.com`,
+        messagingSenderId: process.env.FIREBASE_SENDER_ID,
+        appId: process.env.FIREBASE_APP_ID
+    };
+    res.json(config);
+});
+
+// ============================================
+// STATIC FILES
+// ============================================
 app.use(express.static(path.join(__dirname, '..', 'Frontend')));
-
-// 3. Serve public folder (for any extra assets like offline.html)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // ============================================
@@ -96,6 +122,7 @@ app.use('/api/sync', syncRoutes);
 app.use('/api/ranking', rankingRoutes);
 app.use('/api/friends', friendsRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // ============================================
 // HEALTH CHECK
@@ -109,7 +136,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================
-// HTML PAGE ROUTES (optional, but explicit)
+// HTML PAGE ROUTES
 // ============================================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'index.html'));
@@ -186,4 +213,5 @@ app.listen(PORT, () => {
     console.log(`📁 Frontend: ${path.join(__dirname, '..', 'Frontend')}`);
     console.log(`📁 Public: ${path.join(__dirname, '..', 'public')}`);
     console.log(`📦 Payload limit: 50mb\n`);
+    console.log(`🔥 Firebase config endpoint: /api/firebase-config`);
 });
