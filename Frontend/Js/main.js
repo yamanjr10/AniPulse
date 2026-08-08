@@ -92,6 +92,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     console.log('✅ AniPulse initialized');
+
+    // ---- NEW: Ensure cloud data is loaded after login ----
+    setTimeout(ensureCloudDataLoaded, 3000);
 });
 
 // --- Auto-reload (for development) ---
@@ -134,3 +137,52 @@ window.initAutoReload = function () {
         }
     };
 };
+
+// ---- Function to trigger cloud load ----
+async function ensureCloudDataLoaded() {
+    // Only run if we're on the dashboard page
+    if (!window.location.pathname.includes('dashboard.html')) {
+        console.log('ℹ️ Not on dashboard page, skipping cloud load');
+        return;
+    }
+
+    if (!window._needsCloudLoad) {
+        console.log('ℹ️ No cloud load needed (already loaded or no auth)');
+        return;
+    }
+
+    // Wait for dualStorage to be ready
+    let attempts = 0;
+    while (!window.dualStorage && attempts < 30) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+    }
+
+    if (!window.dualStorage) {
+        console.warn('⚠️ DualStorage not available, cannot load cloud data');
+        return;
+    }
+
+    try {
+        console.log('📥 Loading cloud data after authentication...');
+        const result = await window.dualStorage.loadFromCloud();
+        if (result.success) {
+            console.log('✅ Cloud data loaded successfully');
+        } else {
+            console.warn('⚠️ Cloud load failed:', result.error);
+        }
+    } catch (error) {
+        console.error('❌ Error loading cloud data:', error);
+    } finally {
+        // Prevent repeated loads
+        window._needsCloudLoad = false;
+        window._cloudLoaded = true;
+        // Refresh UI
+        if (typeof updateAllComponents === 'function') {
+            setTimeout(updateAllComponents, 500);
+        }
+        if (typeof updateSidebarUserInfo === 'function') {
+            setTimeout(updateSidebarUserInfo, 500);
+        }
+    }
+}

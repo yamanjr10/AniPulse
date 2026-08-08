@@ -26,7 +26,6 @@
     async function loadFirebaseConfig() {
         try {
             const url = `${API_BASE_URL}/api/firebase-config`;
-            console.log('📡 Fetching Firebase config from:', url);
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}${response.status === 429 ? ' (Too Many Requests)' : ''}`);
@@ -102,6 +101,10 @@
                             localStorage.setItem('user', JSON.stringify(storedUser));
                         }
                     }
+
+                    // ✅ FLAG: Indicate that we need to load cloud data after login
+                    window._needsCloudLoad = true;
+
                     console.log('✅ User authenticated:', user.email);
                 } catch (error) {
                     console.error('Failed to get ID token:', error);
