@@ -1,5 +1,5 @@
 // ============================================
-// API SERVICE – Firebase ID Token Auth
+// API SERVICE – Firebase ID Token Auth (with name fallback)
 // ============================================
 
 const API_URL = window.API_BASE_URL ||
@@ -7,8 +7,21 @@ const API_URL = window.API_BASE_URL ||
 
 class AniPulseAPI {
     constructor() {
+        // Read user from localStorage with proper name fallback
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        this.user = {
+            uid: user.uid,
+            name: user.name || user.username || 'User',
+            username: user.username || user.name || 'User',
+            email: user.email,
+            avatar: user.avatar || null,
+            level: user.level || 1,
+            title: user.title || 'Newbie',
+            totalXP: user.totalXP || 0,
+            totalAnime: user.totalAnime || 0,
+            totalHours: user.totalHours || 0
+        };
         this.token = localStorage.getItem('authToken');
-        this.user = JSON.parse(localStorage.getItem('user') || '{}');
         this.saveTimeout = null;
         this.activityTimeout = null;
         this.isSaving = false;
@@ -25,7 +38,7 @@ class AniPulseAPI {
             throw new Error('No authentication token');
         }
 
-        // Debug: log first 20 chars of token
+        // Debug token (first 20 chars)
         console.log(`🔑 Token (${endpoint}):`, token.substring(0, 20) + '...');
 
         const headers = {
@@ -41,13 +54,12 @@ class AniPulseAPI {
             });
 
             if (response.status === 401) {
-                // Token might be expired – try to refresh
+                // Try refreshing token
                 const user = firebase.auth().currentUser;
                 if (user) {
                     try {
                         const newToken = await user.getIdToken(true);
                         localStorage.setItem('authToken', newToken);
-                        // Retry the request once
                         const retryHeaders = { ...headers, 'Authorization': `Bearer ${newToken}` };
                         const retryResponse = await fetch(`${API_URL}${endpoint}`, {
                             ...options,
@@ -61,11 +73,20 @@ class AniPulseAPI {
                         console.warn('Token refresh failed:', refreshError);
                     }
                 }
-                // If we get here, redirect to login
+                // Redirect to login
                 if (!window.location.pathname.includes('login.html')) {
                     window.location.href = '/login.html';
                 }
                 throw new Error('Session expired');
+            }
+
+            // Handle 429 Too Many Requests
+            if (response.status === 429) {
+                const errorText = await response.text();
+                console.warn('⚠️ Rate limited:', errorText);
+                // Queue the request for retry later
+                this.queueRequest(endpoint, options);
+                return { queued: true, message: 'Rate limited, queued for retry' };
             }
 
             const data = await response.json();
@@ -78,6 +99,9 @@ class AniPulseAPI {
             if (error.message === 'Failed to fetch') {
                 console.warn('📦 Network error, queueing request');
                 this.queueRequest(endpoint, options);
+                if (typeof showToast === 'function') {
+                    showToast('Unable to reach server. Please check your internet connection.', 'error');
+                }
                 return { queued: true };
             }
             throw error;
@@ -85,7 +109,7 @@ class AniPulseAPI {
     }
 
     // ============================================
-    // QUEUE SYSTEM FOR OFFLINE MODE
+    // QUEUE SYSTEM
     // ============================================
     queueRequest(endpoint, options) {
         const queue = JSON.parse(localStorage.getItem('pendingApiRequests') || '[]');
@@ -155,7 +179,7 @@ class AniPulseAPI {
     }
 
     // ============================================
-    // ACTIVITY LOG OPERATIONS
+    // ACTIVITY LOG
     // ============================================
     async autoSaveActivity(activities) {
         if (this.activityTimeout) clearTimeout(this.activityTimeout);
@@ -183,7 +207,7 @@ class AniPulseAPI {
     }
 
     // ============================================
-    // SYNC OPERATIONS
+    // SYNC
     // ============================================
     async syncAllData(allData) {
         const data = await this.request('/sync/sync-all', {
@@ -208,7 +232,7 @@ class AniPulseAPI {
     }
 
     // ============================================
-    // USER OPERATIONS
+    // USER
     // ============================================
     async getProfile() {
         const data = await this.request('/auth/profile');
@@ -224,7 +248,7 @@ class AniPulseAPI {
     }
 
     // ============================================
-    // AUTHENTICATION (now only token verification)
+    // AUTH
     // ============================================
     async verifyToken() {
         if (!localStorage.getItem('authToken')) {
@@ -232,6 +256,17 @@ class AniPulseAPI {
         }
         try {
             const data = await this.request('/auth/verify');
+            // Update user info if needed
+            if (data.user) {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.name = data.user.name || data.user.username || user.name;
+                user.username = data.user.username || data.user.name || user.username;
+                user.avatar = data.user.avatar || user.avatar;
+                user.level = data.user.level || user.level;
+                user.title = data.user.title || user.title;
+                user.totalXP = data.user.totalXP || user.totalXP;
+                localStorage.setItem('user', JSON.stringify(user));
+            }
             return { valid: true, user: data.user };
         } catch (error) {
             return { valid: false, error: error.message };
@@ -245,7 +280,6 @@ class AniPulseAPI {
             localStorage.removeItem('user');
             window.location.href = '/login.html';
         }).catch(() => {
-            // Fallback
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
             window.location.href = '/login.html';

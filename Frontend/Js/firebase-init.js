@@ -7,7 +7,7 @@
 
     let initialized = false;
     let retryCount = 0;
-    const MAX_RETRIES = 10;
+    const MAX_RETRIES = 20; // increased from 10
 
     // ---- Compute API base URL ----
     const API_BASE_URL = window.API_BASE_URL || (() => {
@@ -15,6 +15,8 @@
         if (host === 'localhost' || host === '127.0.0.1') {
             return 'http://localhost:3000';
         }
+        // In production, if backend is deployed on the same domain, use relative path
+        // Otherwise, use the hardcoded production URL.
         return 'https://anipulse-63jv.onrender.com';
     })();
 
@@ -24,15 +26,16 @@
     async function loadFirebaseConfig() {
         try {
             const url = `${API_BASE_URL}/api/firebase-config`;
+            console.log('📡 Fetching Firebase config from:', url);
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                throw new Error(`HTTP ${response.status}${response.status === 429 ? ' (Too Many Requests)' : ''}`);
             }
             const config = await response.json();
             console.log('✅ Firebase config loaded from backend');
             return config;
         } catch (error) {
-            console.error('❌ Failed to load Firebase config:', error);
+            console.error('❌ Failed to load Firebase config:', error.message);
             return null;
         }
     }
@@ -46,15 +49,19 @@
         if (!config) {
             retryCount++;
             if (retryCount < MAX_RETRIES) {
-                const delay = Math.min(5000, retryCount * 1000);
-                console.log(`⏳ Retrying in ${delay / 1000}s... (attempt ${retryCount}/${MAX_RETRIES})`);
+                // Exponential backoff: start at 3s, increase up to 30s
+                const delay = Math.min(30000, 3000 * Math.pow(1.2, retryCount));
+                console.log(`⏳ Retrying in ${(delay / 1000).toFixed(1)}s... (attempt ${retryCount}/${MAX_RETRIES})`);
                 setTimeout(initFirebase, delay);
             } else {
                 console.error('❌ Max retries reached. Please check your backend.');
-                // Show a user-friendly error
+                // Show a user-friendly error on the login page
                 const msg = document.getElementById('messageDiv');
                 if (msg) {
                     msg.innerHTML = `<div class="error-msg">⚠️ Could not connect to server. Please refresh or try again later.</div>`;
+                } else {
+                    // Fallback: show alert if messageDiv not found
+                    alert('Could not connect to the server. Please check your internet connection and try again.');
                 }
             }
             return;
@@ -80,10 +87,20 @@
                         const userData = {
                             uid: user.uid,
                             email: user.email,
+                            // Use displayName, fallback to email prefix, and ensure name is set
                             username: user.displayName || user.email.split('@')[0],
+                            name: user.displayName || user.email.split('@')[0],
                             avatar: user.photoURL || null
                         };
                         localStorage.setItem('user', JSON.stringify(userData));
+                    } else {
+                        // Update name if changed
+                        const displayName = user.displayName || user.email.split('@')[0];
+                        if (storedUser.name !== displayName) {
+                            storedUser.name = displayName;
+                            storedUser.username = displayName;
+                            localStorage.setItem('user', JSON.stringify(storedUser));
+                        }
                     }
                     console.log('✅ User authenticated:', user.email);
                 } catch (error) {
@@ -99,7 +116,7 @@
             }
         });
 
-        // ---- Token auto-refresh ----
+        // ---- Token auto-refresh (every 10 minutes) ----
         setInterval(async () => {
             const user = firebase.auth().currentUser;
             if (user) {

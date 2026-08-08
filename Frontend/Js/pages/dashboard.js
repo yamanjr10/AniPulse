@@ -551,7 +551,7 @@
             name: 'AnimeFan',
             avatar: 'https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff'
         };
-        const savedName = savedProfile.name;
+        const savedName = savedProfile.name || savedProfile.username || 'AnimeFan';
         const savedAvatar = savedProfile.avatar;
 
         let currentLevel = 1,

@@ -1,5 +1,5 @@
 // ============================================
-// SYNC MANAGER – with Merge Decision Caching
+// SYNC MANAGER – Reduced Polling, Debounced, Once‑per‑Session Smart Sync
 // ============================================
 
 class SyncManager {
@@ -7,36 +7,63 @@ class SyncManager {
     this.isSyncing = false;
     this.lastSyncTime = localStorage.getItem('lastSyncTime') || null;
     this.syncQueue = [];
+    this.syncDebounceTimeout = null;
     this.init();
   }
 
   init() {
     window.addEventListener('online', () => this.handleOnline());
     window.addEventListener('offline', () => this.handleOffline());
+    // Sync every 10 minutes instead of 5
     setInterval(() => {
       if (navigator.onLine && localStorage.getItem('authToken')) {
         this.syncToCloud();
       }
-    }, 5 * 60 * 1000);
+    }, 10 * 60 * 1000);
     console.log('🔄 Sync Manager initialized');
   }
 
-  // ---- Helper: compute a simple checksum of anime data ----
+  // ---- Debounced sync to cloud ----
+  syncToCloud() {
+    if (this.syncDebounceTimeout) {
+      clearTimeout(this.syncDebounceTimeout);
+      this.syncDebounceTimeout = null;
+    }
+    return new Promise((resolve) => {
+      this.syncDebounceTimeout = setTimeout(async () => {
+        this.syncDebounceTimeout = null;
+        const result = await this.uploadAllLocalData();
+        resolve(result);
+      }, 2000);
+    });
+  }
+
+  // ---- Compute checksum ----
   getDataChecksum() {
     const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
-    // Sort by ID to ensure consistent order
     const sorted = [...animeData].sort((a, b) => (a.id || 0) - (b.id || 0));
     const json = JSON.stringify(sorted);
     let hash = 0;
     for (let i = 0; i < json.length; i++) {
       const char = json.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
+      hash = hash & hash;
     }
     return hash.toString(16);
   }
 
-  // ---- Remember the merge decision ----
+  getDataChecksumFromArray(data) {
+    const sorted = [...data].sort((a, b) => (a.id || 0) - (b.id || 0));
+    const json = JSON.stringify(sorted);
+    let hash = 0;
+    for (let i = 0; i < json.length; i++) {
+      const char = json.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return hash.toString(16);
+  }
+
   storeMergeDecision(strategy, checksum) {
     localStorage.setItem('mergeStrategy', strategy);
     localStorage.setItem('mergeChecksum', checksum);
@@ -154,8 +181,19 @@ class SyncManager {
           localStorage.setItem('animeContributions', JSON.stringify(data.contributions));
         }
         if (data.userProfile) {
-          localStorage.setItem('userProfile', JSON.stringify(data.userProfile));
-          localStorage.setItem('userName', data.userProfile.username);
+          // Merge with existing local profile
+          const existing = JSON.parse(localStorage.getItem('userProfile') || '{}');
+          const merged = { ...existing, ...data.userProfile };
+          localStorage.setItem('userProfile', JSON.stringify(merged));
+          // Update user object
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          user.name = merged.name || merged.username || user.name;
+          user.username = merged.username || merged.name || user.username;
+          user.avatar = merged.avatar || user.avatar;
+          localStorage.setItem('user', JSON.stringify(user));
+          if (typeof updateSidebarUserInfo === 'function') {
+            updateSidebarUserInfo();
+          }
         }
         if (data.levelData) {
           localStorage.setItem('userLevel', data.levelData.level.toString());
@@ -190,9 +228,15 @@ class SyncManager {
   }
 
   // ============================================
-  // SMART SYNC - with cached merge decision
+  // SMART SYNC – Once per session
   // ============================================
   async smartSync() {
+    // Skip if already done this session
+    if (window._smartSyncDone) {
+      console.log('ℹ️ Smart sync already done this session, skipping.');
+      return { success: true, message: 'Already synced' };
+    }
+
     const token = localStorage.getItem('authToken');
     if (!token || !navigator.onLine) {
       return { success: false, error: 'Offline or not logged in' };
@@ -212,32 +256,41 @@ class SyncManager {
 
       if (!status.hasCloudData && localAnimeCount > 0) {
         console.log('📤 Uploading local data to cloud...');
-        return await this.uploadAllLocalData();
+        const result = await this.uploadAllLocalData();
+        window._smartSyncDone = true;
+        return result;
       } else if (status.hasCloudData && localAnimeCount === 0) {
         console.log('📥 Downloading cloud data...');
-        return await this.downloadCloudData();
+        const result = await this.downloadCloudData();
+        window._smartSyncDone = true;
+        return result;
       } else if (status.hasCloudData && localAnimeCount > 0) {
         console.log('🔄 Both have data, checking for conflicts...');
 
-        // Check if we already made a decision for this data
         const stored = this.getStoredMergeDecision();
         if (stored.strategy && stored.checksum === currentChecksum) {
           console.log(`♻️ Using cached merge decision: ${stored.strategy}`);
           if (stored.strategy === 'cloud') {
-            return await this.downloadCloudData();
+            const result = await this.downloadCloudData();
+            window._smartSyncDone = true;
+            return result;
           } else if (stored.strategy === 'local') {
-            return await this.uploadAllLocalData();
+            const result = await this.uploadAllLocalData();
+            window._smartSyncDone = true;
+            return result;
           } else {
-            // 'merge' – we should not need to re-merge, but we can just skip
             console.log('✅ Data already merged, no action needed');
+            window._smartSyncDone = true;
             return { success: true, message: 'Already merged' };
           }
         }
 
-        // Otherwise, show the dialog
-        return await this.mergeDataWithCloud();
+        const result = await this.mergeDataWithCloud();
+        window._smartSyncDone = true;
+        return result;
       } else {
         console.log('ℹ️ No data to sync');
+        window._smartSyncDone = true;
         return { success: true, message: 'No data to sync' };
       }
     } catch (error) {
@@ -247,7 +300,7 @@ class SyncManager {
   }
 
   // ============================================
-  // MERGE DATA - with caching
+  // MERGE DATA
   // ============================================
   async mergeDataWithCloud() {
     try {
@@ -261,9 +314,8 @@ class SyncManager {
 
       const localAnime = JSON.parse(localStorage.getItem('animeData') || '[]');
       const currentChecksum = this.getDataChecksum();
-
-      // Check if already merged (checksum matches cloud checksum)
       const cloudChecksum = this.getDataChecksumFromArray(cloudAnime);
+
       if (currentChecksum === cloudChecksum) {
         console.log('✅ Local and cloud data are identical – no merge needed');
         this.storeMergeDecision('merge', currentChecksum);
@@ -295,19 +347,6 @@ class SyncManager {
       console.error('❌ Merge failed:', error);
       return { success: false, error: error.message };
     }
-  }
-
-  // ---- Helper: checksum from array ----
-  getDataChecksumFromArray(data) {
-    const sorted = [...data].sort((a, b) => (a.id || 0) - (b.id || 0));
-    const json = JSON.stringify(sorted);
-    let hash = 0;
-    for (let i = 0; i < json.length; i++) {
-      const char = json.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return hash.toString(16);
   }
 
   mergeAnimeLists(local, cloud) {
@@ -358,7 +397,7 @@ class SyncManager {
   }
 
   // ============================================
-  // REAL-TIME SYNC - Auto-save changes to cloud
+  // REAL-TIME SYNC
   // ============================================
   async saveToCloud(dataType, data) {
     const token = localStorage.getItem('authToken');
@@ -469,10 +508,14 @@ if (originalSaveData) {
   };
 }
 
+// Only run smart sync once per session, after a delay
 document.addEventListener('DOMContentLoaded', () => {
   const cloudSyncEnabled = localStorage.getItem('cloudSyncEnabled') === 'true';
   if (localStorage.getItem('authToken') && cloudSyncEnabled && navigator.onLine) {
-    setTimeout(() => window.syncManager?.smartSync(), 3000);
+    // Use a flag to prevent multiple calls
+    if (!window._smartSyncDone) {
+      setTimeout(() => window.syncManager?.smartSync(), 3000);
+    }
   }
 });
 

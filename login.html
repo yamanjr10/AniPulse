@@ -6,11 +6,9 @@
     <title>AniPulse - Login</title>
     <link rel="stylesheet" href="/Frontend/Css/pages/auth.css" />
 
-    <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
 
-    <!-- Theme & PWA Meta -->
     <meta name="theme-color" content="#0b1120" />
     <meta name="color-scheme" content="dark light" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -20,26 +18,19 @@
     <link rel="apple-touch-icon" sizes="72x72" href="/Frontend/icon/icon-72x72.png" />
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- ===== FIREBASE SDK (loaded before any custom scripts) ===== -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
-    <!-- ===== CONFIG (must be loaded before firebase-init) ===== -->
     <script defer src="/Frontend/Js/services/config.js"></script>
-
-    <!-- Firebase initializer – fetches config from backend -->
     <script src="/Frontend/Js/firebase-init.js" defer></script>
 </head>
 <body>
 
-    <!-- Floating Orbs -->
     <div class="bg-orbs">
         <div class="bg-orb bg-orb-1"></div>
         <div class="bg-orb bg-orb-2"></div>
         <div class="bg-orb bg-orb-3"></div>
     </div>
 
-    <!-- Auth Card -->
     <div class="auth-card">
         <div class="logo">
             <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
@@ -71,15 +62,16 @@
                     </button>
                 </div>
             </div>
+            <div class="form-group" style="text-align:right; margin-top:-10px;">
+                <a id="forgotPasswordLink" style="color:#A78BFA; font-size:0.8rem; cursor:pointer;">Forgot Password?</a>
+            </div>
             <button type="submit" class="btn" id="submitBtn">
                 <i class="fas fa-sign-in-alt"></i> Login
             </button>
         </form>
 
-        <!-- Divider -->
         <div class="divider"><span>OR</span></div>
 
-        <!-- Google Sign-In -->
         <button type="button" class="btn btn-google" id="googleSignInBtn">
             <i class="fab fa-google"></i> Sign in with Google
         </button>
@@ -90,14 +82,10 @@
         </div>
     </div>
 
-    <!-- ============================================
-                 LOGIN SCRIPT – FIREBASE AUTH
-                 ============================================ -->
     <script>
         (function () {
             'use strict';
 
-            // ---- Suppress the harmless Firebase popup listener error globally ----
             window.addEventListener('unhandledrejection', function (e) {
                 const reason = e.reason;
                 if (reason && typeof reason === 'object' && reason.message && reason.message.includes('tabs:outgoing.message.ready')) {
@@ -122,6 +110,7 @@
             const modeBadge = document.getElementById('modeBadge');
             const passwordToggle = document.getElementById('passwordToggle');
             const googleBtn = document.getElementById('googleSignInBtn');
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink');
 
             // ---- Password Toggle ----
             passwordToggle.addEventListener('click', () => {
@@ -149,7 +138,7 @@
                 setTimeout(() => { messageDiv.innerHTML = ''; }, 5000);
             }
 
-            // ---- Toggle Mode (Login / Register) ----
+            // ---- Toggle Mode ----
             function updateMode() {
                 if (isLoginMode) {
                     submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
@@ -179,7 +168,38 @@
                 window.history.pushState({}, '', newUrl);
             });
 
-            // ---- Form Submission (Firebase Auth) ----
+            // ---- Forgot Password ----
+            forgotPasswordLink.addEventListener('click', async () => {
+                const email = emailInput.value.trim();
+                if (!email) {
+                    showMessage('Please enter your email address first.');
+                    return;
+                }
+                try {
+                    await firebase.auth().sendPasswordResetEmail(email);
+                    showMessage('Password reset email sent! Check your inbox.', false);
+                } catch (error) {
+                    showMessage(error.message);
+                }
+            });
+
+            // ---- Load cloud data after login ----
+            async function loadCloudDataAfterLogin() {
+                if (window.dualStorage) {
+                    try {
+                        await window.dualStorage.loadFromCloud();
+                        // Refresh UI
+                        if (typeof updateAllComponents === 'function') {
+                            setTimeout(updateAllComponents, 500);
+                        }
+                        console.log('✅ Cloud data loaded after login');
+                    } catch (e) {
+                        console.warn('Auto-load from cloud failed:', e);
+                    }
+                }
+            }
+
+            // ---- Form Submission ----
             document.getElementById('authForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
@@ -213,20 +233,29 @@
                     let idToken;
 
                     if (isLoginMode) {
-                        // ---- LOGIN ----
                         userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                        const user = userCredential.user;
+                        if (!user.emailVerified) {
+                            await user.sendEmailVerification();
+                            showMessage('Please verify your email. A new verification link has been sent.', false);
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                            return;
+                        }
                     } else {
-                        // ---- REGISTER ----
                         const username = usernameInput.value.trim();
                         userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                        // Update display name
                         await userCredential.user.updateProfile({ displayName: username });
+                        // Send verification email
+                        await userCredential.user.sendEmailVerification();
+                        showMessage('Registration successful! Please verify your email before logging in.', false);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Sign Up';
+                        return;
                     }
 
-                    // Get Firebase ID token
                     idToken = await userCredential.user.getIdToken();
 
-                    // Send token to backend
                     const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
                     const payload = isLoginMode ?
                         { token: idToken } :
@@ -241,11 +270,26 @@
                     const data = await response.json();
                     if (!response.ok) throw new Error(data.error || 'Authentication failed');
 
-                    // Store token & user data
+                    // Store token & user data (ensure name is set)
+                    const userData = {
+                        uid: data.user.uid,
+                        name: data.user.name || data.user.username,
+                        username: data.user.username || data.user.name,
+                        email: data.user.email,
+                        avatar: data.user.avatar,
+                        level: data.user.level || 1,
+                        title: data.user.title || 'Newbie',
+                        totalXP: data.user.totalXP || 0,
+                        totalAnime: data.user.totalAnime || 0,
+                        totalHours: data.user.totalHours || 0
+                    };
                     localStorage.setItem('authToken', idToken);
-                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('user', JSON.stringify(userData));
 
-                    showMessage(isLoginMode ? 'Login successful! Redirecting...' : 'Registration successful! Redirecting...', false);
+                    showMessage(isLoginMode ? 'Login successful! Loading your data...' : 'Registration successful! Redirecting...', false);
+
+                    // Load cloud data automatically
+                    await loadCloudDataAfterLogin();
 
                     setTimeout(() => {
                         window.location.href = '/dashboard.html';
@@ -261,9 +305,8 @@
                 }
             });
 
-            // ---- Google Sign-In (with immediate loading feedback) ----
+            // ---- Google Sign-In ----
             googleBtn.addEventListener('click', async () => {
-                // 1. Show loading state immediately
                 googleBtn.disabled = true;
                 googleBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
                 showMessage('Opening Google sign-in...', false);
@@ -283,34 +326,46 @@
                     const data = await response.json();
                     if (!response.ok) throw new Error(data.error || 'Google sign-in failed');
 
+                    const userData = {
+                        uid: data.user.uid,
+                        name: data.user.name || data.user.username,
+                        username: data.user.username || data.user.name,
+                        email: data.user.email,
+                        avatar: data.user.avatar,
+                        level: data.user.level || 1,
+                        title: data.user.title || 'Newbie',
+                        totalXP: data.user.totalXP || 0,
+                        totalAnime: data.user.totalAnime || 0,
+                        totalHours: data.user.totalHours || 0
+                    };
                     localStorage.setItem('authToken', idToken);
-                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('user', JSON.stringify(userData));
 
-                    showMessage('Google sign-in successful! Redirecting...', false);
+                    showMessage('Google sign-in successful! Loading your data...', false);
+
+                    // Load cloud data automatically
+                    await loadCloudDataAfterLogin();
+
                     setTimeout(() => {
                         window.location.href = '/dashboard.html';
                     }, 1000);
 
                 } catch (error) {
-                    // 2. Ignore the harmless Firebase popup listener error
                     if (error.message && error.message.includes('tabs:outgoing.message.ready')) {
                         console.warn('Ignored harmless Firebase popup listener error');
-                        // Reset button state
                         googleBtn.disabled = false;
                         googleBtn.innerHTML = '<i class="fab fa-google"></i> Sign in with Google';
-                        // Clear the message
                         setTimeout(() => { messageDiv.innerHTML = ''; }, 3000);
                         return;
                     }
                     console.error('Google sign-in error:', error);
                     showMessage(error.message);
-                    // Reset button state
                     googleBtn.disabled = false;
                     googleBtn.innerHTML = '<i class="fab fa-google"></i> Sign in with Google';
                 }
             });
 
-            // ---- Check URL params for register mode ----
+            // ---- Check URL params ----
             window.addEventListener('load', () => {
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('register') === 'true') {
