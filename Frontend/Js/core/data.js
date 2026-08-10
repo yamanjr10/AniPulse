@@ -5,13 +5,11 @@
 (function () {
     'use strict';
 
-    // --- Data variables ---
     let animeData = JSON.parse(localStorage.getItem('animeData')) || [];
     let activityLog = JSON.parse(localStorage.getItem('activityLog')) || [];
     let isEditing = false;
     let currentEditId = null;
 
-    // Expose to global
     window.animeData = animeData;
     window.activityLog = activityLog;
     window.isEditing = isEditing;
@@ -19,11 +17,10 @@
 
     // --- Save data (with timestamp) ---
     window.saveData = function () {
-        localStorage.setItem('animeData', JSON.stringify(animeData));
-        // ✅ Always update the last modified timestamp
         const now = new Date().toISOString();
+        localStorage.setItem('animeData', JSON.stringify(animeData));
         localStorage.setItem('animeDataLastModified', now);
-        console.log('💾 Data saved to localStorage', new Date(now).toLocaleTimeString());
+        console.log('💾 Data saved to localStorage at', now);
     };
 
     // --- Log activity ---
@@ -35,23 +32,18 @@
             timestamp: timestamp || new Date().toISOString()
         };
         activityLog.unshift(activity);
-        if (activityLog.length > 50) {
-            activityLog = activityLog.slice(0, 50);
-        }
+        if (activityLog.length > 50) activityLog = activityLog.slice(0, 50);
         localStorage.setItem('activityLog', JSON.stringify(activityLog));
         window.activityLog = activityLog;
-
-        // Dispatch event for any listeners
         window.dispatchEvent(new CustomEvent('activityLogged', { detail: activity }));
     };
 
-    // --- Getters / setters for external modules ---
+    // --- Getters / setters ---
     window.getAnimeData = function () { return animeData; };
     window.setAnimeData = function (newData) {
         animeData = newData;
         window.animeData = animeData;
         window.saveData();
-        // Notify other components
         window.dispatchEvent(new CustomEvent('animeUpdate', { detail: { data: animeData } }));
     };
     window.getActivityLog = function () { return activityLog; };
@@ -87,5 +79,5 @@
         };
     };
 
-    console.log('✅ Data module loaded (with timestamp on save)');
+    console.log('✅ Data module loaded (timestamp on every save)');
 })();

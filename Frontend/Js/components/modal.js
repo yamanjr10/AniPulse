@@ -24,6 +24,50 @@
         return type === 'Movie';
     }
 
+    // ---- Immediate sync helper (with delay) ----
+    function triggerImmediateSync() {
+        if (window.dualStorage && navigator.onLine && localStorage.getItem('authToken')) {
+            console.log('🔄 Forcing immediate sync after data change...');
+            // Small delay to ensure localStorage is fully written
+            setTimeout(() => {
+                window.dualStorage.syncToCloud();
+            }, 200);
+        }
+    }
+
+    // ---- Before unload sync (beacon) ----
+    function setupBeforeUnloadSync() {
+        window.addEventListener('beforeunload', function () {
+            if (window.dualStorage && localStorage.getItem('authToken')) {
+                const token = localStorage.getItem('authToken');
+                const data = {
+                    animeData: JSON.parse(localStorage.getItem('animeData') || '[]'),
+                    activityLog: JSON.parse(localStorage.getItem('activityLog') || '[]'),
+                    userProfile: JSON.parse(localStorage.getItem('userProfile') || '{}'),
+                    unlockedAchievements: JSON.parse(localStorage.getItem('unlockedAchievements') || '[]'),
+                    userXpHistory: JSON.parse(localStorage.getItem('userXpHistory') || '[]'),
+                    animeContributions: JSON.parse(localStorage.getItem('animeContributions') || '{}'),
+                    appSettings: JSON.parse(localStorage.getItem('appSettings') || '{}'),
+                    levelData: {
+                        totalXP: parseInt(localStorage.getItem('userXP') || '0'),
+                        level: parseInt(localStorage.getItem('userLevel') || '1'),
+                        title: localStorage.getItem('userLevelTitle') || 'Newbie'
+                    },
+                    lastModified: new Date().toISOString()
+                };
+                try {
+                    navigator.sendBeacon(
+                        `${window.API_BASE_URL}/api/sync/sync-all`,
+                        new Blob([JSON.stringify(data)], { type: 'application/json' })
+                    );
+                    console.log('📤 Beforeunload beacon sent');
+                } catch (e) {
+                    // ignore
+                }
+            }
+        });
+    }
+
     // --- Modal open/close (with scroll preservation) ---
     window.openModal = function (modalElement) {
         if (!modalElement) return;
@@ -71,7 +115,7 @@
         console.log('✅ Modal closed');
     };
 
-    // --- Reset editing state (now sets year/month to current date) ---
+    // --- Reset editing state ---
     function resetEditingState() {
         window.isEditing = false;
         window.currentEditId = null;
@@ -113,7 +157,6 @@
                 type.dispatchEvent(event);
             }
         }
-        // Set year/month dropdowns to current date
         const yearSelect = document.getElementById('animeYear');
         const monthSelect = document.getElementById('animeMonth');
         if (yearSelect && monthSelect) {
@@ -126,13 +169,11 @@
             searchResults.style.display = 'none';
             searchResults.innerHTML = '';
         }
-        // Re-enable cover/genre fields
         const coverInput = document.getElementById('animeCover');
         const genresInput = document.getElementById('animeGenres');
         if (coverInput) coverInput.disabled = true;
         if (genresInput) genresInput.disabled = true;
 
-        // Reset progress max attribute
         const progressInput = document.getElementById('animeProgress');
         const episodesInput = document.getElementById('animeEpisodes');
         if (progressInput && episodesInput) {
@@ -176,13 +217,11 @@
         const searchResultsDiv = document.getElementById('searchResults');
         const modalTitle = document.getElementById('addAnimeTitle');
 
-        // ---- Lock title field when editing (disabled, no cursor) ----
         if (animeTitle) {
             animeTitle.disabled = true;
             animeTitle.placeholder = 'Title is locked (click row to edit)';
         }
 
-        // ---- Change modal title ----
         if (modalTitle) modalTitle.textContent = 'Edit Anime';
 
         if (animeIdInput) animeIdInput.value = anime.id;
@@ -200,7 +239,6 @@
         if (animeCover) animeCover.value = anime.cover || '';
         if (animeGenres) animeGenres.value = anime.genres ? anime.genres.join(', ') : '';
 
-        // Populate year/month from existing finishDate, if available
         if (anime.finishDate && animeYear && animeMonth) {
             const [year, month] = anime.finishDate.split('-');
             animeYear.value = year;
@@ -227,7 +265,6 @@
             searchResultsDiv.innerHTML = '';
         }
 
-        // ---- Sync progress max with episodes ----
         syncProgressMax();
 
         if (addModal) {
@@ -253,7 +290,6 @@
         if (typeof window.saveData === 'function') window.saveData();
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { }
 
-        // ---- Force immediate sync after deletion ----
         triggerImmediateSync();
 
         window.closeModal(document.getElementById('addAnimeModal'));
@@ -261,14 +297,6 @@
         if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
         if (typeof showToast === 'function') showToast('Anime deleted successfully!', 'success');
     };
-
-    // ---- Helper: trigger immediate sync ----
-    function triggerImmediateSync() {
-        if (window.dualStorage && navigator.onLine && localStorage.getItem('authToken')) {
-            console.log('🔄 Forcing immediate sync after data change...');
-            window.dualStorage.syncToCloud();
-        }
-    }
 
     // --- Handle add/update form submit ---
     window.handleAddAnime = function (e) {
@@ -326,7 +354,6 @@
                 toastMessage = `"${title}" updated successfully!`;
             }
 
-            // ---- Update all fields (except dates) ----
             existing.title = title;
             existing.type = type;
             existing.episodes = episodes;
@@ -338,9 +365,7 @@
             existing.genres = genres;
             existing.updatedAt = nowTimestamp;
 
-            // ---- Date handling: only set if status changes to Completed ----
             if (isNowCompleted && !wasCompleted) {
-                // Newly completed → set finishDate and actualFinishDate
                 if (year && month) {
                     const y = parseInt(year);
                     const m = parseInt(month);
@@ -360,20 +385,15 @@
                 const currentDay = String(now.getDate()).padStart(2, '0');
                 existing.actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
             }
-            // If already completed → dates are left untouched
 
             if (typeof window.saveData === 'function') window.saveData();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
-
-            // ---- Force immediate sync ----
             triggerImmediateSync();
 
         } else {
-            // ---- Add new anime ----
             if (status === 'Completed') {
                 logAction = 'completed';
                 toastMessage = `"${title}" added and marked as completed! 🎉`;
-                // Set dates for new completed anime
                 if (year && month) {
                     const y = parseInt(year);
                     const m = parseInt(month);
@@ -416,8 +436,6 @@
             window.animeData.push(newAnime);
             if (typeof window.saveData === 'function') window.saveData();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
-
-            // ---- Force immediate sync ----
             triggerImmediateSync();
         }
 
@@ -492,18 +510,14 @@
         tableBody._clickHandler = clickHandler;
     }
 
-    // --- Setup modal close handlers for both modals (with direct listeners) ---
+    // --- Setup modal close handlers ---
     function setupModalHandlers() {
-        // --------------------------------------------------------
-        // 1. Add Anime Modal
-        // --------------------------------------------------------
         const addModal = document.getElementById('addAnimeModal');
         if (addModal) {
             addModal.setAttribute('hidden', '');
             addModal.style.display = 'none';
             addModal.classList.remove('show', 'active');
 
-            // Click outside to close
             addModal.addEventListener('click', function (e) {
                 if (e.target === this) {
                     window.closeModal(this);
@@ -511,7 +525,6 @@
                 }
             });
 
-            // Direct listeners for X and Cancel buttons (to be safe)
             const closeButtons = addModal.querySelectorAll('.close-modal, .btn-secondary.close-modal');
             closeButtons.forEach(btn => {
                 btn.addEventListener('click', function (e) {
@@ -522,7 +535,6 @@
                 });
             });
 
-            // Delete button
             const deleteBtn = document.getElementById('deleteBtn');
             if (deleteBtn) {
                 const newDeleteBtn = deleteBtn.cloneNode(true);
@@ -530,14 +542,12 @@
                 newDeleteBtn.addEventListener('click', window.deleteAnime);
             }
 
-            // Sync progress when episodes change
             const episodesInput = document.getElementById('animeEpisodes');
             if (episodesInput) {
                 episodesInput.addEventListener('input', syncProgressMax);
                 episodesInput.addEventListener('change', syncProgressMax);
             }
 
-            // Type change → duration
             const typeSelect = document.getElementById('animeType');
             if (typeSelect) {
                 typeSelect.addEventListener('change', handleTypeChange);
@@ -545,23 +555,18 @@
             }
         }
 
-        // --------------------------------------------------------
-        // 2. Import Modal
-        // --------------------------------------------------------
         const importModal = document.getElementById('importModal');
         if (importModal) {
             importModal.setAttribute('hidden', '');
             importModal.style.display = 'none';
             importModal.classList.remove('show', 'active');
 
-            // Click outside to close
             importModal.addEventListener('click', function (e) {
                 if (e.target === this) {
                     window.closeModal(this);
                 }
             });
 
-            // Direct listeners for X and Cancel buttons
             const closeButtons = importModal.querySelectorAll('.close-modal, .btn-secondary.close-modal');
             closeButtons.forEach(btn => {
                 btn.addEventListener('click', function (e) {
@@ -639,6 +644,7 @@
         setupAddAnimeButton();
         setupFloatingButton();
         setupFormSubmit();
+        setupBeforeUnloadSync(); // <-- ensures data is sent on tab close
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(attachTableClickHandler, 300);
@@ -651,9 +657,7 @@
 
     window.initModalSystem = initModalSystem;
 
-    // ============================================
-    // SELECT ANIME FROM SEARCH
-    // ============================================
+    // --- Select anime from search ---
     window.selectAnimeFromSearch = function (anime) {
         console.log('🎯 Selecting anime:', anime.title);
         const titleInput = document.getElementById('animeTitle');

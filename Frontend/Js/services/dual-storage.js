@@ -15,7 +15,6 @@ class DualStorageManager {
         this.checkApiReady();
         window.addEventListener('online', () => this.handleOnline());
         window.addEventListener('offline', () => this.handleOffline());
-        // Auto-sync every 2 minutes
         setInterval(() => this.autoSync(), 120000);
         console.log('💾 Dual Storage Manager initialized');
     }
@@ -107,7 +106,6 @@ class DualStorageManager {
         this.showSyncStatus('Syncing to cloud...', 'info');
 
         try {
-            // ⭐ Read data directly from localStorage at sync time
             const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
             const activityLog = JSON.parse(localStorage.getItem('activityLog') || '[]');
             const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
@@ -169,7 +167,7 @@ class DualStorageManager {
     }
 
     // ============================================
-    // LOAD FROM CLOUD – With timestamp check
+    // LOAD FROM CLOUD – with count safety and timestamp
     // ============================================
     async loadFromCloud() {
         const token = this.getToken();
@@ -195,26 +193,32 @@ class DualStorageManager {
             const result = await response.json();
             if (result.success && result.data) {
                 const { data, lastModified } = result;
-
-                // ⭐ Timestamp check: compare local vs cloud freshness
-                const localTimestamp = localStorage.getItem('animeDataLastModified');
                 const localAnimeCount = JSON.parse(localStorage.getItem('animeData') || '[]').length;
+                const cloudAnimeCount = data.animeData ? data.animeData.length : 0;
 
-                // If local has data and is newer than cloud, push local to cloud
+                // ---- SAFETY: if local has more anime than cloud, keep local ----
+                if (localAnimeCount > cloudAnimeCount) {
+                    console.log(`📌 Local has ${localAnimeCount} anime, cloud has ${cloudAnimeCount} – keeping local and pushing to cloud.`);
+                    await this.syncToCloud();
+                    return { success: true, message: 'Local data kept, cloud updated' };
+                }
+
+                // ---- Timestamp check ----
+                const localTimestamp = localStorage.getItem('animeDataLastModified');
                 if (localTimestamp && lastModified && new Date(localTimestamp) > new Date(lastModified) && localAnimeCount > 0) {
                     console.log('📌 Local data is newer than cloud – keeping local and pushing to cloud.');
                     await this.syncToCloud();
                     return { success: true, message: 'Local data kept, cloud updated' };
                 }
 
-                // If cloud has no data but local has data, push local to cloud
+                // ---- If cloud is empty but local has data, push local ----
                 if ((!data.animeData || data.animeData.length === 0) && localAnimeCount > 0) {
                     console.log('📌 Cloud is empty, but local has data – pushing local to cloud.');
                     await this.syncToCloud();
                     return { success: true, message: 'Local data pushed to cloud' };
                 }
 
-                // If cloud has more or equal data, overwrite local
+                // ---- Otherwise, overwrite local with cloud data ----
                 if (data.animeData && data.animeData.length >= localAnimeCount) {
                     console.log(`📥 Downloading ${data.animeData.length} anime from cloud...`);
                     this.backupLocalData();
@@ -274,8 +278,8 @@ class DualStorageManager {
                     }
                     return { success: true, data };
                 } else {
-                    // Local has more data than cloud – push local
-                    console.log(`📤 Local has ${localAnimeCount} anime, cloud has ${data.animeData?.length || 0} – pushing local to cloud.`);
+                    // Fallback: push local to cloud if local has more or equal data
+                    console.log(`📤 Local has ${localAnimeCount} anime, cloud has ${cloudAnimeCount} – pushing local to cloud.`);
                     await this.syncToCloud();
                     return { success: true, message: 'Local data pushed to cloud' };
                 }
