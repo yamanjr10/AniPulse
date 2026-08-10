@@ -215,7 +215,6 @@
                             </div>
                         </div>
 
-
                         <!-- Navigation Menu -->
                         <nav class="sidebar-menu" aria-label="Main navigation">
                             <div class="menu-item active" data-page="dashboard">
@@ -289,9 +288,9 @@
                                 <span id="liveClock">--:--</span>
                             </div>
                             <div class="stat-item glass">
-    <i class="fas fa-fire" id="streakFire"></i>
-    <span id="streakInfo">0-day streak</span>
-</div>
+                                <i class="fas fa-fire" id="streakFire"></i>
+                                <span id="streakInfo">0-day streak</span>
+                            </div>
                             <div class="stat-item glass">
                                 <i class="fas fa-calendar-day"></i>
                                 <span id="currentDate">Loading...</span>
@@ -1423,7 +1422,6 @@
 
                 <!-- ===== SETTINGS CONTENT ===== -->
                 <div class="settings-content">
-
                     <!-- ===== TAB 1: PROFILE ===== -->
                     <div class="settings-tab-content active" id="tab-profile">
                         <!-- Profile Preview -->
@@ -1445,7 +1443,8 @@
                         <!-- Profile Settings -->
                         <div class="settings-group">
                             <h3>
-                                <i class="fas fa-user" aria-hidden="true"></i> Profile Settings
+                                <i class="fas fa-user" aria-hidden="true"></i> Profile
+                                Settings
                             </h3>
                             <div class="settings-item">
                                 <label for="usernameInput">Display Name</label>
@@ -1456,13 +1455,15 @@
                                 <div class="file-input-wrapper">
                                     <input type="file" id="avatarInput" accept="image/*" />
                                     <div class="file-input-btn">
-                                        <i class="fas fa-upload" aria-hidden="true"></i> Choose Image
+                                        <i class="fas fa-upload" aria-hidden="true"></i> Choose
+                                        Image
                                     </div>
                                 </div>
                             </div>
                             <div class="settings-item">
                                 <button id="resetAvatar" class="btn btn-secondary">
-                                    <i class="fas fa-undo" aria-hidden="true"></i> Reset to Default Avatar
+                                    <i class="fas fa-undo" aria-hidden="true"></i> Reset to
+                                    Default Avatar
                                 </button>
                             </div>
                         </div>
@@ -1544,7 +1545,8 @@
                         <!-- Queue Status -->
                         <div class="settings-group queue-status-card">
                             <h3>
-                                <i class="fas fa-clock" aria-hidden="true"></i> XP Queue Status
+                                <i class="fas fa-clock" aria-hidden="true"></i> XP Queue
+                                Status
                             </h3>
                             <div class="queue-info" id="queueInfoContainer">
                                 <div class="queue-stats">
@@ -1569,7 +1571,8 @@
                                     <span class="queue-percent" id="queuePercent">0%</span>
                                 </div>
                                 <div class="queue-message" id="queueMessage">
-                                    <i class="fas fa-check-circle" aria-hidden="true"></i> No pending XP in queue
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i> No
+                                    pending XP in queue
                                 </div>
                             </div>
                         </div>
@@ -1580,7 +1583,8 @@
                         <!-- Cloud Sync -->
                         <div class="settings-group">
                             <h3>
-                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i> Cloud Sync
+                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                Cloud Sync
                             </h3>
                             <div class="settings-item">
                                 <div class="sync-status" id="syncStatus">
@@ -1593,7 +1597,8 @@
                                     <i class="fas fa-sync-alt" aria-hidden="true"></i> Sync Now
                                 </button>
                                 <button id="loadFromCloudBtn" class="btn btn-secondary">
-                                    <i class="fas fa-cloud-download-alt" aria-hidden="true"></i> Load from Cloud
+                                    <i class="fas fa-cloud-download-alt" aria-hidden="true"></i>
+                                    Load from Cloud
                                 </button>
                             </div>
                             <div class="settings-item">
@@ -1608,14 +1613,23 @@
                             <h3>
                                 <i class="fas fa-save" aria-hidden="true"></i> Auto Backup
                             </h3>
-                            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.3); margin-bottom: 1rem;">
-                                Automatically export and update your anime data JSON file whenever you make changes.
+                            <p style="
+                    font-size: 0.85rem;
+                    color: rgba(255, 255, 255, 0.3);
+                    margin-bottom: 1rem;
+                  ">
+                                Automatically export and update your anime data JSON file
+                                whenever you make changes.
                             </p>
                             <button id="enableBackupBtn" class="btn btn-success">
-                                <i class="fas fa-save" aria-hidden="true"></i> Enable Auto Backup
+                                <i class="fas fa-save" aria-hidden="true"></i> Enable Auto
+                                Backup
                             </button>
-                            <small id="backupStatus"
-                                style="display: block; margin-top: 0.5rem; color: rgba(255,255,255,0.2);"></small>
+                            <small id="backupStatus" style="
+                    display: block;
+                    margin-top: 0.5rem;
+                    color: rgba(255, 255, 255, 0.2);
+                  "></small>
                         </div>
                     </div>
 
@@ -1623,27 +1637,32 @@
                     <div class="settings-tab-content" id="tab-danger">
                         <div class="danger-zone">
                             <h3>
-                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Danger Zone
+                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                Danger Zone
                             </h3>
-                            <p>These actions are irreversible. Please proceed with caution.</p>
+                            <p>
+                                These actions are irreversible. Please proceed with caution.
+                            </p>
                             <div class="danger-actions">
                                 <button class="btn btn-danger" id="clearDataBtn" disabled>
-                                    <i class="fas fa-trash" aria-hidden="true"></i> Clear All Data
+                                    <i class="fas fa-trash" aria-hidden="true"></i> Clear All
+                                    Data
                                 </button>
                                 <button class="btn btn-success" id="exportDataBtn">
-                                    <i class="fas fa-file-export" aria-hidden="true"></i> Export Data as JSON
+                                    <i class="fas fa-file-export" aria-hidden="true"></i> Export
+                                    Data as JSON
                                 </button>
                             </div>
                         </div>
 
                         <!-- Recap Button -->
-                        <div style="margin-top: 1.5rem;">
+                        <div style="margin-top: 1.5rem">
                             <button class="settings-btn" id="openRecapFromSettings">
-                                <i class="fas fa-chart-line" aria-hidden="true"></i> View Recap
+                                <i class="fas fa-chart-line" aria-hidden="true"></i> View
+                                Recap
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </section>
@@ -2054,13 +2073,13 @@
         // PAGE TITLES MAPPING
         // ============================================
         const pageTitles = {
-            dashboard: 'Home - AniPulse',
-            'anime-list': 'Anime List - AniPulse',
-            watchlist: 'Watch List - AniPulse',
-            statistics: 'My Stats - AniPulse',
-            achievements: 'Achievements - AniPulse',
-            community: 'Community - AniPulse',
-            settings: 'Profile - AniPulse'
+            dashboard: "Home - AniPulse",
+            "anime-list": "Anime List - AniPulse",
+            watchlist: "Watch List - AniPulse",
+            statistics: "My Stats - AniPulse",
+            achievements: "Achievements - AniPulse",
+            community: "Community - AniPulse",
+            settings: "Profile - AniPulse",
         };
 
         // ============================================
@@ -2069,7 +2088,7 @@
 
         // Helper: get currently active page ID
         function getActivePageId() {
-            const activeMenuItem = document.querySelector('.menu-item.active');
+            const activeMenuItem = document.querySelector(".menu-item.active");
             return activeMenuItem ? activeMenuItem.dataset.page : null;
         }
 
@@ -2082,8 +2101,9 @@
         // Helper: restore scroll position for a given page
         function restoreScrollPosition(pageId) {
             if (!pageId) return;
-            const pos = parseInt(localStorage.getItem(`scrollPosition_${pageId}`)) || 0;
-            window.scrollTo({ top: pos, behavior: 'smooth' });
+            const pos =
+                parseInt(localStorage.getItem(`scrollPosition_${pageId}`)) || 0;
+            window.scrollTo({ top: pos, behavior: "smooth" });
         }
 
         document.querySelectorAll(".menu-item").forEach((item) => {
@@ -2107,7 +2127,9 @@
                 localStorage.setItem("lastActivePage", pageId);
 
                 // 3. Update menu active state
-                document.querySelectorAll(".menu-item").forEach((i) => i.classList.remove("active"));
+                document
+                    .querySelectorAll(".menu-item")
+                    .forEach((i) => i.classList.remove("active"));
                 this.classList.add("active");
 
                 // 4. Hide all pages, show selected
@@ -2131,7 +2153,7 @@
                 }
 
                 // 5. Set document title based on page
-                document.title = pageTitles[pageId] || 'AniPulse';
+                document.title = pageTitles[pageId] || "AniPulse";
 
                 // 6. Restore saved scroll position for the new page
                 restoreScrollPosition(pageId);
@@ -2139,27 +2161,33 @@
                 // 7. Initialize page-specific content (unchanged)
                 if (pageId === "statistics") {
                     setTimeout(() => {
-                        if (typeof initStatisticsCharts === "function") initStatisticsCharts();
-                        if (typeof updateStatisticsTables === "function") updateStatisticsTables();
+                        if (typeof initStatisticsCharts === "function")
+                            initStatisticsCharts();
+                        if (typeof updateStatisticsTables === "function")
+                            updateStatisticsTables();
                         if (typeof refreshAllCharts === "function") refreshAllCharts();
                     }, 100);
                 } else if (pageId === "watchlist") {
                     setTimeout(() => {
-                        if (typeof updateWatchlist === "function") updateWatchlist("all", 1);
+                        if (typeof updateWatchlist === "function")
+                            updateWatchlist("all", 1);
                     }, 100);
                 } else if (pageId === "achievements") {
                     setTimeout(() => {
-                        if (typeof updateAchievements === "function") updateAchievements();
+                        if (typeof updateAchievements === "function")
+                            updateAchievements();
                     }, 100);
                 } else if (pageId === "community") {
                     setTimeout(() => {
                         if (typeof initCommunityPage === "function") initCommunityPage();
                         if (typeof loadFriends === "function") loadFriends();
-                        if (typeof loadFriendRequests === "function") loadFriendRequests();
+                        if (typeof loadFriendRequests === "function")
+                            loadFriendRequests();
                     }, 100);
                 } else if (pageId === "anime-list") {
                     setTimeout(() => {
-                        if (typeof updateAnimeDisplay === "function") updateAnimeDisplay();
+                        if (typeof updateAnimeDisplay === "function")
+                            updateAnimeDisplay();
                     }, 100);
                 } else if (pageId === "settings") {
                     setTimeout(() => {
@@ -2168,7 +2196,8 @@
                         if (typeof initAvatarSystem === "function") initAvatarSystem();
                         if (
                             window.AniPulseLevelSystem &&
-                            typeof window.AniPulseLevelSystem.updateAllLevelUI === "function"
+                            typeof window.AniPulseLevelSystem.updateAllLevelUI ===
+                            "function"
                         ) {
                             window.AniPulseLevelSystem.updateAllLevelUI();
                         }
@@ -2176,10 +2205,14 @@
                 } else if (pageId === "dashboard") {
                     setTimeout(() => {
                         if (typeof updateStats === "function") updateStats();
-                        if (typeof updateTopRatedAnime === "function") updateTopRatedAnime();
-                        if (typeof updateCurrentMonthAnime === "function") updateCurrentMonthAnime();
-                        if (typeof updateRecentActivity === "function") updateRecentActivity();
-                        if (typeof updateCurrentlyWatching === "function") updateCurrentlyWatching();
+                        if (typeof updateTopRatedAnime === "function")
+                            updateTopRatedAnime();
+                        if (typeof updateCurrentMonthAnime === "function")
+                            updateCurrentMonthAnime();
+                        if (typeof updateRecentActivity === "function")
+                            updateRecentActivity();
+                        if (typeof updateCurrentlyWatching === "function")
+                            updateCurrentlyWatching();
                         if (typeof renderAnimeDNA === "function") renderAnimeDNA();
                     }, 100);
                 }
@@ -2216,7 +2249,7 @@
             });
 
             // Determine which page to show (from localStorage or default)
-            const savedPage = localStorage.getItem("lastActivePage") || 'dashboard';
+            const savedPage = localStorage.getItem("lastActivePage") || "dashboard";
 
             // Show the saved page
             const activePage = document.getElementById(`${savedPage}-page`);
@@ -2226,13 +2259,15 @@
             }
 
             // Set active menu item
-            const menuItem = document.querySelector(`.menu-item[data-page="${savedPage}"]`);
+            const menuItem = document.querySelector(
+                `.menu-item[data-page="${savedPage}"]`,
+            );
             if (menuItem) {
                 menuItem.classList.add("active");
             }
 
             // Set document title
-            document.title = pageTitles[savedPage] || 'AniPulse';
+            document.title = pageTitles[savedPage] || "AniPulse";
 
             // Restore saved scroll position for the initial page
             restoreScrollPosition(savedPage);
@@ -2249,18 +2284,25 @@
             setTimeout(() => {
                 if (savedPage === "dashboard") {
                     if (typeof updateStats === "function") updateStats();
-                    if (typeof updateTopRatedAnime === "function") updateTopRatedAnime();
-                    if (typeof updateCurrentMonthAnime === "function") updateCurrentMonthAnime();
-                    if (typeof updateRecentActivity === "function") updateRecentActivity();
-                    if (typeof updateCurrentlyWatching === "function") updateCurrentlyWatching();
+                    if (typeof updateTopRatedAnime === "function")
+                        updateTopRatedAnime();
+                    if (typeof updateCurrentMonthAnime === "function")
+                        updateCurrentMonthAnime();
+                    if (typeof updateRecentActivity === "function")
+                        updateRecentActivity();
+                    if (typeof updateCurrentlyWatching === "function")
+                        updateCurrentlyWatching();
                     if (typeof renderAnimeDNA === "function") renderAnimeDNA();
                 } else if (savedPage === "anime-list") {
                     if (typeof updateAnimeDisplay === "function") updateAnimeDisplay();
                 } else if (savedPage === "watchlist") {
-                    if (typeof updateWatchlist === "function") updateWatchlist("all", 1);
+                    if (typeof updateWatchlist === "function")
+                        updateWatchlist("all", 1);
                 } else if (savedPage === "statistics") {
-                    if (typeof initStatisticsCharts === "function") initStatisticsCharts();
-                    if (typeof updateStatisticsTables === "function") updateStatisticsTables();
+                    if (typeof initStatisticsCharts === "function")
+                        initStatisticsCharts();
+                    if (typeof updateStatisticsTables === "function")
+                        updateStatisticsTables();
                     if (typeof refreshAllCharts === "function") refreshAllCharts();
                 } else if (savedPage === "achievements") {
                     if (typeof updateAchievements === "function") updateAchievements();
@@ -2282,7 +2324,8 @@
 
                 // Common updates
                 if (typeof updateAnimeDisplay === "function") updateAnimeDisplay();
-                if (typeof updateSidebarUserInfo === "function") updateSidebarUserInfo();
+                if (typeof updateSidebarUserInfo === "function")
+                    updateSidebarUserInfo();
                 if (typeof updateCurrentDate === "function") updateCurrentDate();
             }, 200);
         });
@@ -2296,7 +2339,10 @@
                 navigator.serviceWorker
                     .register("/service-worker.js")
                     .then((registration) => {
-                        console.log("✅ ServiceWorker registered successfully:", registration.scope);
+                        console.log(
+                            "✅ ServiceWorker registered successfully:",
+                            registration.scope,
+                        );
                     })
                     .catch((error) => {
                         console.log("❌ ServiceWorker registration failed:", error);
