@@ -125,17 +125,16 @@
     }
 
     // ============================================
-    // SECTION 1: STATISTICS HERO
+    // SECTION 1: STATISTICS HERO (FIXED NAME)
     // ============================================
 
     function updateStatsHero() {
         console.log('🔄 Updating Statistics Hero...');
 
         const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
+        // ✅ READ NAME FROM userProfile
         const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
-        const userName = userProfile.name ||
-            JSON.parse(localStorage.getItem('user') || '{}').username ||
-            'AnimeFan';
+        const userName = userProfile.name || userProfile.username || 'AnimeFan';
 
         const completed = animeData.filter(a => a.userStatus === 'Completed').length;
 
@@ -1326,12 +1325,15 @@
             return;
         }
 
-        const monthlyCounts = Object.values(monthlyGroups);
+        const monthlyCounts = Object.values(monthlyGroups).map(g => g.count);
         const avgMonthly = monthlyCounts.length > 0 ? monthlyCounts.reduce((a, b) => a + b, 0) / monthlyCounts.length : 0;
-        insights.push({
-            icon: 'fas fa-calendar-alt',
-            text: `You complete an average of <strong>${avgMonthly.toFixed(1)}</strong> anime per month.`
-        });
+
+        if (!isNaN(avgMonthly) && avgMonthly > 0) {
+            insights.push({
+                icon: 'fas fa-calendar-alt',
+                text: `You complete an average of <strong>${avgMonthly.toFixed(1)}</strong> anime per month.`
+            });
+        }
 
         let fastestMonth = '', fastestCount = 0;
         Object.entries(monthlyGroups).forEach(([key, data]) => {
@@ -2388,14 +2390,24 @@
 
     // Monthly progress chart update (safe)
     window.updateMonthlyProgressChart = function () {
+        // If chart doesn't exist, try to initialize it
         if (!window.monthlyProgressChart) {
-            console.warn('⚠️ monthlyProgressChart not initialized, skipping update');
+            console.warn('⚠️ monthlyProgressChart not initialized – re-initializing...');
+            if (typeof window.initCharts === 'function') {
+                window.initCharts();
+            }
             return;
         }
 
         const chart = window.monthlyProgressChart;
+        // Check if chart has the required datasets (trend line + bar)
         if (!chart.data || !chart.data.datasets || chart.data.datasets.length < 2) {
-            console.warn('⚠️ monthlyProgressChart is missing required datasets');
+            console.warn('⚠️ monthlyProgressChart is missing required datasets – re-initializing...');
+            try { chart.destroy(); } catch (e) { }
+            window.monthlyProgressChart = null;
+            if (typeof window.initCharts === 'function') {
+                window.initCharts();
+            }
             return;
         }
 

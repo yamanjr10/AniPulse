@@ -131,6 +131,19 @@
     }
 
     // ============================================
+    // PROFILE PREVIEW – name from userProfile
+    // ============================================
+    function refreshProfilePreview() {
+        const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+        const name = userProfile.name || userProfile.username || 'User';
+        const avatar = userProfile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366F1&color=fff`;
+        const previewName = document.getElementById('profilePreviewName');
+        const previewAvatar = document.getElementById('profilePreviewAvatar');
+        if (previewName) previewName.textContent = name;
+        if (previewAvatar) previewAvatar.src = avatar;
+    }
+
+    // ============================================
     // EXPORT DATA (manual JSON download)
     // ============================================
     window.exportData = function () {
@@ -361,12 +374,43 @@
     window.initSettings = function () {
         initSettingsTabs();
 
+        // ---- Refresh profile preview on load ----
+        refreshProfilePreview();
+
         const usernameInput = document.getElementById('usernameInput');
         if (usernameInput) {
-            const current = localStorage.getItem('userName') || '';
-            usernameInput.value = current;
+            // Read from userProfile (single source of truth)
+            const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+            const currentName = userProfile.name || userProfile.username || '';
+            usernameInput.value = currentName;
+
+            usernameInput.addEventListener('change', function () {
+                const newName = this.value.trim();
+                if (newName) {
+                    // Update userProfile
+                    const userProfile = JSON.parse(localStorage.getItem('userProfile') || {});
+                    userProfile.name = newName;
+                    userProfile.username = newName;
+                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                    refreshProfilePreview();
+                    if (typeof window.updateSidebarUserInfo === 'function') {
+                        window.updateSidebarUserInfo();
+                    }
+                    // Also update the user object
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    user.name = newName;
+                    user.username = newName;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    if (typeof showToast === 'function') showToast('Name updated!', 'success');
+                }
+            });
         }
 
+        // ---- Avatar reset (already in avatar.js) ----
+        // ---- Sync UI ----
+        window.initSyncUI();
+
+        // ---- Clear data ----
         const clearBtn = document.getElementById('clearDataBtn');
         if (clearBtn) {
             clearBtn.addEventListener('click', function () {
@@ -378,11 +422,28 @@
             });
         }
 
+        // ---- Export data ----
         document.getElementById('exportDataBtn')?.addEventListener('click', function () {
             if (typeof window.exportData === 'function') window.exportData();
         });
 
+        // ---- Queue status ----
         initQueueStatusUI();
+
+        // ---- Listen for profile changes from other tabs ----
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'userProfile') {
+                refreshProfilePreview();
+                if (usernameInput) {
+                    const profile = JSON.parse(e.newValue) || {};
+                    usernameInput.value = profile.name || profile.username || '';
+                }
+            }
+        });
+
+        // ---- Also listen for cloud load events ----
+        document.addEventListener('cloudDataLoaded', refreshProfilePreview);
+
         console.log('✅ Settings initialized');
     };
 

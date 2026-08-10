@@ -68,7 +68,7 @@
         const token = localStorage.getItem('authToken');
         if (!token) return;
         try {
-            const response = await fetch('http://localhost:3000/api/friends/requests', {
+            const response = await fetch(`${window.API_BASE_URL}/api/friends/requests`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const requests = await response.json();
@@ -132,7 +132,7 @@
         resultsList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
 
         try {
-            const response = await fetch(`http://localhost:3000/api/user/search?q=${encodeURIComponent(query)}`, {
+            const response = await fetch(`${window.API_BASE_URL}/api/user/search?q=${encodeURIComponent(query)}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Search failed');
@@ -177,7 +177,7 @@
         const token = localStorage.getItem('authToken');
         if (!token) return;
         try {
-            const response = await fetch(`http://localhost:3000/api/friends/request/${userId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/api/friends/request/${userId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -202,7 +202,7 @@
         const token = localStorage.getItem('authToken');
         if (!token) return;
         try {
-            const response = await fetch(`http://localhost:3000/api/friends/accept/${requestId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/api/friends/accept/${requestId}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -220,7 +220,7 @@
         const token = localStorage.getItem('authToken');
         if (!token) return;
         try {
-            const response = await fetch(`http://localhost:3000/api/friends/decline/${requestId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/api/friends/decline/${requestId}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -238,7 +238,7 @@
         const token = localStorage.getItem('authToken');
         if (!token) return;
         try {
-            const response = await fetch(`http://localhost:3000/api/friends/remove/${friendId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/api/friends/remove/${friendId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -548,7 +548,7 @@
         const token = localStorage.getItem('authToken');
 
         try {
-            const friendsResponse = await fetch('http://localhost:3000/api/friends/list', {
+            const friendsResponse = await fetch(`${window.API_BASE_URL}/api/friends/list`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (friendsResponse.ok) friendsList = await friendsResponse.json();
@@ -655,14 +655,14 @@
         safeSetHTML('profileActivityList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading activity...</div>');
 
         try {
-            const response = await fetch(`http://localhost:3000/api/user/full-profile/${userId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/api/user/full-profile/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (!response.ok) {
                 if (response.status === 404) {
                     console.warn('Full profile endpoint not found, trying fallback...');
-                    const fallbackResponse = await fetch(`http://localhost:3000/api/user/profile/${userId}`, {
+                    const fallbackResponse = await fetch(`${window.API_BASE_URL}/api/user/profile/${userId}`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (fallbackResponse.ok) {
@@ -1075,8 +1075,9 @@
                     return;
                 }
 
+                // ✅ FIX: Use /api/ranking/global-paginated instead of /api/ranking/global
                 const limit = Math.max(this.itemsPerPage * 2, 50);
-                const response = await this.apiCall(`/api/ranking/global?limit=${limit}&page=${this.currentPage}&type=${this.currentStat}`);
+                const response = await this.apiCall(`/api/ranking/global-paginated?limit=${limit}&page=${this.currentPage}&type=${this.currentStat}`);
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Failed to load global leaderboard (${response.status})`);

@@ -551,7 +551,8 @@
             name: 'AnimeFan',
             avatar: 'https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff'
         };
-        const savedName = savedProfile.name;
+        // Use name, fallback to username
+        const savedName = savedProfile.name || savedProfile.username || 'AnimeFan';
         const savedAvatar = savedProfile.avatar;
 
         let currentLevel = 1,
@@ -810,67 +811,51 @@
         }
     };
 
-    // ============================================
-    // STREAK STYLING – NEW FUNCTION
-    // ============================================
-
+    // --- Streak styling (unchanged) ---
     function updateStreakStyle(streak) {
         const streakInfo = document.getElementById('streakInfo');
         const streakFire = document.getElementById('streakFire');
-        if (!streakInfo || !streakFire) return;
-
-        let color, textShadow, filter;
-
+        if (!streakInfo || !streakFire) {
+            console.warn('⚠️ Streak elements not found in DOM.');
+            return;
+        }
+        let color, textShadow, filter, scale;
         if (streak < 3) {
-            // Gray
             color = '#9CA3AF';
             textShadow = 'none';
             filter = 'none';
+            scale = 1;
         } else if (streak < 10) {
-            // Yellow / Orange
             color = '#FFB000';
             textShadow = '0 0 8px rgba(255, 176, 0, 0.3)';
             filter = 'drop-shadow(0 0 6px rgba(255, 176, 0, 0.4))';
+            scale = 1;
         } else if (streak < 30) {
-            // Orange
             color = '#FF6B00';
             textShadow = '0 0 10px rgba(255, 107, 0, 0.4)';
             filter = 'drop-shadow(0 0 8px rgba(255, 107, 0, 0.5))';
+            scale = 1;
         } else if (streak < 100) {
-            // Pink
             color = '#FF3B81';
             textShadow = '0 0 12px rgba(255, 59, 129, 0.5)';
             filter = 'drop-shadow(0 0 10px rgba(255, 59, 129, 0.6))';
+            scale = 1.02;
         } else if (streak < 200) {
-            // Magenta
             color = '#D000FF';
             textShadow = '0 0 15px rgba(208, 0, 255, 0.6)';
             filter = 'drop-shadow(0 0 12px rgba(208, 0, 255, 0.7))';
+            scale = 1.05;
         } else {
-            // Purple
             color = '#8B5CF6';
             textShadow = '0 0 20px rgba(139, 92, 246, 0.7)';
             filter = 'drop-shadow(0 0 15px rgba(139, 92, 246, 0.8))';
+            scale = 1.08;
         }
-
-        // Apply inline styles (highest specificity)
         streakInfo.style.color = color;
         streakInfo.style.textShadow = textShadow;
         streakFire.style.color = color;
         streakFire.style.filter = filter;
-
-        // Add transitions only once
-        if (!streakInfo.style.transition) {
-            streakInfo.style.transition = 'color 0.4s ease, text-shadow 0.4s ease';
-            streakFire.style.transition = 'color 0.4s ease, filter 0.4s ease, transform 0.4s ease';
-        }
-
-        // Fire icon subtle scaling based on streak
-        if (streak >= 100) {
-            streakFire.style.transform = 'scale(1.05)';
-        } else {
-            streakFire.style.transform = 'scale(1)';
-        }
+        streakFire.style.transform = `scale(${scale})`;
     }
 
     // --- Greeting banner ---
@@ -885,7 +870,9 @@
         const streakInfo = document.getElementById('streakInfo');
         const dailyQuote = document.getElementById('dailyQuote');
 
-        const userName = localStorage.getItem('userName') || 'Otaku';
+        // ---- READ NAME FROM userProfile (single source of truth) ----
+        const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+        const userName = userProfile.name || userProfile.username || 'Otaku';
 
         const quotes = [
             "“Whatever you lose, you'll find it again.” — One Piece",
@@ -931,14 +918,23 @@
             greetingSubline.textContent = sub;
             liveClock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             streakInfo.textContent = ` ${streak}-day streak`;
-            dailyQuote.textContent = quotes[Math.floor(Math.random() * quotes.length)];
-
-            // ---- NEW: Apply streak styling ----
             updateStreakStyle(streak);
+            dailyQuote.textContent = quotes[Math.floor(Math.random() * quotes.length)];
         }
 
         updateGreeting();
         setInterval(updateGreeting, 60000);
+
+        // ---- Streak reveal animation ----
+        setTimeout(() => {
+            const bannerStats = document.querySelector('.banner-stats');
+            if (bannerStats) {
+                bannerStats.classList.add('streak-animate');
+                setTimeout(() => {
+                    bannerStats.classList.remove('streak-animate');
+                }, 2000);
+            }
+        }, 400);
     }
 
     // --- Profile dropdown toggle ---
