@@ -17,10 +17,13 @@
     window.isEditing = isEditing;
     window.currentEditId = currentEditId;
 
-    // --- Save data ---
+    // --- Save data (with timestamp) ---
     window.saveData = function () {
         localStorage.setItem('animeData', JSON.stringify(animeData));
-        console.log('💾 Data saved to localStorage');
+        // ✅ Always update the last modified timestamp
+        const now = new Date().toISOString();
+        localStorage.setItem('animeDataLastModified', now);
+        console.log('💾 Data saved to localStorage', new Date(now).toLocaleTimeString());
     };
 
     // --- Log activity ---
@@ -84,5 +87,5 @@
         };
     };
 
-    console.log('✅ Data module loaded');
+    console.log('✅ Data module loaded (with timestamp on save)');
 })();

@@ -1,5 +1,6 @@
 // ============================================
-// SYNC MANAGER – Full Cloud Sync on Any Change
+// SYNC MANAGER – Smart sync, conflict resolution, periodic sync
+// (No save hook – only dualStorage handles uploads)
 // ============================================
 
 class SyncManager {
@@ -14,7 +15,7 @@ class SyncManager {
   init() {
     window.addEventListener('online', () => this.handleOnline());
     window.addEventListener('offline', () => this.handleOffline());
-    // Sync every 10 minutes
+    // Periodic sync every 10 minutes
     setInterval(() => {
       if (navigator.onLine && localStorage.getItem('authToken')) {
         this.syncToCloud();
@@ -23,7 +24,7 @@ class SyncManager {
     console.log('🔄 Sync Manager initialized');
   }
 
-  // ---- Debounced full sync ----
+  // ---- Debounced sync (used for manual calls) ----
   syncToCloud() {
     if (this.syncDebounceTimeout) {
       clearTimeout(this.syncDebounceTimeout);
@@ -165,66 +166,86 @@ class SyncManager {
 
         // ---- Timestamp check: compare local vs cloud freshness ----
         const localTimestamp = localStorage.getItem('animeDataLastModified');
-        if (localTimestamp && lastModified && new Date(localTimestamp) > new Date(lastModified)) {
+        const localAnimeCount = JSON.parse(localStorage.getItem('animeData') || '[]').length;
+
+        // If local has data and is newer, keep local and push to cloud
+        if (localTimestamp && lastModified && new Date(localTimestamp) > new Date(lastModified) && localAnimeCount > 0) {
           console.log('📌 Local data is newer than cloud – keeping local and pushing to cloud.');
           await this.uploadAllLocalData();
           return { success: true, message: 'Local data kept, cloud updated' };
         }
 
-        // If cloud is newer or no local data, overwrite local
-        this.backupLocalData();
+        // If cloud is empty but local has data, push local
+        if ((!data.animeData || data.animeData.length === 0) && localAnimeCount > 0) {
+          console.log('📌 Cloud is empty, but local has data – pushing local to cloud.');
+          await this.uploadAllLocalData();
+          return { success: true, message: 'Local data pushed to cloud' };
+        }
 
-        if (data.animeData) {
-          localStorage.setItem('animeData', JSON.stringify(data.animeData));
-          localStorage.setItem('animeDataLastModified', lastModified || new Date().toISOString());
-          window.animeData = data.animeData;
-        }
-        if (data.activityLog) {
-          localStorage.setItem('activityLog', JSON.stringify(data.activityLog));
-          window.activityLog = data.activityLog;
-        }
-        if (data.achievements) {
-          localStorage.setItem('unlockedAchievements', JSON.stringify(data.achievements));
-        }
-        if (data.xpHistory) {
-          localStorage.setItem('userXpHistory', JSON.stringify(data.xpHistory));
-        }
-        if (data.contributions) {
-          localStorage.setItem('animeContributions', JSON.stringify(data.contributions));
-        }
-        if (data.userProfile) {
-          const existing = JSON.parse(localStorage.getItem('userProfile') || '{}');
-          const merged = { ...existing, ...data.userProfile };
-          localStorage.setItem('userProfile', JSON.stringify(merged));
-          const user = JSON.parse(localStorage.getItem('user') || '{}');
-          user.name = merged.name || merged.username || user.name;
-          user.username = merged.username || merged.name || user.username;
-          user.avatar = merged.avatar || user.avatar;
-          localStorage.setItem('user', JSON.stringify(user));
-          if (typeof updateSidebarUserInfo === 'function') {
-            updateSidebarUserInfo();
+        // If cloud has data and is newer (or equal), overwrite local
+        if (data.animeData && data.animeData.length >= localAnimeCount) {
+          this.backupLocalData();
+
+          if (data.animeData) {
+            localStorage.setItem('animeData', JSON.stringify(data.animeData));
+            localStorage.setItem('animeDataLastModified', lastModified || new Date().toISOString());
+            window.animeData = data.animeData;
           }
-        }
-        if (data.levelData) {
-          localStorage.setItem('userLevel', data.levelData.level.toString());
-          localStorage.setItem('userLevelTitle', data.levelData.title);
-          localStorage.setItem('userXP', data.levelData.totalXP.toString());
-          if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.saveUserProfile === 'function') {
-            const profile = window.AniPulseLevelSystem.getUserProfile();
-            profile.totalExp = data.levelData.totalXP;
-            profile.level = data.levelData.level;
-            profile.title = data.levelData.title;
-            window.AniPulseLevelSystem.saveUserProfile(profile);
-            window.AniPulseLevelSystem.updateAllLevelUI();
+          if (data.activityLog) {
+            localStorage.setItem('activityLog', JSON.stringify(data.activityLog));
+            window.activityLog = data.activityLog;
           }
+          if (data.achievements) {
+            localStorage.setItem('unlockedAchievements', JSON.stringify(data.achievements));
+          }
+          if (data.xpHistory) {
+            localStorage.setItem('userXpHistory', JSON.stringify(data.xpHistory));
+          }
+          if (data.contributions) {
+            localStorage.setItem('animeContributions', JSON.stringify(data.contributions));
+          }
+          if (data.userProfile) {
+            const existing = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const merged = { ...existing, ...data.userProfile };
+            localStorage.setItem('userProfile', JSON.stringify(merged));
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            user.name = merged.name || merged.username || user.name;
+            user.username = merged.username || merged.name || user.username;
+            user.avatar = merged.avatar || user.avatar;
+            localStorage.setItem('user', JSON.stringify(user));
+            if (typeof updateSidebarUserInfo === 'function') {
+              updateSidebarUserInfo();
+            }
+          }
+          if (data.levelData) {
+            localStorage.setItem('userLevel', data.levelData.level.toString());
+            localStorage.setItem('userLevelTitle', data.levelData.title);
+            localStorage.setItem('userXP', data.levelData.totalXP.toString());
+            if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.saveUserProfile === 'function') {
+              const profile = window.AniPulseLevelSystem.getUserProfile();
+              profile.totalExp = data.levelData.totalXP;
+              profile.level = data.levelData.level;
+              profile.title = data.levelData.title;
+              window.AniPulseLevelSystem.saveUserProfile(profile);
+              window.AniPulseLevelSystem.updateAllLevelUI();
+            }
+          }
+
+          this.lastSyncTime = new Date().toISOString();
+          localStorage.setItem('lastSyncTime', this.lastSyncTime);
+          this.showSyncNotification(`✅ Downloaded ${data.animeData?.length || 0} anime entries from cloud!`, 'success');
+
+          if (typeof updateAllComponents === 'function') updateAllComponents();
+          if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+            setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
+          }
+          return { success: true, data };
+        } else {
+          // Local has more data than cloud – push local
+          console.log(`📤 Local has ${localAnimeCount} anime, cloud has ${data.animeData?.length || 0} – pushing local to cloud.`);
+          await this.uploadAllLocalData();
+          return { success: true, message: 'Local data pushed to cloud' };
         }
-
-        this.lastSyncTime = new Date().toISOString();
-        localStorage.setItem('lastSyncTime', this.lastSyncTime);
-        this.showSyncNotification(`✅ Downloaded ${data.animeData?.length || 0} anime entries from cloud!`, 'success');
-
-        if (typeof updateAllComponents === 'function') updateAllComponents();
-        return { success: true, data };
       } else {
         throw new Error(result.error || 'Failed to load data');
       }
@@ -406,7 +427,7 @@ class SyncManager {
   }
 
   // ============================================
-  // REAL-TIME SYNC (partial updates – still used for some cases)
+  // REAL-TIME SYNC (partial updates – fallback)
   // ============================================
   async saveToCloud(dataType, data) {
     const token = localStorage.getItem('authToken');
@@ -504,26 +525,10 @@ class SyncManager {
 window.syncManager = new SyncManager();
 
 // ============================================
-// INTEGRATION – Debounced full sync on any change
+// ⚠️ REMOVED CONFLICTING SAVE HOOK
 // ============================================
-let syncDebounceTimeout = null;
 
-const originalSaveData = window.saveData;
-if (originalSaveData) {
-  window.saveData = function (...args) {
-    // 1. Call original save to update localStorage
-    originalSaveData.apply(this, args);
-
-    // 2. Trigger full cloud sync (debounced)
-    if (window.syncManager && navigator.onLine && localStorage.getItem('authToken')) {
-      clearTimeout(syncDebounceTimeout);
-      syncDebounceTimeout = setTimeout(() => {
-        window.syncManager.uploadAllLocalData();
-        syncDebounceTimeout = null;
-      }, 3000); // wait 3 seconds after last change
-    }
-  };
-}
+console.log('✅ Sync Manager loaded (save hook removed, using dualStorage)');
 
 document.addEventListener('DOMContentLoaded', () => {
   const cloudSyncEnabled = localStorage.getItem('cloudSyncEnabled') === 'true';
@@ -533,5 +538,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 });
-
-console.log('✅ Sync Manager loaded (full sync on any change)');

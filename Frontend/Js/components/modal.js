@@ -253,13 +253,24 @@
         if (typeof window.saveData === 'function') window.saveData();
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { }
 
+        // ---- Force immediate sync after deletion ----
+        triggerImmediateSync();
+
         window.closeModal(document.getElementById('addAnimeModal'));
         resetEditingState();
         if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
         if (typeof showToast === 'function') showToast('Anime deleted successfully!', 'success');
     };
 
-    // --- Handle add/update form submit (FIXED: preserve actualFinishDate on edit) ---
+    // ---- Helper: trigger immediate sync ----
+    function triggerImmediateSync() {
+        if (window.dualStorage && navigator.onLine && localStorage.getItem('authToken')) {
+            console.log('🔄 Forcing immediate sync after data change...');
+            window.dualStorage.syncToCloud();
+        }
+    }
+
+    // --- Handle add/update form submit ---
     window.handleAddAnime = function (e) {
         e.preventDefault();
 
@@ -354,6 +365,9 @@
             if (typeof window.saveData === 'function') window.saveData();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
+            // ---- Force immediate sync ----
+            triggerImmediateSync();
+
         } else {
             // ---- Add new anime ----
             if (status === 'Completed') {
@@ -402,6 +416,9 @@
             window.animeData.push(newAnime);
             if (typeof window.saveData === 'function') window.saveData();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
+
+            // ---- Force immediate sync ----
+            triggerImmediateSync();
         }
 
         window.closeModal(document.getElementById('addAnimeModal'));
@@ -635,7 +652,7 @@
     window.initModalSystem = initModalSystem;
 
     // ============================================
-    // SELECT ANIME FROM SEARCH (FIXED: sync progress)
+    // SELECT ANIME FROM SEARCH
     // ============================================
     window.selectAnimeFromSearch = function (anime) {
         console.log('🎯 Selecting anime:', anime.title);

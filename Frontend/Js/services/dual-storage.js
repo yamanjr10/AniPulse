@@ -1,5 +1,5 @@
 // ============================================
-// DUAL STORAGE MANAGER – with timestamp check
+// DUAL STORAGE MANAGER – Primary sync system
 // ============================================
 
 class DualStorageManager {
@@ -15,6 +15,7 @@ class DualStorageManager {
         this.checkApiReady();
         window.addEventListener('online', () => this.handleOnline());
         window.addEventListener('offline', () => this.handleOffline());
+        // Auto-sync every 2 minutes
         setInterval(() => this.autoSync(), 120000);
         console.log('💾 Dual Storage Manager initialized');
     }
@@ -87,6 +88,9 @@ class DualStorageManager {
         };
     }
 
+    // ============================================
+    // SYNC TO CLOUD – Reads latest data from localStorage
+    // ============================================
     async syncToCloud() {
         const token = this.getToken();
         if (!token) {
@@ -103,22 +107,31 @@ class DualStorageManager {
         this.showSyncStatus('Syncing to cloud...', 'info');
 
         try {
-            let userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            // ⭐ Read data directly from localStorage at sync time
             const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
             const activityLog = JSON.parse(localStorage.getItem('activityLog') || '[]');
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements') || '[]');
+            const userXpHistory = JSON.parse(localStorage.getItem('userXpHistory') || '[]');
+            const animeContributions = JSON.parse(localStorage.getItem('animeContributions') || '{}');
+            const appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}');
             const levelData = this.getLevelData();
+
+            const now = new Date().toISOString();
 
             const allData = {
                 animeData,
                 activityLog,
                 userProfile,
-                unlockedAchievements: JSON.parse(localStorage.getItem('unlockedAchievements') || '[]'),
-                userXpHistory: JSON.parse(localStorage.getItem('userXpHistory') || '[]'),
-                animeContributions: JSON.parse(localStorage.getItem('animeContributions') || '{}'),
-                appSettings: JSON.parse(localStorage.getItem('appSettings') || '{}'),
+                unlockedAchievements,
+                userXpHistory,
+                animeContributions,
+                appSettings,
                 levelData,
-                lastModified: new Date().toISOString()
+                lastModified: now
             };
+
+            console.log(`📤 Syncing ${animeData.length} anime to cloud...`);
 
             const response = await fetch(`${window.API_BASE_URL}/api/sync/sync-all`, {
                 method: 'POST',
@@ -136,11 +149,12 @@ class DualStorageManager {
 
             const result = await response.json();
             if (result.success) {
-                this.lastSyncTime = new Date().toISOString();
-                localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
+                this.lastSyncTime = now;
+                localStorage.setItem('lastCloudSyncTime', now);
                 localStorage.setItem('cloudSyncEnabled', 'true');
-                this.showSyncStatus(`✅ Synced Level ${levelData.level} (${levelData.totalXP} XP)`, 'success');
-                console.log('✅ Full sync completed (avatar included)');
+                localStorage.setItem('animeDataLastModified', now);
+                this.showSyncStatus(`✅ Synced ${animeData.length} anime (Level ${levelData.level})`, 'success');
+                console.log('✅ Full sync completed');
                 return true;
             } else {
                 throw new Error(result.error || 'Sync failed');
@@ -154,6 +168,9 @@ class DualStorageManager {
         }
     }
 
+    // ============================================
+    // LOAD FROM CLOUD – With timestamp check
+    // ============================================
     async loadFromCloud() {
         const token = this.getToken();
         if (!token) {
@@ -179,71 +196,89 @@ class DualStorageManager {
             if (result.success && result.data) {
                 const { data, lastModified } = result;
 
-                // ---- TIMESTAMP CHECK: compare local vs cloud freshness ----
+                // ⭐ Timestamp check: compare local vs cloud freshness
                 const localTimestamp = localStorage.getItem('animeDataLastModified');
-                if (localTimestamp && lastModified && new Date(localTimestamp) > new Date(lastModified)) {
+                const localAnimeCount = JSON.parse(localStorage.getItem('animeData') || '[]').length;
+
+                // If local has data and is newer than cloud, push local to cloud
+                if (localTimestamp && lastModified && new Date(localTimestamp) > new Date(lastModified) && localAnimeCount > 0) {
                     console.log('📌 Local data is newer than cloud – keeping local and pushing to cloud.');
-                    await this.syncToCloud(); // pushes local to cloud
+                    await this.syncToCloud();
                     return { success: true, message: 'Local data kept, cloud updated' };
                 }
 
-                // Otherwise, overwrite local with cloud data
-                this.backupLocalData();
+                // If cloud has no data but local has data, push local to cloud
+                if ((!data.animeData || data.animeData.length === 0) && localAnimeCount > 0) {
+                    console.log('📌 Cloud is empty, but local has data – pushing local to cloud.');
+                    await this.syncToCloud();
+                    return { success: true, message: 'Local data pushed to cloud' };
+                }
 
-                if (data.animeData) {
-                    localStorage.setItem('animeData', JSON.stringify(data.animeData));
-                    localStorage.setItem('animeDataLastModified', lastModified || new Date().toISOString());
-                    window.animeData = data.animeData;
-                }
-                if (data.activityLog) {
-                    localStorage.setItem('activityLog', JSON.stringify(data.activityLog));
-                    window.activityLog = data.activityLog;
-                }
-                if (data.achievements) {
-                    localStorage.setItem('unlockedAchievements', JSON.stringify(data.achievements));
-                }
-                if (data.xpHistory) {
-                    localStorage.setItem('userXpHistory', JSON.stringify(data.xpHistory));
-                }
-                if (data.contributions) {
-                    localStorage.setItem('animeContributions', JSON.stringify(data.contributions));
-                }
-                if (data.userProfile) {
-                    const existing = JSON.parse(localStorage.getItem('userProfile') || '{}');
-                    const merged = { ...existing, ...data.userProfile };
-                    localStorage.setItem('userProfile', JSON.stringify(merged));
-                    const user = JSON.parse(localStorage.getItem('user') || '{}');
-                    user.name = merged.name || merged.username || user.name;
-                    user.username = merged.username || merged.name || user.username;
-                    user.avatar = merged.avatar || user.avatar;
-                    localStorage.setItem('user', JSON.stringify(user));
-                    if (typeof updateSidebarUserInfo === 'function') {
-                        updateSidebarUserInfo();
+                // If cloud has more or equal data, overwrite local
+                if (data.animeData && data.animeData.length >= localAnimeCount) {
+                    console.log(`📥 Downloading ${data.animeData.length} anime from cloud...`);
+                    this.backupLocalData();
+
+                    if (data.animeData) {
+                        localStorage.setItem('animeData', JSON.stringify(data.animeData));
+                        localStorage.setItem('animeDataLastModified', lastModified || new Date().toISOString());
+                        window.animeData = data.animeData;
                     }
-                }
-                if (data.levelData) {
-                    localStorage.setItem('userLevel', data.levelData.level.toString());
-                    localStorage.setItem('userLevelTitle', data.levelData.title);
-                    localStorage.setItem('userXP', data.levelData.totalXP.toString());
-                    if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.saveUserProfile === 'function') {
-                        const profile = window.AniPulseLevelSystem.getUserProfile();
-                        profile.totalExp = data.levelData.totalXP;
-                        profile.level = data.levelData.level;
-                        profile.title = data.levelData.title;
-                        window.AniPulseLevelSystem.saveUserProfile(profile);
-                        window.AniPulseLevelSystem.updateAllLevelUI();
+                    if (data.activityLog) {
+                        localStorage.setItem('activityLog', JSON.stringify(data.activityLog));
+                        window.activityLog = data.activityLog;
                     }
-                }
+                    if (data.achievements) {
+                        localStorage.setItem('unlockedAchievements', JSON.stringify(data.achievements));
+                    }
+                    if (data.xpHistory) {
+                        localStorage.setItem('userXpHistory', JSON.stringify(data.xpHistory));
+                    }
+                    if (data.contributions) {
+                        localStorage.setItem('animeContributions', JSON.stringify(data.contributions));
+                    }
+                    if (data.userProfile) {
+                        const existing = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                        const merged = { ...existing, ...data.userProfile };
+                        localStorage.setItem('userProfile', JSON.stringify(merged));
+                        const user = JSON.parse(localStorage.getItem('user') || '{}');
+                        user.name = merged.name || merged.username || user.name;
+                        user.username = merged.username || merged.name || user.username;
+                        user.avatar = merged.avatar || user.avatar;
+                        localStorage.setItem('user', JSON.stringify(user));
+                        if (typeof updateSidebarUserInfo === 'function') {
+                            updateSidebarUserInfo();
+                        }
+                    }
+                    if (data.levelData) {
+                        localStorage.setItem('userLevel', data.levelData.level.toString());
+                        localStorage.setItem('userLevelTitle', data.levelData.title);
+                        localStorage.setItem('userXP', data.levelData.totalXP.toString());
+                        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.saveUserProfile === 'function') {
+                            const profile = window.AniPulseLevelSystem.getUserProfile();
+                            profile.totalExp = data.levelData.totalXP;
+                            profile.level = data.levelData.level;
+                            profile.title = data.levelData.title;
+                            window.AniPulseLevelSystem.saveUserProfile(profile);
+                            window.AniPulseLevelSystem.updateAllLevelUI();
+                        }
+                    }
 
-                this.lastSyncTime = new Date().toISOString();
-                localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
-                this.showSyncStatus(`✅ Loaded Level ${data.levelData?.level || 1} from cloud!`, 'success');
+                    this.lastSyncTime = new Date().toISOString();
+                    localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
+                    this.showSyncStatus(`✅ Loaded ${data.animeData?.length || 0} anime from cloud!`, 'success');
 
-                if (typeof updateAllComponents === 'function') updateAllComponents();
-                if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
-                    setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
+                    if (typeof updateAllComponents === 'function') updateAllComponents();
+                    if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+                        setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
+                    }
+                    return { success: true, data };
+                } else {
+                    // Local has more data than cloud – push local
+                    console.log(`📤 Local has ${localAnimeCount} anime, cloud has ${data.animeData?.length || 0} – pushing local to cloud.`);
+                    await this.syncToCloud();
+                    return { success: true, message: 'Local data pushed to cloud' };
                 }
-                return { success: true, data };
             } else {
                 throw new Error(result.error || 'No data returned');
             }
@@ -256,6 +291,9 @@ class DualStorageManager {
         }
     }
 
+    // ============================================
+    // UTILITIES
+    // ============================================
     backupLocalData() {
         const backup = {
             timestamp: new Date().toISOString(),
