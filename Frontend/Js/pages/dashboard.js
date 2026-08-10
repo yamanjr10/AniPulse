@@ -810,6 +810,69 @@
         }
     };
 
+    // ============================================
+    // STREAK STYLING – NEW FUNCTION
+    // ============================================
+
+    function updateStreakStyle(streak) {
+        const streakInfo = document.getElementById('streakInfo');
+        const streakFire = document.getElementById('streakFire');
+        if (!streakInfo || !streakFire) return;
+
+        let color, textShadow, filter;
+
+        if (streak < 3) {
+            // Gray
+            color = '#9CA3AF';
+            textShadow = 'none';
+            filter = 'none';
+        } else if (streak < 10) {
+            // Yellow / Orange
+            color = '#FFB000';
+            textShadow = '0 0 8px rgba(255, 176, 0, 0.3)';
+            filter = 'drop-shadow(0 0 6px rgba(255, 176, 0, 0.4))';
+        } else if (streak < 30) {
+            // Orange
+            color = '#FF6B00';
+            textShadow = '0 0 10px rgba(255, 107, 0, 0.4)';
+            filter = 'drop-shadow(0 0 8px rgba(255, 107, 0, 0.5))';
+        } else if (streak < 100) {
+            // Pink
+            color = '#FF3B81';
+            textShadow = '0 0 12px rgba(255, 59, 129, 0.5)';
+            filter = 'drop-shadow(0 0 10px rgba(255, 59, 129, 0.6))';
+        } else if (streak < 200) {
+            // Magenta
+            color = '#D000FF';
+            textShadow = '0 0 15px rgba(208, 0, 255, 0.6)';
+            filter = 'drop-shadow(0 0 12px rgba(208, 0, 255, 0.7))';
+        } else {
+            // Purple
+            color = '#8B5CF6';
+            textShadow = '0 0 20px rgba(139, 92, 246, 0.7)';
+            filter = 'drop-shadow(0 0 15px rgba(139, 92, 246, 0.8))';
+        }
+
+        // Apply inline styles (highest specificity)
+        streakInfo.style.color = color;
+        streakInfo.style.textShadow = textShadow;
+        streakFire.style.color = color;
+        streakFire.style.filter = filter;
+
+        // Add transitions only once
+        if (!streakInfo.style.transition) {
+            streakInfo.style.transition = 'color 0.4s ease, text-shadow 0.4s ease';
+            streakFire.style.transition = 'color 0.4s ease, filter 0.4s ease, transform 0.4s ease';
+        }
+
+        // Fire icon subtle scaling based on streak
+        if (streak >= 100) {
+            streakFire.style.transform = 'scale(1.05)';
+        } else {
+            streakFire.style.transform = 'scale(1)';
+        }
+    }
+
     // --- Greeting banner ---
     function initGreeting() {
         const banner = document.getElementById('greetingBanner');
@@ -840,6 +903,8 @@
         const today = new Date().toDateString();
         let streak = parseInt(localStorage.getItem('streak') || '0');
         const lastActive = localStorage.getItem('lastActive');
+
+        // ---- STREAK CALCULATION (unchanged) ----
         if (lastActive !== today) {
             if (lastActive === new Date(Date.now() - 86400000).toDateString()) {
                 streak += 1;
@@ -867,6 +932,9 @@
             liveClock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             streakInfo.textContent = ` ${streak}-day streak`;
             dailyQuote.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+
+            // ---- NEW: Apply streak styling ----
+            updateStreakStyle(streak);
         }
 
         updateGreeting();

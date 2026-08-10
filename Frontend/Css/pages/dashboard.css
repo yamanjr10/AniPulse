@@ -4024,3 +4024,46 @@
     display: inline-block;
 }
 
+/* ============================================
+   STREAK STYLING – Dynamic colors via JS
+   ============================================ */
+
+.greeting-banner .stat-item #streakFire,
+.greeting-banner .stat-item #streakInfo {
+    transition: color 0.4s ease, text-shadow 0.4s ease, filter 0.4s ease, transform 0.4s ease;
+}
+
+.greeting-banner .stat-item #streakFire {
+    font-size: 1rem;
+}
+
+.greeting-banner .stat-item #streakInfo {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+[data-theme="light"] .greeting-banner .stat-item #streakFire {
+    color: var(--streak-color, #F97316);
+}
+
+.greeting-banner .stat-item i:not(#streakFire) {
+    color: inherit;
+}
+
+.greeting-banner .stat-item #streakFire[style*="scale(1.05)"],
+.greeting-banner .stat-item #streakFire[style*="scale(1.08)"] {
+    animation: streakPulse 2s ease-in-out infinite;
+}
+
+@keyframes streakPulse {
+
+    0%,
+    100% {
+        transform: scale(var(--streak-scale, 1));
+    }
+
+    50% {
+        transform: scale(calc(var(--streak-scale, 1) * 1.05));
+    }
+}
+
