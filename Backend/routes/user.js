@@ -372,6 +372,4 @@ async function createNotification(userId, type, title, message, data = null) {
 }
 module.exports.createNotification = createNotification;
 
-// (Removed POST /avatar base64 endpoint – use upload.js instead)
-
 module.exports = router;
