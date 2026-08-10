@@ -1,5 +1,5 @@
 // ============================================
-// DUAL STORAGE MANAGER – LocalStorage + Firestore (auto‑load, name fix)
+// DUAL STORAGE MANAGER – with timestamp check
 // ============================================
 
 class DualStorageManager {
@@ -116,7 +116,8 @@ class DualStorageManager {
                 userXpHistory: JSON.parse(localStorage.getItem('userXpHistory') || '[]'),
                 animeContributions: JSON.parse(localStorage.getItem('animeContributions') || '{}'),
                 appSettings: JSON.parse(localStorage.getItem('appSettings') || '{}'),
-                levelData
+                levelData,
+                lastModified: new Date().toISOString()
             };
 
             const response = await fetch(`${window.API_BASE_URL}/api/sync/sync-all`, {
@@ -176,11 +177,22 @@ class DualStorageManager {
 
             const result = await response.json();
             if (result.success && result.data) {
-                const { data } = result;
+                const { data, lastModified } = result;
+
+                // ---- TIMESTAMP CHECK: compare local vs cloud freshness ----
+                const localTimestamp = localStorage.getItem('animeDataLastModified');
+                if (localTimestamp && lastModified && new Date(localTimestamp) > new Date(lastModified)) {
+                    console.log('📌 Local data is newer than cloud – keeping local and pushing to cloud.');
+                    await this.syncToCloud(); // pushes local to cloud
+                    return { success: true, message: 'Local data kept, cloud updated' };
+                }
+
+                // Otherwise, overwrite local with cloud data
                 this.backupLocalData();
 
                 if (data.animeData) {
                     localStorage.setItem('animeData', JSON.stringify(data.animeData));
+                    localStorage.setItem('animeDataLastModified', lastModified || new Date().toISOString());
                     window.animeData = data.animeData;
                 }
                 if (data.activityLog) {
@@ -197,11 +209,9 @@ class DualStorageManager {
                     localStorage.setItem('animeContributions', JSON.stringify(data.contributions));
                 }
                 if (data.userProfile) {
-                    // Merge with existing local profile
                     const existing = JSON.parse(localStorage.getItem('userProfile') || '{}');
                     const merged = { ...existing, ...data.userProfile };
                     localStorage.setItem('userProfile', JSON.stringify(merged));
-                    // Update user object with name
                     const user = JSON.parse(localStorage.getItem('user') || '{}');
                     user.name = merged.name || merged.username || user.name;
                     user.username = merged.username || merged.name || user.username;
@@ -215,8 +225,6 @@ class DualStorageManager {
                     localStorage.setItem('userLevel', data.levelData.level.toString());
                     localStorage.setItem('userLevelTitle', data.levelData.title);
                     localStorage.setItem('userXP', data.levelData.totalXP.toString());
-                    localStorage.setItem('userTotalAnime', data.levelData.totalAnime.toString());
-                    localStorage.setItem('userTotalHours', data.levelData.totalHours.toString());
                     if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.saveUserProfile === 'function') {
                         const profile = window.AniPulseLevelSystem.getUserProfile();
                         profile.totalExp = data.levelData.totalXP;

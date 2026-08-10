@@ -5,7 +5,9 @@ const router = express.Router();
 
 router.use(express.json({ limit: '50mb' }));
 
-// Sync all data
+// ============================================
+// SYNC ALL DATA (Upload to cloud)
+// ============================================
 router.post('/sync-all', verifyToken, async (req, res) => {
   const { animeData, activityLog, userProfile, unlockedAchievements, userXpHistory, animeContributions, appSettings, levelData } = req.body;
   const userId = req.userId;
@@ -13,6 +15,7 @@ router.post('/sync-all', verifyToken, async (req, res) => {
     console.log(`🔄 Syncing all data for user: ${userId}`);
     const promises = [];
 
+    // Save Anime List – includes lastUpdated timestamp
     if (animeData && Array.isArray(animeData)) {
       promises.push(
         db.collection(COLLECTIONS.ANIME_LISTS).doc(userId).set({
@@ -22,6 +25,8 @@ router.post('/sync-all', verifyToken, async (req, res) => {
         })
       );
     }
+
+    // Save Activity Log
     if (activityLog && Array.isArray(activityLog)) {
       promises.push(
         db.collection(COLLECTIONS.ACTIVITY_LOGS).doc(userId).set({
@@ -31,6 +36,8 @@ router.post('/sync-all', verifyToken, async (req, res) => {
         })
       );
     }
+
+    // Save User Profile (without avatar)
     if (userProfile) {
       const cleanProfile = { ...userProfile };
       delete cleanProfile.avatar;
@@ -41,6 +48,8 @@ router.post('/sync-all', verifyToken, async (req, res) => {
         }, { merge: true })
       );
     }
+
+    // Save Achievements
     if (unlockedAchievements && Array.isArray(unlockedAchievements)) {
       promises.push(
         db.collection(COLLECTIONS.ACHIEVEMENTS).doc(userId).set({
@@ -50,6 +59,8 @@ router.post('/sync-all', verifyToken, async (req, res) => {
         })
       );
     }
+
+    // Save XP History
     if (userXpHistory && Array.isArray(userXpHistory)) {
       promises.push(
         db.collection(COLLECTIONS.XP_HISTORY).doc(userId).set({
@@ -58,6 +69,8 @@ router.post('/sync-all', verifyToken, async (req, res) => {
         })
       );
     }
+
+    // Save Contributions (Heatmap)
     if (animeContributions) {
       promises.push(
         db.collection(COLLECTIONS.CONTRIBUTIONS).doc(userId).set({
@@ -66,6 +79,8 @@ router.post('/sync-all', verifyToken, async (req, res) => {
         })
       );
     }
+
+    // Save Settings
     if (appSettings) {
       promises.push(
         db.collection(COLLECTIONS.SETTINGS).doc(userId).set({
@@ -74,6 +89,8 @@ router.post('/sync-all', verifyToken, async (req, res) => {
         })
       );
     }
+
+    // Save Level Data – critical for ranking
     if (levelData) {
       const { getLevelFromXP, getTitleForLevel } = require('../utils/levelSystem');
       const level = levelData.level || getLevelFromXP(levelData.totalXP || 0);
@@ -100,32 +117,49 @@ router.post('/sync-all', verifyToken, async (req, res) => {
   }
 });
 
-// Load all data
+// ============================================
+// LOAD ALL DATA (Download from cloud) – includes lastModified
+// ============================================
 router.get('/load-all', verifyToken, async (req, res) => {
   const userId = req.userId;
   try {
     const data = {};
-    const animeDoc = await db.collection(COLLECTIONS.ANIME_LISTS).doc(userId).get();
-    data.animeData = animeDoc.exists ? animeDoc.data().animeList || [] : [];
+    let lastModified = null;
 
+    // Anime List – capture lastUpdated as lastModified
+    const animeDoc = await db.collection(COLLECTIONS.ANIME_LISTS).doc(userId).get();
+    if (animeDoc.exists) {
+      data.animeData = animeDoc.data().animeList || [];
+      lastModified = animeDoc.data().lastUpdated || null;
+    } else {
+      data.animeData = [];
+    }
+
+    // Activity Log
     const activityDoc = await db.collection(COLLECTIONS.ACTIVITY_LOGS).doc(userId).get();
     data.activityLog = activityDoc.exists ? activityDoc.data().activities || [] : [];
 
+    // User Profile
     const profileDoc = await db.collection(COLLECTIONS.USER_PROFILES).doc(userId).get();
     data.userProfile = profileDoc.exists ? profileDoc.data() : null;
 
+    // Achievements
     const achievementsDoc = await db.collection(COLLECTIONS.ACHIEVEMENTS).doc(userId).get();
     data.unlockedAchievements = achievementsDoc.exists ? achievementsDoc.data().unlocked || [] : [];
 
+    // XP History
     const xpDoc = await db.collection(COLLECTIONS.XP_HISTORY).doc(userId).get();
     data.userXpHistory = xpDoc.exists ? xpDoc.data().history || [] : [];
 
+    // Contributions
     const contributionsDoc = await db.collection(COLLECTIONS.CONTRIBUTIONS).doc(userId).get();
     data.animeContributions = contributionsDoc.exists ? contributionsDoc.data().contributions || {} : {};
 
+    // Settings
     const settingsDoc = await db.collection(COLLECTIONS.SETTINGS).doc(userId).get();
     data.appSettings = settingsDoc.exists ? settingsDoc.data().settings || {} : {};
 
+    // Level Data
     const userDoc = await db.collection(COLLECTIONS.USERS).doc(userId).get();
     if (userDoc.exists) {
       data.levelData = {
@@ -138,14 +172,18 @@ router.get('/load-all', verifyToken, async (req, res) => {
     } else {
       data.levelData = { totalXP: 0, level: 1, title: 'Newbie', totalAnime: 0, totalHours: 0 };
     }
-    res.json({ success: true, data });
+
+    // Return the data and the lastModified timestamp (from animeLists)
+    res.json({ success: true, data, lastModified });
   } catch (error) {
     console.error('Load error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Sync status
+// ============================================
+// SYNC STATUS – Check if user has cloud data
+// ============================================
 router.get('/status', verifyToken, async (req, res) => {
   const userId = req.userId;
   try {

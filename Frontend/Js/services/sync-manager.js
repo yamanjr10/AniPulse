@@ -1,5 +1,5 @@
 // ============================================
-// SYNC MANAGER – Reduced Polling, Debounced, Once‑per‑Session Smart Sync
+// SYNC MANAGER – Full Cloud Sync on Any Change
 // ============================================
 
 class SyncManager {
@@ -14,7 +14,7 @@ class SyncManager {
   init() {
     window.addEventListener('online', () => this.handleOnline());
     window.addEventListener('offline', () => this.handleOffline());
-    // Sync every 10 minutes instead of 5
+    // Sync every 10 minutes
     setInterval(() => {
       if (navigator.onLine && localStorage.getItem('authToken')) {
         this.syncToCloud();
@@ -23,7 +23,7 @@ class SyncManager {
     console.log('🔄 Sync Manager initialized');
   }
 
-  // ---- Debounced sync to cloud ----
+  // ---- Debounced full sync ----
   syncToCloud() {
     if (this.syncDebounceTimeout) {
       clearTimeout(this.syncDebounceTimeout);
@@ -38,7 +38,7 @@ class SyncManager {
     });
   }
 
-  // ---- Compute checksum ----
+  // ---- Checksum for merge decisions ----
   getDataChecksum() {
     const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
     const sorted = [...animeData].sort((a, b) => (a.id || 0) - (b.id || 0));
@@ -102,7 +102,8 @@ class SyncManager {
           totalXP: parseInt(localStorage.getItem('userXP') || '0'),
           level: parseInt(localStorage.getItem('userLevel') || '1'),
           title: localStorage.getItem('userLevelTitle') || 'Newbie'
-        }
+        },
+        lastModified: new Date().toISOString()
       };
 
       const response = await fetch(`${window.API_BASE_URL}/api/sync/sync-all`, {
@@ -160,11 +161,22 @@ class SyncManager {
 
       const result = await response.json();
       if (result.success) {
-        const { data } = result;
+        const { data, lastModified } = result;
+
+        // ---- Timestamp check: compare local vs cloud freshness ----
+        const localTimestamp = localStorage.getItem('animeDataLastModified');
+        if (localTimestamp && lastModified && new Date(localTimestamp) > new Date(lastModified)) {
+          console.log('📌 Local data is newer than cloud – keeping local and pushing to cloud.');
+          await this.uploadAllLocalData();
+          return { success: true, message: 'Local data kept, cloud updated' };
+        }
+
+        // If cloud is newer or no local data, overwrite local
         this.backupLocalData();
 
         if (data.animeData) {
           localStorage.setItem('animeData', JSON.stringify(data.animeData));
+          localStorage.setItem('animeDataLastModified', lastModified || new Date().toISOString());
           window.animeData = data.animeData;
         }
         if (data.activityLog) {
@@ -181,11 +193,9 @@ class SyncManager {
           localStorage.setItem('animeContributions', JSON.stringify(data.contributions));
         }
         if (data.userProfile) {
-          // Merge with existing local profile
           const existing = JSON.parse(localStorage.getItem('userProfile') || '{}');
           const merged = { ...existing, ...data.userProfile };
           localStorage.setItem('userProfile', JSON.stringify(merged));
-          // Update user object
           const user = JSON.parse(localStorage.getItem('user') || '{}');
           user.name = merged.name || merged.username || user.name;
           user.username = merged.username || merged.name || user.username;
@@ -231,7 +241,6 @@ class SyncManager {
   // SMART SYNC – Once per session
   // ============================================
   async smartSync() {
-    // Skip if already done this session
     if (window._smartSyncDone) {
       console.log('ℹ️ Smart sync already done this session, skipping.');
       return { success: true, message: 'Already synced' };
@@ -397,7 +406,7 @@ class SyncManager {
   }
 
   // ============================================
-  // REAL-TIME SYNC
+  // REAL-TIME SYNC (partial updates – still used for some cases)
   // ============================================
   async saveToCloud(dataType, data) {
     const token = localStorage.getItem('authToken');
@@ -495,28 +504,34 @@ class SyncManager {
 window.syncManager = new SyncManager();
 
 // ============================================
-// INTEGRATION WITH EXISTING CODE
+// INTEGRATION – Debounced full sync on any change
 // ============================================
+let syncDebounceTimeout = null;
+
 const originalSaveData = window.saveData;
 if (originalSaveData) {
-  window.saveData = function () {
-    originalSaveData();
+  window.saveData = function (...args) {
+    // 1. Call original save to update localStorage
+    originalSaveData.apply(this, args);
+
+    // 2. Trigger full cloud sync (debounced)
     if (window.syncManager && navigator.onLine && localStorage.getItem('authToken')) {
-      const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
-      window.syncManager.saveToCloud('animeData', animeData);
+      clearTimeout(syncDebounceTimeout);
+      syncDebounceTimeout = setTimeout(() => {
+        window.syncManager.uploadAllLocalData();
+        syncDebounceTimeout = null;
+      }, 3000); // wait 3 seconds after last change
     }
   };
 }
 
-// Only run smart sync once per session, after a delay
 document.addEventListener('DOMContentLoaded', () => {
   const cloudSyncEnabled = localStorage.getItem('cloudSyncEnabled') === 'true';
   if (localStorage.getItem('authToken') && cloudSyncEnabled && navigator.onLine) {
-    // Use a flag to prevent multiple calls
     if (!window._smartSyncDone) {
       setTimeout(() => window.syncManager?.smartSync(), 3000);
     }
   }
 });
 
-console.log('✅ Sync Manager loaded');
+console.log('✅ Sync Manager loaded (full sync on any change)');
