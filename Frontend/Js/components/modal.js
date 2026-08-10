@@ -5,10 +5,8 @@
 (function () {
     'use strict';
 
-    // --- Store scroll position per modal (by id) ---
     let modalScrollPositions = {};
 
-    // --- Helpers for duration defaults ---
     function getDefaultDuration(type) {
         switch (type) {
             case 'Movie': return 120;
@@ -24,18 +22,15 @@
         return type === 'Movie';
     }
 
-    // ---- Immediate sync helper (with delay) ----
     function triggerImmediateSync() {
         if (window.dualStorage && navigator.onLine && localStorage.getItem('authToken')) {
             console.log('🔄 Forcing immediate sync after data change...');
-            // Small delay to ensure localStorage is fully written
             setTimeout(() => {
                 window.dualStorage.syncToCloud();
             }, 200);
         }
     }
 
-    // ---- Before unload sync (beacon) ----
     function setupBeforeUnloadSync() {
         window.addEventListener('beforeunload', function () {
             if (window.dualStorage && localStorage.getItem('authToken')) {
@@ -61,14 +56,11 @@
                         new Blob([JSON.stringify(data)], { type: 'application/json' })
                     );
                     console.log('📤 Beforeunload beacon sent');
-                } catch (e) {
-                    // ignore
-                }
+                } catch (e) { }
             }
         });
     }
 
-    // --- Modal open/close (with scroll preservation) ---
     window.openModal = function (modalElement) {
         if (!modalElement) return;
         const scrollY = window.scrollY;
@@ -115,7 +107,6 @@
         console.log('✅ Modal closed');
     };
 
-    // --- Reset editing state ---
     function resetEditingState() {
         window.isEditing = false;
         window.currentEditId = null;
@@ -185,7 +176,6 @@
         }
     }
 
-    // --- Edit anime ---
     window.editAnime = function (id) {
         console.log('✏️ Editing anime with ID:', id);
         const anime = window.animeData.find(a => a.id == id);
@@ -274,7 +264,6 @@
         }
     };
 
-    // --- Delete anime ---
     window.deleteAnime = function () {
         if (!window.currentEditId) {
             if (typeof showToast === 'function') showToast('No anime selected to delete', 'error');
@@ -288,6 +277,7 @@
         }
         window.animeData = window.animeData.filter(a => a.id != window.currentEditId);
         if (typeof window.saveData === 'function') window.saveData();
+        window.setLocalDirty(); // <-- mark dirty
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { }
 
         triggerImmediateSync();
@@ -298,7 +288,6 @@
         if (typeof showToast === 'function') showToast('Anime deleted successfully!', 'success');
     };
 
-    // --- Handle add/update form submit ---
     window.handleAddAnime = function (e) {
         e.preventDefault();
 
@@ -387,6 +376,7 @@
             }
 
             if (typeof window.saveData === 'function') window.saveData();
+            window.setLocalDirty(); // <-- mark dirty
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
             triggerImmediateSync();
 
@@ -435,6 +425,7 @@
             };
             window.animeData.push(newAnime);
             if (typeof window.saveData === 'function') window.saveData();
+            window.setLocalDirty(); // <-- mark dirty
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
             triggerImmediateSync();
         }
@@ -445,7 +436,6 @@
         if (typeof showToast === 'function') showToast(toastMessage, 'success');
     };
 
-    // --- Sync progress max with total episodes ---
     function syncProgressMax() {
         const episodesInput = document.getElementById('animeEpisodes');
         const progressInput = document.getElementById('animeProgress');
@@ -458,7 +448,6 @@
         }
     }
 
-    // --- Handle type change to adjust duration field ---
     function handleTypeChange() {
         const typeSelect = document.getElementById('animeType');
         const durationInput = document.getElementById('animeDuration');
@@ -480,7 +469,6 @@
         durationInput.disabled = !editable;
     }
 
-    // --- Table row click handler ---
     function attachTableClickHandler() {
         const tableBody = document.getElementById('anime-table-body');
         if (!tableBody) {
@@ -510,7 +498,6 @@
         tableBody._clickHandler = clickHandler;
     }
 
-    // --- Setup modal close handlers ---
     function setupModalHandlers() {
         const addModal = document.getElementById('addAnimeModal');
         if (addModal) {
@@ -578,7 +565,6 @@
         }
     }
 
-    // --- Floating add button ---
     function setupFloatingButton() {
         const floatBtn = document.getElementById('floatingAddAnimeBtn');
         if (!floatBtn) return;
@@ -591,7 +577,6 @@
         });
     }
 
-    // --- Main add button ---
     function setupAddAnimeButton() {
         const btn = document.getElementById('addAnimeBtn');
         if (!btn) return;
@@ -605,7 +590,6 @@
         });
     }
 
-    // --- Open add anime modal ---
     window.openAddAnimeModal = function () {
         const addModal = document.getElementById('addAnimeModal');
         if (!addModal) {
@@ -619,14 +603,12 @@
         }
     };
 
-    // --- Form submit setup ---
     function setupFormSubmit() {
         const form = document.getElementById('addAnimeForm');
         if (!form) return;
         form.addEventListener('submit', window.handleAddAnime);
     }
 
-    // --- Escape key handler ---
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             const modal = document.getElementById('addAnimeModal');
@@ -637,14 +619,13 @@
         }
     });
 
-    // --- Init ---
     function initModalSystem() {
         console.log('🚀 Initializing modal system...');
         setupModalHandlers();
         setupAddAnimeButton();
         setupFloatingButton();
         setupFormSubmit();
-        setupBeforeUnloadSync(); // <-- ensures data is sent on tab close
+        setupBeforeUnloadSync();
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(attachTableClickHandler, 300);
@@ -657,7 +638,6 @@
 
     window.initModalSystem = initModalSystem;
 
-    // --- Select anime from search ---
     window.selectAnimeFromSearch = function (anime) {
         console.log('🎯 Selecting anime:', anime.title);
         const titleInput = document.getElementById('animeTitle');

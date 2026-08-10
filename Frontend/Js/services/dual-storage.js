@@ -167,7 +167,7 @@ class DualStorageManager {
     }
 
     // ============================================
-    // LOAD FROM CLOUD – with count safety and timestamp
+    // LOAD FROM CLOUD – with dirty flag & count safety
     // ============================================
     async loadFromCloud() {
         const token = this.getToken();
@@ -184,6 +184,14 @@ class DualStorageManager {
         this.showSyncStatus('Loading from cloud...', 'info');
 
         try {
+            // ---- If local is dirty, push to cloud and keep local ----
+            if (window.isLocalDirty && window.isLocalDirty()) {
+                console.log('📌 Local data is dirty – pushing to cloud and keeping local.');
+                await this.syncToCloud();
+                window.clearLocalDirty();
+                return { success: true, message: 'Local data kept (dirty flag)' };
+            }
+
             const response = await fetch(`${window.API_BASE_URL}/api/sync/load-all`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });

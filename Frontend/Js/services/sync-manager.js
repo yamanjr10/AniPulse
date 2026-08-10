@@ -138,7 +138,7 @@ class SyncManager {
   }
 
   // ============================================
-  // DOWNLOAD DATA FROM CLOUD – with count safety
+  // DOWNLOAD DATA FROM CLOUD – with dirty flag & count safety
   // ============================================
   async downloadCloudData() {
     const token = localStorage.getItem('authToken');
@@ -148,6 +148,14 @@ class SyncManager {
     this.showSyncNotification('Downloading your cloud data...', 'info');
 
     try {
+      // ---- If local is dirty, push to cloud and keep local ----
+      if (window.isLocalDirty && window.isLocalDirty()) {
+        console.log('📌 Local data is dirty – pushing to cloud and keeping local.');
+        await this.uploadAllLocalData();
+        window.clearLocalDirty();
+        return { success: true, message: 'Local data kept (dirty flag)' };
+      }
+
       const response = await fetch(`${window.API_BASE_URL}/api/sync/load-all`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -526,10 +534,6 @@ class SyncManager {
 
 // Initialize sync manager
 window.syncManager = new SyncManager();
-
-// ============================================
-// ⚠️ REMOVED CONFLICTING SAVE HOOK
-// ============================================
 
 console.log('✅ Sync Manager loaded (save hook removed, using dualStorage)');
 

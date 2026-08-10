@@ -23,6 +23,21 @@
         console.log('💾 Data saved to localStorage at', now);
     };
 
+    // --- Dirty flag functions ---
+    window.setLocalDirty = function () {
+        localStorage.setItem('localDirty', 'true');
+        console.log('🔴 Local data marked as dirty');
+    };
+
+    window.clearLocalDirty = function () {
+        localStorage.removeItem('localDirty');
+        console.log('🟢 Local dirty flag cleared');
+    };
+
+    window.isLocalDirty = function () {
+        return localStorage.getItem('localDirty') === 'true';
+    };
+
     // --- Log activity ---
     window.logActivity = function (action, animeTitle, timestamp) {
         const activity = {
@@ -79,5 +94,5 @@
         };
     };
 
-    console.log('✅ Data module loaded (timestamp on every save)');
+    console.log('✅ Data module loaded (timestamp + dirty flag)');
 })();
