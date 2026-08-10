@@ -167,7 +167,7 @@ class DualStorageManager {
     }
 
     // ============================================
-    // LOAD FROM CLOUD – with dirty flag & count safety
+    // LOAD FROM CLOUD – with dirty flag & cache
     // ============================================
     async loadFromCloud() {
         const token = this.getToken();
@@ -189,6 +189,12 @@ class DualStorageManager {
                 console.log('📌 Local data is dirty – pushing to cloud and keeping local.');
                 await this.syncToCloud();
                 window.clearLocalDirty();
+                // ✅ Store merge decision so the dialog doesn't appear next time
+                const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
+                if (checksum && window.syncManager) {
+                    window.syncManager.storeMergeDecision('local', checksum);
+                    console.log('📝 Stored merge decision: local');
+                }
                 return { success: true, message: 'Local data kept (dirty flag)' };
             }
 
@@ -208,6 +214,10 @@ class DualStorageManager {
                 if (localAnimeCount > cloudAnimeCount) {
                     console.log(`📌 Local has ${localAnimeCount} anime, cloud has ${cloudAnimeCount} – keeping local and pushing to cloud.`);
                     await this.syncToCloud();
+                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
+                    if (checksum && window.syncManager) {
+                        window.syncManager.storeMergeDecision('local', checksum);
+                    }
                     return { success: true, message: 'Local data kept, cloud updated' };
                 }
 
@@ -216,6 +226,10 @@ class DualStorageManager {
                 if (localTimestamp && lastModified && new Date(localTimestamp) > new Date(lastModified) && localAnimeCount > 0) {
                     console.log('📌 Local data is newer than cloud – keeping local and pushing to cloud.');
                     await this.syncToCloud();
+                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
+                    if (checksum && window.syncManager) {
+                        window.syncManager.storeMergeDecision('local', checksum);
+                    }
                     return { success: true, message: 'Local data kept, cloud updated' };
                 }
 
@@ -223,6 +237,10 @@ class DualStorageManager {
                 if ((!data.animeData || data.animeData.length === 0) && localAnimeCount > 0) {
                     console.log('📌 Cloud is empty, but local has data – pushing local to cloud.');
                     await this.syncToCloud();
+                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
+                    if (checksum && window.syncManager) {
+                        window.syncManager.storeMergeDecision('local', checksum);
+                    }
                     return { success: true, message: 'Local data pushed to cloud' };
                 }
 
@@ -276,6 +294,14 @@ class DualStorageManager {
                         }
                     }
 
+                    // After successful download, store merge decision as 'cloud' if checksums match
+                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
+                    const cloudChecksum = window.syncManager ? window.syncManager.getDataChecksumFromArray(data.animeData) : null;
+                    if (checksum && cloudChecksum && checksum === cloudChecksum && window.syncManager) {
+                        window.syncManager.storeMergeDecision('cloud', checksum);
+                        console.log('📝 Stored merge decision: cloud');
+                    }
+
                     this.lastSyncTime = new Date().toISOString();
                     localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
                     this.showSyncStatus(`✅ Loaded ${data.animeData?.length || 0} anime from cloud!`, 'success');
@@ -289,6 +315,10 @@ class DualStorageManager {
                     // Fallback: push local to cloud if local has more or equal data
                     console.log(`📤 Local has ${localAnimeCount} anime, cloud has ${cloudAnimeCount} – pushing local to cloud.`);
                     await this.syncToCloud();
+                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
+                    if (checksum && window.syncManager) {
+                        window.syncManager.storeMergeDecision('local', checksum);
+                    }
                     return { success: true, message: 'Local data pushed to cloud' };
                 }
             } else {

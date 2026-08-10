@@ -1,6 +1,5 @@
 // ============================================
 // SYNC MANAGER – Smart sync, conflict resolution, periodic sync
-// (No save hook – only dualStorage handles uploads)
 // ============================================
 
 class SyncManager {
@@ -51,6 +50,7 @@ class SyncManager {
   }
 
   getDataChecksumFromArray(data) {
+    if (!data) return null;
     const sorted = [...data].sort((a, b) => (a.id || 0) - (b.id || 0));
     const json = JSON.stringify(sorted);
     let hash = 0;
@@ -138,7 +138,7 @@ class SyncManager {
   }
 
   // ============================================
-  // DOWNLOAD DATA FROM CLOUD – with dirty flag & count safety
+  // DOWNLOAD DATA FROM CLOUD
   // ============================================
   async downloadCloudData() {
     const token = localStorage.getItem('authToken');
@@ -148,14 +148,6 @@ class SyncManager {
     this.showSyncNotification('Downloading your cloud data...', 'info');
 
     try {
-      // ---- If local is dirty, push to cloud and keep local ----
-      if (window.isLocalDirty && window.isLocalDirty()) {
-        console.log('📌 Local data is dirty – pushing to cloud and keeping local.');
-        await this.uploadAllLocalData();
-        window.clearLocalDirty();
-        return { success: true, message: 'Local data kept (dirty flag)' };
-      }
-
       const response = await fetch(`${window.API_BASE_URL}/api/sync/load-all`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -252,7 +244,7 @@ class SyncManager {
           }
           return { success: true, data };
         } else {
-          // Fallback: push local to cloud if local has more or equal data
+          // Fallback: push local to cloud
           console.log(`📤 Local has ${localAnimeCount} anime, cloud has ${cloudAnimeCount} – pushing local to cloud.`);
           await this.uploadAllLocalData();
           return { success: true, message: 'Local data pushed to cloud' };
@@ -270,7 +262,7 @@ class SyncManager {
   }
 
   // ============================================
-  // SMART SYNC – Once per session
+  // SMART SYNC – Once per session with cached decision
   // ============================================
   async smartSync() {
     if (window._smartSyncDone) {
@@ -308,6 +300,7 @@ class SyncManager {
       } else if (status.hasCloudData && localAnimeCount > 0) {
         console.log('🔄 Both have data, checking for conflicts...');
 
+        // ---- Check cached decision ----
         const stored = this.getStoredMergeDecision();
         if (stored.strategy && stored.checksum === currentChecksum) {
           console.log(`♻️ Using cached merge decision: ${stored.strategy}`);
@@ -316,6 +309,7 @@ class SyncManager {
             window._smartSyncDone = true;
             return result;
           } else if (stored.strategy === 'local') {
+            // If we cached 'local', we should keep local and push to cloud to be safe
             const result = await this.uploadAllLocalData();
             window._smartSyncDone = true;
             return result;
@@ -326,6 +320,7 @@ class SyncManager {
           }
         }
 
+        // ---- No cached decision, ask user ----
         const result = await this.mergeDataWithCloud();
         window._smartSyncDone = true;
         return result;
@@ -341,7 +336,7 @@ class SyncManager {
   }
 
   // ============================================
-  // MERGE DATA
+  // MERGE DATA – with cache storage
   // ============================================
   async mergeDataWithCloud() {
     try {
@@ -535,7 +530,7 @@ class SyncManager {
 // Initialize sync manager
 window.syncManager = new SyncManager();
 
-console.log('✅ Sync Manager loaded (save hook removed, using dualStorage)');
+console.log('✅ Sync Manager loaded (cache decision + dirty flag)');
 
 document.addEventListener('DOMContentLoaded', () => {
   const cloudSyncEnabled = localStorage.getItem('cloudSyncEnabled') === 'true';

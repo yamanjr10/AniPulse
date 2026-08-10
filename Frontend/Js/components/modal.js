@@ -34,7 +34,6 @@
     function setupBeforeUnloadSync() {
         window.addEventListener('beforeunload', function () {
             if (window.dualStorage && localStorage.getItem('authToken')) {
-                const token = localStorage.getItem('authToken');
                 const data = {
                     animeData: JSON.parse(localStorage.getItem('animeData') || '[]'),
                     activityLog: JSON.parse(localStorage.getItem('activityLog') || '[]'),
@@ -277,7 +276,7 @@
         }
         window.animeData = window.animeData.filter(a => a.id != window.currentEditId);
         if (typeof window.saveData === 'function') window.saveData();
-        window.setLocalDirty(); // <-- mark dirty
+        window.setLocalDirty();
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { }
 
         triggerImmediateSync();
@@ -376,7 +375,7 @@
             }
 
             if (typeof window.saveData === 'function') window.saveData();
-            window.setLocalDirty(); // <-- mark dirty
+            window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
             triggerImmediateSync();
 
@@ -425,7 +424,7 @@
             };
             window.animeData.push(newAnime);
             if (typeof window.saveData === 'function') window.saveData();
-            window.setLocalDirty(); // <-- mark dirty
+            window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
             triggerImmediateSync();
         }
