@@ -30,14 +30,20 @@ router.get('/my-stats', verifyToken, async (req, res) => {
     if (!userDoc.exists) userDoc = await db.collection(COLLECTIONS.USERS).doc(userId).get();
     const userData = userDoc.data() || {};
     const displayName = userData.name || userData.username || 'User';
+
+    // Recalculate level and title from totalXP
+    const totalXP = userData.totalXP || 0;
+    const level = getLevelFromXP(totalXP);
+    const title = getTitleForLevel(level);
+
     res.json({
       uid: userId,
       username: displayName,
       name: displayName,
       avatar: userData.avatar || null,
-      level: userData.level || 1,
-      title: userData.title || 'Newbie',
-      totalXP: userData.totalXP || 0,
+      level: level,
+      title: title,
+      totalXP: totalXP,
       totalAnime: userData.totalAnime || 0,
       totalHours: userData.totalHours || 0
     });
@@ -78,14 +84,20 @@ router.get('/profile/:userId', verifyToken, async (req, res) => {
       });
       totalHours = Math.round(minutes / 60);
     }
+
+    // Recalculate level and title from totalXP
+    const totalXP = userData.totalXP || 0;
+    const level = getLevelFromXP(totalXP);
+    const title = getTitleForLevel(level);
+
     res.json({
       uid: userId,
       name: displayName,
       username: displayName,
       avatar: userData.avatar || null,
-      level: userData.level || 1,
-      title: userData.title || 'Newbie',
-      totalXP: userData.totalXP || 0,
+      level: level,
+      title: title,
+      totalXP: totalXP,
       totalAnime,
       totalEpisodes,
       totalHours
@@ -113,12 +125,16 @@ router.get('/search', verifyToken, async (req, res) => {
         if (match) displayName = decodeURIComponent(match[1]);
       }
       if (displayName && displayName.toLowerCase().includes(searchLower) && doc.id !== currentUserId) {
+        // Recalc level/title from their totalXP
+        const totalXP = userData.totalXP || 0;
+        const level = getLevelFromXP(totalXP);
+        const title = getTitleForLevel(level);
         users.push({
           uid: doc.id,
           name: displayName,
           username: displayName,
-          title: userData.title || 'Newbie',
-          level: userData.level || 1,
+          title: title,
+          level: level,
           avatar: userData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366F1&color=fff`
         });
       }
@@ -178,14 +194,20 @@ router.get('/full-stats/:userId', verifyToken, async (req, res) => {
       .map(([g]) => g);
 
     const displayName = userData.name || userData.username || 'User';
+
+    // Recalculate level and title from stored totalXP
+    const storedTotalXP = userData.totalXP || 0;
+    const level = getLevelFromXP(storedTotalXP);
+    const title = getTitleForLevel(level);
+
     res.json({
       uid: userId,
       name: displayName,
       username: displayName,
       avatar: userData.avatar || null,
-      level: userData.level || 1,
-      title: userData.title || 'Newbie',
-      totalXP: Math.round(totalXP),
+      level: level,
+      title: title,
+      totalXP: Math.round(storedTotalXP),
       totalAnime: filtered.length,
       totalEpisodes,
       totalHours: Math.round(totalHours),

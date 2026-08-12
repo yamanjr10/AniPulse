@@ -579,9 +579,10 @@
         if (badgeEl) badgeEl.textContent = `Lv.${currentLevel}`;
         if (titleEl) titleEl.textContent = currentTitle;
 
-        // ---- Calculate stats ----
+        // ---- Calculate stats (ONLY completed anime) ----
         const data = window.animeData || [];
-        const totalAnime = data.length;
+        // totalAnime = number of completed entries
+        const totalAnime = data.filter(a => a.userStatus === 'Completed').length;
         const totalHours = typeof window.calculateTotalHours === 'function' ? window.calculateTotalHours() : 0;
         const totalEpisodes = typeof window.calculateTotalEpisodes === 'function' ? window.calculateTotalEpisodes() : 0;
 
@@ -690,15 +691,16 @@
         sidebarLevel._guardObserver = observer;
     }
 
-    // --- Total hours ---
+    // --- Total hours (ONLY completed anime, using episodes and duration) ---
     window.calculateTotalHours = function () {
         const data = window.animeData || [];
         let totalMinutes = 0;
         data.forEach(a => {
+            if (a.userStatus !== 'Completed') return;
             if (a.type === 'Movie') {
                 totalMinutes += a.duration || 120;
             } else {
-                const eps = a.progress || a.episodes || 0;
+                const eps = a.episodes || 0;
                 const epDur = a.duration || 20;
                 totalMinutes += eps * epDur;
             }
@@ -706,9 +708,14 @@
         return Math.round(totalMinutes / 60);
     };
 
+    // --- Total episodes (ONLY completed anime, using episodes count) ---
     window.calculateTotalEpisodes = function () {
         const data = window.animeData || [];
-        return data.reduce((s, a) => s + (a.progress || a.episodes || 0), 0);
+        return data.reduce((s, a) => {
+            if (a.userStatus !== 'Completed') return s;
+            if (a.type === 'Movie') return s + 1;
+            return s + (a.episodes || 0);
+        }, 0);
     };
 
     // --- Total anime count by year ---

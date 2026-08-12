@@ -415,206 +415,79 @@
         console.log('✅ User profile rendered successfully');
     }
 
-    function renderUserProfileWithFallback(profile) {
-        console.log('📝 Rendering user profile with fallback data...');
-        safeSetText('profileName', profile.name || profile.username || 'User');
-        safeSetText('profileLevel', `Lv.${profile.level || 1}`);
-        safeSetText('profileTitle', profile.levelTitle || profile.title || 'Newbie');
-
-        const xpFillEl = document.getElementById('profileXpFill');
-        if (xpFillEl) {
-            const progress = Math.min(100, Math.max(0, profile.xpProgress || 0));
-            xpFillEl.style.width = `${progress}%`;
-        }
-        const xpTextEl = document.getElementById('profileXpText');
-        if (xpTextEl) {
-            const currentXP = profile.totalXP || 0;
-            const nextXP = (profile.totalXP + profile.xpToNextLevel) || 1000;
-            xpTextEl.innerHTML = `
-                <span class="xp-current">${window.formatCompactNumber(currentXP)}</span> / 
-                <span class="xp-next">${window.formatCompactNumber(nextXP)}</span> XP
-            `;
-        }
-
-        const avatarImg = document.getElementById('profileAvatar');
-        if (avatarImg) {
-            const avatarUrl = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
-            avatarImg.src = avatarUrl;
-            avatarImg.onerror = function () {
-                this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
-            };
-        }
-
-        function updateStatElement(id, value) {
-            const el = document.getElementById(id);
-            if (el) {
-                const num = value || 0;
-                el.innerHTML = window.formatCompactNumber(num);
-                el.setAttribute('title', num.toLocaleString());
-            }
-        }
-        updateStatElement('profileTotalAnime', profile.stats?.totalAnime || 0);
-        updateStatElement('profileCompleted', profile.stats?.completed || 0);
-        updateStatElement('profileWatching', profile.stats?.watching || 0);
-        updateStatElement('profilePlanToWatch', profile.stats?.planToWatch || 0);
-        updateStatElement('profileEpisodes', profile.stats?.totalEpisodes || 0);
-        updateStatElement('profileHours', profile.stats?.totalHours || 0);
-
-        const friendBtn = document.getElementById('profileFriendBtn');
-        if (friendBtn) {
-            if (!profile.isCurrentUser) {
-                friendBtn.style.display = 'block';
-                if (profile.isFriend) {
-                    friendBtn.innerHTML = '<i class="fas fa-user-check"></i> Friends';
-                    friendBtn.disabled = true;
-                    friendBtn.style.opacity = '0.6';
-                } else {
-                    friendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
-                    friendBtn.disabled = false;
-                    friendBtn.style.opacity = '1';
-                    friendBtn.onclick = () => {
-                        if (typeof window.sendFriendRequest === 'function') window.sendFriendRequest(profile.uid);
-                    };
-                }
-            } else {
-                friendBtn.style.display = 'none';
-            }
-        }
-
-        renderProfileAnimeList('completed', profile.animeList?.completed || []);
-        renderProfileAnimeList('watching', profile.animeList?.watching || []);
-        renderProfileAnimeList('plan', profile.animeList?.planToWatch || []);
-
-        const achievements = profile.achievements || [];
-        const container = document.getElementById('profileAchievementsList');
-        if (container) {
-            if (achievements.length > 0) {
-                container.innerHTML = achievements.map(achievement => `
-                    <div class="profile-achievement-card">
-                        <div class="profile-achievement-icon"><i class="fas fa-trophy"></i></div>
-                        <div class="profile-achievement-info">
-                            <div class="profile-achievement-name">${window.escapeHtml(achievement)}</div>
-                            <div class="profile-achievement-desc">Unlocked achievement</div>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = '<div class="empty-state">No achievements unlocked yet</div>';
-            }
-        }
-
-        const activities = profile.recentActivity || [];
-        const activityContainer = document.getElementById('profileActivityList');
-        if (activityContainer) {
-            if (activities.length > 0) {
-                activityContainer.innerHTML = activities.map(activity => {
-                    let iconClass = 'added', iconName = 'plus-circle';
-                    switch (activity.action) {
-                        case 'completed': iconClass = 'completed'; iconName = 'check-circle'; break;
-                        case 'added': iconClass = 'added'; iconName = 'plus-circle'; break;
-                        case 'edited': iconClass = 'edited'; iconName = 'edit'; break;
-                        default: iconClass = 'added'; iconName = 'plus-circle';
-                    }
-                    return `
-                        <div class="profile-activity-item">
-                            <div class="profile-activity-icon ${iconClass}">
-                                <i class="fas fa-${iconName}"></i>
-                            </div>
-                            <div class="profile-activity-content">
-                                <div class="profile-activity-text">
-                                    ${activity.action === 'completed' ? 'Completed' :
-                            activity.action === 'added' ? 'Added' : 'Updated'} 
-                                    <strong>${window.escapeHtml(activity.animeTitle || 'anime')}</strong>
-                                </div>
-                                <div class="profile-activity-time">${window.formatTimeAgo(activity.timestamp)}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                activityContainer.innerHTML = '<div class="empty-state">No recent activity</div>';
-            }
-        }
-        console.log('✅ User profile rendered with fallback');
-    }
-
-    async function renderFriendsFallback(userId) {
-        console.log('📝 Using friends fallback for user:', userId);
-        const modal = document.getElementById('userProfileModal');
-        if (!modal) return;
-
-        let userData = null;
-        let friendsList = [];
-        const token = localStorage.getItem('authToken');
-
-        try {
-            const friendsResponse = await fetch(`${window.API_BASE_URL}/api/friends/list`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (friendsResponse.ok) friendsList = await friendsResponse.json();
-        } catch (e) { console.warn('Could not fetch friends list:', e); }
-
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    // Render from local data (for current user)
+    function renderLocalUserProfile() {
         const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
 
-        if (userId === currentUser.uid || userId === 'current') {
-            userData = {
-                name: userProfile.name || currentUser.username || 'You',
-                avatar: userProfile.avatar || currentUser.avatar,
-                level: currentUser.level || 1,
-                title: currentUser.title || 'Newbie',
-                totalXP: currentUser.totalXP || 0,
-                stats: { totalAnime: 0, completed: 0, watching: 0, planToWatch: 0, totalEpisodes: 0, totalHours: 0 },
-                isCurrentUser: true,
-                achievements: ['🌟 Profile Loaded'],
-                recentActivity: [],
-                animeList: { completed: [], watching: [], planToWatch: [] }
-            };
-        } else {
-            const foundFriend = friendsList.find(f => f.uid === userId);
-            if (foundFriend) {
-                userData = {
-                    name: foundFriend.name || foundFriend.username || 'Friend',
-                    avatar: foundFriend.avatar,
-                    level: foundFriend.level || 1,
-                    title: foundFriend.title || 'Newbie',
-                    totalXP: foundFriend.totalXP || 0,
-                    stats: { totalAnime: foundFriend.totalAnime || 0, completed: 0, watching: 0, planToWatch: 0, totalEpisodes: 0, totalHours: 0 },
-                    isCurrentUser: false,
-                    isFriend: true,
-                    achievements: ['👥 Friend'],
-                    recentActivity: [],
-                    animeList: { completed: [], watching: [], planToWatch: [] }
-                };
+        // Get stats from local data
+        const completed = animeData.filter(a => a.userStatus === 'Completed');
+        const totalAnime = completed.length;
+        let totalEpisodes = 0, totalHours = 0;
+        completed.forEach(a => {
+            if (a.type === 'Movie') {
+                totalEpisodes += 1;
+                totalHours += (a.duration || 120) / 60;
             } else {
-                userData = {
-                    name: 'Unknown User',
-                    avatar: `https://ui-avatars.com/api/?name=Unknown&background=6366F1&color=fff`,
-                    level: 1,
-                    title: 'Newbie',
-                    totalXP: 0,
-                    stats: { totalAnime: 0, completed: 0, watching: 0, planToWatch: 0, totalEpisodes: 0, totalHours: 0 },
-                    isCurrentUser: false,
-                    isFriend: false,
-                    achievements: ['🔍 User Not Found'],
-                    recentActivity: [],
-                    animeList: { completed: [], watching: [], planToWatch: [] }
-                };
+                const eps = a.episodes || 0;
+                totalEpisodes += eps;
+                totalHours += (eps * (a.duration || 20)) / 60;
             }
+        });
+        totalHours = Math.round(totalHours);
+
+        // Get level data
+        let level = 1, title = 'Newbie', totalXP = 0;
+        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.getUserProfile === 'function') {
+            const profile = window.AniPulseLevelSystem.getUserProfile();
+            level = profile.level || 1;
+            title = profile.title || 'Newbie';
+            totalXP = profile.totalExp || 0;
+        } else {
+            level = parseInt(localStorage.getItem('userLevel') || '1');
+            title = localStorage.getItem('userLevelTitle') || 'Newbie';
+            totalXP = parseInt(localStorage.getItem('userXP') || '0');
         }
 
-        if (friendsList.length > 0) {
-            const friendNames = friendsList.slice(0, 3).map(f => f.name || f.username || 'Friend');
-            if (friendNames.length > 0) {
-                userData.achievements = [
-                    ...userData.achievements,
-                    `👥 Friends: ${friendNames.join(', ')}${friendsList.length > 3 ? ` +${friendsList.length - 3} more` : ''}`
-                ];
-            }
+        const displayName = userProfile.name || user.username || 'You';
+
+        const profile = {
+            uid: 'current',
+            name: displayName,
+            avatar: userProfile.avatar || null,
+            level: level,
+            levelTitle: title,
+            totalXP: totalXP,
+            stats: {
+                totalAnime: totalAnime,
+                completed: totalAnime,
+                watching: animeData.filter(a => a.userStatus === 'Watching').length,
+                planToWatch: animeData.filter(a => a.userStatus === 'Plan to Watch').length,
+                dropped: animeData.filter(a => a.userStatus === 'Dropped').length,
+                totalEpisodes: totalEpisodes,
+                totalHours: totalHours
+            },
+            animeList: {
+                completed: completed.slice(0, 21),
+                watching: animeData.filter(a => a.userStatus === 'Watching').slice(0, 21),
+                planToWatch: animeData.filter(a => a.userStatus === 'Plan to Watch').slice(0, 21)
+            },
+            achievements: JSON.parse(localStorage.getItem('unlockedAchievements') || '[]'),
+            recentActivity: JSON.parse(localStorage.getItem('activityLog') || '[]').slice(0, 10),
+            isCurrentUser: true,
+            isFriend: false,
+            xpProgress: 0,
+            xpToNextLevel: 0
+        };
+
+        // Calculate XP progress (if level system available)
+        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.getXPProgress === 'function') {
+            profile.xpProgress = window.AniPulseLevelSystem.getXPProgress(level, totalXP);
+            profile.xpToNextLevel = window.AniPulseLevelSystem.getXPToNextLevel(level, totalXP);
         }
 
-        renderUserProfileWithFallback(userData);
-        if (typeof showToast === 'function') showToast('Profile loaded with friends fallback', 'info');
+        renderUserProfile(profile);
     }
 
     window.openUserProfile = async function (userId) {
@@ -654,6 +527,15 @@
         safeSetHTML('profileAchievementsList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading achievements...</div>');
         safeSetHTML('profileActivityList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading activity...</div>');
 
+        // Check if the user is viewing their own profile
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (userId === currentUser.uid || userId === 'current') {
+            // Use local data for instant accuracy
+            renderLocalUserProfile();
+            return;
+        }
+
+        // For other users, fetch from API
         try {
             const response = await fetch(`${window.API_BASE_URL}/api/user/full-profile/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -782,67 +664,74 @@
             });
         }
 
-        async loadYourStats() {
-            console.log('📊 Loading your stats...');
-            const token = localStorage.getItem('authToken');
-            if (!token) { this.loadYourStatsFromLocal(); return; }
+        // ============================================
+        // LOAD YOUR STATS – NOW USING LOCAL DATA
+        // ============================================
+        loadYourStats() {
+            console.log('📊 Loading your stats from local data...');
 
-            try {
-                let userId = null;
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                if (user.uid) userId = user.uid;
-                else if (token) {
-                    try {
-                        const payload = JSON.parse(atob(token.split('.')[1]));
-                        userId = payload.uid;
-                    } catch (e) { }
-                }
-                if (!userId) { this.loadYourStatsFromLocal(); return; }
-
-                const response = await fetch(`${this.apiUrl}/api/user/full-stats/${userId}?period=all`, {
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-                });
-                if (!response.ok) { this.loadYourStatsFromLocal(); return; }
-
-                const stats = await response.json();
-                const userData = JSON.parse(localStorage.getItem('user') || '{}');
-                stats.totalXP = stats.totalXP || userData.totalXP || 0;
-                stats.totalAnime = stats.totalAnime || 0;
-                stats.totalEpisodes = stats.totalEpisodes || 0;
-                stats.totalHours = stats.totalHours || 0;
-                stats.level = stats.level || userData.level || 1;
-                stats.title = stats.title || userData.title || 'Newbie';
-                stats.name = stats.name || userData.username || 'You';
-                this.updateYourStatsUI(stats);
-
-            } catch (error) {
-                console.error('Failed to load your stats:', error);
-                this.loadYourStatsFromLocal();
-            }
-        }
-
-        loadYourStatsFromLocal() {
-            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            // Get user info
             const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
             const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
+
+            // Calculate completed stats
             const completed = animeData.filter(a => a.userStatus === 'Completed');
+            const totalAnime = completed.length;
             let totalEpisodes = 0, totalHours = 0;
             completed.forEach(a => {
-                const eps = a.type === 'Movie' ? 1 : (a.episodes || 0);
-                totalEpisodes += eps;
-                totalHours += (eps * (a.duration || 20)) / 60;
+                if (a.type === 'Movie') {
+                    totalEpisodes += 1;
+                    totalHours += (a.duration || 120) / 60;
+                } else {
+                    const eps = a.episodes || 0;
+                    totalEpisodes += eps;
+                    totalHours += (eps * (a.duration || 20)) / 60;
+                }
             });
+            totalHours = Math.round(totalHours);
+
+            // Get level/XP
+            let level = 1, title = 'Newbie', totalXP = 0;
+            if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.getUserProfile === 'function') {
+                const profile = window.AniPulseLevelSystem.getUserProfile();
+                level = profile.level || 1;
+                title = profile.title || 'Newbie';
+                totalXP = profile.totalExp || 0;
+            } else {
+                level = parseInt(localStorage.getItem('userLevel') || '1');
+                title = localStorage.getItem('userLevelTitle') || 'Newbie';
+                totalXP = parseInt(localStorage.getItem('userXP') || '0');
+            }
+
+            // Get top genres from local data
+            const genreCount = {};
+            completed.forEach(a => {
+                if (a.genres && Array.isArray(a.genres)) {
+                    a.genres.forEach(g => {
+                        if (g !== 'Award Winning') {
+                            genreCount[g] = (genreCount[g] || 0) + 1;
+                        }
+                    });
+                }
+            });
+            const topGenres = Object.entries(genreCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([g]) => g);
+
             const stats = {
-                name: userProfile.name || userData.username || 'You',
-                avatar: userProfile.avatar || userData.avatar,
-                level: userData.level || 1,
-                title: userData.title || 'Newbie',
-                totalXP: userData.totalXP || 0,
-                totalAnime: completed.length,
+                name: userProfile.name || user.username || 'You',
+                avatar: userProfile.avatar || user.avatar,
+                level: level,
+                title: title,
+                totalXP: totalXP,
+                totalAnime: totalAnime,
                 totalEpisodes: totalEpisodes,
-                totalHours: Math.round(totalHours),
-                topGenres: []
+                totalHours: totalHours,
+                topGenres: topGenres
             };
+
             this.updateYourStatsUI(stats);
         }
 
@@ -1008,40 +897,49 @@
                     } catch (e) { console.warn(`Could not get stats for ${friend.name}:`, e); }
                 }
 
-                const userData = JSON.parse(localStorage.getItem('user') || '{}');
+                // Add current user (using local data)
                 const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
+                const completed = animeData.filter(a => a.userStatus === 'Completed');
+                let totalEpisodes = 0, totalHours = 0;
+                completed.forEach(a => {
+                    if (a.type === 'Movie') {
+                        totalEpisodes += 1;
+                        totalHours += (a.duration || 120) / 60;
+                    } else {
+                        const eps = a.episodes || 0;
+                        totalEpisodes += eps;
+                        totalHours += (eps * (a.duration || 20)) / 60;
+                    }
+                });
+                totalHours = Math.round(totalHours);
 
-                let currentUserStats = {
+                let level = 1, title = 'Newbie', totalXP = 0;
+                if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.getUserProfile === 'function') {
+                    const profile = window.AniPulseLevelSystem.getUserProfile();
+                    level = profile.level || 1;
+                    title = profile.title || 'Newbie';
+                    totalXP = profile.totalExp || 0;
+                } else {
+                    level = parseInt(localStorage.getItem('userLevel') || '1');
+                    title = localStorage.getItem('userLevelTitle') || 'Newbie';
+                    totalXP = parseInt(localStorage.getItem('userXP') || '0');
+                }
+
+                const currentUserStats = {
                     uid: 'current',
-                    name: userProfile.name || userData.username || 'You',
-                    avatar: userProfile.avatar || userData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile.name || 'You')}&background=6366F1&color=fff`,
-                    level: userData.level || 1,
-                    title: userData.title || 'Newbie',
-                    totalXP: userData.totalXP || 0,
-                    totalAnime: 0,
-                    totalEpisodes: 0,
-                    totalHours: 0,
+                    name: userProfile.name || user.username || 'You',
+                    avatar: userProfile.avatar || user.avatar,
+                    level: level,
+                    title: title,
+                    totalXP: totalXP,
+                    totalAnime: completed.length,
+                    totalEpisodes: totalEpisodes,
+                    totalHours: totalHours,
                     topGenres: [],
                     isCurrentUser: true
                 };
-
-                try {
-                    const myStatsResponse = await this.apiCall(`/api/user/full-stats/${userData.uid || 'current'}?period=all`);
-                    if (myStatsResponse.ok) {
-                        const myStats = await myStatsResponse.json();
-                        currentUserStats = {
-                            ...currentUserStats,
-                            totalXP: myStats.totalXP || currentUserStats.totalXP,
-                            totalAnime: myStats.totalAnime || 0,
-                            totalEpisodes: myStats.totalEpisodes || 0,
-                            totalHours: myStats.totalHours || 0,
-                            topGenres: myStats.topGenres || [],
-                            level: myStats.level || currentUserStats.level,
-                            title: myStats.title || currentUserStats.title
-                        };
-                        this.updateYourStatsUI(myStats);
-                    }
-                } catch (e) { console.warn('Could not get current user stats:', e); }
 
                 const allUsers = [currentUserStats, ...friendStats];
                 const sorted = this.sortUsers(allUsers);
@@ -1075,7 +973,6 @@
                     return;
                 }
 
-                // ✅ FIX: Use /api/ranking/global-paginated instead of /api/ranking/global
                 const limit = Math.max(this.itemsPerPage * 2, 50);
                 const response = await this.apiCall(`/api/ranking/global-paginated?limit=${limit}&page=${this.currentPage}&type=${this.currentStat}`);
                 if (!response.ok) {
