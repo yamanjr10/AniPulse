@@ -10,10 +10,11 @@
     function getDefaultDuration(type) {
         switch (type) {
             case 'Movie': return 120;
-            case 'TV': return 24;
-            case 'OVA': return 24;
-            case 'ONA': return 20;
-            case 'Special': return 15;
+            case 'TV_SHORT': return 12;   // ✅ TV Short support
+            case 'TV':
+            case 'OVA':
+            case 'ONA':
+            case 'Special':
             default: return 20;
         }
     }
