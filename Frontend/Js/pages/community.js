@@ -290,6 +290,46 @@
         `).join('');
     }
 
+    // ---- RENDER ACHIEVEMENTS (full list with lock/unlock) ----
+    function renderProfileAchievements(unlockedIds) {
+        const container = document.getElementById('profileAchievementsList');
+        if (!container) return;
+
+        const defs = window.ACHIEVEMENTS_DEFINITIONS || [];
+        if (!defs.length) {
+            container.innerHTML = '<div class="empty-state">Achievement definitions not loaded.</div>';
+            return;
+        }
+
+        if (!Array.isArray(unlockedIds)) unlockedIds = [];
+
+        // Build the list – show all achievements, sorted by their order in defs
+        let html = '<div class="profile-achievements-grid" style="display:grid;grid-template-columns:1fr;gap:6px;">';
+        defs.forEach(ach => {
+            const unlocked = unlockedIds.includes(ach.id);
+            const icon = unlocked ? 'fa-unlock' : 'fa-lock';
+            const statusClass = unlocked ? 'unlocked' : 'locked';
+            const title = ach.title; // already includes number
+            const desc = ach.desc;
+
+            html += `
+                <div class="profile-achievement-item ${statusClass}" style="display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;background:${unlocked ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)'};border:1px solid ${unlocked ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)'};">
+                    <div class="profile-achievement-icon" style="font-size:16px;width:28px;text-align:center;color:${unlocked ? '#10B981' : '#6B7280'};">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div class="profile-achievement-info" style="flex:1;">
+                        <div class="profile-achievement-name" style="font-weight:600;font-size:0.85rem;color:${unlocked ? '#E5E7EB' : '#9CA3AF'};">${window.escapeHtml(title)}</div>
+                        <div class="profile-achievement-desc" style="font-size:0.7rem;color:#6B7280;">${window.escapeHtml(desc)}</div>
+                    </div>
+                    ${unlocked ? '<span style="font-size:0.7rem;color:#10B981;font-weight:600;">✓ Unlocked</span>' : '<span style="font-size:0.7rem;color:#6B7280;">🔒 Locked</span>'}
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        container.innerHTML = html;
+    }
+
     // Main rendering function (for API data)
     function renderUserProfile(profile) {
         console.log('📝 Rendering user profile...');
@@ -363,31 +403,9 @@
         renderProfileAnimeList('watching', profile.animeList?.watching || []);
         renderProfileAnimeList('plan', profile.animeList?.planToWatch || []);
 
-        // ---- ACHIEVEMENTS (using global definitions) ----
-        const achievements = profile.achievements || [];
-        const container = document.getElementById('profileAchievementsList');
-        if (container) {
-            if (achievements.length > 0) {
-                const defs = window.ACHIEVEMENTS_DEFINITIONS || [];
-                container.innerHTML = achievements.map(achId => {
-                    const def = defs.find(d => d.id === achId);
-                    const title = def ? def.title : achId;
-                    const desc = def ? def.desc : 'Unlocked achievement';
-                    const icon = def ? def.icon : 'fa-trophy';
-                    return `
-                        <div class="profile-achievement-card">
-                            <div class="profile-achievement-icon"><i class="fas ${icon}"></i></div>
-                            <div class="profile-achievement-info">
-                                <div class="profile-achievement-name">${window.escapeHtml(title)}</div>
-                                <div class="profile-achievement-desc">${window.escapeHtml(desc)}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                container.innerHTML = '<div class="empty-state">No achievements unlocked yet</div>';
-            }
-        }
+        // ---- ACHIEVEMENTS – now shows all with lock/unlock ----
+        const unlockedAchievements = profile.achievements || [];
+        renderProfileAchievements(unlockedAchievements);
 
         const activities = profile.recentActivity || [];
         const activityContainer = document.getElementById('profileActivityList');
@@ -495,31 +513,9 @@
         renderProfileAnimeList('watching', profile.animeList?.watching || []);
         renderProfileAnimeList('plan', profile.animeList?.planToWatch || []);
 
-        // ---- ACHIEVEMENTS (using global definitions) ----
-        const achievements = profile.achievements || [];
-        const container = document.getElementById('profileAchievementsList');
-        if (container) {
-            if (achievements.length > 0) {
-                const defs = window.ACHIEVEMENTS_DEFINITIONS || [];
-                container.innerHTML = achievements.map(achId => {
-                    const def = defs.find(d => d.id === achId);
-                    const title = def ? def.title : achId;
-                    const desc = def ? def.desc : 'Unlocked achievement';
-                    const icon = def ? def.icon : 'fa-trophy';
-                    return `
-                        <div class="profile-achievement-card">
-                            <div class="profile-achievement-icon"><i class="fas ${icon}"></i></div>
-                            <div class="profile-achievement-info">
-                                <div class="profile-achievement-name">${window.escapeHtml(title)}</div>
-                                <div class="profile-achievement-desc">${window.escapeHtml(desc)}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                container.innerHTML = '<div class="empty-state">No achievements unlocked yet</div>';
-            }
-        }
+        // ---- ACHIEVEMENTS (fallback) ----
+        const unlockedAchievements = profile.achievements || [];
+        renderProfileAchievements(unlockedAchievements);
 
         const activities = profile.recentActivity || [];
         const activityContainer = document.getElementById('profileActivityList');
@@ -591,10 +587,8 @@
 
         const displayName = userProfile.name || user.username || 'You';
 
-        // Load unlocked achievement IDs from localStorage (already stored as IDs)
         let unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements') || '[]');
         if (!Array.isArray(unlockedAchievements)) unlockedAchievements = [];
-        // If old index-based, convert (safety)
         if (unlockedAchievements.length > 0 && typeof unlockedAchievements[0] === 'number') {
             const defs = window.ACHIEVEMENTS_DEFINITIONS || [];
             const newIds = unlockedAchievements.map(idx => defs[idx]?.id).filter(Boolean);

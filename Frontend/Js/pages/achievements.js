@@ -40,7 +40,7 @@
         { id: 'rate_10', icon: 'fa-star-half-alt', title: '23. 10 Ratings', desc: 'Rate 10 different anime.', goal: 10 },
         { id: 'rate_50', icon: 'fa-star-half-alt', title: '24. 50 Ratings', desc: 'Rate 50 anime.', goal: 50 },
         { id: 'rate_100', icon: 'fa-star-half-alt', title: '25. 100 Ratings', desc: 'Rate 100 anime.', goal: 100 },
-        { id: 'avg_high', icon: 'fa-star', title: '26. High Standards', desc: 'Maintain average rating ≥ 8.0 (min 10 ratings).', goal: 1 }, // special
+        { id: 'avg_high', icon: 'fa-star', title: '26. High Standards', desc: 'Maintain average rating ≥ 8.0 (min 10 ratings).', goal: 1 },
 
         // ─── Genres ──────────────────────────────
         { id: 'genre_3', icon: 'fa-paint-brush', title: '27. 3 Flavors', desc: 'Watch anime from 3 distinct genres.', goal: 3 },
@@ -77,10 +77,10 @@
         { id: 'dropped_5', icon: 'fa-trash', title: '50. Dropper', desc: 'Drop 5 anime (it’s okay to let go).', goal: 5 },
     ];
 
-    // Expose globally for other modules
+    // Expose globally
     window.ACHIEVEMENTS_DEFINITIONS = ACHIEVEMENTS;
 
-    // ---- Helper functions (unchanged) ----
+    // ---- Helpers (unchanged) ----
     function totalWatchHours(data) {
         return data.reduce((sum, a) => sum + ((a.episodes || 0) * (a.duration || 20)) / 60, 0);
     }
@@ -134,7 +134,6 @@
         const monthlyStreak = () => countConsecutiveMonths(data);
         const listSize = () => data.length;
 
-        // Special: average rating ≥ 8.0 with at least 10 ratings
         const avgRatingHigh = () => {
             const rated = data.filter(a => a.score && a.score > 0);
             if (rated.length < 10) return 0;
@@ -142,14 +141,11 @@
             return avg >= 8.0 ? 1 : 0;
         };
 
-        // Count movies, TV, OVA/ONA
         const movies = () => data.filter(a => a.type === 'Movie' && a.userStatus === 'Completed').length;
         const tv = () => data.filter(a => a.type === 'TV' && a.userStatus === 'Completed').length;
         const ova = () => data.filter(a => (a.type === 'OVA' || a.type === 'ONA') && a.userStatus === 'Completed').length;
 
-        // Streak days (7,30)
         const streakDays = (days) => {
-            // simplified: check if there's a consecutive run of days with at least one completion
             const dates = data
                 .filter(a => a.userStatus === 'Completed' && a.finishDate)
                 .map(a => new Date(a.finishDate).toDateString())
@@ -164,15 +160,10 @@
             return maxStreak;
         };
 
-        // Count anime from different decades
         const decadeCount = () => decadesWatched(data).length;
-
-        // Count "Plan to Watch" and "Watching"
         const planCount = () => data.filter(a => a.userStatus === 'Plan to Watch').length;
         const watchingCount = () => data.filter(a => a.userStatus === 'Watching').length;
         const droppedCount = () => data.filter(a => a.userStatus === 'Dropped').length;
-
-        // Count scores ≥ 9
         const score9plus = () => data.filter(a => a.score >= 9).length;
 
         return {
@@ -233,6 +224,9 @@
     window.updateAchievements = function () {
         const grid = document.getElementById('achievementsGrid');
         if (!grid) return;
+
+        // ✅ FIX: Clear the container before re‑rendering
+        grid.innerHTML = '';
 
         const data = window.animeData || [];
         const progressFns = getProgressFunctions(data);
@@ -298,7 +292,7 @@
 
     function initAchievements() {
         window.updateAchievements();
-        console.log('✅ Achievements initialized (50 unique milestones)');
+        console.log('✅ Achievements initialized (50 unique milestones, no duplicates)');
     }
 
     window.initAchievements = initAchievements;
