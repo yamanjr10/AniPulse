@@ -268,29 +268,44 @@
         return el;
     }
 
-    function renderProfileAnimeList(type, animeList) {
+    // ---- Render anime list with sorting and limit ----
+    function renderProfileAnimeList(type, animeList, limit = 10) {
         const containerId = `profile${type.charAt(0).toUpperCase() + type.slice(1)}List`;
         const container = document.getElementById(containerId);
         if (!container) return;
+
         if (!animeList || animeList.length === 0) {
             container.innerHTML = `<div class="empty-state">No ${type} anime found</div>`;
             return;
         }
-        container.innerHTML = animeList.slice(0, 10).map(anime => `
+
+        let sorted = [...animeList];
+        if (type === 'completed') {
+            sorted.sort((a, b) => {
+                const dateA = a.updatedAt || a.finishDate || a.createdAt || 0;
+                const dateB = b.updatedAt || b.finishDate || b.createdAt || 0;
+                return new Date(dateB) - new Date(dateA);
+            });
+        } else {
+            sorted.sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+        }
+
+        const items = sorted.slice(0, limit);
+
+        container.innerHTML = items.map(anime => `
             <div class="profile-anime-card">
                 <img src="${anime.cover || 'https://placehold.co/60x85/6a5acd/white?text=No+Image'}" 
                      class="profile-anime-cover" 
                      onerror="this.src='https://placehold.co/60x85/6a5acd/white?text=No+Image'">
                 <div class="profile-anime-info">
                     <div class="profile-anime-title">${window.escapeHtml(anime.title)}</div>
-                    ${anime.score ? `<div class="profile-anime-score">⭐ ${anime.score}</div>` : ''}
                     <div class="profile-anime-episodes">${anime.episodes || 0} episodes</div>
                 </div>
             </div>
         `).join('');
     }
 
-    // ---- RENDER ACHIEVEMENTS (full list with lock/unlock) ----
+    // ---- Render achievements as a responsive 3-column grid ----
     function renderProfileAchievements(unlockedIds) {
         const container = document.getElementById('profileAchievementsList');
         if (!container) return;
@@ -303,29 +318,76 @@
 
         if (!Array.isArray(unlockedIds)) unlockedIds = [];
 
-        // Build the list – show all achievements, sorted by their order in defs
-        let html = '<div class="profile-achievements-grid" style="display:grid;grid-template-columns:1fr;gap:6px;">';
+        // Force a 3-column grid using !important to override any external CSS
+        container.style.cssText = `
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 10px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        `;
+
+        let html = '';
         defs.forEach(ach => {
             const unlocked = unlockedIds.includes(ach.id);
-            const icon = unlocked ? 'fa-unlock' : 'fa-lock';
-            const statusClass = unlocked ? 'unlocked' : 'locked';
-            const title = ach.title; // already includes number
-            const desc = ach.desc;
+            const borderColor = unlocked ? 'rgba(16,185,129,0.25)' : 'rgba(255,255,255,0.06)';
+            const bgColor = unlocked ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)';
+            const iconColor = unlocked ? '#10B981' : '#6B7280';
+            const titleColor = unlocked ? '#F1F5F9' : '#9CA3AF';
+            const statusColor = unlocked ? '#10B981' : '#6B7280';
+            const statusText = unlocked ? '✓ Unlocked' : '🔒 Locked';
 
             html += `
-                <div class="profile-achievement-item ${statusClass}" style="display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;background:${unlocked ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)'};border:1px solid ${unlocked ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)'};">
-                    <div class="profile-achievement-icon" style="font-size:16px;width:28px;text-align:center;color:${unlocked ? '#10B981' : '#6B7280'};">
-                        <i class="fas ${icon}"></i>
+                <div style="
+                    background:${bgColor};
+                    border:1px solid ${borderColor};
+                    border-radius:10px;
+                    padding:10px 14px;
+                    display:flex;
+                    align-items:center;
+                    gap:10px;
+                    transition:all 0.2s ease;
+                ">
+                    <div style="
+                        font-size:18px;
+                        color:${iconColor};
+                        width:28px;
+                        text-align:center;
+                        flex-shrink:0;
+                    ">
+                        <i class="fas ${ach.icon}"></i>
                     </div>
-                    <div class="profile-achievement-info" style="flex:1;">
-                        <div class="profile-achievement-name" style="font-weight:600;font-size:0.85rem;color:${unlocked ? '#E5E7EB' : '#9CA3AF'};">${window.escapeHtml(title)}</div>
-                        <div class="profile-achievement-desc" style="font-size:0.7rem;color:#6B7280;">${window.escapeHtml(desc)}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="
+                            font-weight:600;
+                            font-size:0.78rem;
+                            color:${titleColor};
+                            line-height:1.3;
+                        ">
+                            ${window.escapeHtml(ach.title)}
+                        </div>
+                        <div style="
+                            font-size:0.62rem;
+                            color:#6B7280;
+                            line-height:1.3;
+                            margin-top:1px;
+                        ">
+                            ${window.escapeHtml(ach.desc)}
+                        </div>
                     </div>
-                    ${unlocked ? '<span style="font-size:0.7rem;color:#10B981;font-weight:600;">✓ Unlocked</span>' : '<span style="font-size:0.7rem;color:#6B7280;">🔒 Locked</span>'}
+                    <div style="
+                        font-size:0.55rem;
+                        font-weight:600;
+                        color:${statusColor};
+                        white-space:nowrap;
+                        flex-shrink:0;
+                        padding-left:4px;
+                    ">
+                        ${statusText}
+                    </div>
                 </div>
             `;
         });
-        html += '</div>';
 
         container.innerHTML = html;
     }
@@ -399,11 +461,10 @@
             }
         }
 
-        renderProfileAnimeList('completed', profile.animeList?.completed || []);
-        renderProfileAnimeList('watching', profile.animeList?.watching || []);
-        renderProfileAnimeList('plan', profile.animeList?.planToWatch || []);
+        renderProfileAnimeList('completed', profile.animeList?.completed || [], 30);
+        renderProfileAnimeList('watching', profile.animeList?.watching || [], 10);
+        renderProfileAnimeList('plan', profile.animeList?.planToWatch || [], 10);
 
-        // ---- ACHIEVEMENTS – now shows all with lock/unlock ----
         const unlockedAchievements = profile.achievements || [];
         renderProfileAchievements(unlockedAchievements);
 
@@ -509,11 +570,10 @@
             }
         }
 
-        renderProfileAnimeList('completed', profile.animeList?.completed || []);
-        renderProfileAnimeList('watching', profile.animeList?.watching || []);
-        renderProfileAnimeList('plan', profile.animeList?.planToWatch || []);
+        renderProfileAnimeList('completed', profile.animeList?.completed || [], 30);
+        renderProfileAnimeList('watching', profile.animeList?.watching || [], 10);
+        renderProfileAnimeList('plan', profile.animeList?.planToWatch || [], 10);
 
-        // ---- ACHIEVEMENTS (fallback) ----
         const unlockedAchievements = profile.achievements || [];
         renderProfileAchievements(unlockedAchievements);
 
@@ -613,9 +673,9 @@
                 totalHours: totalHours
             },
             animeList: {
-                completed: completed.slice(0, 21),
-                watching: animeData.filter(a => a.userStatus === 'Watching').slice(0, 21),
-                planToWatch: animeData.filter(a => a.userStatus === 'Plan to Watch').slice(0, 21)
+                completed: animeData.filter(a => a.userStatus === 'Completed'),
+                watching: animeData.filter(a => a.userStatus === 'Watching'),
+                planToWatch: animeData.filter(a => a.userStatus === 'Plan to Watch')
             },
             achievements: unlockedAchievements,
             recentActivity: JSON.parse(localStorage.getItem('activityLog') || '[]').slice(0, 10),
@@ -751,14 +811,12 @@
         safeSetHTML('profileAchievementsList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading achievements...</div>');
         safeSetHTML('profileActivityList', '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading activity...</div>');
 
-        // Check if viewing own profile
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         if (userId === currentUser.uid || userId === 'current') {
             renderLocalUserProfile();
             return;
         }
 
-        // For other users
         try {
             const response = await fetch(`${window.API_BASE_URL}/api/user/full-profile/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -887,7 +945,6 @@
             });
         }
 
-        // ---- Load your stats from local data ----
         loadYourStats() {
             console.log('📊 Loading your stats from local data...');
 
@@ -1114,7 +1171,6 @@
                     } catch (e) { console.warn(`Could not get stats for ${friend.name}:`, e); }
                 }
 
-                // Add current user from local data
                 const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
@@ -1429,4 +1485,6 @@
     }
 
     window.initCommunityPage = initCommunityPage;
+
+    // Auto-init if main doesn't call.
 })();
