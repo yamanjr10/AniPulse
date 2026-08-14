@@ -100,11 +100,18 @@
                 bell.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.isDropdownOpen = !this.isDropdownOpen;
-                    if (dropdown) dropdown.style.display = this.isDropdownOpen ? 'block' : 'none';
+                    if (this.isDropdownOpen) {
+                        dropdown.removeAttribute('hidden');
+                        dropdown.style.display = 'block';
+                    } else {
+                        dropdown.setAttribute('hidden', '');
+                        dropdown.style.display = 'none';
+                    }
                 });
             }
             document.addEventListener('click', (e) => {
                 if (dropdown && !dropdown.contains(e.target) && !bell.contains(e.target)) {
+                    dropdown.setAttribute('hidden', '');
                     dropdown.style.display = 'none';
                     this.isDropdownOpen = false;
                 }
@@ -259,11 +266,13 @@
                     this.renderNotifications();
                     this.updateBadge();
                     if (typeof window.loadFriends === 'function') await window.loadFriends();
-                    setTimeout(() => {
-                        const dropdown = document.getElementById('notificationDropdown');
-                        if (dropdown) dropdown.style.display = 'none';
+                    // Close dropdown after accepting
+                    const dropdown = document.getElementById('notificationDropdown');
+                    if (dropdown) {
+                        dropdown.setAttribute('hidden', '');
+                        dropdown.style.display = 'none';
                         this.isDropdownOpen = false;
-                    }, 2000);
+                    }
                 } else {
                     this.showToast('Failed to accept friend request', 'error');
                     if (acceptBtn) { acceptBtn.textContent = 'Accept'; acceptBtn.disabled = false; }
@@ -291,11 +300,12 @@
                     this.showToast('Friend request declined', 'info');
                     this.renderNotifications();
                     this.updateBadge();
-                    setTimeout(() => {
-                        const dropdown = document.getElementById('notificationDropdown');
-                        if (dropdown) dropdown.style.display = 'none';
+                    const dropdown = document.getElementById('notificationDropdown');
+                    if (dropdown) {
+                        dropdown.setAttribute('hidden', '');
+                        dropdown.style.display = 'none';
                         this.isDropdownOpen = false;
-                    }, 1500);
+                    }
                 } else {
                     this.showToast('Failed to decline friend request', 'error');
                     if (declineBtn) { declineBtn.textContent = 'Decline'; declineBtn.disabled = false; }
@@ -312,8 +322,11 @@
                 window.openUserProfile(userId);
             }
             const dropdown = document.getElementById('notificationDropdown');
-            if (dropdown) dropdown.style.display = 'none';
-            this.isDropdownOpen = false;
+            if (dropdown) {
+                dropdown.setAttribute('hidden', '');
+                dropdown.style.display = 'none';
+                this.isDropdownOpen = false;
+            }
         }
 
         handleNotificationClick(type, data) {
@@ -327,8 +340,11 @@
                     break;
             }
             const dropdown = document.getElementById('notificationDropdown');
-            if (dropdown) dropdown.style.display = 'none';
-            this.isDropdownOpen = false;
+            if (dropdown) {
+                dropdown.setAttribute('hidden', '');
+                dropdown.style.display = 'none';
+                this.isDropdownOpen = false;
+            }
         }
 
         showToast(message, type = 'info') {
