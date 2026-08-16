@@ -65,7 +65,7 @@
     border-radius: 24px;
     margin-bottom: 2rem;
     min-height: 200px;
-    
+
     /* Premium Gradient Background */
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -111,9 +111,19 @@
 }
 
 @keyframes floatOrb {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -30px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -30px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
 }
 
 /* ===== STATS HERO CONTENT ===== */
@@ -242,10 +252,12 @@
     background: rgba(245, 158, 11, 0.15);
     color: #f59e0b;
 }
+
 .hero-insight-icon.streak {
     background: rgba(239, 68, 68, 0.15);
     color: #ef4444;
 }
+
 .hero-insight-icon.rating {
     background: rgba(139, 92, 246, 0.15);
     color: #8b5cf6;
@@ -316,14 +328,17 @@
     background: rgba(16, 185, 129, 0.15);
     color: #10b981;
 }
+
 .hero-stat-icon.episodes {
     background: rgba(59, 130, 246, 0.15);
     color: #3b82f6;
 }
+
 .hero-stat-icon.time {
     background: rgba(245, 158, 11, 0.15);
     color: #f59e0b;
 }
+
 .hero-stat-icon.rating-star {
     background: rgba(139, 92, 246, 0.15);
     color: #8b5cf6;
@@ -366,9 +381,11 @@
 [data-theme="dark"] .hero-glow-1 {
     background: rgba(168, 85, 247, 0.3);
 }
+
 [data-theme="dark"] .hero-glow-2 {
     background: rgba(59, 130, 246, 0.25);
 }
+
 [data-theme="dark"] .hero-glow-3 {
     background: rgba(236, 72, 153, 0.15);
 }
@@ -383,9 +400,11 @@
 [data-theme="light"] .hero-glow-1 {
     background: rgba(168, 85, 247, 0.15);
 }
+
 [data-theme="light"] .hero-glow-2 {
     background: rgba(59, 130, 246, 0.12);
 }
+
 [data-theme="light"] .hero-glow-3 {
     background: rgba(236, 72, 153, 0.08);
 }
@@ -456,14 +475,17 @@
     background: rgba(16, 185, 129, 0.08);
     color: #059669;
 }
+
 [data-theme="light"] .hero-stat-icon.episodes {
     background: rgba(59, 130, 246, 0.08);
     color: #2563eb;
 }
+
 [data-theme="light"] .hero-stat-icon.time {
     background: rgba(245, 158, 11, 0.08);
     color: #d97706;
 }
+
 [data-theme="light"] .hero-stat-icon.rating-star {
     background: rgba(139, 92, 246, 0.08);
     color: #7c3aed;
@@ -473,10 +495,12 @@
     background: rgba(245, 158, 11, 0.08);
     color: #d97706;
 }
+
 [data-theme="light"] .hero-insight-icon.streak {
     background: rgba(239, 68, 68, 0.08);
     color: #dc2626;
 }
+
 [data-theme="light"] .hero-insight-icon.rating {
     background: rgba(139, 92, 246, 0.08);
     color: #7c3aed;
@@ -491,17 +515,17 @@
         padding: 2rem 2rem;
         min-height: 180px;
     }
-    
+
     .stats-hero-content {
         flex-direction: column;
         align-items: stretch;
         gap: 1.5rem;
     }
-    
+
     .stats-hero-right {
         grid-template-columns: repeat(4, 1fr);
     }
-    
+
     .hero-stat-card {
         min-width: 0;
     }
@@ -513,59 +537,59 @@
         min-height: 160px;
         border-radius: 16px;
     }
-    
+
     .stats-hero-right {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.6rem;
     }
-    
+
     .hero-title {
         font-size: 1.6rem;
     }
-    
+
     .hero-stat-card {
         padding: 0.6rem 0.8rem;
         border-radius: 12px;
     }
-    
+
     .hero-stat-value {
         font-size: 1rem;
     }
-    
+
     .hero-stat-icon {
         width: 34px;
         height: 34px;
         font-size: 0.75rem;
     }
-    
+
     .hero-glow-1 {
         width: 150px;
         height: 150px;
         top: -40px;
         right: -30px;
     }
-    
+
     .hero-glow-2 {
         width: 120px;
         height: 120px;
         bottom: -30px;
         left: -20px;
     }
-    
+
     .hero-glow-3 {
         width: 100px;
         height: 100px;
     }
-    
+
     .hero-insights {
         gap: 0.5rem;
     }
-    
+
     .hero-insight-item {
         padding: 0.4rem 0.7rem;
         border-radius: 10px;
     }
-    
+
     .hero-insight-text {
         font-size: 0.7rem;
     }
@@ -577,90 +601,90 @@
         min-height: 140px;
         border-radius: 12px;
     }
-    
+
     .stats-hero-right {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.5rem;
     }
-    
+
     .hero-title {
         font-size: 1.3rem;
         gap: 0.3rem;
     }
-    
+
     .hero-greeting-text {
         font-size: 1rem;
     }
-    
+
     .hero-subtitle {
         font-size: 0.85rem;
     }
-    
+
     .hero-stat-card {
         padding: 0.5rem 0.6rem;
         border-radius: 10px;
         gap: 0.5rem;
     }
-    
+
     .hero-stat-value {
         font-size: 0.85rem;
     }
-    
+
     .hero-stat-label {
         font-size: 0.5rem;
     }
-    
+
     .hero-stat-icon {
         width: 28px;
         height: 28px;
         font-size: 0.65rem;
         border-radius: 8px;
     }
-    
+
     .hero-badge {
         font-size: 0.65rem;
         padding: 0.2rem 0.7rem 0.2rem 0.4rem;
     }
-    
+
     .hero-badge-icon {
         font-size: 0.7rem;
     }
-    
+
     .hero-glow-1 {
         width: 100px;
         height: 100px;
         top: -30px;
         right: -20px;
     }
-    
+
     .hero-glow-2 {
         width: 80px;
         height: 80px;
         bottom: -20px;
         left: -15px;
     }
-    
+
     .hero-glow-3 {
         width: 70px;
         height: 70px;
     }
-    
+
     .hero-insight-item {
         padding: 0.3rem 0.5rem;
         gap: 0.4rem;
     }
-    
+
     .hero-insight-icon {
         width: 26px;
         height: 26px;
         font-size: 0.6rem;
         border-radius: 6px;
     }
-    
+
     .hero-insight-text {
         font-size: 0.65rem;
     }
-    
+
     .hero-insight-label {
         font-size: 0.5rem;
     }
@@ -673,15 +697,15 @@
     .stats-hero .hero-glow-orb {
         animation: none !important;
     }
-    
+
     .stats-hero .shine-overlay {
         display: none !important;
     }
-    
+
     .stats-hero .stat-item:hover {
         transform: none !important;
     }
-    
+
     .stats-hero .quote-card:hover {
         transform: none !important;
     }
@@ -835,6 +859,172 @@
 
 .metric-change.neutral {
     color: var(--text-muted);
+}
+
+/* ============================================
+   PERIOD STATS – Dedicated Section (with spacing)
+   ============================================ */
+.period-stats-section {
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+}
+
+.period-stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.period-stats-header .section-title {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.period-stats-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.period-stats-filters {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.filter-group select {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 12px;
+    min-width: 130px;
+}
+
+.filter-group select:hover {
+    border-color: var(--clr-primary);
+}
+
+.filter-group select:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
+}
+
+.period-label {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    background: var(--bg-highlight);
+    padding: 0.2rem 1rem;
+    border-radius: 20px;
+}
+
+.period-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .period-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.period-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-tertiary);
+    padding: 1.2rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.period-stat-card:hover {
+    background: var(--bg-hover);
+    transform: translateY(-2px);
+}
+
+.period-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.period-stat-icon.completed {
+    background: rgba(72, 187, 120, 0.2);
+    color: #48bb78;
+}
+
+.period-stat-icon.episodes {
+    background: rgba(66, 153, 225, 0.2);
+    color: #4299e1;
+}
+
+.period-stat-icon.hours {
+    background: rgba(237, 137, 54, 0.2);
+    color: #ed8936;
+}
+
+.period-stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.period-stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+
+.period-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Light theme dropdown override */
+[data-theme="light"] .filter-group select {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2347566b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
 }
 
 /* ============================================
@@ -2125,7 +2315,8 @@
 [data-theme="light"] .journey-chart-card,
 [data-theme="light"] .journey-secondary-chart,
 [data-theme="light"] .personality-card,
-[data-theme="light"] .insights-panel {
+[data-theme="light"] .insights-panel,
+[data-theme="light"] .period-stats-section {
     background: #FFFFFF;
     border: 1px solid rgba(0, 0, 0, 0.06);
 }
@@ -2134,7 +2325,8 @@
 [data-theme="light"] .analytics-card:hover,
 [data-theme="light"] .rating-card:hover,
 [data-theme="light"] .journey-chart-card:hover,
-[data-theme="light"] .journey-secondary-chart:hover {
+[data-theme="light"] .journey-secondary-chart:hover,
+[data-theme="light"] .period-stats-section:hover {
     border-color: var(--clr-primary);
     box-shadow: 0 8px 24px rgba(79, 70, 229, 0.08);
 }
@@ -2148,7 +2340,8 @@
 [data-theme="light"] .milestone-item:hover,
 [data-theme="light"] .pace-insight:hover,
 [data-theme="light"] .smart-insight:hover,
-[data-theme="light"] .advanced-insight:hover {
+[data-theme="light"] .advanced-insight:hover,
+[data-theme="light"] .period-stat-card:hover {
     background: #F1F5F9;
 }
 
@@ -2286,6 +2479,11 @@
     .journey-milestones-container {
         grid-template-columns: 1fr;
     }
+
+    .period-stats-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 
 @media (max-width: 480px) {
@@ -2362,6 +2560,10 @@
     .score-bar-percent {
         font-size: 0.5rem;
         min-width: 34px;
+    }
+
+    .period-stats-section {
+        padding: 1rem;
     }
 }
 
@@ -2873,4 +3075,44 @@
     .pace-insight:hover {
         transform: none !important;
     }
+}
+
+/* ============================================ */
+/* Period Stats – Dropdowns                     */
+/* ============================================ */
+
+.period-stats-filters select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--color-bg-input, #1e293b);
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.12));
+    border-radius: 8px;
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-primary, #f1f5f9);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 12px;
+    min-width: 130px;
+}
+
+.period-stats-filters select:hover {
+    border-color: var(--color-primary, #6a5acd);
+}
+
+.period-stats-filters select:focus {
+    border-color: var(--color-primary, #6a5acd);
+    box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
+}
+
+/* Light theme overrides */
+[data-theme="light"] .period-stats-filters select {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2347566b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
 }

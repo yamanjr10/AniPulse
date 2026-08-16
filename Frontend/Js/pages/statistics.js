@@ -1,6 +1,6 @@
 // ============================================
 // STATISTICS PAGE – All charts, metrics, hero, analytics
-// Full file – No placeholders
+// Full file – with Period Stats filter
 // ============================================
 
 (function () {
@@ -125,14 +125,13 @@
     }
 
     // ============================================
-    // SECTION 1: STATISTICS HERO (FIXED NAME)
+    // SECTION 1: STATISTICS HERO
     // ============================================
 
     function updateStatsHero() {
         console.log('🔄 Updating Statistics Hero...');
 
         const animeData = JSON.parse(localStorage.getItem('animeData')) || [];
-        // ✅ READ NAME FROM userProfile
         const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
         const userName = userProfile.name || userProfile.username || 'AnimeFan';
 
@@ -256,7 +255,7 @@
     }
 
     // ============================================
-    // SECTION 2: OVERVIEW METRICS
+    // SECTION 2: OVERVIEW METRICS (overall totals)
     // ============================================
 
     function updateOverviewMetrics() {
@@ -447,7 +446,142 @@
     }
 
     // ============================================
-    // SECTION 3: LIBRARY ANALYTICS
+    // SECTION 3: PERIOD STATS (new dedicated section)
+    // ============================================
+
+    function getAvailableYearsForPeriod() {
+        const data = window.animeData || [];
+        const years = new Set();
+        data.forEach(a => {
+            if (a.userStatus === 'Completed' && a.finishDate) {
+                const y = parseInt(a.finishDate.split('-')[0]);
+                if (!isNaN(y)) years.add(y);
+            }
+        });
+        // Always include current year
+        years.add(new Date().getFullYear());
+        return Array.from(years).sort((a, b) => b - a);
+    }
+
+    function calculatePeriodStats(month, year) {
+        const data = window.animeData || [];
+        let completed = 0, episodes = 0, hours = 0;
+
+        data.forEach(a => {
+            if (a.userStatus !== 'Completed') return;
+
+            let date = null;
+            if (a.actualFinishDate) date = parseDateSafely(a.actualFinishDate);
+            if (!date && a.finishDate) date = parseDateSafely(a.finishDate);
+            if (!date && a.completedTimestamp) date = parseDateSafely(a.completedTimestamp);
+            if (!date) return;
+
+            const animeYear = date.getFullYear();
+            const animeMonth = date.getMonth() + 1; // 1-12
+
+            if (year && animeYear !== year) return;
+            if (month !== 'all' && animeMonth !== parseInt(month)) return;
+
+            completed++;
+            const isMovie = a.type === 'Movie';
+            const episodeCount = a.episodes || 0;
+            const duration = a.duration || (isMovie ? 120 : 20);
+
+            if (isMovie) {
+                episodes += 1;
+                hours += duration / 60;
+            } else {
+                episodes += episodeCount;
+                hours += (episodeCount * duration) / 60;
+            }
+        });
+
+        return { completed, episodes, hours: Math.round(hours * 10) / 10 };
+    }
+
+    function updatePeriodStats() {
+        const monthSelect = document.getElementById('periodMonth');
+        const yearSelect = document.getElementById('periodYear');
+        const label = document.getElementById('periodDisplayLabel');
+
+        if (!monthSelect || !yearSelect) return;
+
+        const month = monthSelect.value;
+        const year = parseInt(yearSelect.value);
+
+        const stats = calculatePeriodStats(month, year);
+
+        document.getElementById('periodCompleted').textContent = stats.completed;
+        document.getElementById('periodEpisodes').textContent = stats.episodes.toLocaleString();
+
+        // ✅ Display hours as total hours (rounded)
+        const totalHours = Math.round(stats.hours);
+        document.getElementById('periodHours').textContent = `${totalHours} hrs`;
+
+        // Update label
+        let monthName = 'All Months';
+        if (month !== 'all') {
+            monthName = new Date(year, parseInt(month) - 1).toLocaleString('default', { month: 'long' });
+        }
+        label.textContent = `Showing: ${monthName} ${year}`;
+
+        // Save to localStorage
+        localStorage.setItem('periodMonth', month);
+        localStorage.setItem('periodYear', year);
+    }
+
+    function initPeriodStats() {
+        const yearSelect = document.getElementById('periodYear');
+        const monthSelect = document.getElementById('periodMonth');
+        if (!yearSelect || !monthSelect) return;
+
+        const years = getAvailableYearsForPeriod();
+        const currentYear = new Date().getFullYear();
+
+        // Populate year dropdown
+        yearSelect.innerHTML = '';
+        years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            yearSelect.appendChild(opt);
+        });
+
+        // Load saved values from localStorage
+        const savedMonth = localStorage.getItem('periodMonth');
+        const savedYear = localStorage.getItem('periodYear');
+
+        // Set month – saved or current
+        if (savedMonth && monthSelect.querySelector(`option[value="${savedMonth}"]`)) {
+            monthSelect.value = savedMonth;
+        } else {
+            // default to current month
+            monthSelect.value = new Date().getMonth() + 1;
+        }
+
+        // Set year – saved or current
+        if (savedYear && yearSelect.querySelector(`option[value="${savedYear}"]`)) {
+            yearSelect.value = parseInt(savedYear);
+        } else {
+            yearSelect.value = currentYear;
+        }
+
+        // Event listeners that save on change
+        monthSelect.addEventListener('change', () => {
+            localStorage.setItem('periodMonth', monthSelect.value);
+            updatePeriodStats();
+        });
+        yearSelect.addEventListener('change', () => {
+            localStorage.setItem('periodYear', yearSelect.value);
+            updatePeriodStats();
+        });
+
+        // Initial update
+        updatePeriodStats();
+    }
+
+    // ============================================
+    // SECTION 4: LIBRARY ANALYTICS
     // ============================================
 
     function updateLibraryAnalytics() {
@@ -673,7 +807,7 @@
     }
 
     // ============================================
-    // SECTION 4: RATING ANALYTICS
+    // SECTION 5: RATING ANALYTICS
     // ============================================
 
     function calculateStandardDeviation(values) {
@@ -1033,7 +1167,7 @@
     }
 
     // ============================================
-    // SECTION 5: COMPLETION JOURNEY
+    // SECTION 6: COMPLETION JOURNEY
     // ============================================
 
     function formatDate(date) {
@@ -1591,7 +1725,7 @@
     }
 
     // ============================================
-    // SECTION 6: CHART FUNCTIONS (Dashboard & Statistics)
+    // SECTION 7: CHART FUNCTIONS (Dashboard & Statistics)
     // ============================================
 
     function calculateMonthlyProgressData() {
@@ -1721,7 +1855,7 @@
         updateGenreChartWithFilter();
     }
 
-    // --- EXTRACTED CHART UPDATE FUNCTIONS (SCOPE FIX) ---
+    // --- EXTRACTED CHART UPDATE FUNCTIONS ---
 
     function populateYearDropdowns() {
         const years = getAvailableYears();
@@ -1890,7 +2024,7 @@
     }
 
     // ============================================
-    // SECTION 7: STATISTICS TABLES
+    // SECTION 8: STATISTICS TABLES
     // ============================================
 
     function updateStatisticsTables() {
@@ -1957,17 +2091,11 @@
     }
 
     // ============================================
-    // SECTION 8: MONTHLY STATS (for dashboard) – UPGRADED
+    // SECTION 9: MONTHLY STATS (for dashboard) – UPGRADED
     // ============================================
 
-    /**
-     * Calculates stats for the current month (completed anime, movies, episodes, hours)
-     * @param {Object} options - { debug: false }
-     * @returns {Object} { hours, completed, movies, episodes }
-     */
     function calculateMonthlyStats(options = {}) {
         const debug = options.debug || false;
-
         const data = window.animeData || [];
         if (!Array.isArray(data) || data.length === 0) {
             if (debug) console.warn('⚠️ No anime data found');
@@ -1980,12 +2108,10 @@
 
         let hours = 0, completed = 0, movies = 0, episodes = 0;
 
-        // Use a local reference to the date parser (with fallback)
         const parseDate = typeof window.parseDateSafely === 'function'
             ? window.parseDateSafely
             : function (dateStr) {
                 if (!dateStr) return null;
-                // Try common formats
                 if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr) || /^\d{4}-\d{2}$/.test(dateStr)) {
                     const parts = dateStr.split('-').map(Number);
                     const d = new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
@@ -1998,10 +2124,8 @@
         if (debug) console.log(`📊 calculateMonthlyStats: ${data.length} anime total`);
 
         data.forEach(a => {
-            // Skip if not completed
             if (a.userStatus !== 'Completed') return;
 
-            // Try multiple date sources in order of priority
             let completionDate = null;
             if (a.actualFinishDate) completionDate = parseDate(a.actualFinishDate);
             if (!completionDate && a.finishDate) completionDate = parseDate(a.finishDate);
@@ -2013,7 +2137,6 @@
                 return;
             }
 
-            // Check if completion date matches current month/year
             if (completionDate.getMonth() === currentMonth && completionDate.getFullYear() === currentYear) {
                 const isMovie = a.type === 'Movie';
                 const episodeCount = a.episodes || 0;
@@ -2022,7 +2145,7 @@
                 if (isMovie) {
                     movies++;
                     hours += duration / 60;
-                    episodes += 1; // Movies count as 1 episode
+                    episodes += 1;
                 } else {
                     episodes += episodeCount;
                     hours += (episodeCount * duration) / 60;
@@ -2044,13 +2167,8 @@
         return result;
     }
 
-    /**
-     * Updates the "vs last month" stat cards with percentage changes
-     * @param {Object} options - { debug: false }
-     */
     function updateStatCardsWithChanges(options = {}) {
         const debug = options.debug || false;
-
         const data = window.animeData || [];
         if (!Array.isArray(data)) {
             if (debug) console.warn('⚠️ Invalid anime data');
@@ -2061,7 +2179,6 @@
         const currentYear = now.getFullYear();
         const currentMonth = now.getMonth();
 
-        // Helper to get stats for a specific month
         function getStats(year, month) {
             let completed = 0, movies = 0, episodes = 0, hours = 0;
 
@@ -2107,7 +2224,6 @@
             return { completed, movies, episodes, hours };
         }
 
-        // Special case: January has no previous month data for comparison
         if (now.getMonth() === 0) {
             const statTypes = ['completed', 'movies', 'episodes', 'hours'];
             statTypes.forEach(stat => {
@@ -2121,7 +2237,6 @@
             return;
         }
 
-        // Get current and previous month stats
         const current = getStats(currentYear, currentMonth);
 
         let prevYear = currentYear, prevMonth = currentMonth - 1;
@@ -2130,7 +2245,6 @@
 
         if (debug) console.log('📊 Current month:', current, 'Previous:', prev);
 
-        // Update each stat card
         const statTypes = ['completed', 'movies', 'episodes', 'hours'];
         statTypes.forEach(stat => {
             const el = document.getElementById(`${stat}-change`);
@@ -2178,7 +2292,7 @@
     }
 
     // ============================================
-    // SECTION 9: DASHBOARD CHARTS (FIXED - COMPLETE)
+    // SECTION 10: DASHBOARD CHARTS
     // ============================================
 
     function initCharts() {
@@ -2186,7 +2300,6 @@
         const textColor = isDark ? '#ffffff' : '#64748b';
         const gridColor = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
 
-        // Clean up existing chart
         if (window.monthlyProgressChart) {
             if (typeof window.monthlyProgressChart.destroy === 'function') {
                 window.monthlyProgressChart.destroy();
@@ -2220,9 +2333,6 @@
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 datasets: [
-                    // ==========================
-                    // Trend Line (Behind Bars)
-                    // ==========================
                     {
                         type: 'line',
                         label: 'Trend',
@@ -2261,9 +2371,6 @@
                             }
                         }
                     },
-                    // ==========================
-                    // Bar Chart
-                    // ==========================
                     {
                         type: 'bar',
                         label: 'Anime Completed',
@@ -2300,12 +2407,10 @@
                                 const dataIndex = context.dataIndex;
                                 const rawValue = context.raw;
 
-                                // For bar dataset (index 1) – show count
                                 if (datasetIndex === 1) {
                                     return `Completed: ${rawValue}`;
                                 }
 
-                                // For trend line (index 0) – show change with auto text
                                 if (datasetIndex === 0 && dataIndex > 0 && dataIndex <= _monthlyChartCurrentMonth) {
                                     const current = _monthlyChartData[dataIndex];
                                     const previous = _monthlyChartData[dataIndex - 1];
@@ -2345,7 +2450,7 @@
             }
         });
 
-        // Genre Distribution Chart (unchanged)
+        // Genre Distribution Chart
         const genreCtx = document.getElementById('genreDistributionChart')?.getContext('2d');
         if (genreCtx) {
             if (genreDistributionChart && typeof genreDistributionChart.destroy === 'function') {
@@ -2388,9 +2493,7 @@
         console.log('✅ Dashboard charts initialized (auto-text tooltip with trend cutoff)');
     }
 
-    // Monthly progress chart update (safe)
     window.updateMonthlyProgressChart = function () {
-        // If chart doesn't exist, try to initialize it
         if (!window.monthlyProgressChart) {
             console.warn('⚠️ monthlyProgressChart not initialized – re-initializing...');
             if (typeof window.initCharts === 'function') {
@@ -2400,7 +2503,6 @@
         }
 
         const chart = window.monthlyProgressChart;
-        // Check if chart has the required datasets (trend line + bar)
         if (!chart.data || !chart.data.datasets || chart.data.datasets.length < 2) {
             console.warn('⚠️ monthlyProgressChart is missing required datasets – re-initializing...');
             try { chart.destroy(); } catch (e) { }
@@ -2432,7 +2534,7 @@
     };
 
     // ============================================
-    // SECTION 10: STATISTICS CHARTS (All charts)
+    // SECTION 11: STATISTICS CHARTS (All charts)
     // ============================================
 
     function initStatisticsCharts() {
@@ -2639,7 +2741,6 @@
             });
         }
 
-        // Populate year dropdowns and initial data
         populateYearDropdowns();
         refreshAllCharts();
 
@@ -2647,7 +2748,7 @@
     }
 
     // ============================================
-    // SECTION 11: INIT FUNCTIONS
+    // SECTION 12: INIT FUNCTIONS
     // ============================================
 
     function initStatsHero() {
@@ -2750,7 +2851,7 @@
     }
 
     // ============================================
-    // SECTION 12: MAIN STATISTICS PAGE INIT
+    // SECTION 13: MAIN STATISTICS PAGE INIT
     // ============================================
 
     function initStatisticsPage() {
@@ -2758,6 +2859,7 @@
 
         initStatsHero();
         initOverviewMetrics();
+        initPeriodStats();          // <-- NEW: Period Stats filter
         initLibraryAnalytics();
         initRatingAnalytics();
         initCompletionJourney();
@@ -2784,7 +2886,7 @@
     }
 
     // ============================================
-    // SECTION 13: EXPOSE GLOBALLY
+    // SECTION 14: EXPOSE GLOBALLY
     // ============================================
 
     window.initStatisticsPage = initStatisticsPage;
@@ -2815,6 +2917,7 @@
             setTimeout(() => {
                 updateStatsHero();
                 updateOverviewMetrics();
+                updatePeriodStats();
                 updateLibraryAnalytics();
                 updateRatingAnalytics();
                 updateCompletionJourney();
@@ -2824,7 +2927,7 @@
     }
 
     // ============================================
-    // SECTION 14: AUTO-INIT
+    // SECTION 15: AUTO-INIT
     // ============================================
 
     const statsMenuItem = document.querySelector('.menu-item[data-page="statistics"]');
