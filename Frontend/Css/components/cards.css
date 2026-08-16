@@ -64,9 +64,17 @@
 }
 
 @keyframes valuePop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.08); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .stat-card .stat-label {
@@ -129,8 +137,15 @@
 }
 
 @keyframes arrowBounce {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(3px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(3px);
+    }
 }
 
 /* Stat Icon */
@@ -153,16 +168,46 @@
 }
 
 @keyframes floatIcon {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
 }
 
-.stat-icon.success { background: var(--gradient-success); box-shadow: 0 10px 20px -8px rgba(16, 185, 129, 0.5); }
-.stat-icon.info { background: var(--gradient-info); box-shadow: 0 10px 20px -8px rgba(59, 130, 246, 0.5); }
-.stat-icon.warning { background: var(--gradient-warning); box-shadow: 0 10px 20px -8px rgba(245, 158, 11, 0.5); }
-.stat-icon.danger { background: var(--gradient-danger); box-shadow: 0 10px 20px -8px rgba(239, 68, 68, 0.5); }
-.stat-icon.primary { background: var(--gradient-primary); box-shadow: 0 10px 20px -8px rgba(79, 70, 229, 0.5); }
-.stat-icon.secondary { background: var(--gradient-secondary); box-shadow: 0 10px 20px -8px rgba(139, 92, 246, 0.5); }
+.stat-icon.success {
+    background: var(--gradient-success);
+    box-shadow: 0 10px 20px -8px rgba(16, 185, 129, 0.5);
+}
+
+.stat-icon.info {
+    background: var(--gradient-info);
+    box-shadow: 0 10px 20px -8px rgba(59, 130, 246, 0.5);
+}
+
+.stat-icon.warning {
+    background: var(--gradient-warning);
+    box-shadow: 0 10px 20px -8px rgba(245, 158, 11, 0.5);
+}
+
+.stat-icon.danger {
+    background: var(--gradient-danger);
+    box-shadow: 0 10px 20px -8px rgba(239, 68, 68, 0.5);
+}
+
+.stat-icon.primary {
+    background: var(--gradient-primary);
+    box-shadow: 0 10px 20px -8px rgba(79, 70, 229, 0.5);
+}
+
+.stat-icon.secondary {
+    background: var(--gradient-secondary);
+    box-shadow: 0 10px 20px -8px rgba(139, 92, 246, 0.5);
+}
 
 /* ===== ANIME CARD ===== */
 .anime-card {
@@ -287,18 +332,19 @@
 
 /* Anime Badges */
 .anime-card .rating-badge {
-    position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
-    background: var(--gradient-warning);
-    color: var(--text-inverse);
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-full);
-    font-size: var(--text-xs);
+    display: inline-flex;
+    align-items: center;
+    color: var(--clr-warning-light);
     font-weight: var(--font-bold);
-    z-index: 3;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-    transition: all var(--transition);
+    font-size: var(--text-xs);
+    gap: var(--space-1);
+    background: rgba(0, 0, 0, 0.819);
+    padding: var(--space-0-5) var(--space-2);
+    border-radius: var(--radius-full);
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(251, 191, 36, 0.1);
+    border-image: none;
 }
 
 .anime-card:hover .rating-badge {
@@ -333,15 +379,19 @@
 .anime-badge[data-status="Watching"] {
     background: var(--gradient-primary);
 }
+
 .anime-badge[data-status="Completed"] {
     background: var(--gradient-success);
 }
+
 .anime-badge[data-status="Plan to Watch"] {
     background: var(--gradient-warning);
 }
+
 .anime-badge[data-status="Dropped"] {
     background: var(--gradient-danger);
 }
+
 .anime-badge[data-status="On-Hold"] {
     background: var(--gradient-secondary);
 }
@@ -447,18 +497,41 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-    .stat-card { padding: var(--space-4); }
-    .stat-card .stat-value { font-size: var(--text-2xl); }
-    
-    .chart-card { padding: var(--space-4); }
-    .chart-card .chart-container { height: 220px; }
-    
-    .anime-card .anime-cover { height: 200px; }
-    .anime-card .anime-info { padding: var(--space-3); }
-    .anime-card .anime-title { font-size: var(--text-sm); }
+    .stat-card {
+        padding: var(--space-4);
+    }
+
+    .stat-card .stat-value {
+        font-size: var(--text-2xl);
+    }
+
+    .chart-card {
+        padding: var(--space-4);
+    }
+
+    .chart-card .chart-container {
+        height: 220px;
+    }
+
+    .anime-card .anime-cover {
+        height: 200px;
+    }
+
+    .anime-card .anime-info {
+        padding: var(--space-3);
+    }
+
+    .anime-card .anime-title {
+        font-size: var(--text-sm);
+    }
 }
 
 @media (max-width: 480px) {
-    .stat-card .stat-value { font-size: var(--text-xl); }
-    .dna-card .dna-value { font-size: var(--text-2xl); }
+    .stat-card .stat-value {
+        font-size: var(--text-xl);
+    }
+
+    .dna-card .dna-value {
+        font-size: var(--text-2xl);
+    }
 }
