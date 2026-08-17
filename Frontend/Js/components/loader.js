@@ -1,5 +1,5 @@
 // ============================================
-// APP LOADER – With stats animation
+// APP LOADER – With stats animation & ready check
 // ============================================
 
 (function () {
@@ -20,14 +20,13 @@
         function update(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            // Ease-out cubic for smooth finish
             const eased = 1 - Math.pow(1 - progress, 3);
             const currentValue = Math.round(start + (target - start) * eased);
             element.textContent = currentValue;
             if (progress < 1) {
                 requestAnimationFrame(update);
             } else {
-                element.textContent = target; // ensure final value
+                element.textContent = target; 
             }
         }
         requestAnimationFrame(update);
@@ -56,7 +55,7 @@
     }
     window.hideLoader = hideLoader;
 
-    // --- Fake progress ---
+    // --- Fake progress bar animation ---
     function runFakeProgress() {
         const bar = document.getElementById('loader-progress');
         const percent = document.getElementById('loader-percent');
@@ -67,13 +66,42 @@
                 clearInterval(timer);
                 return;
             }
-            if (progress < 80) progress += 5;
-            else if (progress < 92) progress += 2;
-            else progress += 0.3;
-            progress = Math.min(progress, 95);
+            if (progress < 60) progress += 7;
+            else if (progress < 80) progress += 4;
+            else if (progress < 95) progress += 2;
+            else progress += 0.5;
+            progress = Math.min(progress, 100);
             bar.style.width = progress + '%';
             percent.textContent = Math.floor(progress) + '%';
-        }, 120);
+
+            if (progress >= 100 && !loaderFinished) {
+                percent.textContent = 'Ready!';
+                percent.style.color = '#34D399';
+                bar.style.background = 'linear-gradient(90deg, #10B981, #34D399, #6EE7B7)';
+                bar.style.animation = 'none';
+            }
+        }, 90);
+    }
+
+    function isAppReady() {
+        const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
+        const statEl = document.querySelector('.stat-value');
+        const hasData = animeData.length > 0 || (statEl && statEl.textContent !== '0');
+        return hasData;
+    }
+
+
+    function waitForAppReady() {
+        if (loaderFinished) return;
+        if (isAppReady()) {
+            hideLoader();
+            if (typeof window.updateCurrentlyWatching === 'function') {
+                window.updateCurrentlyWatching();
+            }
+            return;
+        }
+        
+        setTimeout(waitForAppReady, 200);
     }
 
     // --- Start animations after loader ---
@@ -103,7 +131,6 @@
                 const el = document.getElementById(id);
                 if (el) {
                     const target = targets[i];
-                    // Only animate if target > 0, else just set the value
                     if (target > 0) {
                         el.textContent = 0;
                         animateCount(el, target, 2500);
@@ -114,13 +141,13 @@
             });
         }, 300);
 
-        // Heatmap
+       
         setTimeout(() => {
             const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
             try { if (typeof window.renderActivityHeatmap === 'function') window.renderActivityHeatmap(animeData); } catch (e) { }
         }, 300);
 
-        // Search
+     
         try { if (typeof window.searchAnime === 'function') window.searchAnime(); } catch (e) { }
     };
 
@@ -130,18 +157,10 @@
         document.body.classList.add('loading');
         runFakeProgress();
 
-        // Finish on load
-        window.addEventListener('load', () => {
-            hideLoader();
-            if (typeof window.updateCurrentlyWatching === 'function') {
-                window.updateCurrentlyWatching();
-            }
-        });
-
-        // Emergency safety
+        setTimeout(waitForAppReady, 500);
         setTimeout(hideLoader, MAX_LOADER_TIME);
 
-        console.log('✅ Loader initialized with stats animation');
+        console.log('✅ Loader initialized with stats animation and ready check');
     }
 
     window.initLoader = initLoader;

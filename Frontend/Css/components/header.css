@@ -91,62 +91,24 @@
     align-items: center;
 }
 
-.app-logo h2 {
+.app-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
 }
 
-.app-logo i {
-    font-size: 1.8rem;
-    background: linear-gradient(135deg, #8B5CF6, #6366F1, #A78BFA);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: logoHeartbeat 2s ease-in-out infinite;
-    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));
+.app-logo img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    border-radius: 0;
+    background: none;
+    padding: 0;
+    transition: transform 0.3s ease;
 }
 
-@keyframes logoHeartbeat {
-    0%, 100% { 
-        transform: scale(1);
-        filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));
-    }
-    14% { 
-        transform: scale(1.15);
-        filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
-    }
-    28% { 
-        transform: scale(1);
-        filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));
-    }
-    42% { 
-        transform: scale(1.1);
-        filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.4));
-    }
-    70% { 
-        transform: scale(1);
-        filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));
-    }
-}
-
-.app-logo span {
-    background: linear-gradient(135deg, #FFFFFF, #A78BFA, #8B5CF6);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 800;
-    animation: logoGradient 4s ease infinite;
-}
-
-@keyframes logoGradient {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+.app-logo img:hover {
+    transform: scale(1.04);
 }
 
 /* ============================================
