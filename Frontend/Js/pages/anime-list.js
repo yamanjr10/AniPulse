@@ -1,5 +1,6 @@
 // ============================================
-// ANIME LIST – Full Date Tooltips + Mobile Filters
+// ANIME LIST – Original Style + Search Override
+// Search ignores month/year when active
 // ============================================
 
 (function () {
@@ -26,7 +27,7 @@
         return document.getElementById('dashboardSearch');
     }
 
-    // ─── DATE HELPERS ──────────────────────────────
+    // ─── DATE PARSER (handles YYYY-MM-DD and YYYY-MM) ──
     function parseDateSafely(dateStr) {
         if (!dateStr) return null;
         if (typeof dateStr === 'string') {
@@ -48,6 +49,7 @@
         return null;
     }
 
+    // ─── FORMAT DATE FOR DISPLAY ────────────────────
     function formatDateForDisplay(dateStr) {
         if (!dateStr) return '-';
         const d = parseDateSafely(dateStr);
@@ -57,7 +59,6 @@
         const year = d.getFullYear();
         const day = d.getDate();
         const hasDay = dateStr.split('-').length === 3;
-        // For display in the cell, we show full date if day exists, else month/year
         return hasDay ? `${month} ${day}, ${year}` : `${month} ${year}`;
     }
 
@@ -98,7 +99,6 @@
             }
 
             // ─── DATE FORMATTING ──────────────────────
-            // Completed date
             let completionDisplay = '-';
             let completionTooltip = '';
             if (anime.userStatus === 'Completed') {
@@ -109,7 +109,6 @@
                 }
             }
 
-            // Added date (createdAt)
             let creationTooltip = '';
             if (anime.createdAt) {
                 creationTooltip = formatTooltip('Added on', anime.createdAt);
@@ -117,7 +116,6 @@
 
             const combinedTooltip = [creationTooltip, completionTooltip].filter(Boolean).join(' | ');
 
-            // ─── PROGRESS BAR ──────────────────────────
             const progress = anime.progress || 0;
             const episodes = anime.episodes || 0;
             const progressPercentage = episodes > 0 ? Math.round((progress / episodes) * 100) : 0;
@@ -134,7 +132,6 @@
             const scoreDisplay = anime.score ? `<span class="anime-score">${anime.score.toFixed(1)}</span>` : '-';
             const safeTitle = anime.title.length > 35 ? anime.title.slice(0, 35) + '...' : anime.title;
 
-            // ─── TITLE CELL ────────────────────────────
             const titleWithCover = `
                 <div class="anime-title-cell" title="${window.escapeHtml(combinedTooltip)}">
                     <img src="${anime.cover || 'https://placehold.co/50x70/6a5acd/white?text=No+Image'}"
@@ -171,8 +168,8 @@
         const searchInput = getSearchInput();
 
         const status = filters.status ? filters.status.value : 'all';
-        const month = filters.month ? filters.month.value : 'all';
-        const year = filters.year ? filters.year.value : 'all';
+        let month = filters.month ? filters.month.value : 'all';
+        let year = filters.year ? filters.year.value : 'all';
         const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
         let filtered = [...data];
@@ -182,12 +179,15 @@
             filtered = filtered.filter(a => a.userStatus === status);
         }
 
-        // 2. Search filter (title)
+        // 2. Search filter (title) – if active, ignore month/year
         if (query) {
             filtered = filtered.filter(a => a.title.toLowerCase().includes(query));
+            // ✅ Search overrides month/year – show all matches regardless of date
+            month = 'all';
+            year = 'all';
         }
 
-        // 3. Month/Year filter (only for completed)
+        // 3. Month/Year filter (only applied if search is NOT active)
         if (month !== 'all' || year !== 'all') {
             filtered = filtered.filter(a => {
                 if (a.userStatus !== 'Completed') return false;
@@ -213,7 +213,7 @@
 
     // ─── INIT ──────────────────────────────────────
     function initAnimeList() {
-        console.log('📋 Initializing Anime List (full date tooltips + mobile filters)');
+        console.log('📋 Initializing Anime List (search overrides month/year)');
 
         const filters = getFilters();
         const searchInput = getSearchInput();
@@ -269,7 +269,7 @@
         }
         setTimeout(initialRender, 100);
 
-        console.log('✅ Anime List initialized');
+        console.log('✅ Anime List initialized – search now ignores month/year');
     }
 
     // ─── AUTO‑INIT ──────────────────────────────────
