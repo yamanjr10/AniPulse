@@ -1,4 +1,3 @@
-// Frontend/Js/pages/watchlist.js
 (function () {
     'use strict';
 

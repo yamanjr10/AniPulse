@@ -1,5 +1,6 @@
 // ============================================
 // ACHIEVEMENTS – 50 Unique Milestones
+// Day & Month streaks: max for unlock, current for progress
 // ============================================
 
 (function () {
@@ -55,8 +56,8 @@
         { id: 'ova_5', icon: 'fa-play-circle', title: '34. OVA Collector', desc: 'Complete 5 OVAs/ONAs.', goal: 5 },
 
         // ─── Streaks ─────────────────────────────
-        { id: 'streak_week', icon: 'fa-calendar-week', title: '35. 7-Day Streak', desc: 'Complete at least 1 anime each day for 7 days.', goal: 7 },
-        { id: 'streak_month', icon: 'fa-calendar-alt', title: '36. 30-Day Streak', desc: 'Complete at least 1 anime each day for 30 days.', goal: 30 },
+        { id: 'streak_week', icon: 'fa-calendar-week', title: '35. 7-Day Streak', desc: 'Complete at least 1 anime each day for 7 consecutive days (any time).', goal: 7 },
+        { id: 'streak_month', icon: 'fa-calendar-alt', title: '36. 30-Day Streak', desc: 'Complete at least 1 anime each day for 30 consecutive days (any time).', goal: 30 },
         { id: 'streak_3m', icon: 'fa-calendar-check', title: '37. 3-Month Streak', desc: 'Complete anime in 3 consecutive months.', goal: 3 },
         { id: 'streak_6m', icon: 'fa-calendar-check', title: '38. 6-Month Streak', desc: 'Complete anime in 6 consecutive months.', goal: 6 },
         { id: 'streak_12m', icon: 'fa-calendar-check', title: '39. Year-Long Streak', desc: 'Complete anime in 12 consecutive months.', goal: 12 },
@@ -77,19 +78,26 @@
         { id: 'dropped_5', icon: 'fa-trash', title: '50. Dropper', desc: 'Drop 5 anime (it’s okay to let go).', goal: 5 },
     ];
 
-    // Expose globally
     window.ACHIEVEMENTS_DEFINITIONS = ACHIEVEMENTS;
 
-    // ---- Helpers (unchanged) ----
+    // ---- Helpers ----
+
     function totalWatchHours(data) {
         return data.reduce((sum, a) => sum + ((a.episodes || 0) * (a.duration || 20)) / 60, 0);
     }
 
-    function countConsecutiveMonths(data) {
+    function decadesWatched(data) {
+        const decades = new Set();
+        data.forEach(a => { if (a.startYear) decades.add(Math.floor(a.startYear / 10) * 10); });
+        return Array.from(decades);
+    }
+
+    // ---- Max consecutive months (any time) ----
+    function getMaxMonthStreak(data) {
         const monthStrings = [...new Set(
-            data.filter(a => a.userStatus === 'Completed' && a.finishDate)
+            data.filter(a => a.userStatus === 'Completed' && (a.actualFinishDate || a.finishDate))
                 .map(a => {
-                    const d = new Date(a.finishDate);
+                    const d = new Date(a.actualFinishDate || a.finishDate);
                     const month = (d.getMonth() + 1).toString().padStart(2, '0');
                     return `${d.getFullYear()}-${month}`;
                 })
@@ -109,19 +117,119 @@
         return maxStreak;
     }
 
-    function getCompletedThisMonth(data) {
-        const now = new Date();
-        return data.filter(a => {
-            if (a.userStatus !== 'Completed' || !a.finishDate) return false;
-            const d = new Date(a.finishDate);
-            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-        }).length;
+    // ---- Current consecutive months (from this month backwards) ----
+    function getCurrentMonthStreak(data) {
+        const monthSet = new Set(
+            data.filter(a => a.userStatus === 'Completed' && (a.actualFinishDate || a.finishDate))
+                .map(a => {
+                    const d = new Date(a.actualFinishDate || a.finishDate);
+                    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+                    return `${d.getFullYear()}-${month}`;
+                })
+        );
+        if (monthSet.size === 0) return 0;
+
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1; // 1-12
+
+        let streak = 0;
+        let year = currentYear;
+        let month = currentMonth;
+        while (true) {
+            const key = `${year}-${String(month).padStart(2, '0')}`;
+            if (monthSet.has(key)) {
+                streak++;
+                // Move to previous month
+                month--;
+                if (month === 0) { month = 12; year--; }
+            } else {
+                break;
+            }
+        }
+        return streak;
     }
 
-    function decadesWatched(data) {
-        const decades = new Set();
-        data.forEach(a => { if (a.startYear) decades.add(Math.floor(a.startYear / 10) * 10); });
-        return Array.from(decades);
+    // ---- Max consecutive days (any time) ----
+    function getMaxDayStreak(data) {
+        const dateStrings = data
+            .filter(a => a.userStatus === 'Completed')
+            .map(a => a.actualFinishDate || a.finishDate)
+            .filter(d => d && d.length >= 10);
+
+        if (dateStrings.length === 0) return 0;
+
+        const dates = dateStrings
+            .map(d => {
+                const date = new Date(d);
+                if (isNaN(date.getTime())) return null;
+                date.setHours(0, 0, 0, 0);
+                return date;
+            })
+            .filter(d => d !== null);
+
+        if (dates.length === 0) return 0;
+
+        const uniqueTimestamps = new Set(dates.map(d => d.getTime()));
+        const uniqueDates = Array.from(uniqueTimestamps)
+            .map(ts => new Date(ts))
+            .sort((a, b) => a - b);
+
+        let maxStreak = 0;
+        let currentStreak = 1;
+        for (let i = 1; i < uniqueDates.length; i++) {
+            const diffDays = (uniqueDates[i] - uniqueDates[i - 1]) / (1000 * 60 * 60 * 24);
+            if (diffDays === 1) {
+                currentStreak++;
+                if (currentStreak > maxStreak) maxStreak = currentStreak;
+            } else {
+                currentStreak = 1;
+            }
+        }
+        if (uniqueDates.length > 0 && maxStreak === 0) maxStreak = 1;
+        return maxStreak;
+    }
+
+    // ---- Current consecutive days (from today backwards) ----
+    function getCurrentDayStreak(data) {
+        const dateStrings = data
+            .filter(a => a.userStatus === 'Completed')
+            .map(a => a.actualFinishDate || a.finishDate)
+            .filter(d => d && d.length >= 10);
+
+        if (dateStrings.length === 0) return 0;
+
+        const dates = dateStrings
+            .map(d => {
+                const date = new Date(d);
+                if (isNaN(date.getTime())) return null;
+                date.setHours(0, 0, 0, 0);
+                return date;
+            })
+            .filter(d => d !== null);
+
+        if (dates.length === 0) return 0;
+
+        const uniqueTimestamps = new Set(dates.map(d => d.getTime()));
+        const uniqueDates = Array.from(uniqueTimestamps)
+            .map(ts => new Date(ts))
+            .sort((a, b) => a - b);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let streak = 0;
+        let currentDate = new Date(today);
+        while (true) {
+            const hasCompletion = uniqueDates.some(d => d.getTime() === currentDate.getTime());
+            if (hasCompletion) {
+                streak++;
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        return streak;
     }
 
     // ---- Progress functions map ----
@@ -131,7 +239,6 @@
         const totalHours = () => totalWatchHours(data);
         const totalRated = () => data.filter(a => a.score > 0).length;
         const uniqueGenres = () => new Set(data.flatMap(a => a.genres || [])).size;
-        const monthlyStreak = () => countConsecutiveMonths(data);
         const listSize = () => data.length;
 
         const avgRatingHigh = () => {
@@ -145,26 +252,13 @@
         const tv = () => data.filter(a => a.type === 'TV' && a.userStatus === 'Completed').length;
         const ova = () => data.filter(a => (a.type === 'OVA' || a.type === 'ONA') && a.userStatus === 'Completed').length;
 
-        const streakDays = (days) => {
-            const dates = data
-                .filter(a => a.userStatus === 'Completed' && a.finishDate)
-                .map(a => new Date(a.finishDate).toDateString())
-                .sort();
-            if (dates.length === 0) return 0;
-            let maxStreak = 1, current = 1;
-            for (let i = 1; i < dates.length; i++) {
-                const diff = (new Date(dates[i]) - new Date(dates[i - 1])) / (1000 * 60 * 60 * 24);
-                if (diff === 1) { current++; maxStreak = Math.max(maxStreak, current); }
-                else { current = 1; }
-            }
-            return maxStreak;
-        };
-
         const decadeCount = () => decadesWatched(data).length;
         const planCount = () => data.filter(a => a.userStatus === 'Plan to Watch').length;
         const watchingCount = () => data.filter(a => a.userStatus === 'Watching').length;
         const droppedCount = () => data.filter(a => a.userStatus === 'Dropped').length;
         const score9plus = () => data.filter(a => a.score >= 9).length;
+
+        // We'll handle streaks directly in update loop, so not needed here.
 
         return {
             first_anime: listSize,
@@ -201,11 +295,6 @@
             movie_10: movies,
             tv_10: tv,
             ova_5: ova,
-            streak_week: () => streakDays(7) >= 7 ? 1 : 0,
-            streak_month: () => streakDays(30) >= 30 ? 1 : 0,
-            streak_3m: monthlyStreak,
-            streak_6m: monthlyStreak,
-            streak_12m: monthlyStreak,
             list_10: listSize,
             list_25: listSize,
             list_50: listSize,
@@ -225,11 +314,16 @@
         const grid = document.getElementById('achievementsGrid');
         if (!grid) return;
 
-        // ✅ FIX: Clear the container before re‑rendering
         grid.innerHTML = '';
 
         const data = window.animeData || [];
         const progressFns = getProgressFunctions(data);
+
+        // Pre‑compute streak values
+        const maxDayStreak = getMaxDayStreak(data);
+        const currentDayStreak = getCurrentDayStreak(data);
+        const maxMonthStreak = getMaxMonthStreak(data);
+        const currentMonthStreak = getCurrentMonthStreak(data);
 
         let unlockedIds = JSON.parse(localStorage.getItem('unlockedAchievements') || '[]');
         if (!Array.isArray(unlockedIds)) unlockedIds = [];
@@ -243,10 +337,27 @@
         const newUnlocks = [];
 
         ACHIEVEMENTS.forEach(ach => {
-            const current = progressFns[ach.id] ? progressFns[ach.id]() : 0;
-            const goal = ach.goal;
-            const percent = Math.min((current / goal) * 100, 100);
-            const done = current >= goal;
+            let current, goal, percent, done;
+
+            // ─── Special handling for streak achievements ───
+            if (ach.id === 'streak_week' || ach.id === 'streak_month') {
+                goal = ach.goal;
+                done = maxDayStreak >= goal;
+                const valueForProgress = done ? goal : Math.min(currentDayStreak, goal);
+                percent = Math.min((valueForProgress / goal) * 100, 100);
+                current = valueForProgress;
+            } else if (ach.id === 'streak_3m' || ach.id === 'streak_6m' || ach.id === 'streak_12m') {
+                goal = ach.goal;
+                done = maxMonthStreak >= goal;
+                const valueForProgress = done ? goal : Math.min(currentMonthStreak, goal);
+                percent = Math.min((valueForProgress / goal) * 100, 100);
+                current = valueForProgress;
+            } else {
+                current = progressFns[ach.id] ? progressFns[ach.id]() : 0;
+                goal = ach.goal;
+                percent = Math.min((current / goal) * 100, 100);
+                done = current >= goal;
+            }
 
             if (done) {
                 if (!unlockedIds.includes(ach.id)) {
@@ -292,7 +403,7 @@
 
     function initAchievements() {
         window.updateAchievements();
-        console.log('✅ Achievements initialized (50 unique milestones, no duplicates)');
+        console.log('✅ Achievements initialized – day & month streaks: max for unlock, current for progress');
     }
 
     window.initAchievements = initAchievements;

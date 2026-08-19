@@ -350,7 +350,6 @@
 
 /* Gradient border effect */
 #watchlist-container .anime-card::before {
-    content: '';
     position: absolute;
     inset: -1px;
     background: linear-gradient(135deg, #8B5CF6, #6366F1, #A78BFA);
@@ -431,7 +430,7 @@
     min-height: auto !important;
     max-width: 100%;
     position: relative;
-    cursor: help;
+    cursor: pointer;
 }
 
 /* Remove multi-line clamp */

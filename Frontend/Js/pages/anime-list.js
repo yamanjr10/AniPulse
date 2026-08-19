@@ -1,13 +1,82 @@
 // ============================================
-// ANIME LIST – Data‑driven rendering
+// ANIME LIST – Full Date Tooltips + Mobile Filters
 // ============================================
 
 (function () {
     'use strict';
 
-    // ─── RENDER TABLE ──────────────────────────────
+    // ─── DOM REFS ──────────────────────────────────
+    function getFilters() {
+        return {
+            status: document.getElementById('statusFilter'),
+            month: document.getElementById('monthFilter'),
+            year: document.getElementById('yearFilter'),
+        };
+    }
+
+    function getTableBody() {
+        return document.getElementById('anime-table-body');
+    }
+
+    function getAnimeCount() {
+        return document.getElementById('anime-count');
+    }
+
+    function getSearchInput() {
+        return document.getElementById('dashboardSearch');
+    }
+
+    // ─── DATE HELPERS ──────────────────────────────
+    function parseDateSafely(dateStr) {
+        if (!dateStr) return null;
+        if (typeof dateStr === 'string') {
+            const parts = dateStr.split('-');
+            if (parts.length >= 2) {
+                const y = parseInt(parts[0]);
+                const m = parseInt(parts[1]) - 1;
+                if (!isNaN(y) && !isNaN(m) && m >= 0 && m <= 11) {
+                    const d = new Date(y, m, parts.length === 3 ? parseInt(parts[2]) : 1);
+                    if (!isNaN(d.getTime())) return d;
+                }
+            }
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) return d;
+        }
+        if (dateStr instanceof Date && !isNaN(dateStr.getTime())) {
+            return dateStr;
+        }
+        return null;
+    }
+
+    function formatDateForDisplay(dateStr) {
+        if (!dateStr) return '-';
+        const d = parseDateSafely(dateStr);
+        if (!d) return '-';
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = monthNames[d.getMonth()];
+        const year = d.getFullYear();
+        const day = d.getDate();
+        const hasDay = dateStr.split('-').length === 3;
+        // For display in the cell, we show full date if day exists, else month/year
+        return hasDay ? `${month} ${day}, ${year}` : `${month} ${year}`;
+    }
+
+    function formatTooltip(label, dateStr) {
+        if (!dateStr) return '';
+        const d = parseDateSafely(dateStr);
+        if (!d) return '';
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = monthNames[d.getMonth()];
+        const year = d.getFullYear();
+        const day = d.getDate();
+        const hasDay = dateStr.split('-').length === 3;
+        const datePart = hasDay ? `${month} ${day}, ${year}` : `${month} ${year}`;
+        return `${label}: ${datePart}`;
+    }
+
+    // ─── ORIGINAL RENDER FUNCTION ──────────────────
     window.updateAnimeTableView = function (animeList) {
-        const tableBody = document.getElementById('anime-table-body');
+        const tableBody = getTableBody();
         if (!tableBody) return;
 
         if (animeList.length === 0) {
@@ -28,25 +97,27 @@
                 default: statusClass = 'badge-plan';
             }
 
-            let completionDate = '-', completionTooltip = '';
+            // ─── DATE FORMATTING ──────────────────────
+            // Completed date
+            let completionDisplay = '-';
+            let completionTooltip = '';
             if (anime.userStatus === 'Completed') {
-                if (anime.finishDate && anime.finishDate.length >= 7) {
-                    const [year, month] = anime.finishDate.split('-');
-                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    completionDate = `${monthNames[parseInt(month) - 1]} ${year}`;
-                }
-                if (anime.actualFinishDate) {
-                    const parts = anime.actualFinishDate.split('-');
-                    if (parts.length >= 3) {
-                        const [year, month] = parts;
-                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        completionTooltip = `Completed on: ${monthNames[parseInt(month) - 1]} ${year}`;
-                    }
-                } else if (anime.finishDate) {
-                    completionTooltip = `Completed in: ${completionDate}`;
+                const dateStr = anime.actualFinishDate || anime.finishDate;
+                if (dateStr) {
+                    completionDisplay = formatDateForDisplay(dateStr);
+                    completionTooltip = formatTooltip('Completed on', dateStr);
                 }
             }
 
+            // Added date (createdAt)
+            let creationTooltip = '';
+            if (anime.createdAt) {
+                creationTooltip = formatTooltip('Added on', anime.createdAt);
+            }
+
+            const combinedTooltip = [creationTooltip, completionTooltip].filter(Boolean).join(' | ');
+
+            // ─── PROGRESS BAR ──────────────────────────
             const progress = anime.progress || 0;
             const episodes = anime.episodes || 0;
             const progressPercentage = episodes > 0 ? Math.round((progress / episodes) * 100) : 0;
@@ -63,17 +134,7 @@
             const scoreDisplay = anime.score ? `<span class="anime-score">${anime.score.toFixed(1)}</span>` : '-';
             const safeTitle = anime.title.length > 35 ? anime.title.slice(0, 35) + '...' : anime.title;
 
-            let creationTooltip = '';
-            if (anime.createdAt) {
-                const parts = anime.createdAt.split(' ')[0].split('-');
-                if (parts.length >= 3) {
-                    const [year, month] = parts;
-                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    creationTooltip = `Added on: ${monthNames[parseInt(month) - 1]} ${year}`;
-                }
-            }
-            const combinedTooltip = [creationTooltip, completionTooltip].filter(Boolean).join(' | ');
-
+            // ─── TITLE CELL ────────────────────────────
             const titleWithCover = `
                 <div class="anime-title-cell" title="${window.escapeHtml(combinedTooltip)}">
                     <img src="${anime.cover || 'https://placehold.co/50x70/6a5acd/white?text=No+Image'}"
@@ -95,124 +156,127 @@
                     <td>${progressBar}</td>
                     <td><span class="badge ${statusClass}">${statusText}</span></td>
                     <td>${scoreDisplay}</td>
-                    <td><span title="${window.escapeHtml(completionTooltip)}">${completionDate}</span></td>
+                    <td><span title="${window.escapeHtml(completionTooltip)}">${completionDisplay}</span></td>
                 </tr>
             `;
         }).join('');
 
-        // Re‑bind click handler (modal system attaches it)
-        // The modal system uses attachTableClickHandler; we don't need to do it here.
+        // The modal system attaches click handlers separately
     };
 
-    // ─── UPDATE DISPLAY (core filter + render) ────
+    // ─── MAIN UPDATE FUNCTION (filter logic) ──────
     window.updateAnimeDisplay = function () {
-        const statusFilter = document.getElementById('statusFilter')?.value || 'all';
-        const sortFilter = document.getElementById('sortFilter')?.value || 'id';
-        let monthFilter = document.getElementById('monthFilter')?.value || 'all';
-        let yearFilter = document.getElementById('yearFilter')?.value || 'all';
+        const data = window.animeData || [];
+        const filters = getFilters();
+        const searchInput = getSearchInput();
 
-        // Get search query from global search manager
-        const searchQuery = window.AniPulseSearch?.query || '';
+        const status = filters.status ? filters.status.value : 'all';
+        const month = filters.month ? filters.month.value : 'all';
+        const year = filters.year ? filters.year.value : 'all';
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-        // ✅ If search is active, ignore month/year filters
-        // This allows searching across ALL dates regardless of the selected month/year
-        if (searchQuery.trim() !== '') {
-            monthFilter = 'all';
-            yearFilter = 'all';
+        let filtered = [...data];
+
+        // 1. Status filter
+        if (status !== 'all') {
+            filtered = filtered.filter(a => a.userStatus === status);
         }
 
-        // 1. Start with full dataset
-        let filtered = [...(window.animeData || [])];
-
-        // 2. Apply search filter (if any)
-        if (searchQuery) {
-            const lowerQuery = searchQuery.toLowerCase();
-            filtered = filtered.filter(anime => {
-                // Build an array of searchable fields
-                const searchableFields = [
-                    anime.title,
-                    anime.title_english,
-                    anime.title_romaji,
-                    anime.title_japanese,
-                    anime.type,
-                    anime.userStatus,
-                    anime.studio,
-                    anime.synopsis,
-                    ...(anime.genres || []),
-                ];
-                return searchableFields.some(field =>
-                    field && field.toString().toLowerCase().includes(lowerQuery)
-                );
-            });
+        // 2. Search filter (title)
+        if (query) {
+            filtered = filtered.filter(a => a.title.toLowerCase().includes(query));
         }
 
-        // 3. Apply status filter
-        if (statusFilter !== 'all') {
-            filtered = filtered.filter(a => a.userStatus === statusFilter);
-        }
-
-        // 4. Apply month/year filters (now possibly overridden to 'all' by search)
-        if (monthFilter !== 'all' || yearFilter !== 'all') {
-            filtered = filtered.filter(anime => {
-                const dateToCheck = anime.finishDate || anime.updatedAt || anime.createdAt;
-                if (!dateToCheck) return false;
-                const parts = dateToCheck.split('-');
-                if (parts.length < 2) return false;
-                const [year, month] = parts;
-                if (monthFilter !== 'all' && month !== monthFilter) return false;
-                if (yearFilter !== 'all' && year !== yearFilter) return false;
+        // 3. Month/Year filter (only for completed)
+        if (month !== 'all' || year !== 'all') {
+            filtered = filtered.filter(a => {
+                if (a.userStatus !== 'Completed') return false;
+                const dateStr = a.actualFinishDate || a.finishDate || a.completedTimestamp;
+                if (!dateStr) return false;
+                const d = parseDateSafely(dateStr);
+                if (!d) return false;
+                const animeYear = d.getFullYear();
+                const animeMonth = d.getMonth() + 1;
+                if (year !== 'all' && animeYear !== parseInt(year)) return false;
+                if (month !== 'all' && animeMonth !== parseInt(month)) return false;
                 return true;
             });
         }
 
-        // 5. Apply sorting
-        if (sortFilter === 'title') filtered.sort((a, b) => a.title.localeCompare(b.title));
-        else if (sortFilter === 'rating') filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
-        else if (sortFilter === 'episodes') filtered.sort((a, b) => (b.episodes || 0) - (a.episodes || 0));
-        else if (sortFilter === 'updated') filtered.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
-        // default: keep original order (by id)
-
-        // 6. Update counter
-        const countEl = document.getElementById('anime-count');
+        // Update counter
+        const countEl = getAnimeCount();
         if (countEl) countEl.textContent = `Total Anime: ${filtered.length}`;
 
-        // 7. Render the table
+        // Render using the original style
         window.updateAnimeTableView(filtered);
     };
 
-    // ─── RESTORE FILTERS (from localStorage) ──────
-    function restoreFilters() {
-        const mappings = [
-            { elId: 'statusFilter', storageKey: 'animeFilterStatus' },
-            { elId: 'monthFilter', storageKey: 'animeFilterMonth' },
-            { elId: 'yearFilter', storageKey: 'animeFilterYear' }
-        ];
-        let attempts = 0;
-        const maxAttempts = 30;
-        const interval = setInterval(() => {
-            attempts++;
-            const allReady = mappings.every(m => document.getElementById(m.elId));
-            if (!allReady && attempts <= maxAttempts) return;
-            clearInterval(interval);
+    // ─── INIT ──────────────────────────────────────
+    function initAnimeList() {
+        console.log('📋 Initializing Anime List (full date tooltips + mobile filters)');
 
-            mappings.forEach(({ elId, storageKey }) => {
-                const el = document.getElementById(elId);
-                if (!el) return;
-                const saved = localStorage.getItem(storageKey);
-                if (saved && el.value !== saved) el.value = saved;
-                el.addEventListener('change', (e) => {
-                    localStorage.setItem(storageKey, e.target.value);
-                    if (typeof window.updateAnimeDisplay === 'function') window.updateAnimeDisplay();
+        const filters = getFilters();
+        const searchInput = getSearchInput();
+        const tbody = getTableBody();
+        if (!tbody) return;
+
+        // ─── Attach events (works on mobile) ──
+        const attachEvent = (el, eventName, handler) => {
+            if (!el) return;
+            el.addEventListener(eventName, handler);
+            if (eventName === 'change') {
+                el.addEventListener('touchend', function () {
+                    setTimeout(handler, 50);
                 });
-            });
-            // Initial render
-            if (typeof window.updateAnimeDisplay === 'function') window.updateAnimeDisplay();
-        }, 200);
+            }
+        };
+
+        attachEvent(filters.status, 'change', updateAnimeDisplay);
+        attachEvent(filters.month, 'change', updateAnimeDisplay);
+        attachEvent(filters.year, 'change', updateAnimeDisplay);
+
+        if (searchInput) {
+            searchInput.addEventListener('input', updateAnimeDisplay);
+        }
+
+        // ─── Data change events ──
+        window.addEventListener('animeUpdate', updateAnimeDisplay);
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'animeData') updateAnimeDisplay();
+        });
+
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) setTimeout(updateAnimeDisplay, 100);
+        });
+
+        document.addEventListener('pageChanged', function (e) {
+            if (e.detail.page === 'anime-list') {
+                setTimeout(updateAnimeDisplay, 100);
+            }
+        });
+
+        // ─── Initial render ──
+        let attempts = 0;
+        function initialRender() {
+            if (window.animeData && window.animeData.length > 0) {
+                updateAnimeDisplay();
+            } else if (attempts < 5) {
+                attempts++;
+                setTimeout(initialRender, 200);
+            } else {
+                updateAnimeDisplay();
+            }
+        }
+        setTimeout(initialRender, 100);
+
+        console.log('✅ Anime List initialized');
     }
 
-    // ─── INIT ──────────────────────────────────────
-    window.initAnimeList = function () {
-        restoreFilters();
-        console.log('✅ Anime List initialized');
-    };
+    // ─── AUTO‑INIT ──────────────────────────────────
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAnimeList);
+    } else {
+        setTimeout(initAnimeList, 50);
+    }
+
 })();

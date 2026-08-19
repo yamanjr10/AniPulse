@@ -21,28 +21,5 @@ router.post('/anilist', async (req, res) => {
     }
 });
 
-// Proxy for Kitsu API
-router.get('/kitsu', async (req, res) => {
-    try {
-        const query = req.query.q || '';
-        const url = `https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(query)}&page[limit]=10&sort=-averageRating`;
-
-        const response = await fetch(url, {
-            headers: {
-                'Accept': 'application/vnd.api+json',  // Kitsu requires this specific Accept header
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`Kitsu API responded with ${response.status}`);
-        }
-
-        const data = await response.json();
-        res.json(data);
-    } catch (error) {
-        console.error('Kitsu proxy error:', error);
-        res.status(500).json({ error: 'Failed to fetch from Kitsu' });
-    }
-});
 
 module.exports = router;

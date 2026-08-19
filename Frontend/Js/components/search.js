@@ -9,15 +9,12 @@
     // ─── SEARCH CONFIG ────────────────────────────
     const SEARCH_CONFIG = {
         CACHE_DURATION: 10 * 60 * 1000,
-        TIMEOUT: 8000,
-        DEBOUNCE_DELAY: 600,
+        TIMEOUT: 5000,
+        DEBOUNCE_DELAY: 300,
         MIN_QUERY_LENGTH: 2,
         MAX_RESULTS: 10,
-        // PRIMARY: AniList via proxy
         ANILIST_PROXY: `${window.API_BASE_URL || 'http://localhost:3000'}/api/proxy/anilist`,
-        // FALLBACK: Jikan (direct – CORS may be an issue; keep as last resort)
         JIKAN_API: 'https://api.jikan.moe/v4/anime',
-        // Global search
         GLOBAL_DEBOUNCE: 300,
         GLOBAL_MIN_QUERY: 1,
         STORAGE_KEY: 'anipulse_search_query',
@@ -25,13 +22,12 @@
 
     // ─── SEARCH CACHE (modal) ─────────────────────
     const searchCache = new Map();
-    let isJikanAvailable = true;  // we'll try Jikan if AniList fails
-    let usingFallback = false;
     let searchTimeout = null;
     let isSearching = false;
+    let currentSearchController = null;
 
     // ─── GLOBAL SEARCH STATE ──────────────────────
-    let globalQuery = '';
+    let globalQuery = ''; // trimmed version used for filtering
     let globalDebounceTimer = null;
     let isNavigating = false;
 
@@ -91,16 +87,15 @@
         }
     }
 
+    // ✅ Fixed: no longer overwrites the input value
     function performGlobalSearch(query) {
-        globalQuery = query.trim();
+        globalQuery = query.trim(); // trimmed version used for filtering
         try {
             localStorage.setItem(SEARCH_CONFIG.STORAGE_KEY, globalQuery);
         } catch (_) { /* ignore */ }
 
-        const input = getDashboardSearchInput();
-        if (input && input.value !== globalQuery) {
-            input.value = globalQuery;
-        }
+        // ✅ IMPORTANT: Do NOT set input.value = globalQuery
+        // This keeps the user's typed text intact (including spaces)
 
         if (!globalQuery) {
             applyGlobalSearch();
@@ -194,12 +189,10 @@
             input.addEventListener('keydown', handleGlobalKeydown);
             document.addEventListener('keydown', handleGlobalKeydown);
 
+            // ✅ Page changed listener – no longer overwrites the input
             document.addEventListener('pageChanged', function (e) {
                 if (e.detail.page === 'anime-list') {
-                    const inp = getDashboardSearchInput();
-                    if (inp && inp.value !== globalQuery) {
-                        inp.value = globalQuery;
-                    }
+                    // Keep the input value as is – do NOT set it to globalQuery
                     applyGlobalSearch();
                 }
             });
@@ -217,9 +210,8 @@
         }
     };
 
-    // ─── MODAL SEARCH – PRIMARY: AniList ──────────
-    // ---- Search with AniList (via proxy) ----
-    async function searchAnilist(query) {
+    // ─── MODAL SEARCH (unchanged, but with abort support) ──
+    async function searchAnilist(query, signal) {
         const graphqlQuery = `
             query ($search: String) {
                 Page(page: 1, perPage: 10) {
@@ -246,7 +238,8 @@
                 body: JSON.stringify({
                     query: graphqlQuery,
                     variables: { search: query }
-                })
+                }),
+                signal: signal
             });
 
             if (!response.ok) {
@@ -256,7 +249,6 @@
 
             const result = await response.json();
 
-            // Check for GraphQL errors
             if (result.errors) {
                 console.warn('[AniList] GraphQL errors:', result.errors);
                 return null;
@@ -270,7 +262,6 @@
 
             console.log(`[AniList] Found ${media.length} results`);
 
-            // Map to our internal format
             return {
                 data: media.map(item => ({
                     id: item.id,
@@ -282,7 +273,7 @@
                     episodes: item.episodes || 0,
                     score: item.averageScore ? item.averageScore / 10 : null,
                     images: { jpg: { image_url: item.coverImage?.large || item.coverImage?.medium || null } },
-                    genres: item.genres || [],   // array of strings
+                    genres: item.genres || [],
                     synopsis: item.description || '',
                     duration: item.duration || 20,
                     source: 'anilist',
@@ -290,31 +281,34 @@
                 }))
             };
         } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('[AniList] Request aborted');
+                throw error;
+            }
             console.warn('[AniList] Search failed:', error);
             return null;
         }
     }
 
-    // ---- Fallback: Jikan (direct) ----
-    async function searchJikan(query) {
+    async function searchJikan(query, signal) {
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
             const url = `${SEARCH_CONFIG.JIKAN_API}?q=${encodeURIComponent(query)}&limit=10`;
             const response = await fetch(url, {
-                signal: controller.signal,
+                signal: signal,
                 headers: { 'Accept': 'application/json' }
             });
-            clearTimeout(timeoutId);
             if (!response.ok) throw new Error(`Jikan HTTP ${response.status}`);
             return await response.json();
         } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('[Jikan] Request aborted');
+                throw error;
+            }
             console.warn('[Jikan] Search failed:', error);
             return null;
         }
     }
 
-    // ---- Main modal search ----
     async function performModalSearch(query) {
         const cacheKey = query.toLowerCase().trim();
         const cached = searchCache.get(cacheKey);
@@ -323,47 +317,59 @@
             return cached.data;
         }
 
-        // 1. Try AniList first
-        let result = await searchAnilist(query);
-        let source = 'anilist';
+        if (currentSearchController) {
+            currentSearchController.abort();
+        }
+        currentSearchController = new AbortController();
+        const signal = currentSearchController.signal;
 
-        // 2. If AniList fails, fallback to Jikan
-        if (!result || !result.data || result.data.length === 0) {
-            console.log('[Search] AniList returned no results, trying Jikan');
-            const jikanData = await searchJikan(query);
-            if (jikanData && jikanData.data && jikanData.data.length > 0) {
-                // Transform Jikan format to our internal format
-                result = {
-                    data: jikanData.data.map(item => ({
-                        id: item.mal_id,
-                        title: item.title || 'Unknown',
-                        title_english: item.title_english || '',
-                        title_romaji: '',
-                        title_japanese: item.title_japanese || '',
-                        type: item.type || 'TV',
-                        episodes: item.episodes || 0,
-                        score: item.score || null,
-                        images: { jpg: { image_url: item.images?.jpg?.image_url || null } },
-                        genres: item.genres?.map(g => g.name) || [],
-                        synopsis: item.synopsis || '',
-                        duration: item.duration || 20,
-                        source: 'jikan'
-                    }))
-                };
-                source = 'jikan';
+        try {
+            let result = await searchAnilist(query, signal);
+            let source = 'anilist';
+
+            if (!result || !result.data || result.data.length === 0) {
+                console.log('[Search] AniList empty, trying Jikan');
+                const jikanData = await searchJikan(query, signal);
+                if (jikanData && jikanData.data && jikanData.data.length > 0) {
+                    result = {
+                        data: jikanData.data.map(item => ({
+                            id: item.mal_id,
+                            title: item.title || 'Unknown',
+                            title_english: item.title_english || '',
+                            title_romaji: '',
+                            title_japanese: item.title_japanese || '',
+                            type: item.type || 'TV',
+                            episodes: item.episodes || 0,
+                            score: item.score || null,
+                            images: { jpg: { image_url: item.images?.jpg?.image_url || null } },
+                            genres: item.genres?.map(g => g.name) || [],
+                            synopsis: item.synopsis || '',
+                            duration: item.duration || 20,
+                            source: 'jikan'
+                        }))
+                    };
+                    source = 'jikan';
+                }
             }
-        }
 
-        if (result && result.data && result.data.length > 0) {
-            searchCache.set(cacheKey, { data: result, timestamp: Date.now() });
-            result._source = source;
-            return result;
+            if (result && result.data && result.data.length > 0) {
+                searchCache.set(cacheKey, { data: result, timestamp: Date.now() });
+                result._source = source;
+                return result;
+            }
+            return null;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('[Search] Request aborted');
+                return null;
+            }
+            console.warn('[Search] Error:', error);
+            return null;
+        } finally {
+            currentSearchController = null;
         }
-
-        return null;
     }
 
-    // ---- Display results (modal) ----
     function displaySearchResults(data, searchResults, source) {
         if (!searchResults) return;
         searchResults.innerHTML = '';
@@ -380,7 +386,6 @@
             return;
         }
 
-        // Source indicator
         if (source) {
             const indicator = document.createElement('div');
             indicator.style.cssText = `
@@ -433,7 +438,6 @@
                 </div>
             `;
 
-            // Store the anime data for selection
             const animeData = {
                 id: anime.id,
                 title: title,
@@ -461,10 +465,8 @@
         searchResults.style.display = 'block';
     }
 
-    // ---- Select anime from search (fills form) ----
     window.selectAnimeFromSearch = function (anime) {
         console.log('🎯 Selecting anime:', anime.title);
-        console.log('📦 Genres raw:', anime.genres);
 
         const titleInput = document.getElementById('animeTitle');
         const typeSelect = document.getElementById('animeType');
@@ -487,7 +489,7 @@
         }
         if (episodesInput) {
             episodesInput.value = anime.episodes || 1;
-            syncProgressMax(); // if defined
+            syncProgressMax();
         }
         if (durationInput) {
             if (anime.type === 'Movie') {
@@ -507,10 +509,8 @@
             if (coverUrl) coverInput.value = coverUrl;
         }
 
-        // ---- GENRE PARSING ----
         let genreString = '';
         if (Array.isArray(anime.genres)) {
-            // If it's an array of strings or objects, flatten to names
             genreString = anime.genres
                 .map(g => (typeof g === 'object' && g.name) ? g.name : g)
                 .filter(g => g && g !== 'Award Winning')
@@ -521,8 +521,6 @@
         if (genresInput) {
             genresInput.value = genreString;
             console.log('✅ Genres set to:', genreString);
-        } else {
-            console.warn('Genres input not found');
         }
 
         if (scoreInput && anime.score) {
@@ -542,17 +540,12 @@
         console.log('✅ Anime selected successfully');
     };
 
-    // ---- Progress sync (if defined elsewhere) ----
     function syncProgressMax() {
-        // This function should be defined in modal.js; we call it if available.
         if (typeof window.syncProgressMax === 'function') {
             window.syncProgressMax();
-        } else {
-            console.warn('syncProgressMax not defined, skipping');
         }
     }
 
-    // ---- Modal search wrapper ----
     window.searchAnime = async function () {
         const searchInput = document.getElementById('animeTitle');
         if (!searchInput) return;
@@ -604,7 +597,6 @@
         }, SEARCH_CONFIG.DEBOUNCE_DELAY);
     };
 
-    // ---- Close search results ----
     window.closeSearchResults = function () {
         const searchResults = document.getElementById('searchResults');
         if (searchResults) {
@@ -615,11 +607,9 @@
         if (searchLoading) searchLoading.style.display = 'none';
     };
 
-    // ---- Init ----
     function initSearchSystem() {
         console.log('🔍 Initializing search system (AniList primary)...');
 
-        // 1. Modal search (add anime)
         const searchInput = document.getElementById('animeTitle');
         if (searchInput) {
             const newInput = searchInput.cloneNode(true);
@@ -637,10 +627,8 @@
             });
         }
 
-        // 2. Global search (dashboard)
         AniPulseSearch.init();
 
-        // 3. Close results on Escape or outside click
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') window.closeSearchResults();
         });
@@ -655,7 +643,6 @@
             }
         });
 
-        // 4. Dropdown toggle (dashboard search)
         const searchToggle = document.getElementById('searchToggle');
         const searchDropdown = document.querySelector('.search-dropdown');
         const dashboardSearch = document.getElementById('dashboardSearch');
@@ -674,7 +661,6 @@
         console.log('✅ Search system initialized (primary: AniList)');
     }
 
-    // Expose
     window.initSearchSystem = initSearchSystem;
     window.AniPulseSearch = AniPulseSearch;
 
