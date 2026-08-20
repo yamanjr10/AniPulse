@@ -148,13 +148,31 @@
                 type.dispatchEvent(event);
             }
         }
+
+        // ===== SET DEFAULT MONTH/YEAR =====
         const yearSelect = document.getElementById('animeYear');
         const monthSelect = document.getElementById('animeMonth');
         if (yearSelect && monthSelect) {
             const now = new Date();
-            yearSelect.value = now.getFullYear().toString();
+            const currentYear = now.getFullYear();
+            // Ensure the current year exists in the dropdown
+            let yearExists = false;
+            for (let i = 0; i < yearSelect.options.length; i++) {
+                if (yearSelect.options[i].value === String(currentYear)) {
+                    yearExists = true;
+                    break;
+                }
+            }
+            if (!yearExists) {
+                const opt = document.createElement('option');
+                opt.value = String(currentYear);
+                opt.textContent = String(currentYear);
+                yearSelect.appendChild(opt);
+            }
+            yearSelect.value = String(currentYear);
             monthSelect.value = String(now.getMonth() + 1).padStart(2, '0');
         }
+
         const searchResults = document.getElementById('searchResults');
         if (searchResults) {
             searchResults.style.display = 'none';
