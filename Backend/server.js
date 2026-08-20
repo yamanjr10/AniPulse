@@ -14,7 +14,6 @@ const syncRoutes = require('./routes/sync');
 const rankingRoutes = require('./routes/ranking');
 const friendsRoutes = require('./routes/friends');
 const userRoutes = require('./routes/user');
-const proxyRoutes = require('./routes/proxy');
 const uploadRoutes = require('./routes/upload');
 
 const app = express();
@@ -115,7 +114,6 @@ app.use(express.static(path.join(__dirname, '..', 'Frontend')));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes
-app.use('/api/proxy', proxyRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/anime', animeRoutes);
 app.use('/api/sync', syncRoutes);
