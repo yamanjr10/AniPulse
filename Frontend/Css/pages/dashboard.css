@@ -2765,23 +2765,19 @@
 }
 
 #top-rated-anime .rating-badge {
-    position: absolute;
-    top: var(--space-2);
-    right: var(--space-2);
-    background: var(--gradient-warning);
-    color: var(--text-inverse);
-    padding: var(--space-0-5) var(--space-2);
-    border-radius: var(--radius-full);
-    font-size: 0.65rem;
-    font-weight: var(--font-extrabold);
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    backdrop-filter: var(--blur-sm);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    z-index: 3;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: all var(--transition);
+    display: inline-flex;
+        align-items: center;
+        color: var(--clr-warning-light);
+        font-weight: var(--font-bold);
+        font-size: var(--text-xs);
+        gap: var(--space-1);
+        background: rgba(0, 0, 0, 0.819);
+        padding: var(--space-0-5) var(--space-2);
+        border-radius: var(--radius-full);
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(251, 191, 36, 0.1);
+        border-image: none;
 }
 
 #top-rated-anime .anime-card:hover .rating-badge {

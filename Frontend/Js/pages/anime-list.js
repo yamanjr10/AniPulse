@@ -1,6 +1,6 @@
 // ============================================
 // ANIME LIST – Original Style + Search Override
-// Search ignores month/year when active
+// Non‑completed anime always shown when status = All
 // ============================================
 
 (function () {
@@ -27,7 +27,7 @@
         return document.getElementById('dashboardSearch');
     }
 
-    // ─── DATE PARSER (handles YYYY-MM-DD and YYYY-MM) ──
+    // ─── DATE PARSER ───────────────────────────────
     function parseDateSafely(dateStr) {
         if (!dateStr) return null;
         if (typeof dateStr === 'string') {
@@ -75,7 +75,7 @@
         return `${label}: ${datePart}`;
     }
 
-    // ─── ORIGINAL RENDER FUNCTION ──────────────────
+    // ─── RENDER FUNCTION ──────────────────────────
     window.updateAnimeTableView = function (animeList) {
         const tableBody = getTableBody();
         if (!tableBody) return;
@@ -98,7 +98,6 @@
                 default: statusClass = 'badge-plan';
             }
 
-            // ─── DATE FORMATTING ──────────────────────
             let completionDisplay = '-';
             let completionTooltip = '';
             if (anime.userStatus === 'Completed') {
@@ -157,11 +156,9 @@
                 </tr>
             `;
         }).join('');
-
-        // The modal system attaches click handlers separately
     };
 
-    // ─── MAIN UPDATE FUNCTION (filter logic) ──────
+    // ─── MAIN UPDATE FUNCTION ──────────────────────
     window.updateAnimeDisplay = function () {
         const data = window.animeData || [];
         const filters = getFilters();
@@ -182,15 +179,20 @@
         // 2. Search filter (title) – if active, ignore month/year
         if (query) {
             filtered = filtered.filter(a => a.title.toLowerCase().includes(query));
-            // ✅ Search overrides month/year – show all matches regardless of date
+            // Search overrides month/year
             month = 'all';
             year = 'all';
         }
 
-        // 3. Month/Year filter (only applied if search is NOT active)
+        // 3. Month/Year filter – but only for completed anime
+        // ✅ Non‑completed anime are always included when status is 'all'
         if (month !== 'all' || year !== 'all') {
             filtered = filtered.filter(a => {
-                if (a.userStatus !== 'Completed') return false;
+                // Always keep non‑completed anime (they have no finish date to filter by)
+                if (a.userStatus !== 'Completed') {
+                    return true;
+                }
+                // For completed anime, apply the date filter
                 const dateStr = a.actualFinishDate || a.finishDate || a.completedTimestamp;
                 if (!dateStr) return false;
                 const d = parseDateSafely(dateStr);
@@ -207,20 +209,19 @@
         const countEl = getAnimeCount();
         if (countEl) countEl.textContent = `Total Anime: ${filtered.length}`;
 
-        // Render using the original style
+        // Render
         window.updateAnimeTableView(filtered);
     };
 
     // ─── INIT ──────────────────────────────────────
     function initAnimeList() {
-        console.log('📋 Initializing Anime List (search overrides month/year)');
+        console.log('📋 Initializing Anime List (non‑completed always shown when status=All)');
 
         const filters = getFilters();
         const searchInput = getSearchInput();
         const tbody = getTableBody();
         if (!tbody) return;
 
-        // ─── Attach events (works on mobile) ──
         const attachEvent = (el, eventName, handler) => {
             if (!el) return;
             el.addEventListener(eventName, handler);
@@ -239,7 +240,6 @@
             searchInput.addEventListener('input', updateAnimeDisplay);
         }
 
-        // ─── Data change events ──
         window.addEventListener('animeUpdate', updateAnimeDisplay);
         window.addEventListener('storage', function (e) {
             if (e.key === 'animeData') updateAnimeDisplay();
@@ -255,7 +255,6 @@
             }
         });
 
-        // ─── Initial render ──
         let attempts = 0;
         function initialRender() {
             if (window.animeData && window.animeData.length > 0) {
@@ -269,10 +268,9 @@
         }
         setTimeout(initialRender, 100);
 
-        console.log('✅ Anime List initialized – search now ignores month/year');
+        console.log('✅ Anime List initialized');
     }
 
-    // ─── AUTO‑INIT ──────────────────────────────────
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAnimeList);
     } else {

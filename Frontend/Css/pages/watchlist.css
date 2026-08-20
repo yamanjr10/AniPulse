@@ -611,17 +611,95 @@
 
 /* ===== RATING BADGE ===== */
 #watchlist-container .rating-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: linear-gradient(135deg, #F59E0B, #FBBF24);
-    color: #1E293B;
-    padding: 3px 10px;
+display: inline-flex;
+    align-items: center;
+    color: var(--clr-warning-light);
+    font-weight: var(--font-bold);
+    font-size: var(--text-xs);
+    gap: var(--space-1);
+    background: rgba(0, 0, 0, 0.819);
+    padding: var(--space-0-5) var(--space-2);
+    border-radius: var(--radius-full);
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(251, 191, 36, 0.1);
+    border-image: none;
+}
+
+/* ============================================
+   FILTER COUNT BADGE
+   ============================================ */
+
+.filter-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
     border-radius: 30px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    z-index: 3;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.6rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    line-height: 1;
+}
+
+/* Active filter – badge becomes visible and vibrant */
+.filter-btn.active .filter-count {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Individual status colors for active badge */
+.filter-btn[data-status="Watching"].active .filter-count {
+    background: rgba(139, 92, 246, 0.25);
+    color: #A78BFA;
+}
+
+.filter-btn[data-status="Completed"].active .filter-count {
+    background: rgba(16, 185, 129, 0.25);
+    color: #34D399;
+}
+
+.filter-btn[data-status="Plan to Watch"].active .filter-count {
+    background: rgba(59, 130, 246, 0.25);
+    color: #60A5FA;
+}
+
+.filter-btn[data-status="Dropped"].active .filter-count {
+    background: rgba(239, 68, 68, 0.25);
+    color: #F87171;
+}
+
+.filter-btn[data-status="On-Hold"].active .filter-count {
+    background: rgba(245, 158, 11, 0.25);
+    color: #FBBF24;
+}
+
+.filter-btn[data-status="all"].active .filter-count {
+    background: rgba(255, 255, 255, 0.12);
+    color: #E2E8F0;
+}
+
+/* Light theme */
+[data-theme="light"] .filter-count {
+    background: rgba(0, 0, 0, 0.04);
+    color: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .filter-btn.active .filter-count {
+    background: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.7);
 }
 
 /* ============================================

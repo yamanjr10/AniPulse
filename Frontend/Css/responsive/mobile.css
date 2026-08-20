@@ -3,823 +3,1825 @@
    ============================================ */
 
 @media (max-width: 767px) {
+
     /* ===== VARIABLES OVERRIDE ===== */
     :root {
         --header-height: 56px;
         --container-padding: var(--space-3);
     }
-    
+
     /* ===== LAYOUT ===== */
     .main-content {
-        padding-top: calc(var(--header-height) + var(--space-4)) !important;
+        padding-top: calc(var(--header-height) + var(--space-4));
     }
-    
+
     /* ===== HEADER ===== */
     .top-bar {
-        top: 10px !important;
-        left: var(--space-3) !important;
-        right: var(--space-3) !important;
-        width: calc(100% - var(--space-6)) !important;
-        height: var(--header-height) !important;
-        padding: 0 var(--space-4) !important;
-        border-radius: var(--radius-2xl) !important;
+        top: 10px;
+        left: var(--space-3);
+        right: var(--space-3);
+        width: calc(100% - var(--space-6));
+        height: var(--header-height);
+        padding: 0 var(--space-4);
+        border-radius: var(--radius-2xl);
     }
-    
+
     .app-logo h2 {
-        font-size: var(--text-lg) !important;
+        font-size: var(--text-lg);
     }
-    
+
     .app-logo i {
-        font-size: var(--text-xl) !important;
+        font-size: var(--text-xl);
     }
-    
+
     .app-logo span {
-        font-size: var(--text-base) !important;
+        font-size: var(--text-base);
     }
-    
+
     .user-actions {
-        gap: var(--space-2) !important;
+        gap: var(--space-2);
     }
-    
+
     .search-trigger,
     .theme-toggle,
     .user-avatar {
-        width: 36px !important;
-        height: 36px !important;
+        width: 36px;
+        height: 36px;
     }
-    
-    /* ===== GREETING ===== */
+
+    /* ===== GREETING BANNER ===== */
     .greeting-banner {
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
-        padding: var(--space-4) var(--space-5) !important;
-        border-radius: var(--radius-3xl) !important;
+        margin: 0 var(--space-3) var(--space-4) var(--space-3);
+        padding: var(--space-4) var(--space-5);
+        border-radius: var(--radius-3xl);
     }
-    
+
     .greeting-line {
-        font-size: var(--text-2xl) !important;
+        font-size: var(--text-2xl);
     }
-    
+
     .greeting-emoji {
-        font-size: var(--text-2xl) !important;
+        font-size: var(--text-2xl);
     }
-    
+
     .greeting-subline {
-        font-size: var(--text-base) !important;
+        font-size: var(--text-base);
     }
-    
+
     .greeting-meta {
-        flex-direction: column !important;
-        gap: var(--space-2) !important;
+        flex-direction: column;
+        gap: var(--space-2);
     }
-    
+
     .greeting-meta-item {
-        width: 100% !important;
-        font-size: var(--text-xs) !important;
-        padding: var(--space-2) var(--space-3) !important;
+        width: 100%;
+        font-size: var(--text-xs);
+        padding: var(--space-2) var(--space-3);
     }
-    
+
     .greeting-quote {
-        font-size: var(--text-sm) !important;
-        padding: var(--space-3) !important;
-        max-width: 100% !important;
+        font-size: var(--text-sm);
+        padding: var(--space-3);
+        max-width: 100%;
     }
-    
+
+    .greeting-quote:hover {
+        padding-left: var(--space-3);
+    }
+
     /* ===== STATS ===== */
     .stats-grid {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-3) !important;
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+        margin: 0 var(--space-3) var(--space-4) var(--space-3);
     }
-    
+
     .stat-card {
-        padding: var(--space-4) !important;
+        padding: var(--space-4);
     }
-    
+
     .stat-value {
-        font-size: var(--text-2xl) !important;
+        font-size: var(--text-2xl);
     }
-    
+
     .stat-icon {
-        width: 48px !important;
-        height: 48px !important;
-        font-size: var(--text-lg) !important;
+        width: 48px;
+        height: 48px;
+        font-size: var(--text-lg);
     }
-    
+
     /* ===== DNA ===== */
     .dna-grid {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-3) !important;
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+        margin: 0 var(--space-3) var(--space-4) var(--space-3);
     }
-    
+
     .dna-card {
-        padding: var(--space-4) !important;
+        padding: var(--space-4);
+        flex-direction: row;
+        gap: var(--space-3);
+        text-align: left;
+        min-height: 70px;
     }
-    
+
     .dna-value {
-        font-size: var(--text-2xl) !important;
+        font-size: var(--text-2xl);
     }
-    
-    /* ===== QUICK ACTIONS ===== */
+
+    .dna-label {
+        font-size: 0.6rem;
+    }
+
+    /* ===== QUICK ACTIONS – VERTICAL (one per row) ===== */
     .quick-actions {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-3) !important;
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        margin: 0 var(--space-3) var(--space-4) var(--space-3);
+        width: 100%;
+        max-width: 100%;
     }
-    
-    .action-btn {
-        flex-direction: row !important;
-        padding: var(--space-3) var(--space-4) !important;
-        min-height: auto !important;
-        gap: var(--space-4) !important;
+
+    .quick-actions .action-btn {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        padding: var(--space-3) var(--space-4);
+        min-height: 56px;
+        background: var(--bg-card);
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition);
+        gap: var(--space-3);
+        width: 100%;
     }
-    
-    .action-icon {
-        width: 48px !important;
-        height: 48px !important;
-        font-size: var(--text-lg) !important;
+
+    .quick-actions .action-icon {
+        width: 40px;
+        height: 40px;
+        font-size: var(--text-base);
+        border-radius: var(--radius-lg);
+        flex-shrink: 0;
     }
-    
-    .action-text {
-        font-size: var(--text-sm) !important;
+
+    .quick-actions .action-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        flex: 1;
     }
-    
+
+    .quick-actions .action-shortcut {
+        display: none;
+    }
+
     /* ===== CHARTS ===== */
     .dashboard-grid {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-4) !important;
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+        margin: 0 var(--space-3) var(--space-4) var(--space-3);
     }
-    
+
     .chart-card {
-        padding: var(--space-4) !important;
-        border-radius: var(--radius-2xl) !important;
+        padding: var(--space-4);
+        border-radius: var(--radius-2xl);
     }
-    
+
     .chart-container {
-        height: 220px !important;
+        height: 220px;
     }
-    
+
     .chart-title {
-        font-size: var(--text-base) !important;
+        font-size: var(--text-base);
     }
-    
-    /* ===== ANIME CARDS ===== */
-    .top-anime-grid {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-4) !important;
+
+    .genre-filter-buttons {
+        flex-wrap: wrap;
+        gap: 4px;
+        width: 100%;
     }
-    
-    .anime-card {
-        display: grid !important;
-        grid-template-columns: 100px 1fr !important;
-        min-height: 140px !important;
-        height: auto !important;
-        border-radius: var(--radius-xl) !important;
+
+    .genre-filter-btn {
+        flex: 1;
+        min-width: 50px;
+        font-size: 0.55rem;
+        padding: 3px 8px;
+        justify-content: center;
     }
-    
-    .anime-card .anime-cover {
-        width: 100px !important;
-        height: 140px !important;
-        grid-column: 1 !important;
-        grid-row: 1 !important;
-    }
-    
-    .anime-card .anime-info {
-        grid-column: 2 !important;
-        grid-row: 1 !important;
-        padding: var(--space-3) !important;
-        gap: var(--space-1) !important;
-    }
-    
-    .anime-card .anime-title {
-        font-size: var(--text-sm) !important;
-    }
-    
-    .anime-card .anime-meta {
-        font-size: var(--text-xs) !important;
-    }
-    
-    .anime-card .rating-badge,
-    .anime-card .anime-badge {
-        transform: scale(0.85) !important;
-        top: var(--space-2) !important;
-        padding: var(--space-1) var(--space-2) !important;
-        font-size: 0.6rem !important;
-    }
-    
+
     /* ===== HEATMAP ===== */
+    .heatmap-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+
+    .heatmap-grid {
+        min-width: 400px;
+    }
+
     .heatmap-cell {
-        min-width: 10px !important;
-        max-width: 11px !important;
+        min-width: 8px;
+        max-width: 9px;
     }
-    
-    /* ===== WATCHLIST ===== */
-    #watchlist-page {
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
+
+    .heatmap-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
-    
-    .watchlist-filters {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: var(--space-2) !important;
-        border-radius: var(--radius-lg) !important;
-        padding: var(--space-2) !important;
+
+    .total-contributions {
+        font-size: 0.6rem;
+        padding: 3px 10px;
     }
-    
-    .filter-btn {
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-xs) !important;
-        min-height: 32px !important;
-        text-transform: capitalize !important;
+
+    .heatmap-years {
+        gap: 4px;
     }
-    
-    #watchlist-container {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: var(--space-3) !important;
+
+    .year-btn {
+        font-size: 0.6rem;
+        padding: 2px 8px;
     }
-    
-    #watchlist-container .anime-cover {
-        height: 180px !important;
+
+    /* ============================================
+       ANIME CARDS – COVER ONLY ON MOBILE
+       ============================================ */
+
+    /* ----- Currently Watching – cover + progress bar ----- */
+    #currently-watching-grid .anime-card {
+        display: block;
+        position: relative;
+        aspect-ratio: 2 / 3;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        min-height: unset;
+        height: auto;
     }
-    
-    #watchlist-container .anime-title {
-        font-size: var(--text-sm) !important;
+
+    #currently-watching-grid .anime-card .anime-cover {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 0;
     }
-    
-    /* ===== ANIME LIST ===== */
-    .anime-list-container {
-        padding: var(--space-3) !important;
-        overflow-x: auto !important;
+
+    #currently-watching-grid .anime-card .anime-title,
+    #currently-watching-grid .anime-card .anime-meta,
+    #currently-watching-grid .anime-card .anime-type,
+    #currently-watching-grid .anime-card .anime-score,
+    #currently-watching-grid .anime-card .rating-badge,
+    #currently-watching-grid .anime-card .anime-badge {
+        display: none;
     }
-    
-    .anime-list-header {
-        flex-direction: column !important;
-        padding: var(--space-3) !important;
-        gap: var(--space-3) !important;
-    }
-    
-    .anime-list-title h2 {
-        font-size: var(--text-xl) !important;
-    }
-    
-    .anime-filters {
-        flex-direction: column !important;
-        width: 100% !important;
-        gap: var(--space-2) !important;
-    }
-    
-    .anime-filters select {
-        width: 100% !important;
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-xs) !important;
-    }
-    
-    .anime-filters .anime-counter {
-        width: 100% !important;
-        justify-content: center !important;
-        padding: var(--space-2) !important;
-        font-size: var(--text-xs) !important;
-    }
-    
-    .anime-table {
-        min-width: 600px !important;
-    }
-    
-    .anime-table th,
-    .anime-table td {
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-xs) !important;
-    }
-    
-    .anime-table .anime-cover {
-        width: 36px !important;
-        height: 52px !important;
-    }
-    
-    .anime-table .anime-title {
-        max-width: 120px !important;
-        font-size: var(--text-xs) !important;
-    }
-    
-    .anime-title-cell {
-        min-width: 160px !important;
-        gap: var(--space-2) !important;
-    }
-    
-    .badge {
-        padding: var(--space-1) var(--space-2) !important;
-        font-size: 0.55rem !important;
-    }
-    
-    /* ===== STATISTICS ===== */
-    #statistics-page {
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
-    }
-    
-    .statistics-grid {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-4) !important;
-    }
-    
-    .statistics-grid .chart-card {
-        padding: var(--space-4) !important;
-    }
-    
-    .statistics-grid .chart-container {
-        height: 220px !important;
-    }
-    
-    /* ===== SETTINGS ===== */
-    #settings-page {
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
-    }
-    
-    .profile-preview {
-        flex-direction: column !important;
-        text-align: center !important;
-        padding: var(--space-4) !important;
-        gap: var(--space-4) !important;
-    }
-    
-    .profile-preview-avatar {
-        width: 80px !important;
-        height: 80px !important;
-    }
-    
-    .profile-preview-name {
-        font-size: var(--text-xl) !important;
-    }
-    
-    .profile-preview-join-date {
-        margin: 0 auto !important;
-        font-size: var(--text-xs) !important;
-        padding: var(--space-2) var(--space-3) !important;
-    }
-    
-    .settings-group {
-        padding: var(--space-4) !important;
-    }
-    
-    .settings-group h3 {
-        font-size: var(--text-base) !important;
-    }
-    
-    .settings-item input,
-    .settings-item select {
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-sm) !important;
-    }
-    
-    .danger-zone {
-        padding: var(--space-4) !important;
-    }
-    
-    .danger-actions {
-        flex-direction: column !important;
-        gap: var(--space-2) !important;
-    }
-    
-    .danger-actions .btn {
-        width: 100% !important;
-        justify-content: center !important;
-    }
-    
-    .theme-selection {
-        flex-direction: column !important;
-        gap: var(--space-3) !important;
-    }
-    
-    .theme-card {
+
+    #currently-watching-grid .anime-card .anime-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 6px 8px 8px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
         display: flex !important;
-        align-items: center !important;
-        gap: var(--space-4) !important;
-        padding: var(--space-3) !important;
-        border-radius: var(--radius-xl) !important;
-    }
-    
-    .theme-sample {
-        width: 60px !important;
-        height: 60px !important;
-        margin-bottom: 0 !important;
-        flex-shrink: 0 !important;
-    }
-    
-    .theme-label {
-        flex: 1 !important;
-        text-align: left !important;
-    }
-    
-    .theme-card.active::after {
-        top: var(--space-2) !important;
-        right: var(--space-2) !important;
-        width: 20px !important;
-        height: 20px !important;
-        font-size: 0.6rem !important;
-    }
-    
-    /* ===== COMMUNITY ===== */
-    #community-page {
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
-    }
-    
-    .community-tabs {
-        flex-wrap: wrap !important;
-        border-radius: var(--radius-lg) !important;
-        padding: var(--space-2) !important;
-        width: 100% !important;
-    }
-    
-    .community-tab {
-        flex: 1 !important;
-        justify-content: center !important;
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-xs) !important;
-        min-height: 36px !important;
-    }
-    
-    .friend-request-item {
-        flex-direction: column !important;
-        text-align: center !important;
-        gap: var(--space-3) !important;
-        padding: var(--space-3) !important;
-    }
-    
-    .friend-request-info {
-        flex-direction: column !important;
-    }
-    
-    .friend-request-actions {
-        width: 100% !important;
-        justify-content: center !important;
-        gap: var(--space-2) !important;
-    }
-    
-    .friend-request-actions .btn {
-        flex: 1 !important;
-        justify-content: center !important;
-    }
-    
-    .friends-grid {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-3) !important;
-    }
-    
-    .friend-card {
-        padding: var(--space-3) !important;
-    }
-    
-    .friend-avatar {
-        width: 48px !important;
-        height: 48px !important;
-    }
-    
-    .friend-name {
-        font-size: var(--text-sm) !important;
-    }
-    
-    .search-users-input {
-        flex-direction: column !important;
-        gap: var(--space-2) !important;
-    }
-    
-    .search-users-input input {
-        width: 100% !important;
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-sm) !important;
-    }
-    
-    .search-users-input .btn {
-        width: 100% !important;
-        justify-content: center !important;
-    }
-    
-    .search-result-item {
-        flex-direction: column !important;
-        text-align: center !important;
-        gap: var(--space-2) !important;
-        padding: var(--space-3) !important;
-    }
-    
-    .search-result-info {
-        flex-direction: column !important;
-    }
-    
-    .btn-add-friend {
-        width: 100% !important;
-        justify-content: center !important;
-    }
-    
-    /* ===== LEADERBOARD ===== */
-    .leaderboard-item {
-        flex-wrap: wrap !important;
-        gap: var(--space-2) !important;
-        padding: var(--space-3) !important;
-    }
-    
-    .leaderboard-user {
-        flex-direction: column !important;
-        text-align: center !important;
-    }
-    
-    .leaderboard-rank {
-        width: auto !important;
-    }
-    
-    .leaderboard-avatar {
-        width: 40px !important;
-        height: 40px !important;
-    }
-    
-    .leaderboard-name {
-        font-size: var(--text-sm) !important;
-    }
-    
-    .leaderboard-value {
-        text-align: center !important;
-        min-width: auto !important;
-        width: 100% !important;
-    }
-    
-    .leaderboard-mode-tabs {
-        flex-wrap: wrap !important;
-        border-radius: var(--radius-lg) !important;
-        gap: var(--space-1) !important;
-    }
-    
-    .leaderboard-mode-tab {
-        flex: 1 !important;
-        min-width: 80px !important;
-        padding: var(--space-2) !important;
-        font-size: var(--text-xs) !important;
-    }
-    
-    .leaderboard-filter-btn {
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-xs) !important;
-    }
-    
-    .time-period-buttons {
-        flex-wrap: wrap !important;
-        gap: var(--space-1) !important;
-    }
-    
-    .time-period-btn {
-        padding: var(--space-1) var(--space-2) !important;
-        font-size: var(--text-xs) !important;
-    }
-    
-    .your-stats-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: var(--space-2) !important;
-    }
-    
-    .your-stat {
-        padding: var(--space-2) !important;
-    }
-    
-    .your-stat .stat-value {
-        font-size: var(--text-base) !important;
-    }
-    
-    /* ===== ACHIEVEMENTS ===== */
-    #achievements-page {
-        margin: 0 var(--space-3) var(--space-4) var(--space-3) !important;
-    }
-    
-    .achievements-summary {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-3) !important;
-    }
-    
-    .summary-card {
-        padding: var(--space-4) !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        text-align: left !important;
-    }
-    
-    .summary-card .summary-label {
-        margin-bottom: 0 !important;
-    }
-    
-    .summary-value {
-        font-size: var(--text-2xl) !important;
-    }
-    
-    .achievements-grid {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-3) !important;
-    }
-    
-    .achievement-card {
-        padding: var(--space-4) !important;
-    }
-    
-    .achievement-icon {
-        font-size: var(--text-2xl) !important;
-        margin-bottom: var(--space-2) !important;
-    }
-    
-    .achievement-title {
-        font-size: var(--text-base) !important;
-    }
-    
-    .achievement-desc {
-        font-size: var(--text-sm) !important;
-    }
-    
-    /* ===== MODALS ===== */
-    .modal {
-        padding: var(--space-3) !important;
-    }
-    
-    .modal-content {
-        padding: var(--space-4) !important;
-        margin: var(--space-2) !important;
-        max-width: calc(100% - var(--space-4)) !important;
-        border-radius: var(--radius-2xl) !important;
-        max-height: 90vh !important;
-    }
-    
-    .modal-title {
-        font-size: var(--text-lg) !important;
-    }
-    
-    .modal-header {
-        padding-bottom: var(--space-3) !important;
-        margin-bottom: var(--space-3) !important;
-    }
-    
-    .close-modal {
-        width: 34px !important;
-        height: 34px !important;
-        font-size: var(--text-base) !important;
-    }
-    
-    .form-actions {
-        flex-direction: column !important;
-        gap: var(--space-2) !important;
-    }
-    
-    .form-actions .btn {
-        width: 100% !important;
-        justify-content: center !important;
-        min-height: 44px !important;
-    }
-    
-    #addAnimeForm {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-3) !important;
-        padding: var(--space-3) !important;
-    }
-    
-    #addAnimeModal .form-group input,
-    #addAnimeModal .form-group select {
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-sm) !important;
-    }
-    
-    #searchResults {
-        position: fixed !important;
-        top: auto !important;
-        left: var(--space-3) !important;
-        right: var(--space-3) !important;
-        bottom: var(--space-3) !important;
-        max-height: 50vh !important;
-        z-index: 2000 !important;
-        border-radius: var(--radius-xl) !important;
-    }
-    
-    .search-result-item {
-        padding: var(--space-2) !important;
-    }
-    
-    .search-result-item img {
-        width: 40px !important;
-        height: 56px !important;
-    }
-    
-    /* ===== TOASTS ===== */
-    .toast-container {
-        top: auto !important;
-        bottom: var(--space-4) !important;
-        right: var(--space-4) !important;
-        left: var(--space-4) !important;
-    }
-    
-    .toast {
-        max-width: 100% !important;
-        width: 100% !important;
-        padding: var(--space-3) !important;
-        font-size: var(--text-sm) !important;
-    }
-    
-    .toast-icon {
-        font-size: var(--text-lg) !important;
-    }
-    
-    /* ===== FLOATING BUTTON ===== */
-    .floating-add-anime {
-        width: 52px !important;
-        height: 52px !important;
-        bottom: var(--space-4) !important;
-        right: var(--space-4) !important;
-    }
-    
-    .floating-add-anime i {
-        font-size: var(--text-xl) !important;
-    }
-    
-    .floating-add-tooltip {
-        right: 62px !important;
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-xs) !important;
-    }
-    
-    /* ===== PROFILE DROPDOWN ===== */
-    .profile-dropdown {
-        position: fixed !important;
-        top: calc(var(--header-height) + 4px) !important;
-        left: var(--space-3) !important;
-        right: var(--space-3) !important;
-        width: auto !important;
-        max-width: none !important;
-        border-radius: var(--radius-2xl) !important;
-        border: 1px solid var(--border-color) !important;
-        transform: translateY(-20px) scale(0.98) !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-        transition: all var(--transition) !important;
-        max-height: calc(100vh - var(--header-height) - var(--space-6)) !important;
-        overflow-y: auto !important;
-        padding: var(--space-4) !important;
-        box-shadow: var(--shadow-2xl) !important;
-    }
-    
-    .profile-dropdown.open {
-        transform: translateY(0) scale(1) !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    .profile-dropdown::before {
+        flex-direction: column;
+        gap: 2px;
+        border: none;
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-color);
+    }
+
+    #currently-watching-grid .anime-card .progress-bar-container {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    #currently-watching-grid .anime-card .progress-bar {
+        height: 100%;
+        border-radius: 20px;
+    }
+
+    #currently-watching-grid .anime-card .progress-text {
+        font-size: 0.5rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    #currently-watching-grid .anime-card .percentage-text {
+        color: var(--clr-info);
+    }
+
+    #currently-watching-grid .anime-card .episodes-text {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* ----- Top Rated – cover only ----- */
+    #top-rated-anime .anime-card {
+        display: block;
+        position: relative;
+        aspect-ratio: 2 / 3;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        min-height: unset;
+        height: auto;
+    }
+
+    #top-rated-anime .anime-card .anime-cover {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 0;
+    }
+
+    #top-rated-anime .anime-card .anime-info,
+    #top-rated-anime .anime-card .anime-title,
+    #top-rated-anime .anime-card .anime-meta,
+    #top-rated-anime .anime-card .anime-type,
+    #top-rated-anime .anime-card .anime-score,
+    #top-rated-anime .anime-card .rating-badge,
+    #top-rated-anime .anime-card .anime-badge {
         display: none !important;
     }
-    
-    .profile-dropdown .sidebar-avatar {
-        width: 48px !important;
-        height: 48px !important;
+
+    /* ----- Watchlist – cover only (matches Top Rated) ----- */
+    #watchlist-container .anime-card {
+        display: block !important;
+        position: relative;
+        aspect-ratio: 2 / 3;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        min-height: unset !important;
+        height: auto !important;
+        grid-template-columns: unset !important;
+        grid-template-rows: unset !important;
     }
-    
-    .profile-dropdown .sidebar-username {
-        font-size: var(--text-base) !important;
+
+    #watchlist-container .anime-card .anime-cover {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        border-radius: 0;
     }
-    
-    .profile-dropdown .menu-item {
-        padding: var(--space-3) !important;
-        font-size: var(--text-sm) !important;
+
+    /* Hide all text and badges inside watchlist cards */
+    #watchlist-container .anime-card .anime-info,
+    #watchlist-container .anime-card .anime-title,
+    #watchlist-container .anime-card .anime-meta,
+    #watchlist-container .anime-card .anime-type,
+    #watchlist-container .anime-card .anime-score,
+    #watchlist-container .anime-card .rating-badge,
+    #watchlist-container .anime-card .anime-badge,
+    #watchlist-container .anime-card .progress-container,
+    #watchlist-container .anime-card .progress-text {
+        display: none !important;
     }
-    
-    .profile-dropdown .menu-item i {
-        width: 20px !important;
-        font-size: var(--text-base) !important;
+
+    /* ----- Grid layouts for all three ----- */
+    .top-anime-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
     }
-    
-    /* ===== SEARCH DROPDOWN ===== */
+
+    #top-rated-anime {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
+    }
+
+    #currently-watching-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
+    }
+
+    #watchlist-container {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: var(--space-2) !important;
+    }
+
+    /* ===== WATCHLIST FILTERS ===== */
+    .watchlist-filters {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-1);
+        padding: var(--space-1);
+        border-radius: var(--radius-lg);
+    }
+
+    .filter-btn {
+        padding: var(--space-1) var(--space-2);
+        font-size: 0.6rem;
+        min-height: 30px;
+        border-radius: var(--radius-md);
+        text-transform: capitalize;
+    }
+
+    /* ===== PAGINATION ===== */
+    .pagination-container {
+        margin-top: var(--space-3);
+        padding: var(--space-1);
+    }
+
+    #pagination {
+        gap: 4px;
+        padding: 4px;
+        border-radius: var(--radius-lg);
+        flex-wrap: wrap;
+    }
+
+    .page-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.6rem;
+        border-radius: var(--radius-md);
+    }
+
+    .page-btn:first-child,
+    .page-btn:last-child {
+        padding: 0 var(--space-2);
+        width: auto;
+    }
+
+    /* ============================================
+       ANIME LIST TABLE – LARGER & READABLE
+       ============================================ */
+
+    .anime-list-container {
+        padding: var(--space-2);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: var(--radius-xl);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+    }
+
+    .anime-list-header {
+        flex-direction: column;
+        padding: var(--space-3) var(--space-3);
+        gap: var(--space-3);
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .anime-list-title h2 {
+        font-size: var(--text-base);
+        font-weight: 700;
+    }
+
+    .anime-filters {
+        flex-direction: column;
+        width: 100%;
+        gap: var(--space-2);
+    }
+
+    .anime-filters select {
+        width: 100%;
+        padding: var(--space-2) var(--space-3);
+        font-size: 0.8rem;
+        min-height: 40px;
+        border-radius: var(--radius-md);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .anime-filters .anime-counter {
+        width: 100%;
+        justify-content: center;
+        padding: var(--space-2);
+        font-size: 0.8rem;
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: var(--radius-md);
+        text-align: center;
+    }
+
+    /* Table wrapper – allow horizontal scroll */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: var(--space-1) 0;
+        width: 100%;
+    }
+
+    /* Table – bigger text and spacing */
+    .anime-table {
+        min-width: 600px;
+        width: 100%;
+        font-size: 0.85rem;
+        border-collapse: collapse;
+    }
+
+    .anime-table th,
+    .anime-table td {
+        padding: var(--space-3) var(--space-3);
+        font-size: 0.8rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .anime-table th {
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        font-size: 0.65rem;
+        background: var(--bg-tertiary);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+    }
+
+    .anime-table .anime-cover {
+        width: 40px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+    }
+
+    .anime-title-cell {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        min-width: 180px;
+    }
+
+    .anime-table .anime-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        max-width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .anime-table .anime-genres {
+        font-size: 0.6rem;
+        color: var(--text-muted);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .anime-table .anime-genres span {
+        background: rgba(139, 92, 246, 0.08);
+        padding: 1px 6px;
+        border-radius: var(--radius-sm);
+        color: #A78BFA;
+        font-size: 0.55rem;
+    }
+
+    /* Progress bar – larger */
+    .anime-table .progress-container {
+        width: 80px;
+        height: 6px;
+        background: var(--bg-tertiary);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .anime-table .progress-bar {
+        height: 100%;
+        border-radius: 10px;
+        background: var(--gradient-primary);
+        transition: width 0.3s ease;
+    }
+
+    .anime-table .progress-wrapper small {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        display: block;
+        margin-top: 2px;
+    }
+
+    /* Badges – larger */
+    .badge {
+        padding: var(--space-1) var(--space-2);
+        font-size: 0.65rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .badge-completed {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34D399;
+    }
+
+    .badge-watching {
+        background: rgba(99, 102, 241, 0.15);
+        color: #A78BFA;
+    }
+
+    .badge-plan {
+        background: rgba(245, 158, 11, 0.15);
+        color: #FBBF24;
+    }
+
+    .badge-dropped {
+        background: rgba(239, 68, 68, 0.15);
+        color: #F87171;
+    }
+
+    /* Score – larger */
+    .anime-table .anime-score {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #FBBF24;
+        background: rgba(0, 0, 0, 0.3);
+        padding: var(--space-1) var(--space-2);
+        border-radius: var(--radius-sm);
+        display: inline-block;
+    }
+
+    /* Date column */
+    .anime-table .anime-date {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    /* No anime state */
+    .anime-table .no-anime {
+        text-align: center;
+        padding: var(--space-8) var(--space-4);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* ============================================
+       PERIOD STATS
+       ============================================ */
+    .period-stats-section {
+        padding: var(--space-3);
+    }
+
+    .period-stats-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .period-stats-filters {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-group select {
+        width: 100%;
+        min-width: 0;
+        padding: 6px 30px 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    .period-label {
+        font-size: 0.75rem;
+        padding: 4px 12px;
+        text-align: center;
+    }
+
+    .period-stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .period-stat-card {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .period-stat-value {
+        font-size: 1.2rem;
+    }
+
+    .period-stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    /* ============================================
+       OVERVIEW METRICS
+       ============================================ */
+    .overview-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .metric-card {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .metric-value {
+        font-size: 1.1rem;
+    }
+
+    .metric-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+    }
+
+    /* ============================================
+       LIBRARY ANALYTICS
+       ============================================ */
+    .analytics-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+
+    .analytics-card {
+        padding: var(--space-3);
+    }
+
+    .genre-bar-wrapper,
+    .format-bar-wrapper {
+        gap: 6px;
+    }
+
+    .genre-bar-label {
+        font-size: 0.6rem;
+        min-width: 50px;
+        max-width: 70px;
+    }
+
+    .genre-bar-count,
+    .format-bar-count {
+        font-size: 0.55rem;
+        min-width: 20px;
+    }
+
+    .genre-bar-percent,
+    .format-bar-percent {
+        font-size: 0.5rem;
+        min-width: 30px;
+    }
+
+    .genre-bar-track,
+    .format-bar-track {
+        height: 14px;
+    }
+
+    /* ============================================
+       INSIGHTS
+       ============================================ */
+    .insights-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .insight-card {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .insight-value {
+        font-size: 0.9rem;
+    }
+
+    .smart-insights {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .smart-insight {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .smart-insight-text {
+        font-size: 0.7rem;
+    }
+
+    /* ============================================
+       RATING ANALYTICS
+       ============================================ */
+    .rating-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+
+    .rating-card {
+        padding: var(--space-3);
+    }
+
+    .rating-behavior-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-1);
+    }
+
+    .behavior-card {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .behavior-value {
+        font-size: 1rem;
+    }
+
+    .personality-card {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--space-4);
+    }
+
+    .personality-stats {
+        width: 100%;
+        justify-content: center;
+        gap: var(--space-3);
+    }
+
+    .personality-stat-value {
+        font-size: 0.85rem;
+    }
+
+    .advanced-insights {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    /* ============================================
+       JOURNEY
+       ============================================ */
+    .journey-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+
+    .journey-time-filters {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .journey-filter-btn {
+        font-size: 0.55rem;
+        padding: 2px 10px;
+        flex: 1;
+        text-align: center;
+    }
+
+    .journey-chart-card,
+    .journey-secondary-chart {
+        padding: var(--space-3);
+    }
+
+    .journey-chart-container {
+        height: 150px;
+    }
+
+    .journey-chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .journey-insights-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .journey-insight-card {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .journey-insight-value {
+        font-size: 0.85rem;
+    }
+
+    .journey-milestones-container {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .milestone-item {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .milestone-title {
+        font-size: 0.7rem;
+    }
+
+    #paceInsights {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .pace-insight {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .pace-insight-text {
+        font-size: 0.7rem;
+    }
+
+    /* ============================================
+       ACTIVITY CARD
+       ============================================ */
+    .activity-card {
+        border-radius: var(--radius-xl);
+    }
+
+    .activity-header {
+        padding: var(--space-2) var(--space-3) 0 var(--space-3);
+    }
+
+    .activity-title {
+        font-size: 0.9rem;
+    }
+
+    .activity-list {
+        padding: var(--space-2) var(--space-3);
+        max-height: 250px;
+    }
+
+    .activity-item {
+        padding: var(--space-2) var(--space-2);
+        gap: var(--space-2);
+        flex-wrap: nowrap;
+    }
+
+    .activity-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.6rem;
+    }
+
+    .activity-anime {
+        font-size: 0.7rem;
+    }
+
+    .activity-desc {
+        font-size: 0.55rem;
+    }
+
+    .activity-time {
+        font-size: 0.5rem;
+        padding: 1px 6px;
+    }
+
+    /* ============================================
+       ACHIEVEMENTS
+       ============================================ */
+    #achievements-page {
+        margin: 0 var(--space-2) var(--space-3) var(--space-2);
+    }
+
+    .achievements-summary {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .summary-card {
+        padding: var(--space-2) var(--space-3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+        border-radius: var(--radius-xl);
+    }
+
+    .summary-card .summary-label {
+        margin-bottom: 0;
+        font-size: 0.6rem;
+    }
+
+    .summary-value {
+        font-size: 1.5rem;
+    }
+
+    .achievements-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .achievement-card {
+        padding: var(--space-3);
+        border-radius: var(--radius-xl);
+    }
+
+    .achievement-icon {
+        font-size: 1.8rem;
+        margin-bottom: var(--space-2);
+    }
+
+    .achievement-title {
+        font-size: 0.85rem;
+    }
+
+    .achievement-desc {
+        font-size: 0.7rem;
+    }
+
+    .achievement-status {
+        font-size: 0.5rem;
+        padding: 2px 10px;
+    }
+
+    .achievement-progress-bar {
+        height: 4px;
+    }
+
+    /* ============================================
+       COMMUNITY
+       ============================================ */
+    #community-page {
+        margin: 0 var(--space-2) var(--space-3) var(--space-2);
+    }
+
+    .community-tabs {
+        flex-wrap: wrap;
+        border-radius: var(--radius-lg);
+        padding: var(--space-1);
+        width: 100%;
+    }
+
+    .community-tab {
+        flex: 1;
+        justify-content: center;
+        padding: var(--space-1) var(--space-2);
+        font-size: 0.6rem;
+        min-height: 32px;
+        border-radius: var(--radius-md);
+    }
+
+    .friend-request-item {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-2);
+        padding: var(--space-2);
+        border-radius: var(--radius-lg);
+    }
+
+    .friend-request-info {
+        flex-direction: column;
+    }
+
+    .friend-request-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .friend-request-name {
+        font-size: 0.8rem;
+    }
+
+    .friend-request-actions {
+        width: 100%;
+        justify-content: center;
+        gap: var(--space-2);
+    }
+
+    .friend-request-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .friends-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .friend-card {
+        padding: var(--space-2);
+        border-radius: var(--radius-lg);
+    }
+
+    .friend-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .friend-name {
+        font-size: 0.75rem;
+    }
+
+    /* ===== LEADERBOARD ===== */
+    .leaderboard-item {
+        padding: var(--space-2);
+        border-radius: var(--radius-lg);
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    .leaderboard-user {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .leaderboard-rank {
+        width: auto;
+        font-size: 0.9rem;
+    }
+
+    .leaderboard-rank.top-1,
+    .leaderboard-rank.top-2,
+    .leaderboard-rank.top-3 {
+        font-size: 1.1rem;
+    }
+
+    .leaderboard-avatar {
+        width: 36px;
+        height: 36px;
+    }
+
+    .leaderboard-name {
+        font-size: 0.75rem;
+    }
+
+    .leaderboard-value {
+        text-align: center;
+        min-width: auto;
+        width: 100%;
+        font-size: 0.75rem;
+    }
+
+    .leaderboard-stats {
+        font-size: 0.5rem;
+    }
+
+    .leaderboard-mode-tabs {
+        flex-wrap: wrap;
+        border-radius: var(--radius-lg);
+        gap: var(--space-1);
+    }
+
+    .leaderboard-mode-tab {
+        flex: 1;
+        min-width: 60px;
+        padding: var(--space-1) var(--space-2);
+        font-size: 0.65rem;
+    }
+
+    .leaderboard-filters {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .leaderboard-filter-btn {
+        font-size: 0.55rem;
+        padding: 2px 8px;
+    }
+
+    .time-period-buttons {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .time-period-btn {
+        font-size: 0.55rem;
+        padding: 2px 8px;
+    }
+
+    .your-stats-card {
+        padding: var(--space-3);
+        border-radius: var(--radius-xl);
+    }
+
+    .your-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-2);
+    }
+
+    .your-stat {
+        padding: var(--space-2);
+    }
+
+    .your-stat .stat-value {
+        font-size: 0.95rem;
+    }
+
+    /* ============================================
+       SETTINGS
+       ============================================ */
+    #settings-page {
+        margin: 0 var(--space-2) var(--space-3) var(--space-2);
+    }
+
+    .settings-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding: 4px;
+        gap: 4px;
+        border-radius: var(--radius-lg);
+    }
+
+    .settings-tab {
+        flex: 0 0 auto;
+        padding: 4px 12px;
+        font-size: 0.65rem;
+        min-height: 32px;
+        border-radius: var(--radius-md);
+        white-space: nowrap;
+    }
+
+    .settings-tab span {
+        display: inline;
+    }
+
+    .settings-tab i {
+        font-size: 0.8rem;
+    }
+
+    .profile-preview {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--space-3);
+        gap: var(--space-3);
+        border-radius: var(--radius-xl);
+    }
+
+    .profile-preview-avatar {
+        width: 64px;
+        height: 64px;
+    }
+
+    .profile-preview-name {
+        font-size: 1.05rem;
+    }
+
+    .profile-preview-join-date {
+        margin: 0 auto;
+        font-size: var(--text-xs);
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .settings-group {
+        padding: var(--space-3);
+        border-radius: var(--radius-xl);
+    }
+
+    .settings-group h3 {
+        font-size: 0.85rem;
+        margin-bottom: var(--space-3);
+        padding-bottom: var(--space-2);
+    }
+
+    .settings-item {
+        margin-bottom: var(--space-2);
+    }
+
+    .settings-item label {
+        font-size: 0.6rem;
+        margin-bottom: var(--space-1);
+    }
+
+    .settings-item input,
+    .settings-item select {
+        padding: var(--space-2) var(--space-3);
+        font-size: 0.75rem;
+        border-radius: var(--radius-lg);
+    }
+
+    .file-input-btn {
+        padding: var(--space-2);
+        font-size: 0.7rem;
+        border-radius: var(--radius-lg);
+    }
+
+    #resetAvatar {
+        padding: var(--space-2);
+        font-size: 0.7rem;
+        border-radius: var(--radius-lg);
+    }
+
+    .level-card {
+        padding: var(--space-3);
+        border-radius: var(--radius-xl);
+    }
+
+    .level-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .level-rank {
+        gap: var(--space-2);
+    }
+
+    .level-badge-image {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    .level-title {
+        font-size: 0.85rem;
+    }
+
+    .level-number {
+        font-size: 0.8rem;
+        padding: 2px 10px;
+    }
+
+    .queue-stats {
+        grid-template-columns: 1fr;
+        gap: var(--space-1);
+    }
+
+    .queue-stat-item {
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .queue-value {
+        font-size: 1.1rem;
+    }
+
+    .danger-zone {
+        padding: var(--space-3);
+        border-radius: var(--radius-xl);
+    }
+
+    .danger-zone h3 {
+        font-size: 0.85rem;
+    }
+
+    .danger-zone p {
+        font-size: var(--text-xs);
+    }
+
+    .danger-actions {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .danger-actions .btn {
+        width: 100%;
+        justify-content: center;
+        padding: var(--space-2);
+        font-size: 0.7rem;
+        min-height: 36px;
+        border-radius: var(--radius-lg);
+    }
+
+    .theme-selection {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .theme-card {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-xl);
+    }
+
+    .theme-sample {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        margin-bottom: 0;
+    }
+
+    .theme-label {
+        flex: 1;
+        text-align: left;
+    }
+
+    .theme-card.active::after {
+        top: var(--space-2);
+        right: var(--space-2);
+        width: 18px;
+        height: 18px;
+        font-size: 0.55rem;
+    }
+
+    .settings-btn {
+        padding: var(--space-2);
+        font-size: 0.8rem;
+        border-radius: var(--radius-lg);
+        min-height: 40px;
+        width: 100%;
+    }
+
+    /* ============================================
+       MODALS
+       ============================================ */
+    .modal {
+        padding: 4px;
+    }
+
+    .modal-content {
+        padding: var(--space-3);
+        margin: 4px;
+        border-radius: var(--radius-xl);
+        max-height: 94vh;
+        max-width: calc(100% - 8px);
+    }
+
+    .modal-title {
+        font-size: 0.95rem;
+    }
+
+    .close-modal {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+        border-radius: 50%;
+    }
+
+    #addAnimeForm {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .form-group {
+        margin-bottom: var(--space-2);
+    }
+
+    .form-group label {
+        font-size: 0.6rem;
+        margin-bottom: 4px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: var(--space-2) var(--space-3);
+        font-size: 0.75rem;
+        border-radius: var(--radius-lg);
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: var(--space-1);
+        padding-top: var(--space-3);
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        padding: var(--space-2);
+        font-size: 0.75rem;
+        min-height: 36px;
+        border-radius: var(--radius-lg);
+    }
+
+    /* ===== PROFILE MODAL ===== */
+    .modal-content.profile-modal {
+        max-width: 100%;
+        margin: 4px;
+    }
+
+    .profile-modal-body {
+        padding: var(--space-3);
+    }
+
+    .profile-header-section {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-xl);
+    }
+
+    .profile-avatar-large img {
+        width: 64px;
+        height: 64px;
+    }
+
+    #profileName {
+        font-size: 1.1rem;
+    }
+
+    .profile-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-1);
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-lg);
+    }
+
+    .profile-stat-item .stat-value {
+        font-size: 1rem;
+    }
+
+    .profile-stat-item .stat-label {
+        font-size: 0.5rem;
+    }
+
+    .profile-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 4px;
+        gap: 4px;
+    }
+
+    .profile-tab {
+        font-size: 0.6rem;
+        padding: 4px 10px;
+        flex: 0 0 auto;
+        border-radius: var(--radius-md);
+    }
+
+    .profile-anime-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-2);
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .profile-anime-cover {
+        height: 80px;
+    }
+
+    .profile-anime-title {
+        font-size: 0.65rem;
+    }
+
+    .profile-achievements-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-1);
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .profile-achievement-card {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .profile-achievement-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .profile-achievement-name {
+        font-size: 0.7rem;
+    }
+
+    .profile-achievement-desc {
+        font-size: 0.55rem;
+    }
+
+    .profile-activity-list {
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .profile-activity-item {
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .profile-activity-text {
+        font-size: 0.7rem;
+    }
+
+    .profile-activity-time {
+        font-size: 0.5rem;
+    }
+
+    /* ===== SEARCH RESULTS ===== */
+    #searchResults {
+        position: fixed;
+        top: auto;
+        left: var(--space-2);
+        right: var(--space-2);
+        bottom: var(--space-2);
+        max-height: 50vh;
+        border-radius: var(--radius-xl);
+        z-index: 2000;
+    }
+
+    .search-result-item {
+        padding: var(--space-2);
+        border-radius: var(--radius-lg);
+    }
+
+    .search-result-item img {
+        width: 36px;
+        height: 52px;
+    }
+
+    /* ============================================
+       HEADER DROPDOWNS (Mobile)
+       ============================================ */
     .search-dropdown {
-        position: fixed !important;
-        top: calc(var(--header-height) + 4px) !important;
-        left: var(--space-3) !important;
-        right: var(--space-3) !important;
-        width: auto !important;
-        border-radius: var(--radius-2xl) !important;
-        border: 1px solid var(--border-color) !important;
-        box-shadow: var(--shadow-2xl) !important;
+        position: fixed;
+        top: calc(var(--header-height) + 4px);
+        left: var(--space-2);
+        right: var(--space-2);
+        width: auto;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-2xl);
+        z-index: 1001;
     }
-    
+
     .search-input-wrapper input {
-        padding: var(--space-2) var(--space-3) !important;
-        font-size: var(--text-sm) !important;
+        padding: var(--space-2) var(--space-3);
+        font-size: 0.8rem;
+        padding-left: 34px;
+        border-radius: var(--radius-lg);
     }
-    
-    /* ===== SCROLL TO TOP ===== */
-    .floating-scroll-top {
-        bottom: var(--space-4) !important;
-        right: var(--space-4) !important;
+
+    .search-input-wrapper::before {
+        left: 10px;
+        font-size: 0.8rem;
     }
-    
-    .scroll-top-btn {
-        width: 44px !important;
-        height: 44px !important;
+
+    .profile-dropdown {
+        position: fixed;
+        top: calc(var(--header-height) + 4px);
+        left: var(--space-2);
+        right: var(--space-2);
+        width: auto;
+        max-height: calc(100vh - 70px);
+        overflow-y: auto;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-2xl);
+        padding: var(--space-3);
+        z-index: 1001;
+        transform: translateY(-20px) scale(0.98);
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition);
     }
-    
-    .scroll-top-btn i {
-        font-size: var(--text-base) !important;
+
+    .profile-dropdown.open {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+        visibility: visible;
     }
-    
-    .btn-label {
-        font-size: 0.5rem !important;
+
+    .profile-dropdown::before {
+        display: none;
+    }
+
+    .profile-dropdown .sidebar-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .profile-dropdown .sidebar-username {
+        font-size: 0.85rem;
+    }
+
+    .profile-dropdown .stat-number {
+        font-size: 0.9rem;
+    }
+
+    .profile-dropdown .stat-label {
+        font-size: 0.5rem;
+    }
+
+    .profile-dropdown .menu-item {
+        padding: var(--space-2) var(--space-3);
+        font-size: 0.75rem;
+        border-radius: var(--radius-lg);
+    }
+
+    .profile-dropdown .menu-item i {
+        width: 18px;
+        font-size: 0.8rem;
+    }
+
+    /* ============================================
+       RECAP MODAL
+       ============================================ */
+    .recap-modal .recap-container {
+        width: 98%;
+        height: 92vh;
+        border-radius: var(--radius-xl);
+    }
+
+    .recap-slide {
+        padding: var(--space-4);
+    }
+
+    .recap-slide .slide-icon {
+        font-size: 2.5rem;
+    }
+
+    .recap-slide h1 {
+        font-size: var(--text-xl);
+    }
+
+    .recap-slide .subtitle {
+        font-size: var(--text-base);
+    }
+
+    .recap-slide .hint {
+        font-size: var(--text-sm);
+    }
+
+    .recap-slide .recap-summary {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-2);
+    }
+
+    .recap-controls button {
+        width: 36px;
+        height: 36px;
+        font-size: var(--text-sm);
+    }
+
+    .recap-close {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+        top: var(--space-2);
+        right: var(--space-2);
+    }
+
+    /* ============================================
+       TOASTS
+       ============================================ */
+    .toast-container {
+        top: auto;
+        bottom: var(--space-3);
+        right: var(--space-3);
+        left: var(--space-3);
+        max-width: 100%;
+    }
+
+    .toast {
+        padding: var(--space-2) var(--space-3);
+        font-size: 0.75rem;
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .toast-icon {
+        font-size: 1rem;
+        width: 28px;
+        height: 28px;
+    }
+
+    .toast-title {
+        font-size: 0.8rem;
+    }
+
+    .toast-message {
+        font-size: 0.65rem;
+    }
+
+    /* ============================================
+       FLOATING BUTTON
+       ============================================ */
+    .floating-add-anime {
+        width: 48px;
+        height: 48px;
+        bottom: var(--space-3);
+        right: var(--space-3);
+    }
+
+    .floating-add-anime i {
+        font-size: 1.1rem;
+    }
+
+    .floating-add-tooltip {
+        display: none;
+    }
+
+    /* ============================================
+       TOUCH TARGETS
+       ============================================ */
+    button,
+    .filter-btn,
+    .action-btn,
+    .btn,
+    .page-btn,
+    .menu-item,
+    .search-trigger,
+    .theme-toggle,
+    .user-profile {
+        min-height: 36px;
+        min-width: 36px;
+    }
+
+    /* ============================================
+       SCROLLBAR OVERRIDE (mobile)
+       ============================================ */
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--bg-tertiary);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--clr-primary);
+        border-radius: 10px;
+    }
+
+    * {
+        scrollbar-width: thin;
     }
 }

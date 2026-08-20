@@ -150,18 +150,30 @@
             return;
         }
 
-        container.innerHTML = topRated.map(anime => `
-            <div class="anime-card" onclick="window.editAnime && window.editAnime('${anime.id}')">
-                <img src="${anime.cover || 'https://placehold.co/300x400/6a5acd/white?text=No+Image'}" alt="${window.escapeHtml(anime.title)}" class="anime-cover" onerror="this.src='https://placehold.co/300x400/6a5acd/white?text=No+Image'">
-                <div class="anime-info">
-                    <div class="anime-title" title="${window.escapeHtml(anime.title)}">${window.escapeHtml(anime.title)}</div>
-                    <div class="anime-meta">
-                        <span>${anime.type || 'TV'}</span>
-                        <span class="anime-score">⭐ ${anime.score}</span>
-                    </div>
+        container.innerHTML = topRated.map(anime => {
+            const score = anime.score ? parseFloat(anime.score).toFixed(1) : null;
+            const episodesText = anime.episodes ? `${anime.episodes} Eps` : '';
+
+            return `
+        <div class="anime-card fade-in" onclick="window.editAnime && window.editAnime('${anime.id}')">
+            <div class="anime-img-wrapper">
+                <img src="${anime.cover || 'https://placehold.co/300x400/6a5acd/white?text=No+Image'}"
+                     alt="${window.escapeHtml(anime.title)}"
+                     class="anime-cover"
+                     loading="lazy"
+                     onerror="this.src='https://placehold.co/300x400/6a5acd/white?text=No+Image'">
+                ${score ? `<div class="rating-badge">⭐ ${score}</div>` : ''}
+            </div>
+            <div class="anime-info">
+                <div class="anime-title" title="${window.escapeHtml(anime.title)}">${window.escapeHtml(anime.title)}</div>
+                <div class="anime-meta">
+                    <span>${anime.type || 'TV'}</span>
+                    ${episodesText ? `<span>${episodesText}</span>` : ''}
                 </div>
             </div>
-        `).join('');
+        </div>
+    `;
+        }).join('');
     };
 
     // --- Current month anime (scrolling) ---
