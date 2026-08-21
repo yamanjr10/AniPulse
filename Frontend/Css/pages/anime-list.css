@@ -1,7 +1,65 @@
 /* ============================================
-   ANIME-LIST.CSS - Premium Design (Bigger)
+   ANIME-LIST.CSS - Premium Blue Theme
    Larger Text • Bigger Covers • Better Readability
+   Full Light Theme Support
    ============================================ */
+
+/* ============================================
+   CSS VARIABLES (matches dashboard)
+   ============================================ */
+:root {
+    --color-blue: #3B82F6;
+    --color-blue-dark: #2563EB;
+    --color-blue-light: #60A5FA;
+    --color-indigo: #6366F1;
+    --color-indigo-light: #818CF8;
+    --color-cyan: #06B6D4;
+    --color-teal: #14B8A6;
+    --color-emerald: #10B981;
+    --color-amber: #F59E0B;
+    --color-rose: #F43F5E;
+    --color-violet: #8B5CF6;
+
+    --bg-body: #0B1120;
+    --bg-card: #1A2234;
+    --bg-card-hover: #25324A;
+    --bg-glass: rgba(30, 41, 59, 0.7);
+    --bg-tertiary: rgba(255, 255, 255, 0.04);
+
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+
+    --border: #334155;
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+
+    --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+    --bg-body: #F1F5F9;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #F8FAFC;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    --bg-tertiary: #F8FAFC;
+
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+
+    --border: #E2E8F0;
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
 
 /* ============================================
    PAGE CONTAINER
@@ -13,25 +71,37 @@
     animation: fadeIn 0.5s ease;
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* ============================================
-   ANIME LIST CONTAINER - Premium Card
+   ANIME LIST CONTAINER
    ============================================ */
 .anime-list-container {
     background: var(--bg-card);
-    border-radius: 20px;
+    border-radius: var(--radius-xl);
     border: 1px solid var(--border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
 }
 
 .anime-list-container:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-md);
     border-color: var(--border-hover);
 }
 
 /* ============================================
-   ANIME LIST HEADER - Bigger
+   HEADER
    ============================================ */
 .anime-list-header {
     display: flex;
@@ -56,14 +126,14 @@
 
 .anime-list-title h2 i {
     font-size: 1.5rem;
-    color: var(--clr-primary);
-    background: rgba(79, 70, 229, 0.1);
+    color: var(--color-blue-light);
+    background: rgba(59, 130, 246, 0.1);
     padding: 10px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
 }
 
 /* ============================================
-   ANIME FILTERS - Bigger
+   FILTERS
    ============================================ */
 .anime-filters {
     display: flex;
@@ -77,14 +147,14 @@
     padding-right: 40px;
     background: var(--bg-card);
     border: 2px solid var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238B5CF6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2360A5FA'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
     background-size: 18px;
@@ -93,35 +163,31 @@
 
 .anime-filters select:hover {
     border-color: var(--border-hover);
-    background-color: var(--bg-hover);
+    background-color: var(--bg-card-hover);
 }
 
 .anime-filters select:focus {
     outline: none;
-    border-color: var(--clr-primary);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .anime-counter {
-    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
     color: white;
     padding: 10px 22px;
-    border-radius: 30px;
+    border-radius: var(--radius-full);
     font-size: 0.9rem;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 10px;
     white-space: nowrap;
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
-}
-
-.anime-counter i {
-    font-size: 0.9rem;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
 }
 
 /* ============================================
-   TABLE CONTAINER
+   TABLE
    ============================================ */
 .table-container {
     overflow-x: auto;
@@ -129,9 +195,6 @@
     padding: 0;
 }
 
-/* ============================================
-   ANIME TABLE - Bigger Design
-   ============================================ */
 .anime-table {
     width: 100%;
     border-collapse: collapse;
@@ -139,7 +202,6 @@
     font-size: 1rem;
 }
 
-/* Table Header - Bigger */
 .anime-table thead tr {
     background: var(--bg-tertiary);
 }
@@ -160,16 +222,14 @@
     z-index: 5;
 }
 
-/* Table Rows - Bigger */
 .anime-table tbody tr {
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
     border-bottom: 1px solid var(--border);
     cursor: pointer;
-    position: relative;
 }
 
 .anime-table tbody tr:hover {
-    background: var(--bg-hover);
+    background: var(--bg-card-hover);
     transform: scale(1.003);
 }
 
@@ -184,7 +244,7 @@
 }
 
 /* ============================================
-   ANIME TITLE CELL - Bigger
+   TITLE CELL (with cover)
    ============================================ */
 .anime-title-cell {
     display: flex;
@@ -193,24 +253,22 @@
     min-width: 280px;
 }
 
-/* Bigger Cover Image */
 .anime-table .anime-cover {
     width: 56px;
     height: 80px;
     object-fit: cover;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     border: 2px solid var(--border);
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .anime-table tbody tr:hover .anime-cover {
     transform: scale(1.05) rotate(1deg);
-    border-color: var(--clr-primary);
-    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.2);
+    border-color: var(--color-blue);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
 }
 
-/* Bigger Text */
 .anime-table .anime-info {
     display: flex;
     flex-direction: column;
@@ -226,14 +284,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 220px;
-    transition: color 0.3s ease;
+    transition: color var(--transition-base);
 }
 
 .anime-table tbody tr:hover .anime-title {
-    color: var(--clr-primary);
+    color: var(--color-blue-light);
 }
 
-/* Bigger Genres */
 .anime-table .anime-genres {
     font-size: 0.75rem;
     color: var(--text-muted);
@@ -247,39 +304,39 @@
 }
 
 .anime-table .anime-genres span {
-    background: rgba(139, 92, 246, 0.08);
+    background: rgba(59, 130, 246, 0.08);
     padding: 2px 12px;
-    border-radius: 30px;
+    border-radius: var(--radius-full);
     font-size: 0.65rem;
     font-weight: 500;
-    color: #A78BFA;
-    border: 1px solid rgba(139, 92, 246, 0.08);
+    color: var(--color-blue-light);
+    border: 1px solid rgba(59, 130, 246, 0.08);
 }
 
 /* ============================================
-   TYPE BADGE - Bigger
+   TYPE BADGE
    ============================================ */
 .anime-table .anime-type {
     display: inline-block;
     padding: 6px 18px;
-    background: rgba(139, 92, 246, 0.1);
-    border-radius: 30px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: var(--radius-full);
     font-size: 0.75rem;
     font-weight: 600;
-    color: #A78BFA;
+    color: var(--color-blue-light);
     white-space: nowrap;
-    border: 1px solid rgba(139, 92, 246, 0.12);
-    transition: all 0.3s ease;
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    transition: all var(--transition-base);
 }
 
 .anime-table tbody tr:hover .anime-type {
-    background: rgba(139, 92, 246, 0.18);
-    border-color: rgba(139, 92, 246, 0.25);
+    background: rgba(59, 130, 246, 0.18);
+    border-color: rgba(59, 130, 246, 0.25);
     transform: scale(1.02);
 }
 
 /* ============================================
-   PROGRESS CELL - Bigger
+   PROGRESS
    ============================================ */
 .anime-table .progress-cell {
     min-width: 150px;
@@ -295,21 +352,17 @@
     width: 120px;
     height: 8px;
     background: var(--bg-tertiary);
-    border-radius: 30px;
+    border-radius: var(--radius-full);
     overflow: hidden;
-    position: relative;
 }
 
 .anime-table .progress-bar {
     height: 100%;
-    border-radius: 30px;
+    border-radius: var(--radius-full);
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, var(--color-blue), var(--color-indigo));
     position: relative;
     overflow: hidden;
-}
-
-.anime-table .progress-bar {
-    background: linear-gradient(90deg, #6366F1, #8B5CF6);
 }
 
 .anime-table .progress-bar::after {
@@ -324,8 +377,13 @@
 }
 
 @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .anime-table .progress-wrapper small {
@@ -335,18 +393,18 @@
 }
 
 /* ============================================
-   STATUS BADGES - Bigger
+   STATUS BADGES
    ============================================ */
 .anime-table .badge {
     display: inline-block;
     padding: 6px 18px;
-    border-radius: 30px;
+    border-radius: var(--radius-full);
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
     white-space: nowrap;
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
 }
 
 .anime-table tbody tr:hover .badge {
@@ -360,9 +418,9 @@
 }
 
 .badge-watching {
-    background: rgba(99, 102, 241, 0.12);
-    color: #A78BFA;
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--color-blue-light);
+    border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .badge-plan {
@@ -378,7 +436,7 @@
 }
 
 /* ============================================
-   SCORE BADGE - Bigger
+   SCORE
    ============================================ */
 .anime-table .anime-score {
     display: inline-flex;
@@ -386,13 +444,13 @@
     gap: 8px;
     background: rgba(245, 158, 11, 0.08);
     padding: 6px 18px;
-    border-radius: 30px;
+    border-radius: var(--radius-full);
     color: #FBBF24;
     font-weight: 700;
     font-size: 0.9rem;
     white-space: nowrap;
     border: 1px solid rgba(245, 158, 11, 0.15);
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
 }
 
 .anime-table tbody tr:hover .anime-score {
@@ -400,12 +458,8 @@
     transform: scale(1.02);
 }
 
-.anime-table .anime-score i {
-    font-size: 0.8rem;
-}
-
 /* ============================================
-   DATE CELL - Bigger
+   DATE
    ============================================ */
 .anime-table .anime-date {
     white-space: nowrap;
@@ -417,19 +471,18 @@
 }
 
 .anime-table .anime-date i {
-    color: #A78BFA;
+    color: var(--color-blue-light);
     font-size: 0.8rem;
 }
 
 /* ============================================
-   NO ANIME STATE
+   EMPTY STATE
    ============================================ */
 .anime-table .no-anime {
     text-align: center;
     padding: 80px 20px;
     color: var(--text-muted);
     font-size: 1.05rem;
-    grid-column: 1 / -1;
 }
 
 .anime-table .no-anime::before {
@@ -439,65 +492,12 @@
     font-size: 3rem;
     display: block;
     margin-bottom: 16px;
-    color: var(--clr-secondary);
+    color: var(--color-blue-light);
     opacity: 0.3;
 }
 
 /* ============================================
-   LIGHT THEME SUPPORT
-   ============================================ */
-[data-theme="light"] .anime-list-container {
-    background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .anime-list-header {
-    background: #F8FAFC;
-}
-
-[data-theme="light"] .anime-filters select {
-    background: #FFFFFF;
-    border-color: rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="light"] .anime-filters select:hover {
-    background: #F8FAFC;
-}
-
-[data-theme="light"] .anime-table thead tr {
-    background: #F8FAFC;
-}
-
-[data-theme="light"] .anime-table th {
-    color: #64748B;
-}
-
-[data-theme="light"] .anime-table tbody tr:hover {
-    background: #F8FAFC;
-}
-
-[data-theme="light"] .badge-completed {
-    background: rgba(16, 185, 129, 0.08);
-}
-
-[data-theme="light"] .badge-watching {
-    background: rgba(99, 102, 241, 0.08);
-}
-
-[data-theme="light"] .badge-plan {
-    background: rgba(245, 158, 11, 0.08);
-}
-
-[data-theme="light"] .badge-dropped {
-    background: rgba(239, 68, 68, 0.08);
-}
-
-[data-theme="light"] .anime-table .anime-genres span {
-    background: rgba(99, 102, 241, 0.06);
-}
-
-/* ============================================
-   RESPONSIVE - All Sizes
+   RESPONSIVE
    ============================================ */
 @media (max-width: 1024px) {
     .anime-list-header {
@@ -505,50 +505,45 @@
         flex-direction: column;
         align-items: stretch;
     }
-    
-    .anime-list-title h2 {
-        font-size: 1.4rem;
-    }
-    
+
     .anime-filters {
-        flex-wrap: wrap;
         width: 100%;
     }
-    
+
     .anime-filters select {
         flex: 1;
         min-width: 120px;
         padding: 8px 16px;
         font-size: 0.85rem;
     }
-    
+
     .anime-counter {
         flex: 1;
         justify-content: center;
         padding: 8px 18px;
         font-size: 0.85rem;
     }
-    
+
     .anime-table {
         min-width: 700px;
         font-size: 0.9rem;
     }
-    
+
     .anime-table th,
     .anime-table td {
         padding: 14px 18px;
     }
-    
+
     .anime-table .anime-cover {
         width: 48px;
         height: 68px;
     }
-    
+
     .anime-table .anime-title {
-        font-size: 0.95rem;
         max-width: 180px;
+        font-size: 0.95rem;
     }
-    
+
     .anime-title-cell {
         min-width: 240px;
         gap: 14px;
@@ -559,12 +554,12 @@
     .anime-list-title h2 {
         font-size: 1.2rem;
     }
-    
+
     .anime-list-title h2 i {
         font-size: 1.1rem;
         padding: 8px;
     }
-    
+
     .anime-filters select {
         padding: 8px 14px;
         font-size: 0.8rem;
@@ -572,64 +567,55 @@
         padding-right: 32px;
         background-size: 16px;
     }
-    
+
     .anime-counter {
         font-size: 0.8rem;
         padding: 8px 16px;
     }
-    
+
     .anime-table {
         min-width: 650px;
         font-size: 0.85rem;
     }
-    
+
     .anime-table th,
     .anime-table td {
         padding: 12px 14px;
     }
-    
+
     .anime-table .anime-cover {
         width: 42px;
         height: 60px;
     }
-    
+
     .anime-table .anime-title {
         max-width: 150px;
         font-size: 0.9rem;
     }
-    
+
     .anime-title-cell {
         min-width: 200px;
         gap: 12px;
     }
-    
+
     .anime-table .progress-container {
         width: 90px;
         height: 6px;
     }
-    
-    .anime-table .anime-type {
-        font-size: 0.7rem;
-        padding: 4px 14px;
-    }
-    
+
+    .anime-table .anime-type,
     .anime-table .badge {
         font-size: 0.7rem;
         padding: 4px 14px;
     }
-    
+
     .anime-table .anime-score {
         font-size: 0.8rem;
         padding: 4px 14px;
     }
-    
+
     .anime-table .anime-date {
         font-size: 0.75rem;
-    }
-    
-    .anime-table .anime-genres {
-        font-size: 0.65rem;
-        max-width: 160px;
     }
 }
 
@@ -637,105 +623,101 @@
     .anime-list-header {
         padding: 16px 14px;
     }
-    
+
     .anime-list-title h2 {
         font-size: 1rem;
     }
-    
+
     .anime-list-title h2 i {
         font-size: 0.95rem;
         padding: 6px;
     }
-    
+
     .anime-filters {
         flex-direction: column;
         gap: 8px;
     }
-    
+
     .anime-filters select {
         width: 100%;
         min-width: auto;
         padding: 8px 14px;
         font-size: 0.75rem;
     }
-    
+
     .anime-counter {
         width: 100%;
         justify-content: center;
         padding: 8px 14px;
         font-size: 0.75rem;
     }
-    
+
     .anime-table {
         min-width: 550px;
         font-size: 0.75rem;
     }
-    
+
     .anime-table th,
     .anime-table td {
         padding: 10px 10px;
     }
-    
+
     .anime-table .anime-cover {
         width: 34px;
         height: 48px;
-        border-radius: 6px;
+        border-radius: var(--radius-sm);
     }
-    
+
     .anime-table .anime-title {
         max-width: 100px;
         font-size: 0.75rem;
     }
-    
+
     .anime-title-cell {
         min-width: 150px;
         gap: 10px;
     }
-    
-    .anime-table .anime-type {
-        font-size: 0.6rem;
-        padding: 3px 10px;
-    }
-    
+
+    .anime-table .anime-type,
     .anime-table .badge {
-        font-size: 0.55rem;
+        font-size: 0.6rem;
         padding: 3px 10px;
         letter-spacing: 0.5px;
     }
-    
+
     .anime-table .anime-score {
         font-size: 0.7rem;
         padding: 3px 10px;
         gap: 4px;
     }
-    
+
     .anime-table .anime-score i {
         font-size: 0.6rem;
     }
-    
+
     .anime-table .anime-date {
         font-size: 0.6rem;
         gap: 4px;
     }
-    
+
     .anime-table .anime-date i {
         font-size: 0.6rem;
     }
-    
+
     .anime-table .progress-container {
         width: 60px;
         height: 5px;
     }
-    
+
     .anime-table .progress-wrapper small {
         font-size: 0.6rem;
     }
-    
+
     .anime-table .anime-genres {
         font-size: 0.55rem;
         max-width: 100px;
     }
-    
+
     .anime-table .anime-genres span {
         padding: 1px 8px;
         font-size: 0.5rem;
@@ -746,6 +728,7 @@
    REDUCED MOTION
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
+
     .anime-table tbody tr,
     .anime-table .anime-cover,
     .anime-table .progress-bar::after,
@@ -753,9 +736,8 @@
         animation: none !important;
         transition: none !important;
     }
-    
+
     .anime-table tbody tr:hover {
         transform: none !important;
     }
 }
-

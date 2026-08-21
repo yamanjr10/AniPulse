@@ -1,21 +1,85 @@
 /* =============================================
-   CLEAN LEVEL SYSTEM UI
+   LEVEL SYSTEM UI - Premium Blue Theme
+   Complete with all CSS variables defined
    ============================================= */
 
-/* Sidebar Level Display */
+/* =============================================
+   CSS VARIABLES (self-contained)
+   ============================================= */
+:root {
+    /* -------- PRIMARY COLORS -------- */
+    --color-blue: #3B82F6;
+    --color-blue-dark: #2563EB;
+    --color-blue-light: #60A5FA;
+    --color-indigo: #6366F1;
+    --color-indigo-light: #818CF8;
+    --color-cyan: #06B6D4;
+    --color-cyan-light: #67E8F9;
+    --color-emerald: #10B981;
+    --color-emerald-light: #34D399;
+    --color-amber: #F59E0B;
+    --color-amber-light: #FBBF24;
+    --color-rose: #F43F5E;
+    --color-violet: #8B5CF6;
+    --color-violet-light: #A78BFA;
+
+    /* -------- BACKGROUNDS -------- */
+    --bg-body: #0B1120;
+    --bg-glass: rgba(30, 41, 59, 0.7);
+    --bg-card: rgba(15, 23, 42, 0.6);
+
+    /* -------- TEXT -------- */
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+
+    /* -------- BORDERS -------- */
+    --border: rgba(59, 130, 246, 0.12);
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    /* -------- SHADOWS -------- */
+    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.15);
+
+    /* -------- TRANSITIONS -------- */
+    --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+    --bg-body: #F8FAFC;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    --bg-card: rgba(255, 255, 255, 0.8);
+
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+
+    --border: rgba(59, 130, 246, 0.08);
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.08);
+}
+
+/* =============================================
+   SIDEBAR LEVEL DISPLAY
+   ============================================= */
 .sidebar-level {
     display: flex;
     align-items: center;
     gap: 8px;
     margin: 6px 0 10px 0;
     padding: 6px 10px;
-    background: rgba(139, 92, 246, 0.12);
+    background: rgba(59, 130, 246, 0.12);
     border-radius: 30px;
     width: fit-content;
+    transition: background 0.3s ease;
+}
+
+[data-theme="light"] .sidebar-level {
+    background: rgba(59, 130, 246, 0.08);
 }
 
 .level-badge {
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
     padding: 2px 8px;
     border-radius: 20px;
     font-size: 0.7rem;
@@ -26,16 +90,33 @@
 .level-title {
     font-size: 0.75rem;
     font-weight: 500;
-    color: #a78bfa;
+    color: var(--color-blue-light);
 }
 
-/* Settings Level Card */
+[data-theme="light"] .level-title {
+    color: var(--color-blue);
+}
+
+/* =============================================
+   SETTINGS LEVEL CARD - Premium Blue
+   ============================================= */
 .level-card {
-    background: rgba(139, 92, 246, 0.06);
+    background: rgba(59, 130, 246, 0.06);
     border-radius: 20px;
     padding: 20px;
     margin: 20px 0;
-    border: 1px solid rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    transition: all var(--transition-base);
+}
+
+[data-theme="light"] .level-card {
+    background: rgba(59, 130, 246, 0.04);
+    border-color: rgba(59, 130, 246, 0.08);
+}
+
+.level-card:hover {
+    border-color: rgba(59, 130, 246, 0.25);
+    box-shadow: var(--shadow-glow);
 }
 
 .level-card-header {
@@ -53,25 +134,34 @@
 
 .level-rank i {
     font-size: 1.2rem;
-    color: #fbbf24;
+    color: var(--color-amber-light);
 }
 
 .level-rank span {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
 }
 
 .level-number {
     font-size: 0.85rem;
     font-weight: 500;
-    color: #8b5cf6;
-    background: rgba(139, 92, 246, 0.15);
+    color: var(--color-blue-light);
+    background: rgba(59, 130, 246, 0.12);
     padding: 4px 12px;
     border-radius: 20px;
+    transition: color 0.3s ease, background 0.3s ease;
 }
 
-/* Progress Bar */
+[data-theme="light"] .level-number {
+    color: var(--color-blue);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+/* =============================================
+   PROGRESS BAR - Blue
+   ============================================= */
 .level-progress {
     margin-bottom: 12px;
 }
@@ -82,28 +172,54 @@
     height: 8px;
     overflow: hidden;
     margin-bottom: 8px;
+    transition: background 0.3s ease;
+}
+
+[data-theme="light"] .progress-track {
+    background: rgba(0, 0, 0, 0.08);
 }
 
 .progress-fill {
-    background: linear-gradient(90deg, #8b5cf6, #a855f7);
+    background: linear-gradient(90deg, var(--color-blue), var(--color-indigo), var(--color-blue-light));
+    background-size: 200% 100%;
     height: 100%;
     width: 0%;
     border-radius: 10px;
-    transition: width 0.4s ease;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: progressGlow 2s ease-in-out infinite;
+}
+
+@keyframes progressGlow {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 .progress-stats {
     text-align: right;
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
 }
 
 .progress-stats span:first-child {
-    color: #a78bfa;
+    color: var(--color-blue-light);
     font-weight: 600;
 }
 
-/* Next Level Info */
+[data-theme="light"] .progress-stats span:first-child {
+    color: var(--color-blue);
+}
+
+/* =============================================
+   NEXT LEVEL INFO
+   ============================================= */
 .level-next {
     display: flex;
     align-items: center;
@@ -111,21 +227,33 @@
     padding-top: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--text-muted);
+    transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="light"] .level-next {
+    border-top-color: rgba(0, 0, 0, 0.06);
 }
 
 .level-next i {
     font-size: 0.7rem;
-    color: #8b5cf6;
+    color: var(--color-blue-light);
 }
 
-/* Level Up Toast */
+[data-theme="light"] .level-next i {
+    color: var(--color-blue);
+}
+
+/* =============================================
+   LEVEL UP TOAST - Gold/Blue
+   ============================================= */
 .level-up-toast {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background: #1e1b2e;
-    border-left: 3px solid #fbbf24;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    border-left: 3px solid var(--color-amber-light);
     border-radius: 12px;
     padding: 12px 18px;
     display: flex;
@@ -134,18 +262,30 @@
     z-index: 10001;
     animation: slideInRight 0.3s ease;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(251, 191, 36, 0.15);
+}
+
+[data-theme="light"] .level-up-toast {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(251, 191, 36, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .level-up-toast-icon {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
     color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="light"] .level-up-toast-icon {
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15);
 }
 
 .level-up-toast-content {
@@ -154,13 +294,17 @@
 
 .level-up-toast-title {
     font-weight: 600;
-    color: #fbbf24;
+    color: var(--color-amber-light);
     font-size: 0.85rem;
 }
 
 .level-up-toast-message {
     font-size: 0.75rem;
-    color: #cbd5e1;
+    color: var(--text-secondary);
+}
+
+[data-theme="light"] .level-up-toast-message {
+    color: var(--text-secondary);
 }
 
 @keyframes slideInRight {
@@ -168,6 +312,7 @@
         transform: translateX(100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -179,20 +324,24 @@
         transform: translateX(0);
         opacity: 1;
     }
+
     to {
         transform: translateX(100%);
         opacity: 0;
     }
 }
 
-/* XP Popup Toast */
+/* =============================================
+   XP POPUP TOAST - Blue Theme
+   ============================================= */
 .xp-popup {
     position: fixed;
     bottom: 24px;
     right: 24px;
     width: min(340px, calc(100vw - 48px));
-    background: rgba(15, 13, 28, 0.96);
-    border: 1px solid rgba(139, 92, 246, 0.28);
+    background: rgba(15, 23, 42, 0.96);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: 18px;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
     overflow: hidden;
@@ -200,6 +349,12 @@
     transform: translateY(20px) scale(0.96);
     transition: transform 0.28s ease, opacity 0.28s ease;
     z-index: 11000;
+}
+
+[data-theme="light"] .xp-popup {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(59, 130, 246, 0.15);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
 }
 
 .xp-popup.enter {
@@ -226,6 +381,11 @@
     background-size: cover;
     background-position: center;
     background-color: rgba(255, 255, 255, 0.06);
+    transition: background-color 0.3s ease;
+}
+
+[data-theme="light"] .xp-cover {
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .xp-info {
@@ -236,20 +396,30 @@
 .xp-amount {
     font-size: 1rem;
     font-weight: 700;
-    color: #f8fafc;
+    color: var(--color-blue-light);
+    transition: color 0.3s ease;
+}
+
+[data-theme="light"] .xp-amount {
+    color: var(--color-blue);
 }
 
 .xp-title {
     font-size: 0.85rem;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     line-height: 1.3;
+    transition: color 0.3s ease;
 }
 
 .xp-meta {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
 }
 
+/* =============================================
+   XP PROGRESS BAR
+   ============================================= */
 .xp-bar {
     width: 100%;
     height: 8px;
@@ -257,21 +427,27 @@
     border-radius: 999px;
     overflow: hidden;
     margin-top: 6px;
+    transition: background 0.3s ease;
+}
+
+[data-theme="light"] .xp-bar {
+    background: rgba(0, 0, 0, 0.08);
 }
 
 .xp-fill {
     display: block;
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #8b5cf6, #7c3aed);
-    transition: width 0.5s ease;
+    background: linear-gradient(90deg, var(--color-blue), var(--color-indigo), var(--color-blue-light));
+    background-size: 200% 100%;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 999px;
+    animation: progressGlow 2s ease-in-out infinite;
 }
 
 /* =============================================
    XP POPUP WITH TOTAL XP DISPLAY
    ============================================= */
-
-/* Progress container - wraps bar and XP stats */
 .xp-progress-container {
     display: flex;
     align-items: center;
@@ -279,80 +455,78 @@
     margin-top: 10px;
 }
 
-/* Update existing xp-bar */
-.xp-bar {
-    flex: 1;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 999px;
-    overflow: hidden;
-}
-
-/* Keep existing xp-fill */
-.xp-fill {
-    display: block;
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #8b5cf6, #7c3aed);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* XP Stats container */
 .xp-stats {
     display: flex;
     align-items: baseline;
     gap: 4px;
-    background: rgba(139, 92, 246, 0.12);
+    background: rgba(59, 130, 246, 0.12);
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
     white-space: nowrap;
+    transition: background 0.3s ease;
 }
 
-/* Current XP number */
+[data-theme="light"] .xp-stats {
+    background: rgba(59, 130, 246, 0.08);
+}
+
 .xp-current {
-    color: #c4b5fd;
+    color: var(--color-blue-light);
     font-weight: 700;
     font-size: 0.85rem;
     font-family: 'Inter', monospace;
+    transition: color 0.3s ease;
 }
 
-/* Separator */
+[data-theme="light"] .xp-current {
+    color: var(--color-blue);
+}
+
 .xp-separator {
-    color: #64748b;
+    color: var(--text-muted);
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
-/* Next level XP requirement */
 .xp-next {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-weight: 500;
     font-family: 'Inter', monospace;
+    transition: color 0.3s ease;
 }
 
-/* XP Label */
 .xp-label {
-    color: #8b5cf6;
+    color: var(--color-blue-light);
     font-size: 0.65rem;
     font-weight: 500;
     margin-left: 2px;
+    transition: color 0.3s ease;
 }
 
-/* Animation when XP updates */
+[data-theme="light"] .xp-label {
+    color: var(--color-blue);
+}
+
+/* =============================================
+   XP NUMBER UPDATE ANIMATION
+   ============================================= */
 @keyframes xpNumberPulse {
     0% {
         transform: scale(1);
-        color: #c4b5fd;
+        color: var(--color-blue-light);
     }
+
     50% {
         transform: scale(1.1);
-        color: #e9d5ff;
-        text-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+        color: var(--color-blue);
+        text-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
     }
+
     100% {
         transform: scale(1);
-        color: #c4b5fd;
+        color: var(--color-blue-light);
     }
 }
 
@@ -360,91 +534,141 @@
     animation: xpNumberPulse 0.4s ease;
 }
 
-/* Upgraded Settings Card tweaks */
+/* =============================================
+   SETTINGS LEVEL CARD - Premium Blue
+   ============================================= */
 .settings-level-card .level-badge-image {
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(99,102,241,0.12));
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(99, 102, 241, 0.12));
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #fff;
     font-size: 18px;
     margin-right: 10px;
+    transition: background 0.3s ease;
+}
+
+[data-theme="light"] .settings-level-card .level-badge-image {
+    background: rgba(59, 130, 246, 0.10);
 }
 
 .settings-level-card .level-title-wrap .level-title {
     font-size: 0.95rem;
-    font-weight:700;
-    color: #e6e9f2;
+    font-weight: 700;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
 }
+
 .settings-level-card .level-title-wrap .level-subtitle {
     font-size: 0.72rem;
-    color: #9aa7c7;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
 }
 
 .settings-level-card .progress-row {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
 }
 
 .settings-level-card .progress-percent {
     font-size: 0.82rem;
-    color: #aab8d6;
-    min-width:48px;
-    text-align:right;
+    color: var(--color-blue-light);
+    min-width: 48px;
+    text-align: right;
+    transition: color 0.3s ease;
 }
 
+[data-theme="light"] .settings-level-card .progress-percent {
+    color: var(--color-blue);
+}
+
+/* =============================================
+   XP DELTA - Green for gains
+   ============================================= */
 .settings-level-card .xp-delta {
-    margin-top:8px;
-    display:inline-block;
-    padding:6px 10px;
-    background: rgba(34,197,94,0.12);
-    color: #9be9a8;
+    margin-top: 8px;
+    display: inline-block;
+    padding: 6px 10px;
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--color-emerald-light);
     border-radius: 999px;
-    font-weight:700;
-    font-size:0.85rem;
-    box-shadow: 0 6px 18px rgba(34,197,94,0.06);
+    font-weight: 700;
+    font-size: 0.85rem;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.06);
     transform-origin: right center;
-    transition: transform 0.28s ease, opacity 0.3s ease;
+    transition: transform 0.28s ease, opacity 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="light"] .settings-level-card .xp-delta {
+    background: rgba(16, 185, 129, 0.08);
+    color: #059669;
 }
 
 .settings-level-card .xp-delta.show {
-    display:inline-block;
+    display: inline-block;
     transform: translateY(-4px) scale(1.02);
     opacity: 1;
 }
 
 .settings-level-card .level-actions .btn.small {
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.04);
-    color: #cbd5e1;
-    padding:6px 10px;
-    border-radius:10px;
-    font-size:0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    transition: all var(--transition-base);
 }
 
-/* ============================================
-   XP QUEUE STATUS CARD - SETTINGS PAGE
-   ============================================ */
+[data-theme="light"] .settings-level-card .level-actions .btn.small {
+    border-color: rgba(0, 0, 0, 0.06);
+    color: var(--text-secondary);
+}
 
+.settings-level-card .level-actions .btn.small:hover {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: var(--color-blue);
+    color: var(--text-primary);
+}
+
+/* =============================================
+   XP QUEUE STATUS CARD - Blue Theme
+   ============================================= */
 .queue-status-card {
-    background: rgba(139, 92, 246, 0.06);
+    background: rgba(59, 130, 246, 0.06);
     border-radius: 20px;
     padding: 20px;
     margin: 20px 0;
-    border: 1px solid rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    transition: all var(--transition-base);
+}
+
+[data-theme="light"] .queue-status-card {
+    background: rgba(59, 130, 246, 0.04);
+    border-color: rgba(59, 130, 246, 0.08);
+}
+
+.queue-status-card:hover {
+    border-color: rgba(59, 130, 246, 0.25);
+    box-shadow: var(--shadow-glow);
 }
 
 .queue-status-card h3 {
     margin-bottom: 16px;
-    color: var(--primary);
+    color: var(--color-blue-light);
     display: flex;
     align-items: center;
     gap: 10px;
+    transition: color 0.3s ease;
+}
+
+[data-theme="light"] .queue-status-card h3 {
+    color: var(--color-blue);
 }
 
 .queue-stats {
@@ -461,6 +685,19 @@
     padding: 12px 16px;
     border-radius: 16px;
     text-align: center;
+    transition: background 0.3s ease;
+}
+
+[data-theme="light"] .queue-stat-item {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.queue-stat-item:hover {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+[data-theme="light"] .queue-stat-item:hover {
+    background: rgba(59, 130, 246, 0.04);
 }
 
 .queue-label {
@@ -469,19 +706,26 @@
     color: var(--text-muted);
     margin-bottom: 6px;
     letter-spacing: 0.5px;
+    transition: color 0.3s ease;
 }
 
 .queue-value {
     display: inline-block;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--color-blue-light);
+    transition: color 0.3s ease;
+}
+
+[data-theme="light"] .queue-value {
+    color: var(--color-blue);
 }
 
 .queue-max {
     font-size: 0.85rem;
     color: var(--text-muted);
     margin-left: 4px;
+    transition: color 0.3s ease;
 }
 
 .queue-progress {
@@ -497,24 +741,39 @@
     border-radius: 10px;
     height: 8px;
     overflow: hidden;
+    transition: background 0.3s ease;
+}
+
+[data-theme="light"] .queue-progress .progress-track {
+    background: rgba(0, 0, 0, 0.08);
 }
 
 .queue-progress .progress-fill {
-    background: linear-gradient(90deg, #8b5cf6, #a855f7);
+    background: linear-gradient(90deg, var(--color-blue), var(--color-indigo), var(--color-blue-light));
+    background-size: 200% 100%;
     height: 100%;
     width: 0%;
     border-radius: 10px;
-    transition: width 0.4s ease;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: progressGlow 2s ease-in-out infinite;
 }
 
 .queue-percent {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #a78bfa;
+    color: var(--color-blue-light);
     min-width: 45px;
     text-align: right;
+    transition: color 0.3s ease;
 }
 
+[data-theme="light"] .queue-percent {
+    color: var(--color-blue);
+}
+
+/* =============================================
+   QUEUE MESSAGE - Status specific
+   ============================================= */
 .queue-message {
     padding: 10px 14px;
     border-radius: 12px;
@@ -522,29 +781,260 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(139, 92, 246, 0.08);
+    background: rgba(59, 130, 246, 0.08);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="light"] .queue-message {
+    background: rgba(59, 130, 246, 0.04);
 }
 
 .queue-message i {
     font-size: 0.9rem;
+    color: var(--color-blue-light);
+}
+
+[data-theme="light"] .queue-message i {
+    color: var(--color-blue);
 }
 
 .queue-message.has-queue {
     background: rgba(245, 158, 11, 0.12);
-    color: #fbbf24;
+    color: var(--color-amber-light);
 }
 
 .queue-message.has-queue i {
-    color: #fbbf24;
+    color: var(--color-amber-light);
 }
 
-/* Animation for queue updates */
+[data-theme="light"] .queue-message.has-queue {
+    background: rgba(245, 158, 11, 0.08);
+    color: #D97706;
+}
+
+[data-theme="light"] .queue-message.has-queue i {
+    color: #D97706;
+}
+
+/* =============================================
+   QUEUE UPDATE ANIMATION
+   ============================================= */
 @keyframes queuePulse {
-    0% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.02); }
-    100% { opacity: 0.6; transform: scale(1); }
+    0% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
 }
 
 .queue-value.updated {
     animation: queuePulse 0.4s ease;
+}
+
+/* =============================================
+   REDUCED MOTION
+   ============================================= */
+@media (prefers-reduced-motion: reduce) {
+
+    .progress-fill,
+    .queue-progress .progress-fill,
+    .xp-fill {
+        animation: none !important;
+    }
+
+    .xp-popup {
+        transition: none !important;
+    }
+
+    .xp-popup.enter,
+    .xp-popup.exit {
+        transform: none !important;
+    }
+
+    .level-up-toast {
+        animation: none !important;
+    }
+
+    .settings-level-card .xp-delta {
+        transition: none !important;
+    }
+
+    .xp-current.xp-updated {
+        animation: none !important;
+    }
+
+    .queue-value.updated {
+        animation: none !important;
+    }
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 768px) {
+    .level-card {
+        padding: 16px;
+    }
+
+    .level-rank span {
+        font-size: 1rem;
+    }
+
+    .level-number {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+    }
+
+    .queue-stats {
+        gap: 12px;
+    }
+
+    .queue-stat-item {
+        min-width: 80px;
+        padding: 10px 12px;
+    }
+
+    .queue-value {
+        font-size: 1.2rem;
+    }
+
+    .xp-popup-inner {
+        grid-template-columns: 56px auto;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .xp-cover {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+    }
+
+    .xp-amount {
+        font-size: 0.9rem;
+    }
+
+    .settings-level-card .level-badge-image {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .level-card {
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .level-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .level-rank i {
+        font-size: 1rem;
+    }
+
+    .level-rank span {
+        font-size: 0.9rem;
+    }
+
+    .queue-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .queue-stat-item {
+        min-width: auto;
+    }
+
+    .queue-progress {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .queue-percent {
+        text-align: left;
+        min-width: auto;
+    }
+
+    .xp-popup {
+        bottom: 12px;
+        right: 12px;
+        width: calc(100vw - 24px);
+        border-radius: 14px;
+    }
+
+    .xp-popup-inner {
+        grid-template-columns: 48px auto;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .xp-cover {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+    }
+
+    .xp-amount {
+        font-size: 0.85rem;
+    }
+
+    .xp-title {
+        font-size: 0.75rem;
+    }
+
+    .xp-meta {
+        font-size: 0.65rem;
+    }
+
+    .xp-stats {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+
+    .xp-current {
+        font-size: 0.75rem;
+    }
+
+    .level-up-toast {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        padding: 10px 14px;
+        border-radius: 10px;
+    }
+
+    .level-up-toast-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .level-up-toast-title {
+        font-size: 0.75rem;
+    }
+
+    .level-up-toast-message {
+        font-size: 0.65rem;
+    }
+
+    .settings-level-card .level-badge-image {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
 }

@@ -1,15 +1,110 @@
 /* ============================================
-   CARD COMPONENTS
+   CARD COMPONENTS - Premium Blue Theme
    ============================================ */
 
-/* ===== BASE CARD ===== */
+/* ============================================
+   CSS VARIABLES (matches dashboard)
+   ============================================ */
+:root {
+    --color-blue: #3B82F6;
+    --color-blue-dark: #2563EB;
+    --color-blue-light: #60A5FA;
+    --color-indigo: #6366F1;
+    --color-indigo-light: #818CF8;
+    --color-cyan: #06B6D4;
+    --color-cyan-light: #67E8F9;
+    --color-emerald: #10B981;
+    --color-emerald-light: #34D399;
+    --color-amber: #F59E0B;
+    --color-amber-light: #FBBF24;
+    --color-rose: #F43F5E;
+    --color-violet: #8B5CF6;
+    --color-violet-light: #A78BFA;
+
+    --bg-body: #0B1120;
+    --bg-glass: rgba(30, 41, 59, 0.7);
+    --bg-card: rgba(15, 23, 42, 0.6);
+    --bg-tertiary: rgba(255, 255, 255, 0.04);
+    --bg-hover: rgba(255, 255, 255, 0.06);
+
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+
+    --border: rgba(59, 130, 246, 0.12);
+    --border-color: rgba(255, 255, 255, 0.06);
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.15);
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+    --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 40px;
+    --space-8: 48px;
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+    --text-5xl: 3rem;
+
+    --font-bold: 700;
+    --font-extrabold: 800;
+    --font-family-mono: 'Inter', monospace;
+    --tracking-wide: 0.02em;
+    --tracking-wider: 0.04em;
+    --tracking-tighter: -0.02em;
+}
+
+[data-theme="light"] {
+    --bg-body: #F8FAFC;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    --bg-card: #FFFFFF;
+    --bg-tertiary: #F8FAFC;
+    --bg-hover: #F1F5F9;
+
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+
+    --border: rgba(0, 0, 0, 0.06);
+    --border-color: rgba(0, 0, 0, 0.06);
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.08);
+}
+
+/* ============================================
+   BASE CARD
+   ============================================ */
 .card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
     padding: var(--space-6);
     transition: all var(--transition);
-    backdrop-filter: var(--blur-sm);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     position: relative;
     overflow: hidden;
 }
@@ -20,7 +115,9 @@
     box-shadow: var(--shadow-glow);
 }
 
-/* ===== STAT CARD ===== */
+/* ============================================
+   STAT CARD - Premium Blue
+   ============================================ */
 .stat-card {
     background: var(--bg-card);
     border-radius: var(--radius-2xl);
@@ -30,7 +127,8 @@
     transition: all var(--transition-bounce);
     cursor: pointer;
     border: 1px solid var(--border-color);
-    backdrop-filter: var(--blur-sm);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .stat-card:hover {
@@ -39,7 +137,7 @@
     border-color: var(--border-hover);
 }
 
-/* Stat Card Color Variants */
+/* Stat Card Header */
 .stat-card .stat-header {
     display: flex;
     justify-content: space-between;
@@ -57,6 +155,32 @@
     display: block;
     margin-bottom: var(--space-1);
     transition: transform var(--transition);
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo), var(--color-blue-light));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientFlow 4s ease infinite;
+}
+
+[data-theme="light"] .stat-card .stat-value {
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@keyframes gradientFlow {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 .stat-card:hover .stat-value {
@@ -88,8 +212,14 @@
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-full);
     background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: var(--blur-sm);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     transition: all var(--transition);
+    color: var(--text-secondary);
+}
+
+[data-theme="light"] .stat-card .stat-label {
+    background: rgba(0, 0, 0, 0.06);
 }
 
 .stat-card:hover .stat-label {
@@ -109,21 +239,31 @@
 }
 
 .stat-change.positive {
-    background: rgba(16, 185, 129, 0.2);
-    color: var(--clr-success);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--color-emerald-light);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+[data-theme="light"] .stat-change.positive {
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--color-emerald);
 }
 
 .stat-change.negative {
-    background: rgba(239, 68, 68, 0.2);
-    color: var(--clr-danger);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.15);
+    color: #F87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+[data-theme="light"] .stat-change.negative {
+    background: rgba(239, 68, 68, 0.08);
+    color: #DC2626;
 }
 
 .stat-change.neutral {
-    background: rgba(148, 163, 184, 0.15);
+    background: rgba(148, 163, 184, 0.1);
     color: var(--text-muted);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border: 1px solid rgba(148, 163, 184, 0.15);
 }
 
 .stat-change i {
@@ -148,7 +288,7 @@
     }
 }
 
-/* Stat Icon */
+/* Stat Icon - Blue Themed */
 .stat-icon {
     width: 56px;
     height: 56px;
@@ -180,36 +320,38 @@
 }
 
 .stat-icon.success {
-    background: var(--gradient-success);
-    box-shadow: 0 10px 20px -8px rgba(16, 185, 129, 0.5);
+    background: linear-gradient(135deg, var(--color-emerald), #059669);
+    box-shadow: 0 10px 20px -8px rgba(16, 185, 129, 0.4);
 }
 
 .stat-icon.info {
-    background: var(--gradient-info);
-    box-shadow: 0 10px 20px -8px rgba(59, 130, 246, 0.5);
+    background: linear-gradient(135deg, var(--color-cyan), var(--color-blue));
+    box-shadow: 0 10px 20px -8px rgba(6, 182, 212, 0.4);
 }
 
 .stat-icon.warning {
-    background: var(--gradient-warning);
-    box-shadow: 0 10px 20px -8px rgba(245, 158, 11, 0.5);
+    background: linear-gradient(135deg, var(--color-amber), #D97706);
+    box-shadow: 0 10px 20px -8px rgba(245, 158, 11, 0.4);
 }
 
 .stat-icon.danger {
-    background: var(--gradient-danger);
-    box-shadow: 0 10px 20px -8px rgba(239, 68, 68, 0.5);
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    box-shadow: 0 10px 20px -8px rgba(239, 68, 68, 0.4);
 }
 
 .stat-icon.primary {
-    background: var(--gradient-primary);
-    box-shadow: 0 10px 20px -8px rgba(79, 70, 229, 0.5);
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
+    box-shadow: 0 10px 20px -8px rgba(59, 130, 246, 0.4);
 }
 
 .stat-icon.secondary {
-    background: var(--gradient-secondary);
-    box-shadow: 0 10px 20px -8px rgba(139, 92, 246, 0.5);
+    background: linear-gradient(135deg, var(--color-indigo), var(--color-violet));
+    box-shadow: 0 10px 20px -8px rgba(99, 102, 241, 0.4);
 }
 
-/* ===== ANIME CARD ===== */
+/* ============================================
+   ANIME CARD - Premium Blue
+   ============================================ */
 .anime-card {
     background: var(--bg-card);
     border-radius: var(--radius-xl);
@@ -224,6 +366,10 @@
     flex-direction: column;
 }
 
+[data-theme="light"] .anime-card {
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.06);
+}
+
 .anime-card:hover {
     transform: translateY(-8px);
     border-color: var(--border-hover);
@@ -234,7 +380,7 @@
     content: '';
     position: absolute;
     inset: -1px;
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo), var(--color-cyan));
     border-radius: var(--radius-xl);
     opacity: 0;
     transition: opacity var(--transition);
@@ -243,7 +389,7 @@
 }
 
 .anime-card:hover::before {
-    opacity: 0.6;
+    opacity: 0.4;
 }
 
 .anime-card .anime-cover {
@@ -285,7 +431,7 @@
 }
 
 .anime-card:hover .anime-title {
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo), var(--color-cyan));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -303,26 +449,31 @@
 }
 
 .anime-card .anime-type {
-    background: rgba(139, 92, 246, 0.15);
+    background: rgba(59, 130, 246, 0.12);
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-full);
     font-size: var(--text-xs);
     font-weight: var(--font-semibold);
-    color: var(--clr-secondary-light);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: var(--color-blue-light);
+    border: 1px solid rgba(59, 130, 246, 0.2);
     transition: all var(--transition);
 }
 
+[data-theme="light"] .anime-card .anime-type {
+    color: var(--color-blue);
+    background: rgba(59, 130, 246, 0.08);
+}
+
 .anime-card:hover .anime-type {
-    background: rgba(139, 92, 246, 0.25);
-    border-color: rgba(139, 92, 246, 0.5);
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
 }
 
 .anime-card .anime-score {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
-    color: var(--clr-warning);
+    color: var(--color-amber-light);
     font-weight: var(--font-bold);
     font-size: var(--text-sm);
     background: rgba(0, 0, 0, 0.4);
@@ -334,17 +485,14 @@
 .anime-card .rating-badge {
     display: inline-flex;
     align-items: center;
-    color: var(--clr-warning-light);
+    color: var(--color-amber-light);
     font-weight: var(--font-bold);
     font-size: var(--text-xs);
     gap: var(--space-1);
-    background: rgba(0, 0, 0, 0.819);
-    padding: var(--space-0-5) var(--space-2);
+    background: rgba(0, 0, 0, 0.8);
+    padding: var(--space-1) var(--space-2);
     border-radius: var(--radius-full);
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgba(251, 191, 36, 0.1);
-    border-image: none;
+    border: 1px solid rgba(251, 191, 36, 0.1);
 }
 
 .anime-card:hover .rating-badge {
@@ -357,13 +505,14 @@
     top: var(--space-3);
     left: var(--space-3);
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: var(--blur-sm);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     color: white;
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-full);
     font-size: var(--text-xs);
     font-weight: var(--font-bold);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     z-index: 3;
     text-transform: uppercase;
     letter-spacing: var(--tracking-wide);
@@ -372,31 +521,33 @@
 
 .anime-card:hover .anime-badge {
     transform: translateY(-2px) scale(1.05);
-    border-color: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Status-specific badge colors */
+/* Status-specific badge colors - Blue Theme */
 .anime-badge[data-status="Watching"] {
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
 }
 
 .anime-badge[data-status="Completed"] {
-    background: var(--gradient-success);
+    background: linear-gradient(135deg, var(--color-emerald), #059669);
 }
 
 .anime-badge[data-status="Plan to Watch"] {
-    background: var(--gradient-warning);
+    background: linear-gradient(135deg, var(--color-amber), #D97706);
 }
 
 .anime-badge[data-status="Dropped"] {
-    background: var(--gradient-danger);
+    background: linear-gradient(135deg, #EF4444, #DC2626);
 }
 
 .anime-badge[data-status="On-Hold"] {
-    background: var(--gradient-secondary);
+    background: linear-gradient(135deg, var(--color-violet), var(--color-indigo));
 }
 
-/* ===== CHART CARD ===== */
+/* ============================================
+   CHART CARD - Premium Blue
+   ============================================ */
 .chart-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -405,7 +556,8 @@
     transition: all var(--transition);
     position: relative;
     overflow: hidden;
-    backdrop-filter: var(--blur-sm);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     box-shadow: var(--shadow-sm);
 }
 
@@ -434,8 +586,12 @@
 }
 
 .chart-card .chart-title i {
-    color: var(--clr-secondary);
+    color: var(--color-blue-light);
     font-size: var(--text-xl);
+}
+
+[data-theme="light"] .chart-card .chart-title i {
+    color: var(--color-blue);
 }
 
 .chart-card .chart-container {
@@ -450,7 +606,9 @@
     transform: scale(1.01);
 }
 
-/* ===== DNA CARD ===== */
+/* ============================================
+   DNA CARD - Premium Blue
+   ============================================ */
 .dna-card {
     background: var(--bg-card);
     border-radius: var(--radius-2xl);
@@ -458,7 +616,8 @@
     text-align: center;
     transition: all var(--transition-bounce);
     border: 1px solid var(--border-color);
-    backdrop-filter: var(--blur-sm);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .dna-card:hover {
@@ -476,10 +635,16 @@
     padding: var(--space-1) var(--space-3);
     border-radius: var(--radius-full);
     background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: var(--blur-sm);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     margin-bottom: var(--space-3);
-    color: var(--clr-secondary-light);
-    border-left: 2px solid var(--clr-secondary);
+    color: var(--color-blue-light);
+    border-left: 2px solid var(--color-blue);
+}
+
+[data-theme="light"] .dna-card .dna-label {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--color-blue);
 }
 
 .dna-card .dna-value {
@@ -489,13 +654,38 @@
     font-family: var(--font-family-mono);
     letter-spacing: var(--tracking-tighter);
     display: block;
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo), var(--color-cyan));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientFlow 4s ease infinite;
+}
+
+[data-theme="light"] .dna-card .dna-value {
+    background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* ===== RESPONSIVE ===== */
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+    .stat-card {
+        padding: var(--space-5);
+    }
+
+    .stat-card .stat-value {
+        font-size: var(--text-3xl);
+    }
+
+    .anime-card .anime-cover {
+        height: 260px;
+    }
+}
+
 @media (max-width: 768px) {
     .stat-card {
         padding: var(--space-4);
@@ -524,14 +714,89 @@
     .anime-card .anime-title {
         font-size: var(--text-sm);
     }
-}
 
-@media (max-width: 480px) {
-    .stat-card .stat-value {
-        font-size: var(--text-xl);
+    .dna-card {
+        padding: var(--space-4);
     }
 
     .dna-card .dna-value {
         font-size: var(--text-2xl);
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-card {
+        padding: var(--space-3);
+    }
+
+    .stat-card .stat-value {
+        font-size: var(--text-xl);
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        font-size: var(--text-base);
+    }
+
+    .stat-card .stat-change {
+        font-size: 0.6rem;
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .dna-card .dna-value {
+        font-size: var(--text-xl);
+    }
+
+    .dna-card .dna-label {
+        font-size: 0.6rem;
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .anime-card .anime-cover {
+        height: 160px;
+    }
+
+    .chart-card {
+        padding: var(--space-3);
+    }
+
+    .chart-card .chart-container {
+        height: 180px;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+
+    .stat-card,
+    .stat-card .stat-value,
+    .stat-icon,
+    .stat-card .stat-change i,
+    .anime-card,
+    .anime-card .anime-cover,
+    .dna-card,
+    .chart-card,
+    .chart-card .chart-container,
+    .stat-card .stat-label,
+    .anime-card .anime-badge {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .stat-card:hover,
+    .anime-card:hover,
+    .dna-card:hover,
+    .chart-card:hover {
+        transform: none !important;
+    }
+
+    .stat-card .stat-value {
+        background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 }

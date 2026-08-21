@@ -1,5 +1,57 @@
 /* ============================================
-   LOADER OVERLAY - PREMIUM
+   LOADER OVERLAY - Premium Blue Theme
+   ============================================ */
+
+/* ============================================
+   CSS VARIABLES (matches dashboard)
+   ============================================ */
+:root {
+    --color-blue: #3B82F6;
+    --color-blue-dark: #2563EB;
+    --color-blue-light: #60A5FA;
+    --color-indigo: #6366F1;
+    --color-indigo-light: #818CF8;
+    --color-cyan: #06B6D4;
+    --color-cyan-light: #67E8F9;
+    --color-emerald: #10B981;
+    --color-emerald-light: #34D399;
+    --color-amber: #F59E0B;
+    --color-rose: #F43F5E;
+    --color-violet: #8B5CF6;
+    --color-violet-light: #A78BFA;
+
+    --bg-body: #0B1120;
+    --bg-glass: rgba(30, 41, 59, 0.7);
+    --bg-card: rgba(15, 23, 42, 0.6);
+
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+
+    --border: rgba(59, 130, 246, 0.12);
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.15);
+    --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+    --bg-body: #F8FAFC;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    --bg-card: rgba(255, 255, 255, 0.8);
+
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+
+    --border: rgba(59, 130, 246, 0.08);
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.08);
+}
+
+/* ============================================
+   LOADER OVERLAY - Blue Gradient
    ============================================ */
 #app-loader {
     position: fixed;
@@ -15,6 +67,12 @@
     align-items: center;
     justify-content: center;
     transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+[data-theme="light"] #app-loader {
+    background: linear-gradient(135deg, #F8FAFC, #FFFFFF, #F8FAFC);
+    background-size: 300% 300%;
+    animation: gradientShift 6s ease-in-out infinite;
 }
 
 @keyframes gradientShift {
@@ -36,7 +94,7 @@
 }
 
 /* ============================================
-   FLOATING GLOW ORBS
+   FLOATING GLOW ORBS - Blue/Cyan
    ============================================ */
 .loader-orbs {
     position: absolute;
@@ -51,12 +109,13 @@
     filter: blur(80px);
     opacity: 0.3;
     animation: orbFloat 8s ease-in-out infinite;
+    transition: opacity 0.3s ease;
 }
 
 .loader-orb-1 {
     width: 300px;
     height: 300px;
-    background: rgba(139, 92, 246, 0.15);
+    background: rgba(59, 130, 246, 0.15);
     top: -100px;
     right: -100px;
     animation-delay: 0s;
@@ -65,7 +124,7 @@
 .loader-orb-2 {
     width: 250px;
     height: 250px;
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(99, 102, 241, 0.10);
     bottom: -80px;
     left: -80px;
     animation-delay: -3s;
@@ -74,11 +133,26 @@
 .loader-orb-3 {
     width: 200px;
     height: 200px;
-    background: rgba(236, 72, 153, 0.08);
+    background: rgba(6, 182, 212, 0.08);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     animation-delay: -5s;
+}
+
+[data-theme="light"] .loader-orb-1 {
+    background: rgba(59, 130, 246, 0.06);
+    opacity: 0.5;
+}
+
+[data-theme="light"] .loader-orb-2 {
+    background: rgba(99, 102, 241, 0.04);
+    opacity: 0.5;
+}
+
+[data-theme="light"] .loader-orb-3 {
+    background: rgba(6, 182, 212, 0.03);
+    opacity: 0.5;
 }
 
 @keyframes orbFloat {
@@ -98,7 +172,7 @@
 }
 
 /* ============================================
-   LOADER CONTAINER
+   LOADER CONTAINER - Premium Glass
    ============================================ */
 .loader-container {
     text-align: center;
@@ -109,11 +183,18 @@
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border-radius: 48px;
-    border: 1px solid rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.15);
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
     position: relative;
     z-index: 1;
     animation: containerFloat 3s ease-in-out infinite;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="light"] .loader-container {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(59, 130, 246, 0.10);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.06);
 }
 
 @keyframes containerFloat {
@@ -128,17 +209,17 @@
     }
 }
 
-/* Premium Border Glow */
+/* Premium Border Glow - Blue */
 .loader-container::before {
     content: '';
     position: absolute;
     inset: -1.5px;
     border-radius: 48px;
     background: linear-gradient(135deg,
-            rgba(139, 92, 246, 0.3) 0%,
-            rgba(99, 102, 241, 0.1) 30%,
-            rgba(236, 72, 153, 0.05) 60%,
-            rgba(139, 92, 246, 0.2) 100%);
+            rgba(59, 130, 246, 0.3) 0%,
+            rgba(99, 102, 241, 0.12) 30%,
+            rgba(6, 182, 212, 0.08) 60%,
+            rgba(59, 130, 246, 0.2) 100%);
     background-size: 300% 300%;
     animation: borderGlow 4s ease-in-out infinite;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -147,6 +228,14 @@
     mask-composite: exclude;
     pointer-events: none;
     z-index: -1;
+}
+
+[data-theme="light"] .loader-container::before {
+    background: linear-gradient(135deg,
+            rgba(59, 130, 246, 0.15) 0%,
+            rgba(99, 102, 241, 0.08) 30%,
+            rgba(6, 182, 212, 0.06) 60%,
+            rgba(59, 130, 246, 0.12) 100%);
 }
 
 @keyframes borderGlow {
@@ -162,7 +251,7 @@
 }
 
 /* ============================================
-   LOADER LOGO – ALWAYS ANIMATED
+   LOADER LOGO - Always Animated
    ============================================ */
 .loader-logo {
     display: flex;
@@ -208,7 +297,7 @@
 }
 
 /* ============================================
-   SHINE EFFECT 
+   SHINE EFFECT - Blue/White
    ============================================ */
 .loader-logo::before {
     position: absolute;
@@ -218,11 +307,11 @@
     height: 120%;
     background: linear-gradient(105deg,
             transparent 0%,
-            rgba(255, 255, 255, 0.5) 25%,
-            rgba(255, 255, 255, 0.9) 45%,
-            rgba(255, 255, 255, 1.0) 50%,
-            rgba(255, 255, 255, 0.9) 55%,
-            rgba(255, 255, 255, 0.5) 75%,
+            rgba(255, 255, 255, 0.4) 25%,
+            rgba(255, 255, 255, 0.8) 45%,
+            rgba(255, 255, 255, 0.9) 50%,
+            rgba(255, 255, 255, 0.8) 55%,
+            rgba(255, 255, 255, 0.4) 75%,
             transparent 100%);
     transform: skewX(-20deg);
     animation: shineMove 1.5s ease-in-out infinite !important;
@@ -230,6 +319,17 @@
     pointer-events: none;
     z-index: 3;
     border-radius: 0;
+}
+
+[data-theme="light"] .loader-logo::before {
+    background: linear-gradient(105deg,
+            transparent 0%,
+            rgba(0, 0, 0, 0.08) 25%,
+            rgba(0, 0, 0, 0.15) 45%,
+            rgba(0, 0, 0, 0.2) 50%,
+            rgba(0, 0, 0, 0.15) 55%,
+            rgba(0, 0, 0, 0.08) 75%,
+            transparent 100%);
 }
 
 @keyframes shineMove {
@@ -260,9 +360,9 @@
     height: 120%;
     background: linear-gradient(105deg,
             transparent 0%,
-            rgba(255, 255, 255, 0.2) 30%,
-            rgba(255, 255, 255, 0.4) 50%,
-            rgba(255, 255, 255, 0.2) 70%,
+            rgba(255, 255, 255, 0.15) 30%,
+            rgba(255, 255, 255, 0.3) 50%,
+            rgba(255, 255, 255, 0.15) 70%,
             transparent 100%);
     transform: skewX(-20deg);
     animation: shineMove2 1.9s ease-in-out infinite !important;
@@ -270,6 +370,15 @@
     pointer-events: none;
     z-index: 3;
     border-radius: 0;
+}
+
+[data-theme="light"] .loader-logo::after {
+    background: linear-gradient(105deg,
+            transparent 0%,
+            rgba(0, 0, 0, 0.04) 30%,
+            rgba(0, 0, 0, 0.08) 50%,
+            rgba(0, 0, 0, 0.04) 70%,
+            transparent 100%);
 }
 
 @keyframes shineMove2 {
@@ -293,7 +402,7 @@
 }
 
 /* ============================================
-   PROGRESS BAR
+   PROGRESS BAR - Blue Gradient
    ============================================ */
 .progress-wrapper {
     width: 100%;
@@ -310,13 +419,18 @@
     overflow: hidden;
     position: relative;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease;
+}
+
+[data-theme="light"] .progress-bar {
+    background: rgba(0, 0, 0, 0.06);
 }
 
 #loader-progress {
     display: block;
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA, #8B5CF6, #6366F1);
+    background: linear-gradient(90deg, var(--color-blue), var(--color-indigo), var(--color-blue-light), var(--color-indigo), var(--color-blue));
     background-size: 200% 100%;
     border-radius: 50px;
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -390,7 +504,7 @@
 
 #loader-progress.loading-100 {
     width: 100%;
-    background: linear-gradient(90deg, #10B981, #34D399, #6EE7B7);
+    background: linear-gradient(90deg, var(--color-emerald), var(--color-emerald-light), #6EE7B7);
     animation: none;
 }
 
@@ -467,71 +581,17 @@
 }
 
 /* ============================================
-   LIGHT THEME
-   ============================================ */
-[data-theme="light"] #app-loader {
-    background: linear-gradient(135deg, #F8FAFC, #FFFFFF, #F8FAFC);
-    background-size: 300% 300%;
-    animation: gradientShift 6s ease-in-out infinite;
-}
-
-[data-theme="light"] .loader-container {
-    background: rgba(255, 255, 255, 0.7);
-    border-color: rgba(139, 92, 246, 0.12);
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .loader-container::before {
-    background: linear-gradient(135deg,
-            rgba(139, 92, 246, 0.15) 0%,
-            rgba(99, 102, 241, 0.08) 30%,
-            rgba(236, 72, 153, 0.04) 60%,
-            rgba(139, 92, 246, 0.1) 100%);
-}
-
-[data-theme="light"] .progress-bar {
-    background: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .loader-orb-1 {
-    background: rgba(139, 92, 246, 0.06);
-}
-
-[data-theme="light"] .loader-orb-2 {
-    background: rgba(99, 102, 241, 0.04);
-}
-
-[data-theme="light"] .loader-orb-3 {
-    background: rgba(236, 72, 153, 0.03);
-}
-
-[data-theme="light"] .loader-logo::before {
-    background: linear-gradient(105deg,
-            transparent 0%,
-            rgba(0, 0, 0, 0.1) 25%,
-            rgba(0, 0, 0, 0.2) 45%,
-            rgba(0, 0, 0, 0.3) 50%,
-            rgba(0, 0, 0, 0.2) 55%,
-            rgba(0, 0, 0, 0.1) 75%,
-            transparent 100%);
-}
-
-[data-theme="light"] .loader-logo::after {
-    background: linear-gradient(105deg,
-            transparent 0%,
-            rgba(0, 0, 0, 0.06) 30%,
-            rgba(0, 0, 0, 0.12) 50%,
-            rgba(0, 0, 0, 0.06) 70%,
-            transparent 100%);
-}
-
-/* ============================================
-   REDUCED MOTION – Keep shine alive
+   REDUCED MOTION - Keep shine alive
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
     #app-loader {
         animation: none !important;
         background: #0B1120 !important;
+    }
+
+    [data-theme="light"] #app-loader {
+        background: #F8FAFC !important;
+        animation: none !important;
     }
 
     .loader-container {
@@ -626,12 +686,12 @@
    ============================================ */
 .skeleton {
     background: linear-gradient(90deg,
-            var(--bg-tertiary) 0%,
-            var(--bg-hover) 50%,
-            var(--bg-tertiary) 100%);
+            var(--bg-tertiary, rgba(255, 255, 255, 0.04)) 0%,
+            var(--bg-hover, rgba(255, 255, 255, 0.08)) 50%,
+            var(--bg-tertiary, rgba(255, 255, 255, 0.04)) 100%);
     background-size: 200% 100%;
     animation: skeletonLoading 1.5s infinite;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-md, 12px);
 }
 
 @keyframes skeletonLoading {

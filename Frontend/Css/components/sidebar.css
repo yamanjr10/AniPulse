@@ -1,8 +1,61 @@
 /* ============================================
-   SIDEBAR / NAVIGATION COMPONENT
+   SIDEBAR / NAVIGATION COMPONENT - Blue Theme
    ============================================ */
 
-/* ===== SIDEBAR MENU ===== */
+/* ============================================
+   CSS VARIABLES (matches dashboard)
+   ============================================ */
+:root {
+    --color-blue: #3B82F6;
+    --color-blue-dark: #2563EB;
+    --color-blue-light: #60A5FA;
+    --color-indigo: #6366F1;
+    --color-indigo-light: #818CF8;
+    --color-cyan: #06B6D4;
+    --color-cyan-light: #67E8F9;
+    --color-emerald: #10B981;
+    --color-emerald-light: #34D399;
+    --color-amber: #F59E0B;
+    --color-amber-light: #FBBF24;
+    --color-rose: #F43F5E;
+    --color-rose-light: #FB7185;
+    --color-violet: #8B5CF6;
+    --color-violet-light: #A78BFA;
+
+    --bg-body: #0B1120;
+    --bg-glass: rgba(30, 41, 59, 0.7);
+    --bg-card: rgba(15, 23, 42, 0.6);
+
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+
+    --border: rgba(59, 130, 246, 0.12);
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.15);
+    --radius-full: 9999px;
+    --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+    --bg-body: #F8FAFC;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    --bg-card: rgba(255, 255, 255, 0.8);
+
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+
+    --border: rgba(59, 130, 246, 0.08);
+    --border-hover: rgba(59, 130, 246, 0.3);
+
+    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.08);
+}
+
+/* ============================================
+   SIDEBAR MENU
+   ============================================ */
 .sidebar-menu {
     padding: var(--space-4) var(--space-3);
     display: flex;
@@ -10,7 +63,9 @@
     gap: var(--space-2);
 }
 
-/* ===== MENU ITEMS ===== */
+/* ============================================
+   MENU ITEMS
+   ============================================ */
 .menu-item {
     display: flex;
     align-items: center;
@@ -59,117 +114,135 @@
     transition: all var(--transition);
 }
 
-/* ===== HOVER EFFECTS ===== */
+/* ============================================
+   HOVER EFFECTS - Each page with unique color
+   ============================================ */
 .menu-item:hover {
     transform: translateX(8px);
 }
 
-/* Dashboard - Purple Theme */
+/* Dashboard - Blue/Purple blend */
 .menu-item[data-page="dashboard"]:hover {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.08));
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(59, 130, 246, 0.08));
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
 }
+
 .menu-item[data-page="dashboard"]:hover i {
-    color: var(--clr-secondary-light);
-    text-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+    color: var(--color-indigo-light);
+    text-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
     transform: scale(1.15) rotate(-5deg);
 }
+
 .menu-item[data-page="dashboard"]:hover span {
-    color: var(--clr-secondary-light);
+    color: var(--color-indigo-light);
     letter-spacing: var(--tracking-wide);
 }
 
-/* Anime List - Blue Theme */
+/* Anime List - Blue */
 .menu-item[data-page="anime-list"]:hover {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.08));
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
 }
+
 .menu-item[data-page="anime-list"]:hover i {
-    color: var(--clr-info-light);
+    color: var(--color-blue-light);
     text-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
     transform: scale(1.15) rotate(-5deg);
 }
+
 .menu-item[data-page="anime-list"]:hover span {
-    color: var(--clr-info-light);
+    color: var(--color-blue-light);
     letter-spacing: var(--tracking-wide);
 }
 
-/* Watchlist - Red Theme */
+/* Watchlist - Rose/Red */
 .menu-item[data-page="watchlist"]:hover {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08));
     box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
 }
+
 .menu-item[data-page="watchlist"]:hover i {
-    color: var(--clr-danger-light);
-    text-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
+    color: var(--color-rose-light);
+    text-shadow: 0 0 8px rgba(251, 113, 133, 0.5);
     transform: scale(1.15) rotate(-5deg);
 }
+
 .menu-item[data-page="watchlist"]:hover span {
-    color: var(--clr-danger-light);
+    color: var(--color-rose-light);
     letter-spacing: var(--tracking-wide);
 }
 
-/* Statistics - Green Theme */
+/* Statistics - Emerald */
 .menu-item[data-page="statistics"]:hover {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
 }
+
 .menu-item[data-page="statistics"]:hover i {
-    color: var(--clr-success-light);
+    color: var(--color-emerald-light);
     text-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
     transform: scale(1.15) rotate(-5deg);
 }
+
 .menu-item[data-page="statistics"]:hover span {
-    color: var(--clr-success-light);
+    color: var(--color-emerald-light);
     letter-spacing: var(--tracking-wide);
 }
 
-/* Achievements - Yellow Theme */
+/* Achievements - Amber */
 .menu-item[data-page="achievements"]:hover {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08));
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
 }
+
 .menu-item[data-page="achievements"]:hover i {
-    color: var(--clr-warning-light);
+    color: var(--color-amber-light);
     text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
     transform: scale(1.15) rotate(-5deg);
 }
+
 .menu-item[data-page="achievements"]:hover span {
-    color: var(--clr-warning-light);
+    color: var(--color-amber-light);
     letter-spacing: var(--tracking-wide);
 }
 
-/* Community - Cyan Theme */
+/* Community - Cyan */
 .menu-item[data-page="community"]:hover {
     background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.08));
     box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
 }
+
 .menu-item[data-page="community"]:hover i {
-    color: #22D3EE;
-    text-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+    color: var(--color-cyan-light);
+    text-shadow: 0 0 8px rgba(103, 232, 249, 0.5);
     transform: scale(1.15) rotate(-5deg);
 }
+
 .menu-item[data-page="community"]:hover span {
-    color: #22D3EE;
+    color: var(--color-cyan-light);
     letter-spacing: var(--tracking-wide);
 }
 
-/* Settings - Gray Theme */
+/* Settings - Gray/Soft */
 .menu-item[data-page="settings"]:hover {
     background: linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(71, 85, 105, 0.08));
     box-shadow: 0 4px 15px rgba(100, 116, 139, 0.2);
 }
+
 .menu-item[data-page="settings"]:hover i {
-    color: var(--clr-soft);
+    color: var(--text-secondary);
     text-shadow: 0 0 8px rgba(148, 163, 184, 0.5);
     transform: scale(1.15) rotate(-5deg);
 }
+
 .menu-item[data-page="settings"]:hover span {
-    color: var(--clr-soft);
+    color: var(--text-secondary);
     letter-spacing: var(--tracking-wide);
 }
 
-/* ===== ACTIVE STATES ===== */
+/* ============================================
+   ACTIVE STATES - Each with unique color
+   ============================================ */
 .menu-item.active {
     position: relative;
     animation: slideInLeft 0.4s ease;
@@ -189,75 +262,91 @@
 }
 
 @keyframes glowLine {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
-/* Dashboard Active */
+/* Dashboard Active - Blue/Purple */
 .menu-item.active[data-page="dashboard"] {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.12));
-    color: var(--clr-secondary-light);
-}
-.menu-item.active[data-page="dashboard"] i {
-    color: var(--clr-secondary-light);
-    text-shadow: 0 0 6px rgba(167, 139, 250, 0.4);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(59, 130, 246, 0.12));
+    color: var(--color-indigo-light);
 }
 
-/* Anime List Active */
+.menu-item.active[data-page="dashboard"] i {
+    color: var(--color-indigo-light);
+    text-shadow: 0 0 6px rgba(129, 140, 248, 0.4);
+}
+
+/* Anime List Active - Blue */
 .menu-item.active[data-page="anime-list"] {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.12));
-    color: var(--clr-info-light);
-}
-.menu-item.active[data-page="anime-list"] i {
-    color: var(--clr-info-light);
+    color: var(--color-blue-light);
 }
 
-/* Watchlist Active */
+.menu-item.active[data-page="anime-list"] i {
+    color: var(--color-blue-light);
+}
+
+/* Watchlist Active - Rose */
 .menu-item.active[data-page="watchlist"] {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.12));
-    color: var(--clr-danger-light);
-}
-.menu-item.active[data-page="watchlist"] i {
-    color: var(--clr-danger-light);
+    color: var(--color-rose-light);
 }
 
-/* Statistics Active */
+.menu-item.active[data-page="watchlist"] i {
+    color: var(--color-rose-light);
+}
+
+/* Statistics Active - Emerald */
 .menu-item.active[data-page="statistics"] {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.12));
-    color: var(--clr-success-light);
-}
-.menu-item.active[data-page="statistics"] i {
-    color: var(--clr-success-light);
+    color: var(--color-emerald-light);
 }
 
-/* Achievements Active */
+.menu-item.active[data-page="statistics"] i {
+    color: var(--color-emerald-light);
+}
+
+/* Achievements Active - Amber */
 .menu-item.active[data-page="achievements"] {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.12));
-    color: var(--clr-warning-light);
-}
-.menu-item.active[data-page="achievements"] i {
-    color: var(--clr-warning-light);
+    color: var(--color-amber-light);
 }
 
-/* Community Active */
+.menu-item.active[data-page="achievements"] i {
+    color: var(--color-amber-light);
+}
+
+/* Community Active - Cyan */
 .menu-item.active[data-page="community"] {
     background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(8, 145, 178, 0.12));
-    color: #22D3EE;
-}
-.menu-item.active[data-page="community"] i {
-    color: #22D3EE;
+    color: var(--color-cyan-light);
 }
 
-/* Settings Active */
+.menu-item.active[data-page="community"] i {
+    color: var(--color-cyan-light);
+}
+
+/* Settings Active - Soft */
 .menu-item.active[data-page="settings"] {
     background: linear-gradient(135deg, rgba(100, 116, 139, 0.2), rgba(71, 85, 105, 0.12));
-    color: var(--clr-soft);
-}
-.menu-item.active[data-page="settings"] i {
-    color: var(--clr-soft);
+    color: var(--text-secondary);
 }
 
-/* ===== LOGOUT BUTTON ===== */
+.menu-item.active[data-page="settings"] i {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   LOGOUT BUTTON - Rose/Red
+   ============================================ */
 .menu-item#logoutBtn {
     margin-top: var(--space-4);
     border-top: 1px solid rgba(239, 68, 68, 0.2);
@@ -283,13 +372,13 @@
 }
 
 .menu-item#logoutBtn:hover i {
-    color: var(--clr-danger-light);
-    text-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
+    color: var(--color-rose-light);
+    text-shadow: 0 0 8px rgba(251, 113, 133, 0.5);
     transform: scale(1.15) rotate(-5deg);
 }
 
 .menu-item#logoutBtn:hover span {
-    color: var(--clr-danger-light);
+    color: var(--color-rose-light);
     letter-spacing: var(--tracking-wide);
 }
 
@@ -306,57 +395,73 @@
 }
 
 [data-theme="light"] .menu-item[data-page="dashboard"]:hover {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(59, 130, 246, 0.05));
 }
+
 [data-theme="light"] .menu-item[data-page="anime-list"]:hover {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
 }
+
 [data-theme="light"] .menu-item[data-page="watchlist"]:hover {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
 }
+
 [data-theme="light"] .menu-item[data-page="statistics"]:hover {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
 }
+
 [data-theme="light"] .menu-item[data-page="achievements"]:hover {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05));
 }
+
 [data-theme="light"] .menu-item[data-page="community"]:hover {
     background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.05));
 }
+
 [data-theme="light"] .menu-item[data-page="settings"]:hover {
     background: linear-gradient(135deg, rgba(100, 116, 139, 0.1), rgba(71, 85, 105, 0.05));
 }
+
 [data-theme="light"] .menu-item#logoutBtn {
     border-top-color: rgba(239, 68, 68, 0.15);
 }
+
 [data-theme="light"] .menu-item#logoutBtn:hover {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
 }
+
 [data-theme="light"] .menu-item#logoutBtn:hover i {
-    color: var(--clr-danger);
+    color: var(--color-rose);
 }
+
 [data-theme="light"] .menu-item#logoutBtn:hover span {
-    color: var(--clr-danger);
+    color: var(--color-rose);
 }
 
 [data-theme="light"] .menu-item.active[data-page="dashboard"] {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.08));
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(59, 130, 246, 0.08));
 }
+
 [data-theme="light"] .menu-item.active[data-page="anime-list"] {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.08));
 }
+
 [data-theme="light"] .menu-item.active[data-page="watchlist"] {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08));
 }
+
 [data-theme="light"] .menu-item.active[data-page="statistics"] {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
 }
+
 [data-theme="light"] .menu-item.active[data-page="achievements"] {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08));
 }
+
 [data-theme="light"] .menu-item.active[data-page="community"] {
     background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(8, 145, 178, 0.08));
 }
+
 [data-theme="light"] .menu-item.active[data-page="settings"] {
     background: linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(71, 85, 105, 0.08));
 }
@@ -365,14 +470,31 @@
    ANIMATIONS
    ============================================ */
 @keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-15px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 @keyframes iconBounce {
-    0%, 100% { transform: translateY(0) scale(1); }
-    40% { transform: translateY(-3px) scale(1.1); }
-    80% { transform: translateY(1px) scale(1.05); }
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    40% {
+        transform: translateY(-3px) scale(1.1);
+    }
+
+    80% {
+        transform: translateY(1px) scale(1.05);
+    }
 }
 
 .menu-item:hover i {
@@ -383,6 +505,7 @@
    REDUCED MOTION
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
+
     .menu-item,
     .menu-item::before,
     .menu-item i,
@@ -390,6 +513,7 @@
         animation: none !important;
         transition: none !important;
     }
+
     .menu-item:hover {
         transform: translateX(4px);
     }
@@ -404,10 +528,12 @@
         gap: var(--space-3);
         font-size: var(--text-sm);
     }
+
     .menu-item i {
         width: 20px;
         font-size: var(--text-base);
     }
+
     .menu-item#logoutBtn {
         margin-top: var(--space-3);
         padding-top: var(--space-3);
@@ -420,14 +546,17 @@
         font-size: var(--text-xs);
         border-radius: var(--radius-lg);
     }
+
     .menu-item i {
         width: 18px;
         font-size: var(--text-sm);
     }
+
     .menu-item#logoutBtn {
         margin-top: var(--space-2);
         padding-top: var(--space-2);
     }
+
     .menu-item#logoutBtn::before {
         top: -6px;
     }

@@ -231,36 +231,7 @@
             console.log('✅ Heatmap rendered');
         }
 
-        renderMonthLabels(weeks) {
-            let container = document.getElementById('heatmapMonths');
-            if (!container) {
-                const wrapper = document.querySelector('.heatmap-wrapper');
-                if (wrapper) {
-                    container = document.createElement('div');
-                    container.id = 'heatmapMonths';
-                    container.className = 'heatmap-months';
-                    wrapper.insertBefore(container, wrapper.firstChild);
-                }
-            }
-            if (!container) return;
-
-            const monthPositions = {};
-            let currentMonth = -1;
-            weeks.forEach((week, weekIndex) => {
-                week.forEach((day) => {
-                    if (day && day.date.getDate() <= 7 && day.date.getMonth() !== currentMonth) {
-                        currentMonth = day.date.getMonth();
-                        monthPositions[currentMonth] = {
-                            name: day.date.toLocaleString('default', { month: 'short' }),
-                            position: weekIndex * 15 + 10
-                        };
-                    }
-                });
-            });
-
-            const sorted = Object.values(monthPositions);
-            container.innerHTML = sorted.map(m => `<span class="month-label" style="left:${m.position}px;">${m.name}</span>`).join('');
-        }
+        
 
         getAvailableYears() {
             const data = JSON.parse(localStorage.getItem('animeData') || '[]');

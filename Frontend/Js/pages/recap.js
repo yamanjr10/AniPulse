@@ -35,7 +35,7 @@
         if (!RECAP_ACTIVE) return false;
         if (TEST_MODE) {
             const d = new Date();
-            return d.getMonth() === 6 && d.getDate() <= 30;
+            return d.getMonth() === 7 && d.getDate() <= 30;
         }
         const d = new Date();
         return d.getDate() <= RECAP_WINDOW_DAYS;
