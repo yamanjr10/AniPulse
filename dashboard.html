@@ -828,10 +828,15 @@
                         <span class="period-stats-subtitle">View completed stats for any month or year</span>
                     </div>
 
-                    <!-- Filters -->
-                    <div class="period-stats-filters">
+                <!-- Period Stats Filters -->
+                <div class="period-stats-filters">
+                    <!-- Left: Filters -->
+                    <div class="period-filters-left">
                         <div class="filter-group">
-                            <label for="periodMonth">Month</label>
+                            <label for="periodMonth">
+                                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                                Month
+                            </label>
                             <select id="periodMonth">
                                 <option value="all">All Months</option>
                                 <option value="1">January</option>
@@ -849,15 +854,22 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="periodYear">Year</label>
+                            <label for="periodYear">
+                                <i class="fas fa-calendar-year" aria-hidden="true"></i>
+                                Year
+                            </label>
                             <select id="periodYear">
                                 <!-- populated by JS -->
                             </select>
                         </div>
-                        <div class="filter-group period-label">
-                            <span id="periodDisplayLabel">Showing: July 2026</span>
-                        </div>
                     </div>
+                
+                    <!-- Right: Display Label -->
+                    <div class="period-display-badge">
+                        <i class="fas fa-chart-simple" aria-hidden="true"></i>
+                        <span id="periodDisplayLabel">Showing: July 2026</span>
+                    </div>
+                </div>
 
                     <!-- Stats Cards -->
                     <div class="period-stats-grid">

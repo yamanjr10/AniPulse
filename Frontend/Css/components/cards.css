@@ -215,7 +215,7 @@
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     transition: all var(--transition);
-    color: var(--text-secondary);
+    color: white;
 }
 
 [data-theme="light"] .stat-card .stat-label {

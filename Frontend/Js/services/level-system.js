@@ -249,10 +249,10 @@ function ensureToastContainer() {
 		console.log('✅ Toast container created');
 	}
 }
-// Add popup styles - Pure CSS Premium Design (No Emojis)
+// Add popup styles - Pure CSS Premium Design (Blue Theme)
 function addPopupStyles() {
 	if (document.querySelector('#xp-popup-styles')) return;
-	
+
 	const style = document.createElement('style');
 	style.id = 'xp-popup-styles';
 	style.textContent = `
@@ -275,27 +275,28 @@ function addPopupStyles() {
 		}
 		
 		/* ============================================
-		   INNER CARD - Glassmorphism
+		   INNER CARD - Glassmorphism (Blue Theme)
 		============================================ */
 		.xp-popup-inner {
 			background: linear-gradient(135deg, 
-				rgba(26, 31, 46, 0.98) 0%,
-				rgba(15, 20, 32, 0.98) 100%);
-			backdrop-filter: blur(10px);
+				rgba(11, 17, 32, 0.98) 0%,
+				rgba(26, 31, 46, 0.98) 100%);
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px);
 			border-radius: 20px;
 			padding: 16px;
 			display: flex;
 			gap: 16px;
-			border: 1px solid rgba(139, 92, 246, 0.3);
+			border: 1px solid rgba(59, 130, 246, 0.25);
 			box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.4),
-						0 0 0 0.5px rgba(139, 92, 246, 0.2) inset;
+						0 0 0 0.5px rgba(59, 130, 246, 0.15) inset;
 			transition: transform 0.2s ease, box-shadow 0.2s ease;
 		}
 		
 		.xp-popup-inner:hover {
 			transform: translateX(-4px);
 			box-shadow: 0 30px 45px -12px rgba(0, 0, 0, 0.5),
-						0 0 0 1px rgba(139, 92, 246, 0.4) inset;
+						0 0 0 1px rgba(59, 130, 246, 0.3) inset;
 		}
 		
 		/* ============================================
@@ -322,7 +323,7 @@ function addPopupStyles() {
 			right: 0;
 			bottom: 0;
 			background: linear-gradient(135deg, 
-				rgba(139, 92, 246, 0.2) 0%,
+				rgba(59, 130, 246, 0.15) 0%,
 				transparent 50%);
 			pointer-events: none;
 		}
@@ -340,13 +341,14 @@ function addPopupStyles() {
 			display: flex;
 			flex-direction: column;
 			gap: 6px;
+			min-width: 0;
 		}
 		
 		/* ============================================
-		   XP AMOUNT BADGE
+		   XP AMOUNT BADGE - Blue/Indigo Gradient
 		============================================ */
 		.xp-amount {
-			background: linear-gradient(135deg, #8b5cf6, #6366f1);
+			background: linear-gradient(135deg, #3B82F6, #6366F1);
 			display: inline-flex;
 			align-items: center;
 			gap: 6px;
@@ -357,7 +359,7 @@ function addPopupStyles() {
 			letter-spacing: 0.3px;
 			color: white;
 			width: fit-content;
-			box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+			box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
 			animation: xpGlowPulse 2s infinite;
 			position: relative;
 			overflow: hidden;
@@ -372,7 +374,7 @@ function addPopupStyles() {
 			height: 200%;
 			background: linear-gradient(115deg, 
 				rgba(255,255,255,0) 0%, 
-				rgba(255,255,255,0.3) 50%, 
+				rgba(255,255,255,0.25) 50%, 
 				rgba(255,255,255,0) 100%);
 			transform: rotate(25deg);
 			animation: xpShimmer 3s infinite;
@@ -385,7 +387,7 @@ function addPopupStyles() {
 			font-size: 15px;
 			font-weight: 700;
 			margin: 2px 0 0 0;
-			color: #ffffff;
+			color: #F8FAFC;
 			line-height: 1.3;
 			letter-spacing: -0.2px;
 			display: -webkit-box;
@@ -396,12 +398,12 @@ function addPopupStyles() {
 		}
 		
 		/* ============================================
-		   LEVEL META
+		   LEVEL META - Blue Light
 		============================================ */
 		.xp-meta {
 			font-size: 11px;
 			font-weight: 500;
-			color: #a78bfa;
+			color: #60A5FA;
 			margin-bottom: 4px;
 		}
 		
@@ -413,7 +415,7 @@ function addPopupStyles() {
 		}
 		
 		/* ============================================
-		   PROGRESS BAR
+		   PROGRESS BAR - Blue/Indigo
 		============================================ */
 		.xp-bar {
 			background: rgba(255, 255, 255, 0.08);
@@ -424,7 +426,7 @@ function addPopupStyles() {
 		}
 		
 		.xp-fill {
-			background: linear-gradient(90deg, #8b5cf6, #a78bfa, #6366f1);
+			background: linear-gradient(90deg, #3B82F6, #6366F1, #60A5FA);
 			background-size: 200% 100%;
 			display: block;
 			height: 100%;
@@ -435,40 +437,41 @@ function addPopupStyles() {
 		}
 		
 		/* ============================================
-		   STATS ROW
+		   STATS ROW - Blue Tinted
 		============================================ */
 		.xp-stats {
-			background: rgba(255, 255, 255, 0.05);
+			background: rgba(59, 130, 246, 0.06);
 			border-radius: 12px;
 			padding: 8px 10px;
 			margin-top: 4px;
 			backdrop-filter: blur(4px);
-			border: 1px solid rgba(139, 92, 246, 0.15);
+			-webkit-backdrop-filter: blur(4px);
+			border: 1px solid rgba(59, 130, 246, 0.12);
 			transition: all 0.2s ease;
 			text-align: center;
 		}
 		
 		.xp-stats:hover {
-			background: rgba(255, 255, 255, 0.08);
-			border-color: rgba(139, 92, 246, 0.3);
+			background: rgba(59, 130, 246, 0.10);
+			border-color: rgba(59, 130, 246, 0.25);
 		}
 		
 		/* ============================================
-		   CURRENT XP TEXT
+		   CURRENT XP TEXT - Blue Light
 		============================================ */
 		.xp-current {
 			font-size: 11px;
 			font-weight: 600;
-			color: #c4b5fd;
+			color: #60A5FA;
 			letter-spacing: 0.2px;
 		}
 		
 		/* ============================================
-		   XP NEXT TEXT (Additional XP info)
+		   XP NEXT TEXT
 		============================================ */
 		.xp-next {
 			font-size: 10px;
-			color: #94a3b8;
+			color: #94A3B8;
 			display: block;
 			margin-top: 4px;
 			letter-spacing: 0.2px;
@@ -506,10 +509,10 @@ function addPopupStyles() {
 		
 		@keyframes xpGlowPulse {
 			0%, 100% {
-				box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+				box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
 			}
 			50% {
-				box-shadow: 0 4px 15px rgba(99, 102, 241, 0.7);
+				box-shadow: 0 4px 15px rgba(59, 130, 246, 0.7);
 			}
 		}
 		
@@ -532,24 +535,24 @@ function addPopupStyles() {
 		}
 		
 		/* ============================================
-		   LEVEL UP SPECIAL EFFECT
+		   LEVEL UP SPECIAL EFFECT - Blue Glow
 		============================================ */
 		.xp-popup.level-up .xp-popup-inner {
 			background: linear-gradient(135deg, 
-				rgba(139, 92, 246, 0.3) 0%,
-				rgba(99, 102, 241, 0.2) 100%);
-			border: 1px solid rgba(139, 92, 246, 0.6);
+				rgba(59, 130, 246, 0.25) 0%,
+				rgba(99, 102, 241, 0.15) 100%);
+			border: 1px solid rgba(59, 130, 246, 0.5);
 			animation: xpLevelUpPulse 0.5s ease;
 		}
 		
 		@keyframes xpLevelUpPulse {
 			0%, 100% {
 				transform: scale(1);
-				box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+				box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6);
 			}
 			50% {
 				transform: scale(1.02);
-				box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.3);
+				box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
 			}
 		}
 		
@@ -593,31 +596,58 @@ function addPopupStyles() {
 		}
 		
 		/* ============================================
-		   DARK MODE COMPATIBILITY
+		   LIGHT THEME COMPATIBILITY
 		============================================ */
-		@media (prefers-color-scheme: light) {
-			.xp-popup-inner {
-				background: linear-gradient(135deg, 
-					rgba(255, 255, 255, 0.98) 0%,
-					rgba(245, 245, 255, 0.98) 100%);
-				border: 1px solid rgba(139, 92, 246, 0.4);
-			}
-			
-			.xp-title {
-				color: #1a1f2e;
-			}
-			
-			.xp-meta {
-				color: #8b5cf6;
-			}
-			
-			.xp-stats {
-				background: rgba(139, 92, 246, 0.05);
-			}
-			
-			.xp-current {
-				color: #6d28d9;
-			}
+		[data-theme="light"] .xp-popup-inner {
+			background: linear-gradient(135deg, 
+				rgba(255, 255, 255, 0.98) 0%,
+				rgba(248, 250, 252, 0.98) 100%);
+			border: 1px solid rgba(59, 130, 246, 0.25);
+			box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.08);
+		}
+		
+		[data-theme="light"] .xp-title {
+			color: #0F172A;
+		}
+		
+		[data-theme="light"] .xp-meta {
+			color: #3B82F6;
+		}
+		
+		[data-theme="light"] .xp-stats {
+			background: rgba(59, 130, 246, 0.04);
+			border-color: rgba(59, 130, 246, 0.08);
+		}
+		
+		[data-theme="light"] .xp-stats:hover {
+			background: rgba(59, 130, 246, 0.06);
+			border-color: rgba(59, 130, 246, 0.15);
+		}
+		
+		[data-theme="light"] .xp-current {
+			color: #2563EB;
+		}
+		
+		[data-theme="light"] .xp-amount {
+			background: linear-gradient(135deg, #2563EB, #4F46E5);
+			box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+		}
+		
+		[data-theme="light"] .xp-bar {
+			background: rgba(0, 0, 0, 0.06);
+		}
+		
+		[data-theme="light"] .xp-popup.level-up .xp-popup-inner {
+			background: linear-gradient(135deg, 
+				rgba(59, 130, 246, 0.12) 0%,
+				rgba(99, 102, 241, 0.08) 100%);
+			border: 1px solid rgba(59, 130, 246, 0.35);
+		}
+		
+		[data-theme="light"] .xp-cover::after {
+			background: linear-gradient(135deg, 
+				rgba(59, 130, 246, 0.08) 0%,
+				transparent 50%);
 		}
 		
 		/* ============================================
@@ -648,8 +678,8 @@ function addPopupStyles() {
 			.xp-fill,
 			.xp-amount,
 			.xp-amount::after {
-				animation: none;
-				transition: none;
+				animation: none !important;
+				transition: none !important;
 			}
 			
 			.xp-popup {
@@ -659,7 +689,7 @@ function addPopupStyles() {
 		}
 	`;
 	document.head.appendChild(style);
-	console.log('✅ Premium popup styles added (pure CSS)');
+	console.log('✅ Premium popup styles added (Blue Theme)');
 }
 
 // FIXED Popup queue functions
