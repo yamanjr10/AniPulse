@@ -43,7 +43,7 @@
         return document.querySelector('.menu-item[data-page="anime-list"]');
     }
 
-    // ─── GLOBAL SEARCH (unchanged) ─────────────────
+    // ─── GLOBAL SEARCH ─────────────────────────────
     function navigateToAnimeList() {
         if (isNavigating) return;
         isNavigating = true;
@@ -84,8 +84,10 @@
         }
     }
 
+    // ─── FIXED: keep raw query (spaces preserved) ─
     function performGlobalSearch(query) {
-        globalQuery = query.trim();
+        // Store raw query (including spaces) for display
+        globalQuery = query;  // NO trim here
         try {
             localStorage.setItem(SEARCH_CONFIG.STORAGE_KEY, globalQuery);
         } catch (_) { /* ignore */ }
@@ -95,7 +97,8 @@
             input.value = globalQuery;
         }
 
-        if (!globalQuery) {
+        // Trim only when checking emptiness
+        if (!globalQuery.trim()) {
             applyGlobalSearch();
             return;
         }
