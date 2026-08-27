@@ -59,7 +59,6 @@
             if (elements.completed) elements.completed.textContent = monthlyStats.completed;
             if (elements.movies) elements.movies.textContent = monthlyStats.movies;
             if (elements.episodes) elements.episodes.textContent = monthlyStats.episodes;
-            // Floor hours
             if (elements.hours) {
                 const hoursNum = parseFloat(monthlyStats.hours);
                 elements.hours.textContent = isNaN(hoursNum) ? '0' : Math.floor(hoursNum);
@@ -419,7 +418,6 @@
     // ============================================
 
     function initQuickActions() {
-        // --- Import: open modal ---
         const importBtn = document.getElementById('importBtn');
         if (importBtn) {
             importBtn.addEventListener('click', function (e) {
@@ -433,7 +431,6 @@
             });
         }
 
-        // --- Export: call window.exportData (from settings.js) ---
         const exportBtn = document.getElementById('exportBtn');
         if (exportBtn) {
             exportBtn.addEventListener('click', function (e) {
@@ -460,7 +457,6 @@
             });
         }
 
-        // --- Stats: navigate to Statistics page ---
         const statsBtn = document.getElementById('statsBtn');
         if (statsBtn) {
             statsBtn.addEventListener('click', function (e) {
@@ -476,7 +472,6 @@
             });
         }
 
-        // --- Import Data: merge/update ---
         const importDataBtn = document.getElementById('importDataBtn');
         if (importDataBtn) {
             importDataBtn.addEventListener('click', function (e) {
@@ -563,7 +558,6 @@
             name: 'AnimeFan',
             avatar: 'https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff'
         };
-        // Use name, fallback to username
         const savedName = savedProfile.name || savedProfile.username || 'AnimeFan';
         const savedAvatar = savedProfile.avatar;
 
@@ -591,14 +585,11 @@
         if (badgeEl) badgeEl.textContent = `Lv.${currentLevel}`;
         if (titleEl) titleEl.textContent = currentTitle;
 
-        // ---- Calculate stats (ONLY completed anime) ----
         const data = window.animeData || [];
-        // totalAnime = number of completed entries
         const totalAnime = data.filter(a => a.userStatus === 'Completed').length;
         const totalHours = typeof window.calculateTotalHours === 'function' ? window.calculateTotalHours() : 0;
         const totalEpisodes = typeof window.calculateTotalEpisodes === 'function' ? window.calculateTotalEpisodes() : 0;
 
-        // ---- Build sidebar stats with a single toggle item ----
         if (sidebarUserStats) {
             const formatShort = window.formatNumberShort || ((n) => n.toString());
             sidebarUserStats.innerHTML = `
@@ -616,10 +607,8 @@
             `;
         }
 
-        // ---- Start auto-toggle ----
         startSidebarStatToggle(totalHours, totalEpisodes);
 
-        // ---- Settings page level display ----
         const settingsLevelNum = document.getElementById('settingsLevelNumber');
         const settingsLevelTitle = document.getElementById('settingsLevelTitle');
         if (settingsLevelNum) settingsLevelNum.textContent = `Level ${currentLevel}`;
@@ -633,7 +622,6 @@
         setupSidebarGuard();
     };
 
-    // ---- Toggle function with single element (no display issues) ----
     function startSidebarStatToggle(totalHours, totalEpisodes) {
         if (_sidebarToggleInterval) {
             clearInterval(_sidebarToggleInterval);
@@ -659,7 +647,6 @@
                 labelEl.textContent = 'Eps';
                 currentStat = 'episodes';
             }
-            // Apply fade animation
             numberEl.style.animation = 'none';
             labelEl.style.animation = 'none';
             requestAnimationFrame(() => {
@@ -668,7 +655,6 @@
             });
         };
 
-        // Start with hours
         setStat('hours');
 
         _sidebarToggleInterval = setInterval(() => {
@@ -680,7 +666,6 @@
         }, 15000);
     }
 
-    // --- Guard the sidebarLevel container from being overwritten ---
     function setupSidebarGuard() {
         const sidebarLevel = document.getElementById('sidebarLevel');
         if (!sidebarLevel) return;
@@ -703,7 +688,6 @@
         sidebarLevel._guardObserver = observer;
     }
 
-    // --- Total hours (ONLY completed anime, using episodes and duration) ---
     window.calculateTotalHours = function () {
         const data = window.animeData || [];
         let totalMinutes = 0;
@@ -720,7 +704,6 @@
         return Math.round(totalMinutes / 60);
     };
 
-    // --- Total episodes (ONLY completed anime, using episodes count) ---
     window.calculateTotalEpisodes = function () {
         const data = window.animeData || [];
         return data.reduce((s, a) => {
@@ -730,7 +713,6 @@
         }, 0);
     };
 
-    // --- Total anime count by year ---
     window.updateTotalAnimeCountAllMonths = function () {
         const now = new Date();
         const currentYear = now.getFullYear();
@@ -744,7 +726,6 @@
         if (el) el.textContent = `Total Anime in ${currentYear}: ${total}`;
     };
 
-    // --- User insights ---
     window.updateUserInsights = function () {
         const el = document.getElementById('user-insights');
         if (!el) return;
@@ -786,8 +767,11 @@
         `;
     };
 
-    // --- Master update ---
+    // ============================================
+    // 🔄 ENHANCED updateAllComponents – Auto‑refresh for ALL pages
+    // ============================================
     window.updateAllComponents = function () {
+        // ---- Dashboard ----
         if (typeof window.updateStats === 'function') window.updateStats();
         if (typeof window.refreshAllCharts === 'function') window.refreshAllCharts();
         if (typeof window.updateCurrentMonthAnime === 'function') window.updateCurrentMonthAnime();
@@ -819,6 +803,44 @@
                 window.updateMonthlyProgressChart();
             }
         }
+
+        // ---- ✅ WATCHLIST AUTO‑REFRESH ----
+        const watchlistPage = document.getElementById('watchlist-page');
+        if (watchlistPage && watchlistPage.classList.contains('active')) {
+            const state = window.watchlistState || { status: 'all', page: 1, search: '' };
+            if (typeof window.updateWatchlist === 'function') {
+                window.updateWatchlist(state.status, state.page, state.search);
+            }
+        }
+
+        // ---- ✅ ACHIEVEMENTS AUTO‑REFRESH ----
+        const achievementsPage = document.getElementById('achievements-page');
+        if (achievementsPage && achievementsPage.classList.contains('active')) {
+            if (typeof window.updateAchievements === 'function') {
+                window.updateAchievements();
+            }
+        }
+
+        // ---- ✅ COMMUNITY AUTO‑REFRESH ----
+        const communityPage = document.getElementById('community-page');
+        if (communityPage && communityPage.classList.contains('active')) {
+            // Always refresh friends and requests
+            if (typeof window.loadFriends === 'function') window.loadFriends();
+            if (typeof window.loadFriendRequests === 'function') window.loadFriendRequests();
+
+            // If leaderboard tab is active, refresh it
+            const activeTab = document.querySelector('.community-tab.active');
+            if (activeTab && activeTab.dataset.tab === 'leaderboard') {
+                if (typeof window.loadFriendLeaderboard === 'function') {
+                    window.loadFriendLeaderboard();
+                } else if (typeof window.initLeaderboard === 'function') {
+                    window.initLeaderboard();
+                } else if (window.globalLeaderboard && typeof window.globalLeaderboard.loadLeaderboard === 'function') {
+                    const mode = window.globalLeaderboard.currentMode || 'friends';
+                    window.globalLeaderboard.loadLeaderboard(mode);
+                }
+            }
+        }
     };
 
     // --- Update current date ---
@@ -830,14 +852,11 @@
         }
     };
 
-    // --- Streak styling (unchanged) ---
+    // --- Streak styling ---
     function updateStreakStyle(streak) {
         const streakInfo = document.getElementById('streakInfo');
         const streakFire = document.getElementById('streakFire');
-        if (!streakInfo || !streakFire) {
-            console.warn('⚠️ Streak elements not found in DOM.');
-            return;
-        }
+        if (!streakInfo || !streakFire) return;
         let color, textShadow, filter, scale;
         if (streak < 3) {
             color = '#9CA3AF';
@@ -889,7 +908,6 @@
         const streakInfo = document.getElementById('streakInfo');
         const dailyQuote = document.getElementById('dailyQuote');
 
-        // ---- READ NAME FROM userProfile (single source of truth) ----
         const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
         const userName = userProfile.name || userProfile.username || 'Otaku';
 
@@ -910,7 +928,6 @@
         let streak = parseInt(localStorage.getItem('streak') || '0');
         const lastActive = localStorage.getItem('lastActive');
 
-        // ---- STREAK CALCULATION (unchanged) ----
         if (lastActive !== today) {
             if (lastActive === new Date(Date.now() - 86400000).toDateString()) {
                 streak += 1;
@@ -944,7 +961,6 @@
         updateGreeting();
         setInterval(updateGreeting, 60000);
 
-        // ---- Streak reveal animation ----
         setTimeout(() => {
             const bannerStats = document.querySelector('.banner-stats');
             if (bannerStats) {
@@ -999,7 +1015,6 @@
             }
         }
 
-        // Force sidebar update first (will also start the toggle)
         if (typeof window.updateSidebarUserInfo === 'function') {
             window.updateSidebarUserInfo();
         }

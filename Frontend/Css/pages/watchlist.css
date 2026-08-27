@@ -886,7 +886,6 @@
     display: inline-flex;
     align-items: center;
     margin-left: auto;
-    /* pushes it to the right */
 }
 
 .watchlist-search .search-icon {

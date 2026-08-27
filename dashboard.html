@@ -607,18 +607,28 @@
                     <i class="fas fa-heart" aria-hidden="true"></i>
                     Watch List
                 </h2>
-
+        
+                <!-- Filters + Search -->
                 <div class="watchlist-filters">
+                    <!-- Status filter buttons -->
                     <button class="filter-btn active" data-status="all">All</button>
                     <button class="filter-btn" data-status="Watching">Watching</button>
                     <button class="filter-btn" data-status="On-Hold">On-Hold</button>
                     <button class="filter-btn" data-status="Plan to Watch">Plan to Watch</button>
                     <button class="filter-btn" data-status="Dropped">Dropped</button>
                     <button class="filter-btn" data-status="Completed">Completed</button>
+        
+                    <!-- 🔍 Search input -->
+                    <div class="watchlist-search">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="watchlistSearch" placeholder="Search anime..." aria-label="Search watchlist">
+                    </div>
                 </div>
-
+        
+                <!-- Anime grid -->
                 <div class="top-anime-grid" id="watchlist-container"></div>
-
+        
+                <!-- Pagination -->
                 <div class="pagination-container">
                     <div id="pagination"></div>
                 </div>
