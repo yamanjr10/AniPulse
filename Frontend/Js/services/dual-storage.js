@@ -1,5 +1,5 @@
 // ============================================
-// DUAL STORAGE MANAGER – Primary sync system
+// DUAL STORAGE MANAGER – Full Cloud Sync (Queue + Daily XP + Streak)
 // ============================================
 
 class DualStorageManager {
@@ -88,7 +88,7 @@ class DualStorageManager {
     }
 
     // ============================================
-    // SYNC TO CLOUD – Reads latest data from localStorage
+    // SYNC TO CLOUD – Uploads all local data (including queue, daily XP, streak)
     // ============================================
     async syncToCloud() {
         const token = this.getToken();
@@ -115,6 +115,19 @@ class DualStorageManager {
             const appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}');
             const levelData = this.getLevelData();
 
+            // ---- Daily XP and Queue ----
+            const today = new Date().toDateString();
+            const dailyXPKey = `dailyXP_${today}`;
+            const todayXP = parseInt(localStorage.getItem(dailyXPKey) || '0');
+            const xpPendingQueue = JSON.parse(localStorage.getItem('xpPendingQueue') || '[]');
+            const lastResetDate = localStorage.getItem('lastResetDate') || today;
+
+            // ---- Streak ----
+            const streakData = {
+                streak: parseInt(localStorage.getItem('streak') || '0'),
+                lastActive: localStorage.getItem('lastActive') || today
+            };
+
             const now = new Date().toISOString();
 
             const allData = {
@@ -126,10 +139,14 @@ class DualStorageManager {
                 animeContributions,
                 appSettings,
                 levelData,
+                dailyXP: { date: today, xp: todayXP },
+                xpPendingQueue,
+                lastResetDate,
+                streakData, // <-- NEW
                 lastModified: now
             };
 
-            console.log(`📤 Syncing ${animeData.length} anime to cloud...`);
+            console.log(`📤 Syncing ${animeData.length} anime, ${xpPendingQueue.length} queued, streak ${streakData.streak} days...`);
 
             const response = await fetch(`${window.API_BASE_URL}/api/sync/sync-all`, {
                 method: 'POST',
@@ -151,8 +168,8 @@ class DualStorageManager {
                 localStorage.setItem('lastCloudSyncTime', now);
                 localStorage.setItem('cloudSyncEnabled', 'true');
                 localStorage.setItem('animeDataLastModified', now);
-                this.showSyncStatus(`✅ Synced ${animeData.length} anime (Level ${levelData.level})`, 'success');
-                console.log('✅ Full sync completed');
+                this.showSyncStatus(`✅ Synced ${animeData.length} anime, ${xpPendingQueue.length} queued, streak ${streakData.streak} (Level ${levelData.level})`, 'success');
+                console.log('✅ Full sync completed (queue, daily XP, streak)');
                 return true;
             } else {
                 throw new Error(result.error || 'Sync failed');
@@ -167,7 +184,7 @@ class DualStorageManager {
     }
 
     // ============================================
-    // LOAD FROM CLOUD – with dirty flag & cache
+    // LOAD FROM CLOUD – Always fetches latest and merges
     // ============================================
     async loadFromCloud() {
         const token = this.getToken();
@@ -180,157 +197,191 @@ class DualStorageManager {
             return { success: false, error: 'Offline' };
         }
 
-        this.isSyncing = true;
-        this.showSyncStatus('Loading from cloud...', 'info');
+        // If local is dirty, push local to cloud first (so we don't lose unsaved changes)
+        if (window.isLocalDirty && window.isLocalDirty()) {
+            console.log('📌 Local data is dirty – pushing to cloud before merging.');
+            await this.syncToCloud();
+            window.clearLocalDirty();
+        }
 
+        // Now download and merge cloud data
+        const result = await this.downloadAndApplyCloudData();
+        return result;
+    }
+
+    // ============================================
+    // DOWNLOAD AND APPLY CLOUD DATA (merge + queue + streak restore)
+    // ============================================
+    async downloadAndApplyCloudData() {
+        const token = this.getToken();
         try {
-            // ---- If local is dirty, push to cloud and keep local ----
-            if (window.isLocalDirty && window.isLocalDirty()) {
-                console.log('📌 Local data is dirty – pushing to cloud and keeping local.');
-                await this.syncToCloud();
-                window.clearLocalDirty();
-                // ✅ Store merge decision so the dialog doesn't appear next time
-                const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
-                if (checksum && window.syncManager) {
-                    window.syncManager.storeMergeDecision('local', checksum);
-                    console.log('📝 Stored merge decision: local');
-                }
-                return { success: true, message: 'Local data kept (dirty flag)' };
-            }
-
             const response = await fetch(`${window.API_BASE_URL}/api/sync/load-all`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
             const result = await response.json();
-            if (result.success && result.data) {
-                const { data, lastModified } = result;
-                const localAnimeCount = JSON.parse(localStorage.getItem('animeData') || '[]').length;
-                const cloudAnimeCount = data.animeData ? data.animeData.length : 0;
+            if (!result.success) throw new Error(result.error || 'Failed to load');
 
-                // ---- SAFETY: if local has more anime than cloud, keep local ----
-                if (localAnimeCount > cloudAnimeCount) {
-                    console.log(`📌 Local has ${localAnimeCount} anime, cloud has ${cloudAnimeCount} – keeping local and pushing to cloud.`);
-                    await this.syncToCloud();
-                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
-                    if (checksum && window.syncManager) {
-                        window.syncManager.storeMergeDecision('local', checksum);
-                    }
-                    return { success: true, message: 'Local data kept, cloud updated' };
-                }
+            const { data, lastModified } = result;
+            this.backupLocalData();
 
-                // ---- Timestamp check ----
-                const localTimestamp = localStorage.getItem('animeDataLastModified');
-                if (localTimestamp && lastModified && new Date(localTimestamp) > new Date(lastModified) && localAnimeCount > 0) {
-                    console.log('📌 Local data is newer than cloud – keeping local and pushing to cloud.');
-                    await this.syncToCloud();
-                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
-                    if (checksum && window.syncManager) {
-                        window.syncManager.storeMergeDecision('local', checksum);
-                    }
-                    return { success: true, message: 'Local data kept, cloud updated' };
-                }
+            // ---- Anime list: MERGE (union) ----
+            const localAnime = JSON.parse(localStorage.getItem('animeData') || '[]');
+            const cloudAnime = data.animeData || [];
+            const mergedAnime = this.mergeAnimeLists(localAnime, cloudAnime);
+            localStorage.setItem('animeData', JSON.stringify(mergedAnime));
+            localStorage.setItem('animeDataLastModified', lastModified || new Date().toISOString());
+            window.animeData = mergedAnime;
 
-                // ---- If cloud is empty but local has data, push local ----
-                if ((!data.animeData || data.animeData.length === 0) && localAnimeCount > 0) {
-                    console.log('📌 Cloud is empty, but local has data – pushing local to cloud.');
-                    await this.syncToCloud();
-                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
-                    if (checksum && window.syncManager) {
-                        window.syncManager.storeMergeDecision('local', checksum);
-                    }
-                    return { success: true, message: 'Local data pushed to cloud' };
-                }
+            // ---- Activity log: MERGE, deduplicate by id, sort by timestamp ----
+            const localActivity = JSON.parse(localStorage.getItem('activityLog') || '[]');
+            const cloudActivity = data.activityLog || [];
+            const mergedActivity = this.mergeActivityLogs(localActivity, cloudActivity);
+            localStorage.setItem('activityLog', JSON.stringify(mergedActivity));
+            window.activityLog = mergedActivity;
 
-                // ---- Otherwise, overwrite local with cloud data ----
-                if (data.animeData && data.animeData.length >= localAnimeCount) {
-                    console.log(`📥 Downloading ${data.animeData.length} anime from cloud...`);
-                    this.backupLocalData();
-
-                    if (data.animeData) {
-                        localStorage.setItem('animeData', JSON.stringify(data.animeData));
-                        localStorage.setItem('animeDataLastModified', lastModified || new Date().toISOString());
-                        window.animeData = data.animeData;
-                    }
-                    if (data.activityLog) {
-                        localStorage.setItem('activityLog', JSON.stringify(data.activityLog));
-                        window.activityLog = data.activityLog;
-                    }
-                    if (data.achievements) {
-                        localStorage.setItem('unlockedAchievements', JSON.stringify(data.achievements));
-                    }
-                    if (data.xpHistory) {
-                        localStorage.setItem('userXpHistory', JSON.stringify(data.xpHistory));
-                    }
-                    if (data.contributions) {
-                        localStorage.setItem('animeContributions', JSON.stringify(data.contributions));
-                    }
-                    if (data.userProfile) {
-                        const existing = JSON.parse(localStorage.getItem('userProfile') || '{}');
-                        const merged = { ...existing, ...data.userProfile };
-                        localStorage.setItem('userProfile', JSON.stringify(merged));
-                        const user = JSON.parse(localStorage.getItem('user') || '{}');
-                        user.name = merged.name || merged.username || user.name;
-                        user.username = merged.username || merged.name || user.username;
-                        user.avatar = merged.avatar || user.avatar;
-                        localStorage.setItem('user', JSON.stringify(user));
-                        if (typeof updateSidebarUserInfo === 'function') {
-                            updateSidebarUserInfo();
-                        }
-                    }
-                    if (data.levelData) {
-                        localStorage.setItem('userLevel', data.levelData.level.toString());
-                        localStorage.setItem('userLevelTitle', data.levelData.title);
-                        localStorage.setItem('userXP', data.levelData.totalXP.toString());
-                        if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.saveUserProfile === 'function') {
-                            const profile = window.AniPulseLevelSystem.getUserProfile();
-                            profile.totalExp = data.levelData.totalXP;
-                            profile.level = data.levelData.level;
-                            profile.title = data.levelData.title;
-                            window.AniPulseLevelSystem.saveUserProfile(profile);
-                            window.AniPulseLevelSystem.updateAllLevelUI();
-                        }
-                    }
-
-                    // After successful download, store merge decision as 'cloud' if checksums match
-                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
-                    const cloudChecksum = window.syncManager ? window.syncManager.getDataChecksumFromArray(data.animeData) : null;
-                    if (checksum && cloudChecksum && checksum === cloudChecksum && window.syncManager) {
-                        window.syncManager.storeMergeDecision('cloud', checksum);
-                        console.log('📝 Stored merge decision: cloud');
-                    }
-
-                    this.lastSyncTime = new Date().toISOString();
-                    localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
-                    this.showSyncStatus(`✅ Loaded ${data.animeData?.length || 0} anime from cloud!`, 'success');
-
-                    if (typeof updateAllComponents === 'function') updateAllComponents();
-                    if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
-                        setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
-                    }
-                    return { success: true, data };
-                } else {
-                    // Fallback: push local to cloud if local has more or equal data
-                    console.log(`📤 Local has ${localAnimeCount} anime, cloud has ${cloudAnimeCount} – pushing local to cloud.`);
-                    await this.syncToCloud();
-                    const checksum = window.syncManager ? window.syncManager.getDataChecksum() : null;
-                    if (checksum && window.syncManager) {
-                        window.syncManager.storeMergeDecision('local', checksum);
-                    }
-                    return { success: true, message: 'Local data pushed to cloud' };
-                }
-            } else {
-                throw new Error(result.error || 'No data returned');
+            // ---- User Profile: merge (cloud takes precedence for name, avatar) ----
+            if (data.userProfile) {
+                const existing = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                const mergedProfile = { ...existing, ...data.userProfile };
+                localStorage.setItem('userProfile', JSON.stringify(mergedProfile));
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.name = mergedProfile.name || mergedProfile.username || user.name;
+                user.username = mergedProfile.username || mergedProfile.name || user.username;
+                user.avatar = mergedProfile.avatar || user.avatar;
+                localStorage.setItem('user', JSON.stringify(user));
+                if (typeof updateSidebarUserInfo === 'function') updateSidebarUserInfo();
             }
+
+            // ---- Achievements ----
+            if (data.unlockedAchievements) {
+                localStorage.setItem('unlockedAchievements', JSON.stringify(data.unlockedAchievements));
+            }
+
+            // ---- XP History ----
+            if (data.userXpHistory) {
+                localStorage.setItem('userXpHistory', JSON.stringify(data.userXpHistory));
+            }
+
+            // ---- Contributions (heatmap) ----
+            if (data.animeContributions) {
+                localStorage.setItem('animeContributions', JSON.stringify(data.animeContributions));
+            }
+
+            // ---- App Settings ----
+            if (data.appSettings) {
+                localStorage.setItem('appSettings', JSON.stringify(data.appSettings));
+            }
+
+            // ---- Level Data: cloud takes precedence ----
+            if (data.levelData) {
+                localStorage.setItem('userLevel', data.levelData.level.toString());
+                localStorage.setItem('userLevelTitle', data.levelData.title);
+                localStorage.setItem('userXP', data.levelData.totalXP.toString());
+                if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.saveUserProfile === 'function') {
+                    const profile = window.AniPulseLevelSystem.getUserProfile();
+                    profile.totalExp = data.levelData.totalXP;
+                    profile.level = data.levelData.level;
+                    profile.title = data.levelData.title;
+                    window.AniPulseLevelSystem.saveUserProfile(profile);
+                    window.AniPulseLevelSystem.updateAllLevelUI();
+                }
+            }
+
+            // ============================================
+            // RESTORE DAILY XP, PENDING QUEUE, LAST RESET DATE, STREAK
+            // ============================================
+            const today = new Date().toDateString();
+
+            // ---- Daily XP: only restore if cloud date matches today ----
+            if (data.dailyXP) {
+                if (data.dailyXP.date === today) {
+                    localStorage.setItem(`dailyXP_${today}`, data.dailyXP.xp.toString());
+                    console.log(`📊 Restored today's XP: ${data.dailyXP.xp}`);
+                } else {
+                    console.log(`📊 Cloud dailyXP date (${data.dailyXP.date}) differs from today (${today}) – keeping local today's XP.`);
+                }
+            }
+
+            // ---- Pending Queue: cloud overwrites local completely ----
+            if (data.xpPendingQueue) {
+                localStorage.setItem('xpPendingQueue', JSON.stringify(data.xpPendingQueue));
+                console.log(`📦 Restored ${data.xpPendingQueue.length} queued XP items from cloud`);
+            }
+
+            // ---- Last Reset Date ----
+            if (data.lastResetDate) {
+                localStorage.setItem('lastResetDate', data.lastResetDate);
+            }
+
+            // ---- Streak: cloud overwrites local ----
+            if (data.streakData) {
+                localStorage.setItem('streak', data.streakData.streak.toString());
+                localStorage.setItem('lastActive', data.streakData.lastActive);
+                console.log(`🔥 Streak restored: ${data.streakData.streak} days (last active: ${data.streakData.lastActive})`);
+            }
+
+            // ---- Refresh queue UI ----
+            if (typeof updateQueueStatusUI === 'function') {
+                setTimeout(updateQueueStatusUI, 300);
+            }
+
+            // ---- Update sync time ----
+            this.lastSyncTime = new Date().toISOString();
+            localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
+
+            this.showSyncStatus(`✅ Synced ${mergedAnime.length} anime, ${mergedActivity.length} activities, ${data.xpPendingQueue?.length || 0} queued XP, streak ${data.streakData?.streak || 0}`, 'success');
+
+            // ---- Refresh everything else ----
+            if (typeof updateAllComponents === 'function') updateAllComponents();
+            if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
+                setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
+            }
+
+            return { success: true, data };
         } catch (error) {
-            console.error('❌ Load failed:', error);
+            console.error('❌ Download/merge failed:', error);
             this.showSyncStatus('⚠️ Failed to load from cloud', 'error');
             return { success: false, error: error.message };
-        } finally {
-            this.isSyncing = false;
         }
+    }
+
+    // ============================================
+    // MERGE HELPERS
+    // ============================================
+    mergeAnimeLists(local, cloud) {
+        const map = new Map();
+        // Start with cloud entries
+        cloud.forEach(a => map.set(a.id, a));
+        // Add local entries that are not in cloud (by id)
+        local.forEach(a => {
+            if (!map.has(a.id)) {
+                map.set(a.id, a);
+            }
+            // If both have same id, keep cloud version (latest from other devices)
+        });
+        return Array.from(map.values());
+    }
+
+    mergeActivityLogs(local, cloud) {
+        const map = new Map();
+        // Start with cloud
+        cloud.forEach(a => map.set(a.id, a));
+        // Add local if id not exists
+        local.forEach(a => {
+            if (!map.has(a.id)) {
+                map.set(a.id, a);
+            }
+        });
+        const merged = Array.from(map.values());
+        // Sort by timestamp descending
+        merged.sort((a, b) => {
+            const timeA = new Date(a.timestamp).getTime();
+            const timeB = new Date(b.timestamp).getTime();
+            return timeB - timeA;
+        });
+        // Keep only latest 50 to avoid bloating
+        return merged.slice(0, 50);
     }
 
     // ============================================
@@ -341,7 +392,12 @@ class DualStorageManager {
             timestamp: new Date().toISOString(),
             animeData: localStorage.getItem('animeData'),
             activityLog: localStorage.getItem('activityLog'),
-            userProfile: localStorage.getItem('userProfile')
+            userProfile: localStorage.getItem('userProfile'),
+            xpPendingQueue: localStorage.getItem('xpPendingQueue'),
+            dailyXP: localStorage.getItem(`dailyXP_${new Date().toDateString()}`),
+            lastResetDate: localStorage.getItem('lastResetDate'),
+            streak: localStorage.getItem('streak'),
+            lastActive: localStorage.getItem('lastActive')
         };
         localStorage.setItem('localBackupBeforeCloudSync', JSON.stringify(backup));
     }
@@ -364,6 +420,10 @@ class DualStorageManager {
     handleOnline() {
         console.log('🟢 Online - syncing to cloud...');
         this.syncToCloud();
+        // Also try to load cloud data to get latest changes
+        if (this.isLoggedIn()) {
+            setTimeout(() => this.loadFromCloud(), 1000);
+        }
     }
 
     handleOffline() {

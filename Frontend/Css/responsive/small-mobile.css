@@ -225,6 +225,18 @@
         height: 120px;
     }
 
+    /* ============================================
+       PROFILE MODAL – Extra Small (2 columns)
+       ============================================ */
+    .profile-anime-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+    }
+
+    .profile-anime-card {
+        border-radius: var(--radius-sm, 6px);
+    }
+
     /* ===== WATCHLIST FILTERS ===== */
     .watchlist-filters {
         grid-template-columns: 1fr 1fr;
