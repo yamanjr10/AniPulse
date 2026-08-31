@@ -10,7 +10,7 @@
     function getDefaultDuration(type) {
         switch (type) {
             case 'Movie': return 120;
-            case 'TV_SHORT': return 12;   // ✅ TV Short support
+            case 'TV_SHORT': return 12;
             case 'TV':
             case 'OVA':
             case 'ONA':
@@ -25,7 +25,7 @@
 
     function triggerImmediateSync() {
         if (window.dualStorage && navigator.onLine && localStorage.getItem('authToken')) {
-            console.log('🔄 Forcing immediate sync after data change...');
+            console.log(' Forcing immediate sync after data change...');
             setTimeout(() => {
                 window.dualStorage.syncToCloud();
             }, 200);
@@ -55,11 +55,15 @@
                         `${window.API_BASE_URL}/api/sync/sync-all`,
                         new Blob([JSON.stringify(data)], { type: 'application/json' })
                     );
-                    console.log('📤 Beforeunload beacon sent');
+                    console.log(' Beforeunload beacon sent');
                 } catch (e) { }
             }
         });
     }
+
+    // ============================================================
+    // GLOBAL MODAL OPEN/CLOSE
+    // ============================================================
 
     window.openModal = function (modalElement) {
         if (!modalElement) return;
@@ -80,7 +84,7 @@
         document.body.style.width = '100%';
         document.body.style.height = '100%';
         document.body.style.top = `-${scrollY}px`;
-        console.log('✅ Modal opened');
+        console.log(' Modal opened');
     };
 
     window.closeModal = function (modalElement) {
@@ -104,8 +108,319 @@
             window.scrollTo({ top: scrollY, behavior: 'auto' });
         }
         delete modalScrollPositions[modalId];
-        console.log('✅ Modal closed');
+        console.log(' Modal closed');
     };
+
+    // ============================================================
+    // ID REUSE: get next smallest available ID
+    // ============================================================
+
+    function getNextAvailableId() {
+        const data = window.animeData || [];
+        const ids = new Set(data.map(a => a.id));
+        let id = 1;
+        while (ids.has(id)) id++;
+        return id;
+    }
+
+    // ============================================================
+    // CUSTOM DAY PROMPT MODAL (styled, replaces window.prompt)
+    // ============================================================
+
+    let dayPromptResolve = null;
+    let dayPromptModal = null;
+
+    function createDayPromptModal() {
+        if (dayPromptModal) return;
+
+        dayPromptModal = document.createElement('div');
+        dayPromptModal.id = 'dayPromptModal';
+        dayPromptModal.className = 'modal';
+        dayPromptModal.setAttribute('hidden', '');
+        dayPromptModal.style.display = 'none';
+        dayPromptModal.style.position = 'fixed';
+        dayPromptModal.style.inset = '0';
+        dayPromptModal.style.zIndex = '100000';
+        dayPromptModal.style.backgroundColor = 'rgba(0,0,0,0.6)';
+        dayPromptModal.style.alignItems = 'center';
+        dayPromptModal.style.justifyContent = 'center';
+        dayPromptModal.style.backdropFilter = 'blur(4px)';
+
+        const content = document.createElement('div');
+        content.className = 'modal-content';
+        content.style.maxWidth = '400px';
+        content.style.width = '90%';
+        content.style.padding = '24px';
+        content.style.backgroundColor = 'var(--bg-card, #1A2234)';
+        content.style.borderRadius = '16px';
+        content.style.border = '1px solid var(--border, #334155)';
+        content.style.boxShadow = '0 20px 60px rgba(0,0,0,0.5)';
+
+        content.innerHTML = `
+            <h3 style="margin: 0 0 12px 0; font-size: 1.2rem; color: var(--text-primary, #F8FAFC);">
+                <i class="fas fa-calendar-day" style="margin-right: 8px; color: #3B82F6;"></i>
+                Select Completion Day
+            </h3>
+            <p style="margin: 0 0 16px 0; color: var(--text-secondary, #94A3B8); font-size: 0.9rem;">
+                Enter the day (1-31) for the completion date:
+            </p>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                <label for="dayPromptInput" style="font-weight: 600; color: var(--text-primary, #F8FAFC);">Day:</label>
+                <input type="number" id="dayPromptInput" min="1" max="31" value="1"
+                       style="flex: 1; padding: 8px 12px; background: var(--bg-tertiary, rgba(255,255,255,0.04));
+                              border: 1px solid var(--border, #334155); border-radius: 8px; color: var(--text-primary, #F8FAFC);
+                              font-size: 1rem; font-family: inherit; width: 80px;">
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button id="dayPromptCancel" class="btn-secondary" style="padding: 8px 20px; border: none;
+                        background: var(--bg-tertiary, rgba(255,255,255,0.04)); color: var(--text-secondary, #94A3B8);
+                        border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit;">
+                    Cancel
+                </button>
+                <button id="dayPromptConfirm" class="btn-primary" style="padding: 8px 24px; border: none;
+                        background: linear-gradient(135deg, #3B82F6, #6366F1); color: white;
+                        border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit;">
+                    Confirm
+                </button>
+            </div>
+        `;
+
+        dayPromptModal.appendChild(content);
+        document.body.appendChild(dayPromptModal);
+
+        // Event listeners
+        const input = dayPromptModal.querySelector('#dayPromptInput');
+        const confirmBtn = dayPromptModal.querySelector('#dayPromptConfirm');
+        const cancelBtn = dayPromptModal.querySelector('#dayPromptCancel');
+
+        const close = (value) => {
+            dayPromptModal.style.display = 'none';
+            dayPromptModal.setAttribute('hidden', '');
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.height = '';
+            document.body.style.top = '';
+            if (dayPromptResolve) {
+                dayPromptResolve(value);
+                dayPromptResolve = null;
+            }
+        };
+
+        confirmBtn.addEventListener('click', () => {
+            const val = parseInt(input.value);
+            if (isNaN(val) || val < 1 || val > 31) {
+                alert('Please enter a number between 1 and 31.');
+                return;
+            }
+            close(val);
+        });
+
+        cancelBtn.addEventListener('click', () => close(null));
+
+        dayPromptModal.addEventListener('click', (e) => {
+            if (e.target === dayPromptModal) close(null);
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') confirmBtn.click();
+            if (e.key === 'Escape') cancelBtn.click();
+        });
+
+        // Focus input when opened
+        const observer = new MutationObserver(() => {
+            if (dayPromptModal.style.display === 'flex') {
+                input.focus();
+                input.select();
+            }
+        });
+        observer.observe(dayPromptModal, { attributes: true, attributeFilter: ['style'] });
+    }
+
+    function openDayPrompt(year, month) {
+        return new Promise((resolve) => {
+            createDayPromptModal();
+            dayPromptResolve = resolve;
+            const modal = dayPromptModal;
+            const input = modal.querySelector('#dayPromptInput');
+
+            input.value = '1';
+
+            modal.removeAttribute('hidden');
+            modal.style.display = 'flex';
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            document.body.classList.add('modal-open');
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.height = '100%';
+            document.body.style.top = `-${window.scrollY}px`;
+
+            setTimeout(() => input.focus(), 50);
+        });
+    }
+
+    // ============================================================
+    // CUSTOM CONFIRM MODAL (styled, replaces window.confirm)
+    // ============================================================
+
+    let confirmResolve = null;
+    let confirmModal = null;
+
+    function createConfirmModal() {
+        if (confirmModal) return;
+
+        confirmModal = document.createElement('div');
+        confirmModal.id = 'confirmModal';
+        confirmModal.className = 'modal';
+        confirmModal.setAttribute('hidden', '');
+        confirmModal.style.display = 'none';
+        confirmModal.style.position = 'fixed';
+        confirmModal.style.inset = '0';
+        confirmModal.style.zIndex = '100000';
+        confirmModal.style.backgroundColor = 'rgba(0,0,0,0.6)';
+        confirmModal.style.alignItems = 'center';
+        confirmModal.style.justifyContent = 'center';
+        confirmModal.style.backdropFilter = 'blur(4px)';
+
+        const content = document.createElement('div');
+        content.className = 'modal-content';
+        content.style.maxWidth = '420px';
+        content.style.width = '90%';
+        content.style.padding = '24px';
+        content.style.backgroundColor = 'var(--bg-card, #1A2234)';
+        content.style.borderRadius = '16px';
+        content.style.border = '1px solid var(--border, #334155)';
+        content.style.boxShadow = '0 20px 60px rgba(0,0,0,0.5)';
+
+        content.innerHTML = `
+            <h3 style="margin: 0 0 12px 0; font-size: 1.2rem; color: var(--text-primary, #F8FAFC);">
+                <i class="fas fa-exclamation-triangle" style="margin-right: 8px; color: #EF4444;"></i>
+                Confirm Deletion
+            </h3>
+            <p id="confirmMessage" style="margin: 0 0 20px 0; color: var(--text-secondary, #94A3B8); font-size: 0.95rem; line-height: 1.5;">
+                Are you sure you want to delete this anime?
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button id="confirmCancel" class="btn-secondary" style="padding: 8px 20px; border: none;
+                        background: var(--bg-tertiary, rgba(255,255,255,0.04)); color: var(--text-secondary, #94A3B8);
+                        border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit;">
+                    Cancel
+                </button>
+                <button id="confirmOk" class="btn-danger" style="padding: 8px 24px; border: none;
+                        background: linear-gradient(135deg, #EF4444, #DC2626); color: white;
+                        border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit;">
+                    Delete
+                </button>
+            </div>
+        `;
+
+        confirmModal.appendChild(content);
+        document.body.appendChild(confirmModal);
+
+        const cancelBtn = confirmModal.querySelector('#confirmCancel');
+        const okBtn = confirmModal.querySelector('#confirmOk');
+
+        const close = (result) => {
+            confirmModal.style.display = 'none';
+            confirmModal.setAttribute('hidden', '');
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.height = '';
+            document.body.style.top = '';
+            if (confirmResolve) {
+                confirmResolve(result);
+                confirmResolve = null;
+            }
+        };
+
+        cancelBtn.addEventListener('click', () => close(false));
+        okBtn.addEventListener('click', () => close(true));
+
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) close(false);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (confirmModal && confirmModal.style.display === 'flex') {
+                if (e.key === 'Enter') okBtn.click();
+                if (e.key === 'Escape') cancelBtn.click();
+            }
+        });
+    }
+
+    function openConfirm(message) {
+        return new Promise((resolve) => {
+            createConfirmModal();
+            confirmResolve = resolve;
+            const modal = confirmModal;
+            const msgEl = modal.querySelector('#confirmMessage');
+            if (msgEl) msgEl.textContent = message || 'Are you sure you want to delete this anime?';
+
+            modal.removeAttribute('hidden');
+            modal.style.display = 'flex';
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            document.body.classList.add('modal-open');
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.height = '100%';
+            document.body.style.top = `-${window.scrollY}px`;
+        });
+    }
+
+    // ============================================================
+    // GET ACTUAL FINISH DATE (with custom day prompt)
+    // ============================================================
+
+    async function getActualFinishDate(year, month) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+
+        const selectedYear = parseInt(year);
+        const selectedMonth = parseInt(month);
+
+        if (selectedYear === currentYear && selectedMonth === currentMonth) {
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${currentYear}-${String(currentMonth).padStart(2, '0')}-${day}`;
+        }
+
+        const day = await openDayPrompt(year, month);
+        if (day === null) return null;
+
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    // ============================================================
+    // YEAR DROPDOWN POPULATOR
+    // ============================================================
+
+    function populateYearDropdown() {
+        const yearSelect = document.getElementById('animeYear');
+        if (!yearSelect) return;
+        const currentYear = new Date().getFullYear();
+        const startYear = 1990;
+        const endYear = currentYear + 1;
+
+        yearSelect.innerHTML = '';
+        for (let y = startYear; y <= endYear; y++) {
+            const opt = document.createElement('option');
+            opt.value = String(y);
+            opt.textContent = String(y);
+            yearSelect.appendChild(opt);
+        }
+        yearSelect.value = String(currentYear);
+    }
+
+    // ============================================================
+    // RESET EDITING STATE
+    // ============================================================
 
     function resetEditingState() {
         window.isEditing = false;
@@ -149,27 +464,12 @@
             }
         }
 
-        // ===== SET DEFAULT MONTH/YEAR =====
+        populateYearDropdown();
         const yearSelect = document.getElementById('animeYear');
         const monthSelect = document.getElementById('animeMonth');
         if (yearSelect && monthSelect) {
             const now = new Date();
-            const currentYear = now.getFullYear();
-            // Ensure the current year exists in the dropdown
-            let yearExists = false;
-            for (let i = 0; i < yearSelect.options.length; i++) {
-                if (yearSelect.options[i].value === String(currentYear)) {
-                    yearExists = true;
-                    break;
-                }
-            }
-            if (!yearExists) {
-                const opt = document.createElement('option');
-                opt.value = String(currentYear);
-                opt.textContent = String(currentYear);
-                yearSelect.appendChild(opt);
-            }
-            yearSelect.value = String(currentYear);
+            yearSelect.value = String(now.getFullYear());
             monthSelect.value = String(now.getMonth() + 1).padStart(2, '0');
         }
 
@@ -194,14 +494,18 @@
         }
     }
 
+    // ============================================================
+    // EDIT ANIME
+    // ============================================================
+
     window.editAnime = function (id) {
-        console.log('✏️ Editing anime with ID:', id);
+        console.log(' Editing anime with ID:', id);
         const anime = window.animeData.find(a => a.id == id);
         if (!anime) {
             if (typeof showToast === 'function') showToast('Anime not found', 'error');
             return;
         }
-        console.log('📝 Found anime:', anime.title);
+        console.log(' Found anime:', anime.title);
 
         window.isEditing = true;
         window.currentEditId = id;
@@ -247,10 +551,13 @@
         if (animeCover) animeCover.value = anime.cover || '';
         if (animeGenres) animeGenres.value = anime.genres ? anime.genres.join(', ') : '';
 
+        populateYearDropdown();
         if (anime.finishDate && animeYear && animeMonth) {
             const [year, month] = anime.finishDate.split('-');
-            animeYear.value = year;
-            animeMonth.value = month;
+            if (year && month) {
+                animeYear.value = year;
+                animeMonth.value = month;
+            }
         } else if (animeYear && animeMonth) {
             const now = new Date();
             animeYear.value = now.getFullYear().toString();
@@ -282,14 +589,21 @@
         }
     };
 
-    window.deleteAnime = function () {
+    // ============================================================
+    // DELETE ANIME (with custom confirm)
+    // ============================================================
+
+    window.deleteAnime = async function () {
         if (!window.currentEditId) {
             if (typeof showToast === 'function') showToast('No anime selected to delete', 'error');
             return;
         }
-        if (!confirm('Are you sure you want to delete this anime?')) return;
 
         const anime = window.animeData.find(a => a.id == window.currentEditId);
+        const title = anime ? anime.title : 'this anime';
+        const confirmed = await openConfirm(`Are you sure you want to delete "${title}"?`);
+        if (!confirmed) return;
+
         if (anime && typeof window.logActivity === 'function') {
             window.logActivity("deleted", anime.title);
         }
@@ -306,7 +620,11 @@
         if (typeof showToast === 'function') showToast('Anime deleted successfully!', 'success');
     };
 
-    window.handleAddAnime = function (e) {
+    // ============================================================
+    // HANDLE ADD/EDIT SUBMIT
+    // ============================================================
+
+    window.handleAddAnime = async function (e) {
         e.preventDefault();
 
         const title = document.getElementById('animeTitle')?.value.trim();
@@ -340,6 +658,23 @@
         let logAction = 'added';
         let toastMessage = `"${title}" added successfully!`;
 
+        async function setCompletionDates(year, month) {
+            let y = parseInt(year);
+            let m = parseInt(month);
+            if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
+                finishDate = `${year}-${String(m).padStart(2, '0')}`;
+                const dayResult = await getActualFinishDate(year, month);
+                if (dayResult === null) return false;
+                actualFinishDate = dayResult;
+                return true;
+            } else {
+                const now = new Date();
+                finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                actualFinishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                return true;
+            }
+        }
+
         if (window.isEditing && window.currentEditId) {
             const existing = window.animeData.find(a => a.id == window.currentEditId);
             if (!existing) {
@@ -349,17 +684,6 @@
 
             const wasCompleted = existing.userStatus === 'Completed';
             const isNowCompleted = status === 'Completed';
-
-            if (isNowCompleted && !wasCompleted) {
-                logAction = 'completed';
-                toastMessage = `"${title}" marked as completed! 🎉`;
-            } else if (existing.title !== title) {
-                logAction = 'edited';
-                toastMessage = `"${title}" renamed successfully!`;
-            } else {
-                logAction = 'edited';
-                toastMessage = `"${title}" updated successfully!`;
-            }
 
             existing.title = title;
             existing.type = type;
@@ -372,25 +696,25 @@
             existing.genres = genres;
             existing.updatedAt = nowTimestamp;
 
+            if (isNowCompleted) {
+                const success = await setCompletionDates(year, month);
+                if (!success) return;
+                existing.finishDate = finishDate;
+                existing.actualFinishDate = actualFinishDate;
+            } else {
+                existing.finishDate = null;
+                existing.actualFinishDate = null;
+            }
+
             if (isNowCompleted && !wasCompleted) {
-                if (year && month) {
-                    const y = parseInt(year);
-                    const m = parseInt(month);
-                    if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
-                        existing.finishDate = `${year}-${String(m).padStart(2, '0')}`;
-                    } else {
-                        const now = new Date();
-                        existing.finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                    }
-                } else {
-                    const now = new Date();
-                    existing.finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                }
-                const now = new Date();
-                const currentYear = now.getFullYear();
-                const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-                const currentDay = String(now.getDate()).padStart(2, '0');
-                existing.actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
+                logAction = 'completed';
+                toastMessage = `"${title}" marked as completed! 🎉`;
+            } else if (existing.title !== title) {
+                logAction = 'edited';
+                toastMessage = `"${title}" renamed successfully!`;
+            } else {
+                logAction = 'edited';
+                toastMessage = `"${title}" updated successfully!`;
             }
 
             if (typeof window.saveData === 'function') window.saveData();
@@ -399,34 +723,19 @@
             triggerImmediateSync();
 
         } else {
+            // Adding new – use next available ID
             if (status === 'Completed') {
                 logAction = 'completed';
                 toastMessage = `"${title}" added and marked as completed! 🎉`;
-                if (year && month) {
-                    const y = parseInt(year);
-                    const m = parseInt(month);
-                    if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
-                        finishDate = `${year}-${String(m).padStart(2, '0')}`;
-                    } else {
-                        const now = new Date();
-                        finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                    }
-                } else {
-                    const now = new Date();
-                    finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                }
-                const now = new Date();
-                const currentYear = now.getFullYear();
-                const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-                const currentDay = String(now.getDate()).padStart(2, '0');
-                actualFinishDate = `${currentYear}-${currentMonth}-${currentDay}`;
+                const success = await setCompletionDates(year, month);
+                if (!success) return;
             } else if (status === 'Watching') {
                 logAction = 'watching';
                 toastMessage = `"${title}" added to your watching list! 📺`;
             }
 
             const newAnime = {
-                id: typeof window.getNextId === 'function' ? window.getNextId() : Date.now(),
+                id: getNextAvailableId(), 
                 title: title,
                 type: type,
                 episodes: episodes,
@@ -453,6 +762,10 @@
         if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
         if (typeof showToast === 'function') showToast(toastMessage, 'success');
     };
+
+    // ============================================================
+    // UI HELPERS
+    // ============================================================
 
     function syncProgressMax() {
         const episodesInput = document.getElementById('animeEpisodes');
@@ -483,7 +796,6 @@
                 durationInput.value = defaultDur;
             }
         }
-
         durationInput.disabled = !editable;
     }
 
@@ -508,13 +820,17 @@
             }
             const animeId = row.getAttribute('data-id');
             if (animeId && typeof window.editAnime === 'function') {
-                console.log('🖱️ Row clicked, ID:', animeId);
+                console.log(' Row clicked, ID:', animeId);
                 window.editAnime(animeId);
             }
         };
         tableBody.addEventListener('click', clickHandler);
         tableBody._clickHandler = clickHandler;
     }
+
+    // ============================================================
+    // MODAL SETUP
+    // ============================================================
 
     function setupModalHandlers() {
         const addModal = document.getElementById('addAnimeModal');
@@ -651,7 +967,7 @@
         } else {
             setTimeout(attachTableClickHandler, 300);
         }
-        console.log('✅ Modal system initialized');
+        console.log(' Modal system initialized');
     }
 
     window.initModalSystem = initModalSystem;
@@ -723,6 +1039,6 @@
             const genreCount = Array.isArray(anime.genres) ? anime.genres.length : 0;
             showToast(`✓ Selected: ${anime.title} (${genreCount} genres)`, 'success');
         }
-        console.log('✅ Anime selected successfully');
+        console.log(' Anime selected successfully');
     };
 })();

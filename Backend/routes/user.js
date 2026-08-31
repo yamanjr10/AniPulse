@@ -234,17 +234,29 @@ router.get('/avatar/:userId', async (req, res) => {
   }
 });
 
-// Full profile (for social view)
+// ============================================================
+// FULL PROFILE 
+// ============================================================
 router.get('/full-profile/:userId', verifyToken, async (req, res) => {
   const { userId } = req.params;
   const currentUserId = req.userId;
   try {
+    
     let userDoc = await db.collection(COLLECTIONS.USER_PROFILES).doc(userId).get();
     if (!userDoc.exists) userDoc = await db.collection(COLLECTIONS.USERS).doc(userId).get();
     if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
     const userData = userDoc.data();
-    const displayName = userData.name || userData.username || 'Anime Fan';
 
+    // --- Extract all profile fields ---
+    const displayName = userData.name || userData.username || 'Anime Fan';
+    const avatar = userData.avatar || null;
+    const cover = userData.cover || null;
+    const bio = userData.bio || '';
+    const status = userData.status || '';
+    const favoriteAnime = userData.favoriteAnime || [];
+    const social = userData.social || {};
+
+    // Fetch anime list
     const animeList = await getUserAnimeList(userId);
     const sorted = [...animeList].sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
 
@@ -260,15 +272,18 @@ router.get('/full-profile/:userId', verifyToken, async (req, res) => {
     });
     const totalHours = Math.round(totalMinutes / 60);
 
+    // Achievements
     const achievementsDoc = await db.collection(COLLECTIONS.ACHIEVEMENTS).doc(userId).get();
     const unlocked = achievementsDoc.exists ? achievementsDoc.data().unlocked || [] : [];
 
+    // Level & XP
     const totalXP = userData.totalXP || 0;
     const level = getLevelFromXP(totalXP);
     const levelTitle = getTitleForLevel(level);
     const nextXP = getXPToNextLevel(level, totalXP);
     const progress = getXPProgress(level, totalXP);
 
+    // Friend status
     let isFriend = false;
     if (currentUserId !== userId) {
       const fDoc = await db.collection(COLLECTIONS.FRIENDS).doc(currentUserId).get();
@@ -276,13 +291,19 @@ router.get('/full-profile/:userId', verifyToken, async (req, res) => {
       isFriend = fList.includes(userId);
     }
 
+    // Activity
     const activityDoc = await db.collection(COLLECTIONS.ACTIVITY_LOGS).doc(userId).get();
     const recentActivity = activityDoc.exists ? (activityDoc.data().activities || []).slice(0, 10) : [];
 
     res.json({
       uid: userId,
       name: displayName,
-      avatar: userData.avatar || null,
+      avatar: avatar,
+      cover: cover,                     
+      bio: bio,                         
+      status: status,                   
+      favoriteAnime: favoriteAnime,     
+      social: social,                   
       level,
       levelTitle,
       totalXP,
@@ -314,7 +335,9 @@ router.get('/full-profile/:userId', verifyToken, async (req, res) => {
   }
 });
 
-// ========== NOTIFICATION SYSTEM ==========
+// ============================================================
+// NOTIFICATION SYSTEM
+// ============================================================
 router.get('/notifications', verifyToken, async (req, res) => {
   const userId = req.userId;
   try {

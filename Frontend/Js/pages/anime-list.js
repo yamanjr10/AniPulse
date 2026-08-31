@@ -1,6 +1,5 @@
 // ============================================
-// ANIME LIST – Original Style + Search Override
-// Non‑completed anime always shown when status = All
+// ANIME LIST 
 // ============================================
 
 (function () {
@@ -158,6 +157,37 @@
         }).join('');
     };
 
+    // ─── SET DEFAULT FILTERS TO CURRENT MONTH/YEAR ──
+    function setDefaultFilters() {
+        const now = new Date();
+        const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+        const currentYear = String(now.getFullYear());
+
+        const monthSelect = document.getElementById('monthFilter');
+        const yearSelect = document.getElementById('yearFilter');
+
+        if (monthSelect) {
+            monthSelect.value = currentMonth;
+        }
+
+        if (yearSelect) {
+            let yearExists = false;
+            for (let opt of yearSelect.options) {
+                if (opt.value === currentYear) {
+                    yearExists = true;
+                    break;
+                }
+            }
+            if (!yearExists) {
+                const opt = document.createElement('option');
+                opt.value = currentYear;
+                opt.textContent = currentYear;
+                yearSelect.appendChild(opt);
+            }
+            yearSelect.value = currentYear;
+        }
+    }
+
     // ─── MAIN UPDATE FUNCTION ──────────────────────
     window.updateAnimeDisplay = function () {
         const data = window.animeData || [];
@@ -184,15 +214,12 @@
             year = 'all';
         }
 
-        // 3. Month/Year filter – but only for completed anime
-        // ✅ Non‑completed anime are always included when status is 'all'
+        // 3. Month/Year filter 
         if (month !== 'all' || year !== 'all') {
             filtered = filtered.filter(a => {
-                // Always keep non‑completed anime (they have no finish date to filter by)
                 if (a.userStatus !== 'Completed') {
                     return true;
                 }
-                // For completed anime, apply the date filter
                 const dateStr = a.actualFinishDate || a.finishDate || a.completedTimestamp;
                 if (!dateStr) return false;
                 const d = parseDateSafely(dateStr);
@@ -215,7 +242,7 @@
 
     // ─── INIT ──────────────────────────────────────
     function initAnimeList() {
-        console.log('📋 Initializing Anime List (non‑completed always shown when status=All)');
+        console.log(' Initializing Anime List (non‑completed always shown when status=All)');
 
         const filters = getFilters();
         const searchInput = getSearchInput();
@@ -255,6 +282,9 @@
             }
         });
 
+        // ── NEW: Set default month/year to current date ──
+        setDefaultFilters();
+
         let attempts = 0;
         function initialRender() {
             if (window.animeData && window.animeData.length > 0) {
@@ -268,7 +298,7 @@
         }
         setTimeout(initialRender, 100);
 
-        console.log('✅ Anime List initialized');
+        console.log(' Anime List initialized with current month/year filter');
     }
 
     if (document.readyState === 'loading') {
