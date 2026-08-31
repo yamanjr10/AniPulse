@@ -14,7 +14,7 @@
     // --- Update stats (with retry, verification, and auto-restore) ---
     window.updateStats = function (retries = 0) {
         if (_updatingStats) {
-            console.log('⏳ Stats update already in progress, skipping...');
+            console.log(' Stats update already in progress, skipping...');
             return;
         }
         _updatingStats = true;
@@ -25,14 +25,14 @@
             const hasData = Array.isArray(data) && data.length > 0;
 
             if ((!hasData || !hasStatsFn) && retries < 15) {
-                console.log(`🔄 updateStats retry ${retries + 1}/15...`);
+                console.log(` updateStats retry ${retries + 1}/15...`);
                 _updatingStats = false;
                 setTimeout(() => window.updateStats(retries + 1), 500);
                 return;
             }
 
             if (!hasData) {
-                console.warn('⚠️ No anime data found after retries – stats will show 0');
+                console.warn(' No anime data found after retries – stats will show 0');
             }
 
             const monthlyStats = hasStatsFn
@@ -69,7 +69,7 @@
                 const currentValue = parseInt(completedEl.textContent) || 0;
                 const expectedValue = monthlyStats.completed;
                 if (currentValue !== expectedValue && retries < 10) {
-                    console.warn(`⚠️ DOM mismatch: expected ${expectedValue}, got ${currentValue}. Retrying...`);
+                    console.warn(` DOM mismatch: expected ${expectedValue}, got ${currentValue}. Retrying...`);
                     _updatingStats = false;
                     setTimeout(() => window.updateStats(retries + 1), 300);
                     return;
@@ -80,7 +80,7 @@
                 window.updateStatCardsWithChanges({ debug: false });
             }
 
-            console.log('✅ Stats updated:', monthlyStats);
+            console.log(' Stats updated:', monthlyStats);
 
         } finally {
             _updatingStats = false;
@@ -90,7 +90,7 @@
     // --- Force restore stats if they get reset ---
     window.restoreStats = function () {
         if (_lastStatsValues) {
-            console.log('🔄 Restoring stats after potential reset...');
+            console.log(' Restoring stats after potential reset...');
             const stats = _lastStatsValues;
             const els = {
                 completed: document.getElementById('completed-count'),
@@ -126,7 +126,7 @@
                         expected = isNaN(raw) ? 0 : Math.floor(raw);
                     }
                     if (current !== expected && expected !== undefined) {
-                        console.warn(`⚠️ Stat ${id} was reset to ${current}, restoring to ${expected}`);
+                        console.warn(` Stat ${id} was reset to ${current}, restoring to ${expected}`);
                         el.textContent = expected;
                     }
                 }
@@ -521,6 +521,11 @@
                         if (typeof window.saveData === 'function') window.saveData();
                         if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
 
+                        // Explicitly sync to cloud after import to ensure data is uploaded immediately
+                        if (window.dualStorage && typeof window.dualStorage.syncToCloud === 'function') {
+                            window.dualStorage.syncToCloud().catch(err => console.warn('Sync after import failed:', err));
+                        }
+
                         let message = '';
                         if (addedCount > 0) message += `Added ${addedCount} new anime. `;
                         if (updatedCount > 0) message += `Updated ${updatedCount} existing anime.`;
@@ -678,7 +683,7 @@
                     const badge = sidebarLevel.querySelector('.level-badge');
                     const title = sidebarLevel.querySelector('.level-title');
                     if (!badge || !title || !badge.textContent.trim().startsWith('Lv.')) {
-                        console.warn('⚠️ Sidebar level was overwritten – restoring...');
+                        console.warn(' Sidebar level was overwritten – restoring...');
                         window.updateSidebarUserInfo();
                     }
                 }
@@ -767,9 +772,6 @@
         `;
     };
 
-    // ============================================
-    // 🔄 ENHANCED updateAllComponents – Auto‑refresh for ALL pages
-    // ============================================
     window.updateAllComponents = function () {
         // ---- Dashboard ----
         if (typeof window.updateStats === 'function') window.updateStats();
@@ -804,7 +806,7 @@
             }
         }
 
-        // ---- ✅ WATCHLIST AUTO‑REFRESH ----
+        // ----  WATCHLIST AUTO‑REFRESH ----
         const watchlistPage = document.getElementById('watchlist-page');
         if (watchlistPage && watchlistPage.classList.contains('active')) {
             const state = window.watchlistState || { status: 'all', page: 1, search: '' };
@@ -813,7 +815,7 @@
             }
         }
 
-        // ---- ✅ ACHIEVEMENTS AUTO‑REFRESH ----
+        // ----  ACHIEVEMENTS AUTO‑REFRESH ----
         const achievementsPage = document.getElementById('achievements-page');
         if (achievementsPage && achievementsPage.classList.contains('active')) {
             if (typeof window.updateAchievements === 'function') {
@@ -821,7 +823,7 @@
             }
         }
 
-        // ---- ✅ COMMUNITY AUTO‑REFRESH ----
+        // ----  COMMUNITY AUTO‑REFRESH ----
         const communityPage = document.getElementById('community-page');
         if (communityPage && communityPage.classList.contains('active')) {
             // Always refresh friends and requests
@@ -994,14 +996,14 @@
         setupStatWatcher();
 
         window.addEventListener('animeUpdate', function () {
-            console.log('🔄 Data updated, refreshing stats...');
+            console.log(' Data updated, refreshing stats...');
             if (typeof window.updateStats === 'function') window.updateStats();
             if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
         });
 
         window.addEventListener('storage', function (e) {
             if (e.key === 'animeData') {
-                console.log('🔄 animeData changed in another tab, refreshing...');
+                console.log(' animeData changed in another tab, refreshing...');
                 if (typeof window.updateAllComponents === 'function') {
                     window.updateAllComponents();
                 }
@@ -1026,7 +1028,7 @@
         }, 400);
 
         setTimeout(() => {
-            console.log('🔄 Performing second refresh to ensure stats are loaded...');
+            console.log(' Performing second refresh to ensure stats are loaded...');
             if (typeof window.updateAllComponents === 'function') {
                 window.updateAllComponents();
             }
@@ -1042,7 +1044,7 @@
         }, 3000);
 
         initQuickActions();
-        console.log('✅ Dashboard initialized');
+        console.log(' Dashboard initialized');
     }
 
     window.initDashboard = initDashboard;

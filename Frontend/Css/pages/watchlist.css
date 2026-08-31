@@ -754,20 +754,12 @@
     color: var(--text-primary);
 }
 
-/* Arrows via pseudo-elements – only on .arrow-btn */
-.page-btn.arrow-btn::before,
-.page-btn.arrow-btn::after {
-    content: '';
-}
-
 .page-btn.arrow-btn:first-child::before {
-    content: '‹';
     font-size: 1.3rem;
     line-height: 1;
 }
 
 .page-btn.arrow-btn:last-child::after {
-    content: '›';
     font-size: 1.3rem;
     line-height: 1;
 }

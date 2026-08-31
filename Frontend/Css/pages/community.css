@@ -1473,7 +1473,7 @@
 }
 
 /* ============================================
-   PROFILE HEADER (with cover background)
+   PROFILE HEADER
    ============================================ */
 .profile-header-section {
     position: relative;
@@ -1490,9 +1490,7 @@
     background-image: none;
 }
 
-/* Darker overlay for text readability */
 .profile-header-section::before {
-    content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(to right, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0.2) 100%) !important;
@@ -1587,13 +1585,12 @@
     transform: translateY(-2px);
 }
 
-/* Remove the separate cover wrapper – we no longer need it */
 .profile-cover-wrapper {
     display: none !important;
 }
 
 /* ============================================
-   PROFILE DETAILS ROW (Bio, Fav, Socials)
+   PROFILE DETAILS ROW 
    ============================================ */
 .profile-details-row {
     display: flex;
@@ -1620,7 +1617,6 @@
     flex-shrink: 0;
 }
 
-/* ★ Fav anime tags + Social icons – SAME LINE ★ */
 .profile-details-row .profile-fav-tags {
     display: flex;
     flex-wrap: wrap;
@@ -1653,7 +1649,6 @@
     transform: translateY(-1px);
 }
 
-/* Social icons – pushed to the right on same line */
 .profile-details-row .profile-social-icons {
     display: flex;
     align-items: center;

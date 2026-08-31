@@ -588,7 +588,7 @@
                 activityContainer.innerHTML = '<div class="empty-state">No recent activity</div>';
             }
         }
-        console.log('✅ User profile rendered successfully');
+        console.log(' User profile rendered successfully');
     }
 
     // ============================================
@@ -788,7 +788,7 @@
                 activityContainer.innerHTML = '<div class="empty-state">No recent activity</div>';
             }
         }
-        console.log('✅ User profile rendered with fallback');
+        console.log(' User profile rendered with fallback');
     }
 
     // ============================================
@@ -1688,7 +1688,7 @@
             leaderboardTab.addEventListener('click', () => setTimeout(window.initLeaderboard, 100));
         }
 
-        console.log('✅ Community page initialized');
+        console.log(' Community page initialized');
     }
 
     window.initCommunityPage = initCommunityPage;

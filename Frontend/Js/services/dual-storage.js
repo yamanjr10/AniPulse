@@ -1,5 +1,5 @@
 // ============================================
-// DUAL STORAGE MANAGER – Full Cloud Sync (Queue + Daily XP + Streak)
+// DUAL STORAGE MANAGER – Full Cloud Sync
 // ============================================
 
 class DualStorageManager {
@@ -8,6 +8,7 @@ class DualStorageManager {
         this.syncQueue = [];
         this.saveDebounceTimeout = null;
         this.lastSyncTime = localStorage.getItem('lastCloudSyncTime');
+        this._syncDebounceTimeout = null;
         this.init();
     }
 
@@ -16,7 +17,18 @@ class DualStorageManager {
         window.addEventListener('online', () => this.handleOnline());
         window.addEventListener('offline', () => this.handleOffline());
         setInterval(() => this.autoSync(), 120000);
-        console.log('💾 Dual Storage Manager initialized');
+
+        // Listen for anime data changes (add, edit, delete) and sync to cloud with debounce
+        document.addEventListener('animeUpdate', () => {
+            if (!this.isLoggedIn() || !navigator.onLine) return;
+            clearTimeout(this._syncDebounceTimeout);
+            this._syncDebounceTimeout = setTimeout(() => {
+                this.syncToCloud();
+                this._syncDebounceTimeout = null;
+            }, 2000);
+        });
+
+        console.log(' Dual Storage Manager initialized');
     }
 
     getToken() {
@@ -35,7 +47,7 @@ class DualStorageManager {
             attempts++;
         }
         if (window.api) {
-            console.log('✅ API ready for dual storage');
+            console.log(' API ready for dual storage');
             setTimeout(() => {
                 if (this.isLoggedIn() && navigator.onLine) {
                     this.syncToCloud();
@@ -88,7 +100,7 @@ class DualStorageManager {
     }
 
     // ============================================
-    // SYNC TO CLOUD – Uploads all local data (including queue, daily XP, streak)
+    // SYNC TO CLOUD 
     // ============================================
     async syncToCloud() {
         const token = this.getToken();
@@ -142,11 +154,11 @@ class DualStorageManager {
                 dailyXP: { date: today, xp: todayXP },
                 xpPendingQueue,
                 lastResetDate,
-                streakData, // <-- NEW
+                streakData,
                 lastModified: now
             };
 
-            console.log(`📤 Syncing ${animeData.length} anime, ${xpPendingQueue.length} queued, streak ${streakData.streak} days...`);
+            console.log(` Syncing ${animeData.length} anime, ${xpPendingQueue.length} queued, streak ${streakData.streak} days...`);
 
             const response = await fetch(`${window.API_BASE_URL}/api/sync/sync-all`, {
                 method: 'POST',
@@ -168,8 +180,8 @@ class DualStorageManager {
                 localStorage.setItem('lastCloudSyncTime', now);
                 localStorage.setItem('cloudSyncEnabled', 'true');
                 localStorage.setItem('animeDataLastModified', now);
-                this.showSyncStatus(`✅ Synced ${animeData.length} anime, ${xpPendingQueue.length} queued, streak ${streakData.streak} (Level ${levelData.level})`, 'success');
-                console.log('✅ Full sync completed (queue, daily XP, streak)');
+                this.showSyncStatus(` Synced ${animeData.length} anime, ${xpPendingQueue.length} queued, streak ${streakData.streak} (Level ${levelData.level})`, 'success');
+                console.log(' Full sync completed (queue, daily XP, streak)');
                 return true;
             } else {
                 throw new Error(result.error || 'Sync failed');
@@ -297,16 +309,16 @@ class DualStorageManager {
             if (data.dailyXP) {
                 if (data.dailyXP.date === today) {
                     localStorage.setItem(`dailyXP_${today}`, data.dailyXP.xp.toString());
-                    console.log(`📊 Restored today's XP: ${data.dailyXP.xp}`);
+                    console.log(` Restored today's XP: ${data.dailyXP.xp}`);
                 } else {
-                    console.log(`📊 Cloud dailyXP date (${data.dailyXP.date}) differs from today (${today}) – keeping local today's XP.`);
+                    console.log(`Cloud dailyXP date (${data.dailyXP.date}) differs from today (${today}) – keeping local today's XP.`);
                 }
             }
 
             // ---- Pending Queue: cloud overwrites local completely ----
             if (data.xpPendingQueue) {
                 localStorage.setItem('xpPendingQueue', JSON.stringify(data.xpPendingQueue));
-                console.log(`📦 Restored ${data.xpPendingQueue.length} queued XP items from cloud`);
+                console.log(` Restored ${data.xpPendingQueue.length} queued XP items from cloud`);
             }
 
             // ---- Last Reset Date ----
@@ -318,7 +330,7 @@ class DualStorageManager {
             if (data.streakData) {
                 localStorage.setItem('streak', data.streakData.streak.toString());
                 localStorage.setItem('lastActive', data.streakData.lastActive);
-                console.log(`🔥 Streak restored: ${data.streakData.streak} days (last active: ${data.streakData.lastActive})`);
+                console.log(`Streak restored: ${data.streakData.streak} days (last active: ${data.streakData.lastActive})`);
             }
 
             // ---- Refresh queue UI ----
@@ -330,7 +342,7 @@ class DualStorageManager {
             this.lastSyncTime = new Date().toISOString();
             localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
 
-            this.showSyncStatus(`✅ Synced ${mergedAnime.length} anime, ${mergedActivity.length} activities, ${data.xpPendingQueue?.length || 0} queued XP, streak ${data.streakData?.streak || 0}`, 'success');
+            this.showSyncStatus(` Synced ${mergedAnime.length} anime, ${mergedActivity.length} activities, ${data.xpPendingQueue?.length || 0} queued XP, streak ${data.streakData?.streak || 0}`, 'success');
 
             // ---- Refresh everything else ----
             if (typeof updateAllComponents === 'function') updateAllComponents();
@@ -418,7 +430,7 @@ class DualStorageManager {
     }
 
     handleOnline() {
-        console.log('🟢 Online - syncing to cloud...');
+        console.log(' Online - syncing to cloud...');
         this.syncToCloud();
         // Also try to load cloud data to get latest changes
         if (this.isLoggedIn()) {
@@ -427,7 +439,7 @@ class DualStorageManager {
     }
 
     handleOffline() {
-        console.log('🔴 Offline - changes will sync when online');
+        console.log(' Offline - changes will sync when online');
         this.showSyncStatus('Offline mode - changes will sync when online', 'warning');
     }
 }
@@ -437,12 +449,12 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             window.dualStorage = new DualStorageManager();
-            console.log('✅ Dual Storage Manager ready');
+            console.log(' Dual Storage Manager ready');
         }, 1000);
     });
 } else {
     setTimeout(() => {
         window.dualStorage = new DualStorageManager();
-        console.log('✅ Dual Storage Manager ready');
+        console.log(' Dual Storage Manager ready');
     }, 1000);
 }
