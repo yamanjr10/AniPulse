@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
-    <!-- Firebase initializer (fetches config from backend) -->
+    <!-- Firebase initializer -->
     <script src="/Frontend/Js/firebase-init.js" defer></script>
 
     <!-- Fonts -->
@@ -27,6 +27,10 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         crossorigin="anonymous" />
+
+    <!-- Cropper.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <!-- Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
@@ -1511,28 +1515,33 @@
                 <div class="settings-content">
                     <!-- ===== TAB 1: PROFILE ===== -->
                     <div class="settings-tab-content active" id="tab-profile">
-                        <!-- Profile Preview -->
-                        <div class="profile-preview">
-                            <img loading="lazy"
-                                src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
-                                alt="User Avatar" class="profile-preview-avatar" id="profilePreviewAvatar" />
-                            <div class="profile-preview-info">
-                                <div class="profile-preview-name" id="profilePreviewName">
-                                    Aris
-                                </div>
-                                <div class="profile-preview-join-date">
-                                    <i class="fas fa-calendar-plus" aria-hidden="true"></i>
-                                    <span id="memberSinceText">Member since May 2026</span>
+                    
+                        <!-- ===== PROFILE PREVIEW (Banner) ===== -->
+                        <div id="profilePreviewBanner">
+                            <img id="coverPreviewImage" src="" alt="Cover" />
+                            <div class="banner-gradient"></div>
+                            <div class="banner-content">
+                                <img loading="lazy" src="https://ui-avatars.com/api/?name=Anime+User&background=6a5acd&color=fff"
+                                    alt="User Avatar" class="profile-preview-avatar" id="profilePreviewAvatar" />
+                                <div class="profile-preview-info">
+                                    <div class="profile-preview-name" id="profilePreviewName">Aris</div>
+                                    <div class="profile-preview-join-date">
+                                        <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                                        <span id="memberSinceText">Member since May 2026</span>
+                                    </div>
+                                    <div id="profilePreviewDetails">
+                                        <span id="previewBio"></span>
+                                        <span id="previewStatus"></span>
+                                        <div id="previewFavAnime"></div>
+                                        <div id="previewSocials"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Profile Settings -->
+                    
+                        <!-- ===== SECTION 1: BASIC PROFILE ===== -->
                         <div class="settings-group">
-                            <h3>
-                                <i class="fas fa-user" aria-hidden="true"></i> Profile
-                                Settings
-                            </h3>
+                            <h3><i class="fas fa-user" aria-hidden="true"></i> Basic Info</h3>
                             <div class="settings-item">
                                 <label for="usernameInput">Display Name</label>
                                 <input type="text" id="usernameInput" placeholder="Enter your display name" />
@@ -1541,19 +1550,91 @@
                                 <label for="avatarInput">Profile Photo</label>
                                 <div class="file-input-wrapper">
                                     <input type="file" id="avatarInput" accept="image/*" />
-                                    <div class="file-input-btn">
-                                        <i class="fas fa-upload" aria-hidden="true"></i> Choose
-                                        Image
-                                    </div>
+                                    <div class="file-input-btn"><i class="fas fa-upload" aria-hidden="true"></i> Choose Image</div>
                                 </div>
                             </div>
                             <div class="settings-item">
-                                <button id="resetAvatar" class="btn btn-secondary">
-                                    <i class="fas fa-undo" aria-hidden="true"></i> Reset to
-                                    Default Avatar
-                                </button>
+                                <button id="resetAvatar" class="btn btn-secondary"><i class="fas fa-undo" aria-hidden="true"></i> Reset to
+                                    Default Avatar</button>
                             </div>
                         </div>
+                    
+                        <!-- ===== SECTION 2: PROFILE DETAILS ===== -->
+                        <div class="settings-group">
+                            <h3><i class="fas fa-id-card" aria-hidden="true"></i> Profile Details</h3>
+                    
+                            <!-- Cover Image -->
+                            <div class="settings-item">
+                                <label for="coverInput">Cover Image</label>
+                                <div class="file-input-wrapper">
+                                    <input type="file" id="coverInput" accept="image/*" />
+                                    <div class="file-input-btn"><i class="fas fa-upload" aria-hidden="true"></i> Choose Cover</div>
+                                </div>
+                                <button id="removeCoverBtn" class="btn btn-secondary" style="margin-top:8px; display:none;">
+                                    <i class="fas fa-times" aria-hidden="true"></i> Remove Cover
+                                </button>
+                            </div>
+                    
+                            <!-- Bio -->
+                            <div class="settings-item">
+                                <label for="profileBio">Bio</label>
+                                <textarea id="profileBio" rows="3" placeholder="Tell us about yourself..." maxlength="200"></textarea>
+                                <small id="bioCharCount">0 / 200</small>
+                            </div>
+                    
+                            <!-- Custom Status -->
+                            <div class="settings-item">
+                                <label for="profileStatus">Custom Status</label>
+                                <input type="text" id="profileStatus" placeholder="e.g., Currently watching Frieren" maxlength="60" />
+                            </div>
+                    
+                            <!-- Favorite Anime -->
+                        <div class="settings-item">
+                            <label for="favTagInput">Favorite Anime</label>
+                            <div class="tag-input-wrapper">
+                                <div class="tag-input-container" id="favTagContainer">
+                                    <!-- Selected tags will appear here -->
+                                    <input type="text" id="favTagInput" placeholder="Search and add your favorite anime..."
+                                        autocomplete="off" />
+                                </div>
+                                <div class="tag-dropdown" id="favTagDropdown">
+                                    <!-- Search results will appear here -->
+                                    <div class="tag-dropdown-empty">Start typing to search...</div>
+                                </div>
+                            </div>
+                            <small>Type to search, click to add, click ✕ to remove</small>
+                        </div>
+                        </div>
+                    
+                        <!-- ===== SECTION 3: SOCIAL LINKS ===== -->
+                        <div class="settings-group">
+                            <h3><i class="fas fa-share-alt" aria-hidden="true"></i> Social Links</h3>
+                            <div class="settings-item">
+                                <label for="socialAnilist">AniList</label>
+                                <input type="text" id="socialAnilist" placeholder="Your AniList username" />
+                            </div>
+                            <div class="settings-item">
+                                <label for="socialMAL">MyAnimeList</label>
+                                <input type="text" id="socialMAL" placeholder="Your MyAnimeList username" />
+                            </div>
+                            <div class="settings-item">
+                                <label for="socialTwitter">Twitter</label>
+                                <input type="text" id="socialTwitter" placeholder="@username" />
+                            </div>
+                            <div class="settings-item">
+                                <label for="socialInstagram">Instagram</label>
+                                <input type="text" id="socialInstagram" placeholder="@username" />
+                            </div>
+                        </div>
+                    
+                        <!-- ===== SAVE & RESET ===== -->
+                        <div style="display:flex; gap:12px; margin-top:20px;">
+                            <button id="saveProfileBtn" class="btn btn-primary"><i class="fas fa-save" aria-hidden="true"></i> Save
+                                Profile</button>
+                            <button id="resetProfileBtn" class="btn btn-secondary"><i class="fas fa-undo" aria-hidden="true"></i> Reset to
+                                Defaults</button>
+                        </div>
+                    
                     </div>
 
                     <!-- ===== TAB 2: APPEARANCE ===== -->
@@ -1940,13 +2021,14 @@
                 <h2 class="modal-title" id="userProfileTitle">
                     <i class="fas fa-user-circle" aria-hidden="true"></i> User Profile
                 </h2>
-                <button class="close-modal" onclick="closeUserProfileModal()" aria-label="Close modal">
-                    &times;
-                </button>
+                <button class="close-modal" onclick="closeUserProfileModal()" aria-label="Close modal">&times;</button>
             </div>
             <div class="profile-modal-body">
-                <!-- Profile Header -->
-                <div class="profile-header-section">
+    
+                <!-- ===== Profile Header (Avatar + Name + Badges) ===== -->
+                <!-- Profile Header (with cover as background) -->
+                <div class="profile-header-section" id="profileHeaderSection">
+                    <!-- Cover is applied as background-image via inline style or JS -->
                     <div class="profile-avatar-large">
                         <img id="profileAvatar" src="" alt="" />
                         <div class="profile-status-dot"></div>
@@ -1962,8 +2044,16 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Stats Grid -->
+    
+                <!-- ===== Bio, Status, Fav Anime, Socials ===== -->
+                <div class="profile-details-row">
+                    <div id="profileBioText" class="profile-bio-text"></div>
+                    <div id="profileStatusText" class="profile-status-bubble"></div>
+                    <div id="profileFavAnime" class="profile-fav-tags"></div>
+                    <div id="profileSocials" class="profile-social-icons"></div>
+                </div>
+    
+                <!-- ===== Stats Grid ===== -->
                 <div class="profile-stats-grid">
                     <div class="profile-stat-item">
                         <span class="stat-value" id="profileTotalAnime">0</span>
@@ -1982,8 +2072,8 @@
                         <span class="stat-label">Hrs</span>
                     </div>
                 </div>
-
-                <!-- Tabs -->
+    
+                <!-- ===== Tabs ===== -->
                 <div class="profile-tabs">
                     <button class="profile-tab active" data-tab="completed">
                         <i class="fas fa-check-circle" aria-hidden="true"></i> Completed
@@ -2001,46 +2091,31 @@
                         <i class="fas fa-history" aria-hidden="true"></i> Activity
                     </button>
                 </div>
-
-                <!-- Tab Content -->
+    
+                <!-- ===== Tab Content ===== -->
                 <div id="profileTabCompleted" class="profile-tab-content active">
                     <div class="profile-anime-grid" id="profileCompletedList">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-                            Loading...
-                        </div>
+                        <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
                     </div>
                 </div>
                 <div id="profileTabWatching" class="profile-tab-content">
                     <div class="profile-anime-grid" id="profileWatchingList">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-                            Loading...
-                        </div>
+                        <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
                     </div>
                 </div>
                 <div id="profileTabPlan" class="profile-tab-content">
                     <div class="profile-anime-grid" id="profilePlanList">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-                            Loading...
-                        </div>
+                        <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
                     </div>
                 </div>
                 <div id="profileTabAchievements" class="profile-tab-content">
                     <div class="profile-achievements-grid" id="profileAchievementsList">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-                            Loading...
-                        </div>
+                        <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
                     </div>
                 </div>
                 <div id="profileTabActivity" class="profile-tab-content">
                     <div class="profile-activity-list" id="profileActivityList">
-                        <div class="loading-spinner">
-                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-                            Loading...
-                        </div>
+                        <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
                     </div>
                 </div>
             </div>
@@ -2070,6 +2145,26 @@
         </div>
     </div>
 
+    <!-- ============================================ -->
+    <!-- CROP MODAL -->
+    <!-- ============================================ -->
+    <div id="cropModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="cropModalTitle" hidden>
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="cropModalTitle">Crop Image</h2>
+                <button class="close-modal" id="cropCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="crop-container" style="max-height: 60vh; overflow: hidden;">
+                    <img id="cropImage" src="" alt="Crop preview" style="max-width: 100%;" />
+                </div>
+                <div class="form-actions" style="margin-top: 16px;">
+                    <button type="button" class="btn btn-secondary" id="cropCancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="cropConfirmBtn">Crop & Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- TOAST CONTAINER -->
     <div id="toastContainer" class="toast-container" role="status" aria-live="polite"></div>

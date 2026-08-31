@@ -318,7 +318,6 @@
 
         if (!Array.isArray(unlockedIds)) unlockedIds = [];
 
-        // Force a 3-column grid using !important to override any external CSS
         container.style.cssText = `
             display: grid !important;
             grid-template-columns: repeat(3, 1fr) !important;
@@ -348,41 +347,18 @@
                     gap:10px;
                     transition:all 0.2s ease;
                 ">
-                    <div style="
-                        font-size:18px;
-                        color:${iconColor};
-                        width:28px;
-                        text-align:center;
-                        flex-shrink:0;
-                    ">
+                    <div style="font-size:18px;color:${iconColor};width:28px;text-align:center;flex-shrink:0;">
                         <i class="fas ${ach.icon}"></i>
                     </div>
                     <div style="flex:1;min-width:0;">
-                        <div style="
-                            font-weight:600;
-                            font-size:0.78rem;
-                            color:${titleColor};
-                            line-height:1.3;
-                        ">
+                        <div style="font-weight:600;font-size:0.78rem;color:${titleColor};line-height:1.3;">
                             ${window.escapeHtml(ach.title)}
                         </div>
-                        <div style="
-                            font-size:0.62rem;
-                            color:#6B7280;
-                            line-height:1.3;
-                            margin-top:1px;
-                        ">
+                        <div style="font-size:0.62rem;color:#6B7280;line-height:1.3;margin-top:1px;">
                             ${window.escapeHtml(ach.desc)}
                         </div>
                     </div>
-                    <div style="
-                        font-size:0.55rem;
-                        font-weight:600;
-                        color:${statusColor};
-                        white-space:nowrap;
-                        flex-shrink:0;
-                        padding-left:4px;
-                    ">
+                    <div style="font-size:0.55rem;font-weight:600;color:${statusColor};white-space:nowrap;flex-shrink:0;padding-left:4px;">
                         ${statusText}
                     </div>
                 </div>
@@ -392,13 +368,16 @@
         container.innerHTML = html;
     }
 
-    // Main rendering function (for API data)
+    // ============================================
+    // RENDER FULL USER PROFILE (with cover as background)
+    // ============================================
     function renderUserProfile(profile) {
         console.log('📝 Rendering user profile...');
         safeSetText('profileName', profile.name || profile.username || 'User');
         safeSetText('profileLevel', `Lv.${profile.level || 1}`);
         safeSetText('profileTitle', profile.levelTitle || profile.title || 'Newbie');
 
+        // XP Progress
         const xpFillEl = document.getElementById('profileXpFill');
         if (xpFillEl) {
             const progress = Math.min(100, Math.max(0, profile.xpProgress || 0));
@@ -414,6 +393,7 @@
             `;
         }
 
+        // Avatar
         const avatarImg = document.getElementById('profileAvatar');
         if (avatarImg) {
             const avatarUrl = profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || 'User')}&background=6366F1&color=fff`;
@@ -423,6 +403,7 @@
             };
         }
 
+        // Stats
         function updateStatElement(id, value) {
             const el = document.getElementById(id);
             if (el) {
@@ -438,6 +419,7 @@
         updateStatElement('profileEpisodes', profile.stats?.totalEpisodes);
         updateStatElement('profileHours', profile.stats?.totalHours);
 
+        // Friend button
         const friendBtn = document.getElementById('profileFriendBtn');
         if (friendBtn) {
             if (!profile.isCurrentUser) {
@@ -461,13 +443,119 @@
             }
         }
 
+        // ============================================
+        // 🆕 COVER AS BACKGROUND OF HEADER SECTION
+        // ============================================
+        const headerSection = document.getElementById('profileHeaderSection');
+        if (headerSection) {
+            if (profile.cover) {
+                headerSection.style.backgroundImage = `url('${profile.cover}')`;
+                headerSection.style.backgroundSize = 'cover';
+                headerSection.style.backgroundPosition = 'center';
+                headerSection.style.backgroundColor = 'transparent';
+            } else {
+                headerSection.style.backgroundImage = 'none';
+                headerSection.style.backgroundColor = 'var(--bg-card)';
+            }
+        }
+
+        // ============================================
+        // 🆕 BIO
+        // ============================================
+        const bioEl = document.getElementById('profileBioText');
+        if (bioEl) {
+            bioEl.textContent = profile.bio || '';
+            bioEl.style.display = profile.bio ? 'block' : 'none';
+        }
+
+        // ============================================
+        // 🆕 STATUS (Instagram-notes style)
+        // ============================================
+        const statusEl = document.getElementById('profileStatusText');
+        if (statusEl) {
+            const statusText = profile.status || '';
+            statusEl.textContent = statusText;
+            statusEl.style.display = statusText ? 'inline-block' : 'none';
+            const lower = statusText.toLowerCase();
+            if (lower.includes('watch') || lower.includes('view')) {
+                statusEl.setAttribute('data-status', 'watching');
+            } else if (lower.includes('read') || lower.includes('book')) {
+                statusEl.setAttribute('data-status', 'reading');
+            } else if (lower.includes('game') || lower.includes('play')) {
+                statusEl.setAttribute('data-status', 'gaming');
+            } else if (lower.includes('break') || lower.includes('rest')) {
+                statusEl.setAttribute('data-status', 'break');
+            } else if (lower.includes('work') || lower.includes('study')) {
+                statusEl.setAttribute('data-status', 'working');
+            } else {
+                statusEl.removeAttribute('data-status');
+            }
+        }
+
+        // ============================================
+        // 🆕 FAVORITE ANIME (as tags)
+        // ============================================
+        const favContainer = document.getElementById('profileFavAnime');
+        if (favContainer) {
+            favContainer.innerHTML = '';
+            const favs = profile.favoriteAnime || [];
+            const animeMap = window.animeData ? window.animeData.reduce((map, a) => { map[a.id] = a.title; return map; }, {}) : {};
+            if (favs.length > 0) {
+                favs.forEach(id => {
+                    const title = animeMap[id] || 'Unknown';
+                    const tag = document.createElement('span');
+                    tag.className = 'fav-tag';
+                    tag.textContent = title;
+                    favContainer.appendChild(tag);
+                });
+                favContainer.style.display = 'flex';
+            } else {
+                favContainer.style.display = 'none';
+            }
+        }
+
+        // ============================================
+        // 🆕 SOCIAL LINKS
+        // ============================================
+        const socialsContainer = document.getElementById('profileSocials');
+        if (socialsContainer) {
+            socialsContainer.innerHTML = '';
+            const social = profile.social || {};
+            const icons = {
+                anilist: 'fa-list-ul',
+                myanimelist: 'fa-book',
+                twitter: 'fa-twitter',
+                instagram: 'fa-instagram'
+            };
+            const socialKeys = Object.keys(social).filter(k => social[k]);
+            if (socialKeys.length > 0) {
+                socialKeys.forEach(key => {
+                    const a = document.createElement('a');
+                    a.href = `https://${key}.com/${social[key]}`;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    const iconClass = (key === 'twitter' || key === 'instagram')
+                        ? `fab ${icons[key]}`
+                        : `fas ${icons[key]}`;
+                    a.innerHTML = `<i class="${iconClass}"></i>`;
+                    socialsContainer.appendChild(a);
+                });
+                socialsContainer.style.display = 'flex';
+            } else {
+                socialsContainer.style.display = 'none';
+            }
+        }
+
+        // Anime Lists
         renderProfileAnimeList('completed', profile.animeList?.completed || [], 30);
         renderProfileAnimeList('watching', profile.animeList?.watching || [], 10);
         renderProfileAnimeList('plan', profile.animeList?.planToWatch || [], 10);
 
+        // Achievements
         const unlockedAchievements = profile.achievements || [];
         renderProfileAchievements(unlockedAchievements);
 
+        // Activity
         const activities = profile.recentActivity || [];
         const activityContainer = document.getElementById('profileActivityList');
         if (activityContainer) {
@@ -503,7 +591,9 @@
         console.log('✅ User profile rendered successfully');
     }
 
-    // Fallback render (for when full profile API fails)
+    // ============================================
+    // RENDER PROFILE WITH FALLBACK (also includes cover as background)
+    // ============================================
     function renderUserProfileWithFallback(profile) {
         console.log('📝 Rendering user profile with fallback data...');
         safeSetText('profileName', profile.name || profile.username || 'User');
@@ -570,6 +660,95 @@
             }
         }
 
+        // Cover as background of header
+        const headerSection = document.getElementById('profileHeaderSection');
+        if (headerSection) {
+            if (profile.cover) {
+                headerSection.style.backgroundImage = `url('${profile.cover}')`;
+                headerSection.style.backgroundSize = 'cover';
+                headerSection.style.backgroundPosition = 'center';
+                headerSection.style.backgroundColor = 'transparent';
+            } else {
+                headerSection.style.backgroundImage = 'none';
+                headerSection.style.backgroundColor = 'var(--bg-card)';
+            }
+        }
+
+        const bioEl = document.getElementById('profileBioText');
+        if (bioEl) {
+            bioEl.textContent = profile.bio || '';
+            bioEl.style.display = profile.bio ? 'block' : 'none';
+        }
+
+        const statusEl = document.getElementById('profileStatusText');
+        if (statusEl) {
+            const statusText = profile.status || '';
+            statusEl.textContent = statusText;
+            statusEl.style.display = statusText ? 'inline-block' : 'none';
+            const lower = statusText.toLowerCase();
+            if (lower.includes('watch') || lower.includes('view')) {
+                statusEl.setAttribute('data-status', 'watching');
+            } else if (lower.includes('read') || lower.includes('book')) {
+                statusEl.setAttribute('data-status', 'reading');
+            } else if (lower.includes('game') || lower.includes('play')) {
+                statusEl.setAttribute('data-status', 'gaming');
+            } else if (lower.includes('break') || lower.includes('rest')) {
+                statusEl.setAttribute('data-status', 'break');
+            } else if (lower.includes('work') || lower.includes('study')) {
+                statusEl.setAttribute('data-status', 'working');
+            } else {
+                statusEl.removeAttribute('data-status');
+            }
+        }
+
+        const favContainer = document.getElementById('profileFavAnime');
+        if (favContainer) {
+            favContainer.innerHTML = '';
+            const favs = profile.favoriteAnime || [];
+            const animeMap = window.animeData ? window.animeData.reduce((map, a) => { map[a.id] = a.title; return map; }, {}) : {};
+            if (favs.length > 0) {
+                favs.forEach(id => {
+                    const title = animeMap[id] || 'Unknown';
+                    const tag = document.createElement('span');
+                    tag.className = 'fav-tag';
+                    tag.textContent = title;
+                    favContainer.appendChild(tag);
+                });
+                favContainer.style.display = 'flex';
+            } else {
+                favContainer.style.display = 'none';
+            }
+        }
+
+        const socialsContainer = document.getElementById('profileSocials');
+        if (socialsContainer) {
+            socialsContainer.innerHTML = '';
+            const social = profile.social || {};
+            const icons = {
+                anilist: 'fa-list-ul',
+                myanimelist: 'fa-book',
+                twitter: 'fa-twitter',
+                instagram: 'fa-instagram'
+            };
+            const socialKeys = Object.keys(social).filter(k => social[k]);
+            if (socialKeys.length > 0) {
+                socialKeys.forEach(key => {
+                    const a = document.createElement('a');
+                    a.href = `https://${key}.com/${social[key]}`;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    const iconClass = (key === 'twitter' || key === 'instagram')
+                        ? `fab ${icons[key]}`
+                        : `fas ${icons[key]}`;
+                    a.innerHTML = `<i class="${iconClass}"></i>`;
+                    socialsContainer.appendChild(a);
+                });
+                socialsContainer.style.display = 'flex';
+            } else {
+                socialsContainer.style.display = 'none';
+            }
+        }
+
         renderProfileAnimeList('completed', profile.animeList?.completed || [], 30);
         renderProfileAnimeList('watching', profile.animeList?.watching || [], 10);
         renderProfileAnimeList('plan', profile.animeList?.planToWatch || [], 10);
@@ -612,7 +791,9 @@
         console.log('✅ User profile rendered with fallback');
     }
 
-    // Local data render (for current user)
+    // ============================================
+    // LOCAL USER PROFILE (for current user)
+    // ============================================
     function renderLocalUserProfile() {
         const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -660,6 +841,11 @@
             uid: 'current',
             name: displayName,
             avatar: userProfile.avatar || null,
+            cover: userProfile.cover || null,
+            bio: userProfile.bio || '',
+            status: userProfile.status || '',
+            favoriteAnime: userProfile.favoriteAnime || [],
+            social: userProfile.social || {},
             level: level,
             levelTitle: title,
             totalXP: totalXP,
@@ -693,7 +879,9 @@
         renderUserProfile(profile);
     }
 
-    // Friends fallback (for when profile endpoint fails)
+    // ============================================
+    // FRIENDS FALLBACK (when profile endpoint fails)
+    // ============================================
     async function renderFriendsFallback(userId) {
         console.log('📝 Using friends fallback for user:', userId);
         const modal = document.getElementById('userProfileModal');
@@ -717,6 +905,11 @@
             userData = {
                 name: userProfile.name || currentUser.username || 'You',
                 avatar: userProfile.avatar || currentUser.avatar,
+                cover: userProfile.cover || null,
+                bio: userProfile.bio || '',
+                status: userProfile.status || '',
+                favoriteAnime: userProfile.favoriteAnime || [],
+                social: userProfile.social || {},
                 level: currentUser.level || 1,
                 title: currentUser.title || 'Newbie',
                 totalXP: currentUser.totalXP || 0,
@@ -732,6 +925,11 @@
                 userData = {
                     name: foundFriend.name || foundFriend.username || 'Friend',
                     avatar: foundFriend.avatar,
+                    cover: foundFriend.cover || null,
+                    bio: foundFriend.bio || '',
+                    status: foundFriend.status || '',
+                    favoriteAnime: foundFriend.favoriteAnime || [],
+                    social: foundFriend.social || {},
                     level: foundFriend.level || 1,
                     title: foundFriend.title || 'Newbie',
                     totalXP: foundFriend.totalXP || 0,
@@ -746,6 +944,11 @@
                 userData = {
                     name: 'Unknown User',
                     avatar: `https://ui-avatars.com/api/?name=Unknown&background=6366F1&color=fff`,
+                    cover: null,
+                    bio: '',
+                    status: '',
+                    favoriteAnime: [],
+                    social: {},
                     level: 1,
                     title: 'Newbie',
                     totalXP: 0,
@@ -773,7 +976,9 @@
         if (typeof showToast === 'function') showToast('Profile loaded with friends fallback', 'info');
     }
 
-    // Open profile modal
+    // ============================================
+    // OPEN PROFILE MODAL
+    // ============================================
     window.openUserProfile = async function (userId) {
         const token = localStorage.getItem('authToken');
         if (!token) {
@@ -874,7 +1079,9 @@
         _profileUserId = null;
     };
 
-    // Profile tab switching
+    // ============================================
+    // PROFILE TAB SWITCHING
+    // ============================================
     document.addEventListener('click', function (e) {
         const tab = e.target.closest('.profile-tab');
         if (!tab) return;
@@ -1460,7 +1667,7 @@
     }
 
     // ============================================
-    // INIT COMMUNITY
+    // INIT COMMUNITY PAGE
     // ============================================
     function initCommunityPage() {
         initCommunityTabs();
