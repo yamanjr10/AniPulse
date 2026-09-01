@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
         onCloudReady();
     }
 
-    timeoutId = setTimeout(renderWithLocalData, 15000);
+    timeoutId = setTimeout(renderWithLocalData, 5000);
 
     // Cleanup: remove listener and timeout when done
     const originalOnCloudReady = onCloudReady;

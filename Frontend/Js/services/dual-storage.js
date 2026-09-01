@@ -1,5 +1,5 @@
 // ============================================
-// UNIFIED SYNC MANAGER – Cloud Source of Truth
+// UNIFIED SYNC MANAGER –
 // ============================================
 
 class DualStorageManager {
@@ -17,14 +17,18 @@ class DualStorageManager {
         window.addEventListener('online', () => this.handleOnline());
         window.addEventListener('offline', () => this.handleOffline());
 
+        // Periodic sync: if dirty, upload; else just check (but we'll skip to keep it light)
         setInterval(() => {
             if (this.isLoggedIn() && navigator.onLine) {
                 if (this.isDirty()) {
                     this.syncToCloud();
                 }
+                // Optionally, we could fetch cloud to get updates from other devices,
+                // but we rely on the "online" event and manual refresh.
             }
         }, 120000);
 
+        // Listen for anime data changes (add, edit, delete) and mark dirty + schedule sync
         document.addEventListener('animeUpdate', () => {
             if (!this.isLoggedIn()) return;
             this.markDirty();
@@ -125,8 +129,8 @@ class DualStorageManager {
                 throw new Error(result.error || 'Sync failed');
             }
         } catch (error) {
-            console.error(' Sync failed:', error);
-            this.showSyncStatus(' Sync failed – will retry', 'error');
+            console.error('❌ Sync failed:', error);
+            this.showSyncStatus('⚠️ Sync failed – will retry', 'error');
             // Keep dirty flag true
             return false;
         } finally {
@@ -183,9 +187,6 @@ class DualStorageManager {
             this.showSyncStatus('Offline – cannot load cloud data', 'error');
             return { success: false, error: 'Offline' };
         }
-
-        // IMPORTANT: do NOT upload local data on login.
-        // Just download cloud and replace local, clearing dirty flag.
 
         try {
             const response = await fetch(`${window.API_BASE_URL}/api/sync/load-all`, {
@@ -280,11 +281,15 @@ class DualStorageManager {
                 setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
             }
 
+            // ---- Dispatch event to notify main.js that cloud data is ready ----
+            window.dispatchEvent(new CustomEvent('cloudDataLoaded'));
+            window._cloudLoaded = true;
+            window._needsCloudLoad = false;
+
             return { success: true, data };
         } catch (error) {
-            console.error(' Load from cloud failed:', error);
-            this.showSyncStatus(' Failed to load cloud data – using local cache', 'error');
-            // Do NOT destroy local data – keep existing.
+            console.error('❌ Load from cloud failed:', error);
+            this.showSyncStatus('⚠️ Failed to load cloud data – using local cache', 'error');
             return { success: false, error: error.message };
         }
     }
@@ -292,7 +297,7 @@ class DualStorageManager {
     // ─── ONLINE / OFFLINE ────────────────────────────
 
     handleOnline() {
-        console.log(' Online');
+        console.log('🟢 Online');
         if (this.isLoggedIn()) {
             if (this.isDirty()) {
                 // Upload local changes first
@@ -396,7 +401,8 @@ class DualStorageManager {
     }
 }
 
-// Initialize
+// ─── Initialize ─────────────────────────────────────
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
@@ -407,6 +413,6 @@ if (document.readyState === 'loading') {
 } else {
     setTimeout(() => {
         window.dualStorage = new DualStorageManager();
-        console.log(' Dual Storage Manager (unified) ready');
+        console.log('  Dual Storage Manager (unified) ready');
     }, 1000);
 }
