@@ -23,9 +23,35 @@
         return type === 'Movie';
     }
 
-    // ============================================================
-    // GLOBAL MODAL OPEN/CLOSE
-    // ============================================================
+    function setupBeforeUnloadSync() {
+        // Keep this as is – it's a fallback
+        window.addEventListener('beforeunload', function () {
+            if (window.dualStorage && localStorage.getItem('authToken')) {
+                const data = {
+                    animeData: JSON.parse(localStorage.getItem('animeData') || '[]'),
+                    activityLog: JSON.parse(localStorage.getItem('activityLog') || '[]'),
+                    userProfile: JSON.parse(localStorage.getItem('userProfile') || '{}'),
+                    unlockedAchievements: JSON.parse(localStorage.getItem('unlockedAchievements') || '[]'),
+                    userXpHistory: JSON.parse(localStorage.getItem('userXpHistory') || '[]'),
+                    animeContributions: JSON.parse(localStorage.getItem('animeContributions') || '{}'),
+                    appSettings: JSON.parse(localStorage.getItem('appSettings') || '{}'),
+                    levelData: {
+                        totalXP: parseInt(localStorage.getItem('userXP') || '0'),
+                        level: parseInt(localStorage.getItem('userLevel') || '1'),
+                        title: localStorage.getItem('userLevelTitle') || 'Newbie'
+                    },
+                    lastModified: new Date().toISOString()
+                };
+                try {
+                    navigator.sendBeacon(
+                        `${window.API_BASE_URL}/api/sync/sync-all`,
+                        new Blob([JSON.stringify(data)], { type: 'application/json' })
+                    );
+                    console.log('📤 Beforeunload beacon sent');
+                } catch (e) { }
+            }
+        });
+    }
 
     window.openModal = function (modalElement) {
         if (!modalElement) return;
@@ -46,7 +72,7 @@
         document.body.style.width = '100%';
         document.body.style.height = '100%';
         document.body.style.top = `-${scrollY}px`;
-        console.log(' Modal opened');
+        console.log('✅ Modal opened');
     };
 
     window.closeModal = function (modalElement) {
@@ -70,7 +96,7 @@
             window.scrollTo({ top: scrollY, behavior: 'auto' });
         }
         delete modalScrollPositions[modalId];
-        console.log(' Modal closed');
+        console.log('✅ Modal closed');
     };
 
     // ============================================================
@@ -461,13 +487,13 @@
     // ============================================================
 
     window.editAnime = function (id) {
-        console.log(' Editing anime with ID:', id);
+        console.log('✏️ Editing anime with ID:', id);
         const anime = window.animeData.find(a => a.id == id);
         if (!anime) {
             if (typeof showToast === 'function') showToast('Anime not found', 'error');
             return;
         }
-        console.log(' Found anime:', anime.title);
+        console.log('📝 Found anime:', anime.title);
 
         window.isEditing = true;
         window.currentEditId = id;
@@ -574,7 +600,8 @@
         window.setLocalDirty();
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { }
 
-        triggerImmediateSync();
+        // ---- FIX: trigger sync via animeUpdate event ----
+        window.dispatchEvent(new CustomEvent('animeUpdate'));
 
         window.closeModal(document.getElementById('addAnimeModal'));
         resetEditingState();
@@ -682,7 +709,9 @@
             if (typeof window.saveData === 'function') window.saveData();
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
-            triggerImmediateSync();
+
+            // ---- FIX: trigger sync via animeUpdate event ----
+            window.dispatchEvent(new CustomEvent('animeUpdate'));
 
         } else {
             // Adding new – use next available ID
@@ -697,7 +726,7 @@
             }
 
             const newAnime = {
-                id: getNextAvailableId(), 
+                id: getNextAvailableId(),
                 title: title,
                 type: type,
                 episodes: episodes,
@@ -716,7 +745,9 @@
             if (typeof window.saveData === 'function') window.saveData();
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
-            triggerImmediateSync();
+
+            // ---- FIX: trigger sync via animeUpdate event ----
+            window.dispatchEvent(new CustomEvent('animeUpdate'));
         }
 
         window.closeModal(document.getElementById('addAnimeModal'));
@@ -782,7 +813,7 @@
             }
             const animeId = row.getAttribute('data-id');
             if (animeId && typeof window.editAnime === 'function') {
-                console.log(' Row clicked, ID:', animeId);
+                console.log('🖱️ Row clicked, ID:', animeId);
                 window.editAnime(animeId);
             }
         };
@@ -921,6 +952,7 @@
         setupAddAnimeButton();
         setupFloatingButton();
         setupFormSubmit();
+        setupBeforeUnloadSync();
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(attachTableClickHandler, 300);
@@ -928,13 +960,13 @@
         } else {
             setTimeout(attachTableClickHandler, 300);
         }
-        console.log(' Modal system initialized');
+        console.log('✅ Modal system initialized');
     }
 
     window.initModalSystem = initModalSystem;
 
     window.selectAnimeFromSearch = function (anime) {
-        console.log(' Selecting anime:', anime.title);
+        console.log('🎯 Selecting anime:', anime.title);
         const titleInput = document.getElementById('animeTitle');
         const typeSelect = document.getElementById('animeType');
         const episodesInput = document.getElementById('animeEpisodes');
@@ -1000,6 +1032,6 @@
             const genreCount = Array.isArray(anime.genres) ? anime.genres.length : 0;
             showToast(`✓ Selected: ${anime.title} (${genreCount} genres)`, 'success');
         }
-        console.log(' Anime selected successfully');
+        console.log('✅ Anime selected successfully');
     };
 })();
