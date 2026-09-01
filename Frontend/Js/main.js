@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Logged in: wait for cloud data ──────────
 
-    // If cloud data is already loaded, render immediately
     if (window._cloudLoaded) {
         console.log('☁️ Cloud data already loaded – rendering');
         initializePagesAndUI();
@@ -58,20 +57,12 @@ document.addEventListener('DOMContentLoaded', function () {
     let timeoutFired = false;
     let timeoutId = null;
 
-    function renderWithLocalData() {
-        if (cloudLoaded) return;
-        timeoutFired = true;
-        console.warn('⚠️ Cloud load timeout – rendering with local data');
-        initializePagesAndUI();
-    }
-
     function onCloudReady() {
         if (cloudLoaded) return;
         cloudLoaded = true;
         clearTimeout(timeoutId);
         console.log('✅ Cloud data ready – rendering application');
 
-        // If we already rendered with local data, just update components
         if (timeoutFired) {
             if (typeof window.updateAllComponents === 'function') {
                 setTimeout(window.updateAllComponents, 300);
@@ -79,20 +70,28 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Otherwise, initial render with cloud data
         initializePagesAndUI();
     }
+
+    // Set global callback for dual-storage.js (race condition safety)
+    window._onCloudReady = onCloudReady;
 
     // Listen for the cloudDataLoaded event
     document.addEventListener('cloudDataLoaded', onCloudReady);
 
-    // Also check if _cloudLoaded becomes true (e.g., if already loaded before listener)
+    // Also check if cloud is already loaded (flag set by dual-storage)
     if (window._cloudLoaded) {
         onCloudReady();
     }
 
     // Safety timeout: if cloud doesn't load within 5 seconds, render with local data
-    timeoutId = setTimeout(renderWithLocalData, 5000);
+    timeoutId = setTimeout(() => {
+        if (!cloudLoaded) {
+            timeoutFired = true;
+            console.warn('⚠️ Cloud load timeout – rendering with local data');
+            initializePagesAndUI();
+        }
+    }, 5000);
 
     // ── Shared initialization function ───────────
 

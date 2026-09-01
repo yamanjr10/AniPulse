@@ -1,5 +1,5 @@
 // ============================================
-// UNIFIED SYNC MANAGER –
+// UNIFIED SYNC MANAGER – Cloud Source of Truth
 // ============================================
 
 class DualStorageManager {
@@ -17,28 +17,22 @@ class DualStorageManager {
         window.addEventListener('online', () => this.handleOnline());
         window.addEventListener('offline', () => this.handleOffline());
 
-        // Periodic sync: if dirty, upload; else just check (but we'll skip to keep it light)
         setInterval(() => {
             if (this.isLoggedIn() && navigator.onLine) {
                 if (this.isDirty()) {
                     this.syncToCloud();
                 }
-                // Optionally, we could fetch cloud to get updates from other devices,
-                // but we rely on the "online" event and manual refresh.
             }
         }, 120000);
 
-        // Listen for anime data changes (add, edit, delete) and mark dirty + schedule sync
         document.addEventListener('animeUpdate', () => {
             if (!this.isLoggedIn()) return;
             this.markDirty();
             this.scheduleSync();
         });
 
-        console.log(' Unified Sync Manager initialized (Cloud = Source of Truth)');
+        console.log('✅ Unified Sync Manager initialized (Cloud = Source of Truth)');
     }
-
-    // ─── AUTH ──────────────────────────────────────────
 
     getToken() {
         return localStorage.getItem('authToken');
@@ -53,23 +47,19 @@ class DualStorageManager {
         return user.uid || null;
     }
 
-    // ─── DIRTY STATE ──────────────────────────────────
-
     isDirty() {
         return localStorage.getItem(this._dirtyKey) === 'true';
     }
 
     markDirty() {
         localStorage.setItem(this._dirtyKey, 'true');
-        console.log(' Local data marked as dirty');
+        console.log('🟡 Local data marked as dirty');
     }
 
     clearDirty() {
         localStorage.removeItem(this._dirtyKey);
-        console.log(' Dirty flag cleared');
+        console.log('🟢 Dirty flag cleared');
     }
-
-    // ─── SCHEDULED SYNC ─────────────────────────────
 
     scheduleSync() {
         clearTimeout(this._syncDebounceTimeout);
@@ -78,21 +68,19 @@ class DualStorageManager {
         }, 2000);
     }
 
-    // ─── SYNC TO CLOUD (upload local changes) ──────
-
     async syncToCloud() {
         if (!this.isLoggedIn()) {
-            console.warn(' Not logged in, skipping sync');
+            console.warn('⚠️ Not logged in, skipping sync');
             return false;
         }
         if (!navigator.onLine) {
-            console.log(' Offline – changes will sync when online');
+            console.log('📴 Offline – changes will sync when online');
             this.showSyncStatus('Offline – changes saved locally', 'warning');
             return false;
         }
         if (this.isSyncing) return false;
         if (!this.isDirty()) {
-            console.log('ℹ No local changes to upload');
+            console.log('ℹ️ No local changes to upload');
             return false;
         }
 
@@ -122,8 +110,8 @@ class DualStorageManager {
                 this.clearDirty();
                 this.lastSyncTime = new Date().toISOString();
                 localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
-                this.showSyncStatus(' Synced successfully', 'success');
-                console.log(` Uploaded ${payload.animeData?.length || 0} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
+                this.showSyncStatus('✅ Synced successfully', 'success');
+                console.log(`✅ Uploaded ${payload.animeData?.length || 0} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
                 return true;
             } else {
                 throw new Error(result.error || 'Sync failed');
@@ -131,7 +119,6 @@ class DualStorageManager {
         } catch (error) {
             console.error('❌ Sync failed:', error);
             this.showSyncStatus('⚠️ Sync failed – will retry', 'error');
-            // Keep dirty flag true
             return false;
         } finally {
             this.isSyncing = false;
@@ -175,8 +162,6 @@ class DualStorageManager {
         };
     }
 
-    // ─── LOAD FROM CLOUD (download & replace local) ──
-
     async loadFromCloud() {
         const token = this.getToken();
         if (!token) {
@@ -197,11 +182,8 @@ class DualStorageManager {
             if (!result.success) throw new Error(result.error || 'Failed to load');
 
             const { data, lastModified } = result;
-
-            // Create backup before replacing (safety)
             this.backupLocalData();
 
-            // ---- Replace all local data with cloud data ----
             if (data.animeData) {
                 localStorage.setItem('animeData', JSON.stringify(data.animeData));
                 window.animeData = data.animeData;
@@ -212,7 +194,6 @@ class DualStorageManager {
             }
             if (data.userProfile) {
                 localStorage.setItem('userProfile', JSON.stringify(data.userProfile));
-                // Update user object in localStorage
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 const profile = data.userProfile;
                 user.name = profile.name || profile.username || user.name;
@@ -247,7 +228,6 @@ class DualStorageManager {
                 }
             }
 
-            // ---- Restore Daily XP, Queue, Reset, Streak ----
             const today = new Date().toDateString();
             if (data.dailyXP) {
                 if (data.dailyXP.date === today) {
@@ -265,26 +245,30 @@ class DualStorageManager {
                 localStorage.setItem('lastActive', data.streakData.lastActive);
             }
 
-            // ---- Clear dirty flag because we just replaced local with cloud ----
             this.clearDirty();
 
-            // ---- Update sync time ----
             this.lastSyncTime = new Date().toISOString();
             localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
 
-            this.showSyncStatus(` Loaded ${data.animeData?.length || 0} anime from cloud`, 'success');
+            this.showSyncStatus(`✅ Loaded ${data.animeData?.length || 0} anime from cloud`, 'success');
 
-            // ---- Refresh UI ----
             if (typeof updateQueueStatusUI === 'function') setTimeout(updateQueueStatusUI, 300);
             if (typeof updateAllComponents === 'function') updateAllComponents();
             if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
                 setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
             }
 
-            // ---- Dispatch event to notify main.js that cloud data is ready ----
-            window.dispatchEvent(new CustomEvent('cloudDataLoaded'));
+            // ---- Notify main.js that cloud data is ready ----
             window._cloudLoaded = true;
             window._needsCloudLoad = false;
+
+            // Dispatch event
+            window.dispatchEvent(new CustomEvent('cloudDataLoaded'));
+
+            // Also call the callback directly (race condition safety)
+            if (typeof window._onCloudReady === 'function') {
+                window._onCloudReady();
+            }
 
             return { success: true, data };
         } catch (error) {
@@ -294,27 +278,21 @@ class DualStorageManager {
         }
     }
 
-    // ─── ONLINE / OFFLINE ────────────────────────────
-
     handleOnline() {
         console.log('🟢 Online');
         if (this.isLoggedIn()) {
             if (this.isDirty()) {
-                // Upload local changes first
                 this.syncToCloud();
             } else {
-                // No local changes – download cloud to get latest from other devices
                 this.loadFromCloud();
             }
         }
     }
 
     handleOffline() {
-        console.log(' Offline');
+        console.log('🔴 Offline');
         this.showSyncStatus('Offline – changes will sync when online', 'warning');
     }
-
-    // ─── HELPERS ──────────────────────────────────────
 
     calculateTotalHours() {
         const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
@@ -390,29 +368,26 @@ class DualStorageManager {
             attempts++;
         }
         if (window.api) {
-            console.log(' API ready');
-            // On initial load, if logged in, download cloud (do NOT upload)
+            console.log('✅ API ready');
             if (this.isLoggedIn() && navigator.onLine) {
                 await this.loadFromCloud();
             }
         } else {
-            console.warn(' API not available after 5 seconds');
+            console.warn('⚠️ API not available after 5 seconds');
         }
     }
 }
-
-// ─── Initialize ─────────────────────────────────────
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             window.dualStorage = new DualStorageManager();
-            console.log(' Dual Storage Manager (unified) ready');
+            console.log('✅ Dual Storage Manager (unified) ready');
         }, 1000);
     });
 } else {
     setTimeout(() => {
         window.dualStorage = new DualStorageManager();
-        console.log('  Dual Storage Manager (unified) ready');
+        console.log('✅ Dual Storage Manager (unified) ready');
     }, 1000);
 }
