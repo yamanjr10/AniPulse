@@ -7,38 +7,58 @@
 
     let animeData = JSON.parse(localStorage.getItem('animeData')) || [];
     let activityLog = JSON.parse(localStorage.getItem('activityLog')) || [];
-    let isEditing = false;
-    let currentEditId = null;
 
     window.animeData = animeData;
     window.activityLog = activityLog;
-    window.isEditing = isEditing;
-    window.currentEditId = currentEditId;
 
-    // --- Save data (with timestamp) ---
+    // ─── Save data (local only) ─────────────────
+
     window.saveData = function () {
         const now = new Date().toISOString();
         localStorage.setItem('animeData', JSON.stringify(animeData));
         localStorage.setItem('animeDataLastModified', now);
-        console.log('💾 Data saved to localStorage at', now);
+        console.log(' Data saved to localStorage at', now);
     };
 
-    // --- Dirty flag functions ---
+    // ─── Dirty flag ────────────────────────────
+
     window.setLocalDirty = function () {
         localStorage.setItem('localDirty', 'true');
-        console.log('🔴 Local data marked as dirty');
+        console.log(' Local data marked as dirty');
     };
 
     window.clearLocalDirty = function () {
         localStorage.removeItem('localDirty');
-        console.log('🟢 Local dirty flag cleared');
+        console.log(' Local dirty flag cleared');
     };
 
     window.isLocalDirty = function () {
         return localStorage.getItem('localDirty') === 'true';
     };
 
-    // --- Log activity ---
+    // ─── Set full anime data (with dirty flag) ──
+
+    window.setAnimeData = function (newData, options = {}) {
+        const isCloudRestore = options.isCloudRestore || false;
+
+        animeData = Array.isArray(newData) ? newData : [];
+        window.animeData = animeData;
+
+        window.saveData();
+
+        if (!isCloudRestore) {
+            window.setLocalDirty();
+        }
+
+        window.dispatchEvent(
+            new CustomEvent('animeUpdate', {
+                detail: { data: animeData }
+            })
+        );
+    };
+
+    // ─── Activity log ───────────────────────────
+
     window.logActivity = function (action, animeTitle, timestamp) {
         const activity = {
             id: Date.now(),
@@ -53,24 +73,22 @@
         window.dispatchEvent(new CustomEvent('activityLogged', { detail: activity }));
     };
 
-    // --- Getters / setters ---
+    // ─── Getters / setters ─────────────────────
+
     window.getAnimeData = function () { return animeData; };
-    window.setAnimeData = function (newData) {
-        animeData = newData;
-        window.animeData = animeData;
-        window.saveData();
-        window.dispatchEvent(new CustomEvent('animeUpdate', { detail: { data: animeData } }));
-    };
+
     window.getActivityLog = function () { return activityLog; };
 
-    // --- Next ID helper ---
+    // ─── Next ID helper ─────────────────────────
+
     window.getNextId = function () {
         if (animeData.length === 0) return 1;
         const maxId = Math.max(...animeData.map(a => parseInt(a.id) || 0));
         return maxId + 1;
     };
 
-    // --- Completion date helper ---
+    // ─── Completion date helper ──────────────────
+
     window.getCompletionDate = function () {
         const now = new Date();
         const currentYear = now.getFullYear();
@@ -94,5 +112,5 @@
         };
     };
 
-    console.log('✅ Data module loaded (timestamp + dirty flag)');
+    console.log(' Data module loaded (cloud-aware dirty flag)');
 })();

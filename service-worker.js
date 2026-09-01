@@ -1,118 +1,160 @@
 // ============================================
-// SERVICE WORKER - NETWORK FIRST VERSION
+// SERVICE WORKER
 // ============================================
 
-const CACHE_NAME = 'anipulse-v10';
-const VERSION = '2.1.0';
+const CACHE_NAME = 'anipulse-v11';
+const VERSION = '2.2.0';
 
-// ONLY cache local files - NO external CDNs!
-const OFFLINE_FALLBACKS = [
-    '/offline.html',        // now served from root (or public/ but at root URL)
-    '/dashboard.html'
+const APP_SHELL = [
+    '/',
+    '/index.html',
+    '/dashboard.html',
+    '/login.html',
+    '/offline.html',     
+    '/manifest.json',
+    '/style.css',
+    '/community.css',
+    '/js/main.js',
+    '/js/dashboard.js',
+    '/js/modal.js',
+    '/js/anime-list.js',
+    '/js/statistics.js',
+    '/js/watchlist.js',
+    '/js/achievements.js',
+    '/js/recap.js',
+    '/js/level-system.js',
+    '/js/dual-storage.js',
+    '/js/firebase-init.js',
+    '/js/api.js',
+    '/js/community.js',
+    '/js/settings.js',
+    '/js/avatar.js',
+    '/js/toast.js',
 ];
+
+// ─── INSTALL ──────────────────────────────────────
 
 self.addEventListener('install', (event) => {
     console.log('[SW] Installing version', VERSION);
     event.waitUntil(
-        caches.open(CACHE_NAME).then(async (cache) => {
-            for (const asset of OFFLINE_FALLBACKS) {
-                try {
-                    const response = await fetch(asset);
-                    if (response.ok) {
-                        await cache.put(asset, response);
-                        console.log(`[SW] Cached fallback: ${asset}`);
+        caches.open(CACHE_NAME)
+            .then(async (cache) => {
+                for (const asset of APP_SHELL) {
+                    try {
+                        const response = await fetch(asset);
+                        if (response.ok) {
+                            await cache.put(asset, response);
+                            console.log(`[SW] Cached: ${asset}`);
+                        } else {
+                            console.warn(`[SW] Failed to cache ${asset} (status ${response.status})`);
+                        }
+                    } catch (err) {
+                        console.warn(`[SW] Could not fetch ${asset}:`, err);
                     }
-                } catch (err) {
-                    console.log(`[SW] Failed to cache ${asset}:`, err);
                 }
-            }
-            return cache;
-        }).then(() => self.skipWaiting())
+                return cache;
+            })
+            .then(() => self.skipWaiting())
     );
 });
+
+// ─── ACTIVATE ──────────────────────────────────────
 
 self.addEventListener('activate', (event) => {
     console.log('[SW] Activating version', VERSION);
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
-                        console.log('[SW] Deleting old cache:', cache);
-                        return caches.delete(cache);
-                    }
-                })
-            );
-        }).then(() => self.clients.claim())
+        caches.keys()
+            .then((cacheNames) => {
+                return Promise.all(
+                    cacheNames.map((cache) => {
+                        if (cache !== CACHE_NAME) {
+                            console.log('[SW] Deleting old cache:', cache);
+                            return caches.delete(cache);
+                        }
+                    })
+                );
+            })
+            .then(() => self.clients.claim())
     );
 });
 
-// Fetch event - IGNORE external CDNs
+// ─── FETCH ──────────────────────────────────────────
+
 self.addEventListener('fetch', (event) => {
     const request = event.request;
     const url = new URL(request.url);
 
+    // Skip non-GET, non-HTTPS requests
     if (request.method !== 'GET') return;
     if (!url.protocol.startsWith('http')) return;
 
-    // IGNORE external CDNs - let browser handle them directly
+    // ─── SKIP EXTERNAL CDN REQUESTS ──────────────────
     if (url.hostname.includes('cdn.jsdelivr.net') ||
         url.hostname.includes('cdnjs.cloudflare.com') ||
         url.hostname.includes('fonts.googleapis.com') ||
-        url.hostname.includes('fonts.gstatic.com')) {
-        // Don't intercept CDN requests - let them load normally
+        url.hostname.includes('fonts.gstatic.com') ||
+        url.hostname.includes('firebase') ||
+        url.hostname.includes('googleapis.com') ||
+        url.hostname.includes('gstatic.com')) {
         return;
     }
 
-    // HTML files - network first
+    // ─── SKIP API CALLS ──────────────────────────────
+    if (url.pathname.startsWith('/api/')) {
+        return;
+    }
+
+    // ─── NAVIGATION (HTML) – OFFLINE SUPPORT ──────
     if (request.mode === 'navigate' || url.pathname.endsWith('.html')) {
         event.respondWith(
-            fetch(request, {
-                cache: 'no-store',
-                headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
-            }).catch(async () => {
-                console.log('[SW] Network failed, serving offline page');
-                const cachedResponse = await caches.match('/offline.html');
-                if (cachedResponse) return cachedResponse;
-                return new Response('Offline - Please check your connection', {
-                    status: 200,
-                    headers: { 'Content-Type': 'text/html' }
-                });
-            })
-        );
-        return;
-    }
-
-    // Local CSS/JS files - network first
-    if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
-        // Only intercept LOCAL files
-        if (url.hostname === location.hostname) {
-            event.respondWith(
-                fetch(request, { cache: 'no-store' }).catch(() => {
-                    return caches.match(request);
+            fetch(request)
+                .then((response) => {
+                    if (response.ok) {
+                        const clone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, clone);
+                        });
+                    }
+                    return response;
                 })
-            );
-            return;
-        }
-    }
-
-    // For manifest.json (now at root)
-    if (url.pathname.includes('manifest.json')) {
-        event.respondWith(
-            fetch('/manifest.json', { cache: 'no-store' }).catch(() => {
-                return caches.match('/manifest.json');
-            })
+                .catch(async () => {
+                    console.log('[SW] Offline – serving cached navigation');
+                    const cached = await caches.match(request);
+                    if (cached) return cached;
+                    // Fallback to offline.html
+                    const offline = await caches.match('/offline.html');
+                    if (offline) return offline;
+                    return new Response('You are offline. Please check your connection.', {
+                        status: 200,
+                        headers: { 'Content-Type': 'text/plain' }
+                    });
+                })
         );
         return;
     }
 
-    // For everything else local - network first
+    // ─── STATIC ASSETS (CSS, JS, JSON, IMAGES) ────
     if (url.hostname === location.hostname) {
         event.respondWith(
-            fetch(request).catch(() => {
-                return caches.match(request);
-            })
+            fetch(request)
+                .then((response) => {
+                    if (response.ok) {
+                        const clone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, clone);
+                        });
+                    }
+                    return response;
+                })
+                .catch(async () => {
+                    const cached = await caches.match(request);
+                    if (cached) return cached;
+                    if (url.pathname.match(/\.(png|jpg|jpeg|gif|svg|webp)$/i)) {
+                        return new Response('', { status: 200, headers: { 'Content-Type': 'image/png' } });
+                    }
+                    return new Response('', { status: 200 });
+                })
         );
+        return;
     }
-    // External resources - let them load normally (don't intercept)
 });

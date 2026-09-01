@@ -23,44 +23,6 @@
         return type === 'Movie';
     }
 
-    function triggerImmediateSync() {
-        if (window.dualStorage && navigator.onLine && localStorage.getItem('authToken')) {
-            console.log(' Forcing immediate sync after data change...');
-            setTimeout(() => {
-                window.dualStorage.syncToCloud();
-            }, 200);
-        }
-    }
-
-    function setupBeforeUnloadSync() {
-        window.addEventListener('beforeunload', function () {
-            if (window.dualStorage && localStorage.getItem('authToken')) {
-                const data = {
-                    animeData: JSON.parse(localStorage.getItem('animeData') || '[]'),
-                    activityLog: JSON.parse(localStorage.getItem('activityLog') || '[]'),
-                    userProfile: JSON.parse(localStorage.getItem('userProfile') || '{}'),
-                    unlockedAchievements: JSON.parse(localStorage.getItem('unlockedAchievements') || '[]'),
-                    userXpHistory: JSON.parse(localStorage.getItem('userXpHistory') || '[]'),
-                    animeContributions: JSON.parse(localStorage.getItem('animeContributions') || '{}'),
-                    appSettings: JSON.parse(localStorage.getItem('appSettings') || '{}'),
-                    levelData: {
-                        totalXP: parseInt(localStorage.getItem('userXP') || '0'),
-                        level: parseInt(localStorage.getItem('userLevel') || '1'),
-                        title: localStorage.getItem('userLevelTitle') || 'Newbie'
-                    },
-                    lastModified: new Date().toISOString()
-                };
-                try {
-                    navigator.sendBeacon(
-                        `${window.API_BASE_URL}/api/sync/sync-all`,
-                        new Blob([JSON.stringify(data)], { type: 'application/json' })
-                    );
-                    console.log(' Beforeunload beacon sent');
-                } catch (e) { }
-            }
-        });
-    }
-
     // ============================================================
     // GLOBAL MODAL OPEN/CLOSE
     // ============================================================
