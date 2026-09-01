@@ -44,40 +44,50 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    // ── Logged in: wait for cloud data ──────────
-
-    // If cloud data is already loaded, render immediately
     if (window._cloudLoaded) {
         console.log(' Cloud data already loaded – rendering');
         initializePagesAndUI();
         return;
     }
 
-    // Otherwise, wait for the cloud load event or timeout
     console.log(' Waiting for cloud data...');
 
     let cloudLoaded = false;
+    let timeoutFired = false;
+    let timeoutId = null;
+
+    function renderWithLocalData() {
+        if (cloudLoaded) return;
+        timeoutFired = true;
+        console.warn(' Cloud load timeout – rendering with local data');
+        initializePagesAndUI();
+    }
 
     function onCloudReady() {
         if (cloudLoaded) return;
         cloudLoaded = true;
+        clearTimeout(timeoutId);
         console.log(' Cloud data ready – rendering application');
+        if (timeoutFired) {
+            if (typeof window.updateAllComponents === 'function') {
+                setTimeout(window.updateAllComponents, 300);
+            }
+            return;
+        }
+
         initializePagesAndUI();
     }
 
+    // Listen for the cloudDataLoaded event
     document.addEventListener('cloudDataLoaded', onCloudReady);
 
     if (window._cloudLoaded) {
         onCloudReady();
     }
 
-    const timeoutId = setTimeout(() => {
-        if (!cloudLoaded) {
-            console.warn(' Cloud load timeout – rendering with local data');
-            onCloudReady();
-        }
-    }, 8000);
+    timeoutId = setTimeout(renderWithLocalData, 15000);
 
+    // Cleanup: remove listener and timeout when done
     const originalOnCloudReady = onCloudReady;
     onCloudReady = function () {
         clearTimeout(timeoutId);
