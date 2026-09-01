@@ -921,7 +921,6 @@
         setupAddAnimeButton();
         setupFloatingButton();
         setupFormSubmit();
-        setupBeforeUnloadSync();
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function () {
                 setTimeout(attachTableClickHandler, 300);
@@ -935,7 +934,7 @@
     window.initModalSystem = initModalSystem;
 
     window.selectAnimeFromSearch = function (anime) {
-        console.log('🎯 Selecting anime:', anime.title);
+        console.log(' Selecting anime:', anime.title);
         const titleInput = document.getElementById('animeTitle');
         const typeSelect = document.getElementById('animeType');
         const episodesInput = document.getElementById('animeEpisodes');
