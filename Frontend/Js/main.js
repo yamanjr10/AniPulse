@@ -4,7 +4,7 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function () {
-    console.log(' AniPulse starting...');
+    console.log('🚀 AniPulse starting...');
 
     // 1. Theme
     if (typeof window.initializeTheme === 'function') {
@@ -38,19 +38,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const isLoggedIn = !!localStorage.getItem('authToken');
 
     if (!isLoggedIn) {
-        // ── Logged out: render immediately with local cache ──
-        console.log(' Not logged in – using local cache');
+        console.log('👤 Not logged in – using local cache');
         initializePagesAndUI();
         return;
     }
 
+    // ── Logged in: wait for cloud data ──────────
+
+    // If cloud data is already loaded, render immediately
     if (window._cloudLoaded) {
-        console.log(' Cloud data already loaded – rendering');
+        console.log('☁️ Cloud data already loaded – rendering');
         initializePagesAndUI();
         return;
     }
 
-    console.log(' Waiting for cloud data...');
+    console.log('⏳ Waiting for cloud data...');
 
     let cloudLoaded = false;
     let timeoutFired = false;
@@ -59,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function renderWithLocalData() {
         if (cloudLoaded) return;
         timeoutFired = true;
-        console.warn(' Cloud load timeout – rendering with local data');
+        console.warn('⚠️ Cloud load timeout – rendering with local data');
         initializePagesAndUI();
     }
 
@@ -67,7 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (cloudLoaded) return;
         cloudLoaded = true;
         clearTimeout(timeoutId);
-        console.log(' Cloud data ready – rendering application');
+        console.log('✅ Cloud data ready – rendering application');
+
+        // If we already rendered with local data, just update components
         if (timeoutFired) {
             if (typeof window.updateAllComponents === 'function') {
                 setTimeout(window.updateAllComponents, 300);
@@ -75,25 +79,20 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Otherwise, initial render with cloud data
         initializePagesAndUI();
     }
 
     // Listen for the cloudDataLoaded event
     document.addEventListener('cloudDataLoaded', onCloudReady);
 
+    // Also check if _cloudLoaded becomes true (e.g., if already loaded before listener)
     if (window._cloudLoaded) {
         onCloudReady();
     }
 
+    // Safety timeout: if cloud doesn't load within 5 seconds, render with local data
     timeoutId = setTimeout(renderWithLocalData, 5000);
-
-    // Cleanup: remove listener and timeout when done
-    const originalOnCloudReady = onCloudReady;
-    onCloudReady = function () {
-        clearTimeout(timeoutId);
-        document.removeEventListener('cloudDataLoaded', originalOnCloudReady);
-        originalOnCloudReady();
-    };
 
     // ── Shared initialization function ───────────
 
@@ -140,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
             window.initAutoReload();
         }
 
-        console.log(' AniPulse initialized');
+        console.log('✅ AniPulse initialized');
     }
 
     // 7. Service Worker (always)
@@ -148,10 +147,10 @@ document.addEventListener('DOMContentLoaded', function () {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(registration => {
-                    console.log(' ServiceWorker registered successfully:', registration.scope);
+                    console.log('✅ ServiceWorker registered successfully:', registration.scope);
                 })
                 .catch(error => {
-                    console.log(' ServiceWorker registration failed:', error);
+                    console.log('❌ ServiceWorker registration failed:', error);
                 });
         });
     }
@@ -179,7 +178,7 @@ window.initAutoReload = function () {
                 if (lastChecksum === null) {
                     lastChecksum = newChecksum;
                 } else if (lastChecksum !== newChecksum) {
-                    console.log(' Changes detected! Reloading page...');
+                    console.log('🔄 Changes detected! Reloading page...');
                     if (typeof window.showToast === 'function') {
                         window.showToast('Changes detected! Refreshing...', 'info');
                     }
