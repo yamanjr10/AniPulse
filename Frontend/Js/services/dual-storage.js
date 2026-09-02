@@ -361,6 +361,11 @@ class DualStorageManager {
                 }
             }, 3000);
         }
+        // Also show toast if available
+        if (typeof showToast === 'function') {
+            const toastMessage = message.replace(/<[^>]*>/g, ''); // strip HTML
+            showToast(toastMessage, type);
+        }
         console.log(`[${type.toUpperCase()}] ${message}`);
     }
 

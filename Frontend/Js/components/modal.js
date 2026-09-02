@@ -597,8 +597,12 @@
         window.setLocalDirty();
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { }
 
-        // ---- FIX: trigger sync via animeUpdate event on document ----
+        // ---- Trigger sync: event + direct call ----
         document.dispatchEvent(new CustomEvent('animeUpdate'));
+        if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.scheduleSync === 'function') {
+            window.dualStorage.markDirty();
+            window.dualStorage.scheduleSync();
+        }
 
         window.closeModal(document.getElementById('addAnimeModal'));
         resetEditingState();
@@ -644,6 +648,7 @@
         let logAction = 'added';
         let toastMessage = `"${title}" added successfully!`;
 
+        // ── Helper to set dates ──
         async function setCompletionDates(year, month) {
             let y = parseInt(year);
             let m = parseInt(month);
@@ -671,6 +676,7 @@
             const wasCompleted = existing.userStatus === 'Completed';
             const isNowCompleted = status === 'Completed';
 
+            // Update fields
             existing.title = title;
             existing.type = type;
             existing.episodes = episodes;
@@ -682,9 +688,30 @@
             existing.genres = genres;
             existing.updatedAt = nowTimestamp;
 
+            // ── Set dates ──
             if (isNowCompleted) {
-                const success = await setCompletionDates(year, month);
-                if (!success) return;
+                let y = parseInt(year);
+                let m = parseInt(month);
+                if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
+                    finishDate = `${year}-${String(m).padStart(2, '0')}`;
+                    // Reuse existing day if possible, else prompt
+                    if (existing.actualFinishDate) {
+                        const parts = existing.actualFinishDate.split('-');
+                        let day = parseInt(parts[2]) || 1;
+                        const daysInMonth = new Date(y, m, 0).getDate();
+                        if (day > daysInMonth) day = daysInMonth;
+                        actualFinishDate = `${year}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    } else {
+                        const dayResult = await getActualFinishDate(year, month);
+                        if (dayResult === null) return;
+                        actualFinishDate = dayResult;
+                    }
+                } else {
+                    const now = new Date();
+                    finishDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                    actualFinishDate = existing.actualFinishDate ||
+                        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                }
                 existing.finishDate = finishDate;
                 existing.actualFinishDate = actualFinishDate;
             } else {
@@ -692,6 +719,7 @@
                 existing.actualFinishDate = null;
             }
 
+            // Determine action
             if (isNowCompleted && !wasCompleted) {
                 logAction = 'completed';
                 toastMessage = `"${title}" marked as completed! 🎉`;
@@ -707,11 +735,15 @@
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
-            // ---- FIX: trigger sync via animeUpdate event on document ----
+            // ---- Trigger sync: event + direct call ----
             document.dispatchEvent(new CustomEvent('animeUpdate'));
+            if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.scheduleSync === 'function') {
+                window.dualStorage.markDirty();
+                window.dualStorage.scheduleSync();
+            }
 
         } else {
-            // Adding new – use next available ID
+            // ── Adding new anime ──
             if (status === 'Completed') {
                 logAction = 'completed';
                 toastMessage = `"${title}" added and marked as completed! 🎉`;
@@ -743,8 +775,12 @@
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
-            // ---- FIX: trigger sync via animeUpdate event on document ----
+            // ---- Trigger sync: event + direct call ----
             document.dispatchEvent(new CustomEvent('animeUpdate'));
+            if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.scheduleSync === 'function') {
+                window.dualStorage.markDirty();
+                window.dualStorage.scheduleSync();
+            }
         }
 
         window.closeModal(document.getElementById('addAnimeModal'));

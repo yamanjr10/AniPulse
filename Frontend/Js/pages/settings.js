@@ -1,5 +1,5 @@
 // ============================================
-// SETTINGS PAGE – Full Profile + Crop + Cloud Sync
+// SETTINGS PAGE
 // ============================================
 
 (function () {
@@ -81,18 +81,40 @@
         const lastSync = localStorage.getItem('lastCloudSyncTime');
         if (lastSync) lastSyncSpan.textContent = new Date(lastSync).toLocaleString();
 
-        document.getElementById('syncNowBtn')?.addEventListener('click', async () => {
-            if (window.dualStorage) {
-                await window.dualStorage.syncToCloud();
-                const newSync = localStorage.getItem('lastCloudSyncTime');
-                if (newSync) lastSyncSpan.textContent = new Date(newSync).toLocaleString();
-            }
-        });
+        const syncNowBtn = document.getElementById('syncNowBtn');
+        if (syncNowBtn) {
+            syncNowBtn.addEventListener('click', async () => {
+                if (!window.dualStorage) {
+                    if (typeof showToast === 'function') showToast('Sync system not available', 'error');
+                    return;
+                }
+                const syncStatus = document.getElementById('syncStatusText');
+                if (syncStatus) syncStatus.textContent = 'Syncing...';
+                try {
+                    const result = await window.dualStorage.syncToCloud();
+                    if (result) {
+                        if (typeof showToast === 'function') showToast('✅ Data synced to cloud successfully!', 'success');
+                        const newSync = localStorage.getItem('lastCloudSyncTime');
+                        if (newSync) lastSyncSpan.textContent = new Date(newSync).toLocaleString();
+                    } else {
+                        if (typeof showToast === 'function') showToast('⚠️ No changes to sync or sync failed', 'warning');
+                    }
+                } catch (error) {
+                    console.error('Sync error:', error);
+                    if (typeof showToast === 'function') showToast('❌ Sync failed. Please try again.', 'error');
+                }
+            });
+        }
 
         document.getElementById('loadFromCloudBtn')?.addEventListener('click', async () => {
             if (confirm('⚠️ This will replace your local data with cloud data. Continue?')) {
                 const result = await window.dualStorage?.loadFromCloud();
-                if (result?.success) location.reload();
+                if (result?.success) {
+                    if (typeof showToast === 'function') showToast('✅ Cloud data loaded successfully!', 'success');
+                    location.reload();
+                } else {
+                    if (typeof showToast === 'function') showToast('❌ Failed to load cloud data', 'error');
+                }
             }
         });
     };
@@ -176,15 +198,14 @@
             });
         }
 
-        // Social Links – ✅ FIXED ICON MAPPING
         if (socialsContainer) {
             socialsContainer.innerHTML = '';
             const social = userProfile.social || {};
             const icons = {
-                anilist: 'fa-list-ul',       // Font Awesome free icon for lists
-                myanimelist: 'fa-book',       // Book icon for MAL
-                twitter: 'fa-twitter',        // X/Twitter brand icon
-                instagram: 'fa-instagram'     // Instagram brand icon
+                anilist: 'fa-list-ul',      
+                myanimelist: 'fa-book',  
+                twitter: 'fa-twitter',      
+                instagram: 'fa-instagram'   
             };
             Object.keys(social).forEach(key => {
                 if (social[key]) {

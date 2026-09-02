@@ -1,6 +1,5 @@
-// pages/dashboard.js
 // ============================================
-// DASHBOARD PAGE – Stats, Top Rated, Activity, DNA, Currently Watching
+// DASHBOARD PAGE
 // ============================================
 
 (function () {
@@ -519,18 +518,47 @@
                         }
 
                         if (typeof window.saveData === 'function') window.saveData();
-                        if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
 
-                        // Explicitly sync to cloud after import to ensure data is uploaded immediately
-                        if (window.dualStorage && typeof window.dualStorage.syncToCloud === 'function') {
-                            window.dualStorage.syncToCloud().catch(err => console.warn('Sync after import failed:', err));
+                        // ---- Mark dirty (both flags) ----
+                        window.setLocalDirty();
+                        if (window.dualStorage && typeof window.dualStorage.markDirty === 'function') {
+                            window.dualStorage.markDirty();
                         }
 
-                        let message = '';
-                        if (addedCount > 0) message += `Added ${addedCount} new anime. `;
-                        if (updatedCount > 0) message += `Updated ${updatedCount} existing anime.`;
-                        if (typeof showToast === 'function') showToast(`Import successful! ${message}`, 'success');
+                        // ---- Dispatch event (fallback) ----
+                        document.dispatchEvent(new CustomEvent('animeUpdate'));
 
+                        // ---- Force sync immediately ----
+                        if (window.dualStorage && typeof window.dualStorage.syncToCloud === 'function') {
+                            window.dualStorage.syncToCloud()
+                                .then(success => {
+                                    if (success) {
+                                        if (typeof showToast === 'function') {
+                                            showToast(`✅ Import successful! ${addedCount + updatedCount} anime synced to cloud.`, 'success');
+                                        }
+                                    } else {
+                                        if (typeof showToast === 'function') {
+                                            showToast('⚠️ Import saved locally, but cloud sync failed. Will retry later.', 'warning');
+                                        }
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error('Sync after import failed:', err);
+                                    if (typeof showToast === 'function') {
+                                        showToast('⚠️ Import saved locally, but cloud sync failed. Will retry later.', 'error');
+                                    }
+                                });
+                        } else {
+                            // No sync system – just update UI
+                            if (typeof showToast === 'function') {
+                                showToast(`✅ Import successful! ${addedCount + updatedCount} anime added/updated locally.`, 'success');
+                            }
+                        }
+
+                        // ---- Refresh UI ----
+                        if (typeof window.updateAllComponents === 'function') window.updateAllComponents();
+
+                        // ---- Close modal ----
                         const importModal = document.getElementById('importModal');
                         if (importModal && typeof window.closeModal === 'function') {
                             window.closeModal(importModal);
@@ -772,6 +800,9 @@
         `;
     };
 
+    // ============================================
+    // 🔄 ENHANCED updateAllComponents – Auto‑refresh for ALL pages
+    // ============================================
     window.updateAllComponents = function () {
         // ---- Dashboard ----
         if (typeof window.updateStats === 'function') window.updateStats();
@@ -806,7 +837,7 @@
             }
         }
 
-        // ----  WATCHLIST AUTO‑REFRESH ----
+        // ---- ✅ WATCHLIST AUTO‑REFRESH ----
         const watchlistPage = document.getElementById('watchlist-page');
         if (watchlistPage && watchlistPage.classList.contains('active')) {
             const state = window.watchlistState || { status: 'all', page: 1, search: '' };
@@ -815,7 +846,7 @@
             }
         }
 
-        // ----  ACHIEVEMENTS AUTO‑REFRESH ----
+        // ---- ✅ ACHIEVEMENTS AUTO‑REFRESH ----
         const achievementsPage = document.getElementById('achievements-page');
         if (achievementsPage && achievementsPage.classList.contains('active')) {
             if (typeof window.updateAchievements === 'function') {
@@ -823,7 +854,7 @@
             }
         }
 
-        // ----  COMMUNITY AUTO‑REFRESH ----
+        // ---- ✅ COMMUNITY AUTO‑REFRESH ----
         const communityPage = document.getElementById('community-page');
         if (communityPage && communityPage.classList.contains('active')) {
             // Always refresh friends and requests
