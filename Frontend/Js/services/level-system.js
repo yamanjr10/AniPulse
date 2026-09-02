@@ -1,4 +1,4 @@
-// Advanced RPG Level System - v1.2.0 (FIXED: Direct Completion + Status Change)
+// Advanced RPG Level System
 
 const LEVELS = [
 	// Levels 1-21: Common titles
@@ -57,20 +57,18 @@ const LEVELS = [
 	{ level: 47, title: "Genesis", xpRequired: 578000 },
 	{ level: 48, title: "Apoc", xpRequired: 612000 },
 	{ level: 49, title: "Nirvana", xpRequired: 647000 },
-	{ level: 50, title: "Max", xpRequired: 683000 },
+	{ level: 50, title: "Max", xpRequired: 683000 }
 ];
 
 const USER_PROFILE_KEY = 'userProfile';
 const ANIME_DATA_KEY = 'animeData';
 const MAX_DAILY_XP = window.TEST_MAX_DAILY_XP || 1500;
 
-// DECLARE GLOBAL VARIABLES AT THE TOP
 let _prevAnimeSnapshot = null;
 const xpPopupQueue = [];
 let showingXpPopup = false;
 const recentPopupHashes = new Set();
 
-// Safe localStorage helpers
 function safeGet(key) {
 	try {
 		const v = localStorage.getItem(key);
@@ -89,7 +87,6 @@ function safeSet(key, val) {
 	}
 }
 
-// Initialize user profile if missing
 function getUserProfile() {
 	let profile = safeGet(USER_PROFILE_KEY);
 	if (!profile) {
@@ -101,7 +98,6 @@ function getUserProfile() {
 
 function saveUserProfile(profile) {
 	profile.totalExp = Math.max(0, Math.floor(profile.totalExp || 0));
-	// Recalculate level from totalExp
 	for (let i = LEVELS.length - 1; i >= 0; i--) {
 		if (profile.totalExp >= LEVELS[i].xpRequired) {
 			profile.level = LEVELS[i].level;
@@ -112,8 +108,7 @@ function saveUserProfile(profile) {
 	safeSet(USER_PROFILE_KEY, profile);
 }
 
-// Calculate EXP according to spec
-function calculateExpFromParts({ episodes = 0, progress = 0, duration = 20, type = 'TV', score = 0, hasScore = false, isCompleted = false }, options = {}) {
+function calculateExpFromParts({ episodes = 0, progress = 0, duration = 20, type = 'TV', score = 0, hasScore = false }, options = {}) {
 	const epsForEpisodeBonus = options.useProgress ? Math.max(0, progress) : Math.max(0, episodes);
 	const episodeBonus = Math.floor(epsForEpisodeBonus / 2);
 
@@ -132,7 +127,6 @@ function calculateExpFromParts({ episodes = 0, progress = 0, duration = 20, type
 	return Math.max(0, Math.floor(total));
 }
 
-// Calculate total XP from anime list (single source of truth)
 function calculateTotalExpFromAnimeList(animeList) {
 	let totalExp = 0;
 	animeList.forEach(anime => {
@@ -151,7 +145,6 @@ function calculateTotalExpFromAnimeList(animeList) {
 	return Math.max(0, Math.floor(totalExp));
 }
 
-// Recalculate and update profile
 function recalculateTotalExp() {
 	const animeList = safeGet(ANIME_DATA_KEY) || window.animeData || [];
 	const profile = getUserProfile();
@@ -168,7 +161,6 @@ function recalculateTotalExp() {
 	return newTotalExp;
 }
 
-// Escape HTML
 function escapeHtml(s) {
 	if (!s) return '';
 	return String(s).replace(/[&<>"'`]/g, function (c) {
@@ -176,7 +168,6 @@ function escapeHtml(s) {
 	});
 }
 
-// Ensure toast container exists
 function ensureToastContainer() {
 	if (!document.getElementById('toastContainer')) {
 		const container = document.createElement('div');
@@ -189,456 +180,15 @@ function ensureToastContainer() {
 		console.log('✅ Toast container created');
 	}
 }
-// Add popup styles - Pure CSS Premium Design (Blue Theme)
-function addPopupStyles() {
-	if (document.querySelector('#xp-popup-styles')) return;
 
-	const style = document.createElement('style');
-	style.id = 'xp-popup-styles';
-	style.textContent = `
-		/* ============================================
-		   MAIN POPUP CONTAINER
-		============================================ */
-		.xp-popup {
-			position: fixed;
-			bottom: 24px;
-			right: 24px;
-			z-index: 100000;
-			max-width: 380px;
-			width: calc(100% - 48px);
-			animation: xpSlideIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
-			filter: drop-shadow(0 20px 25px -12px rgba(0, 0, 0, 0.5));
-		}
-		
-		.xp-popup.exit {
-			animation: xpSlideOut 0.3s ease-in forwards;
-		}
-		
-		/* ============================================
-		   INNER CARD - Glassmorphism (Blue Theme)
-		============================================ */
-		.xp-popup-inner {
-			background: linear-gradient(135deg, 
-				rgba(11, 17, 32, 0.98) 0%,
-				rgba(26, 31, 46, 0.98) 100%);
-			backdrop-filter: blur(12px);
-			-webkit-backdrop-filter: blur(12px);
-			border-radius: 20px;
-			padding: 16px;
-			display: flex;
-			gap: 16px;
-			border: 1px solid rgba(59, 130, 246, 0.25);
-			box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.4),
-						0 0 0 0.5px rgba(59, 130, 246, 0.15) inset;
-			transition: transform 0.2s ease, box-shadow 0.2s ease;
-		}
-		
-		.xp-popup-inner:hover {
-			transform: translateX(-4px);
-			box-shadow: 0 30px 45px -12px rgba(0, 0, 0, 0.5),
-						0 0 0 1px rgba(59, 130, 246, 0.3) inset;
-		}
-		
-		/* ============================================
-		   COVER IMAGE
-		============================================ */
-		.xp-cover {
-			width: 70px;
-			height: 100px;
-			background-size: cover;
-			background-position: center;
-			border-radius: 12px;
-			flex-shrink: 0;
-			position: relative;
-			overflow: hidden;
-			box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.3);
-			transition: all 0.3s ease;
-		}
-		
-		.xp-cover::after {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			background: linear-gradient(135deg, 
-				rgba(59, 130, 246, 0.15) 0%,
-				transparent 50%);
-			pointer-events: none;
-		}
-		
-		.xp-popup-inner:hover .xp-cover {
-			transform: scale(1.02);
-			box-shadow: 0 12px 25px -6px rgba(0, 0, 0, 0.4);
-		}
-		
-		/* ============================================
-		   INFO SECTION
-		============================================ */
-		.xp-info {
-			flex: 1;
-			display: flex;
-			flex-direction: column;
-			gap: 6px;
-			min-width: 0;
-		}
-		
-		/* ============================================
-		   XP AMOUNT BADGE - Blue/Indigo Gradient
-		============================================ */
-		.xp-amount {
-			background: linear-gradient(135deg, #3B82F6, #6366F1);
-			display: inline-flex;
-			align-items: center;
-			gap: 6px;
-			padding: 5px 14px;
-			border-radius: 40px;
-			font-size: 12px;
-			font-weight: 700;
-			letter-spacing: 0.3px;
-			color: white;
-			width: fit-content;
-			box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
-			animation: xpGlowPulse 2s infinite;
-			position: relative;
-			overflow: hidden;
-		}
-		
-		.xp-amount::after {
-			content: '';
-			position: absolute;
-			top: -50%;
-			left: -60%;
-			width: 200%;
-			height: 200%;
-			background: linear-gradient(115deg, 
-				rgba(255,255,255,0) 0%, 
-				rgba(255,255,255,0.25) 50%, 
-				rgba(255,255,255,0) 100%);
-			transform: rotate(25deg);
-			animation: xpShimmer 3s infinite;
-		}
-		
-		/* ============================================
-		   ANIME TITLE
-		============================================ */
-		.xp-title {
-			font-size: 15px;
-			font-weight: 700;
-			margin: 2px 0 0 0;
-			color: #F8FAFC;
-			line-height: 1.3;
-			letter-spacing: -0.2px;
-			display: -webkit-box;
-			-webkit-line-clamp: 2;
-			-webkit-box-orient: vertical;
-			overflow: hidden;
-			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-		}
-		
-		/* ============================================
-		   LEVEL META - Blue Light
-		============================================ */
-		.xp-meta {
-			font-size: 11px;
-			font-weight: 500;
-			color: #60A5FA;
-			margin-bottom: 4px;
-		}
-		
-		/* ============================================
-		   PROGRESS CONTAINER
-		============================================ */
-		.xp-progress-container {
-			margin-top: 6px;
-		}
-		
-		/* ============================================
-		   PROGRESS BAR - Blue/Indigo
-		============================================ */
-		.xp-bar {
-			background: rgba(255, 255, 255, 0.08);
-			border-radius: 10px;
-			height: 8px;
-			overflow: hidden;
-			margin-bottom: 8px;
-		}
-		
-		.xp-fill {
-			background: linear-gradient(90deg, #3B82F6, #6366F1, #60A5FA);
-			background-size: 200% 100%;
-			display: block;
-			height: 100%;
-			width: 0%;
-			transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-			border-radius: 10px;
-			animation: xpProgressShimmer 1.5s ease infinite;
-		}
-		
-		/* ============================================
-		   STATS ROW - Blue Tinted
-		============================================ */
-		.xp-stats {
-			background: rgba(59, 130, 246, 0.06);
-			border-radius: 12px;
-			padding: 8px 10px;
-			margin-top: 4px;
-			backdrop-filter: blur(4px);
-			-webkit-backdrop-filter: blur(4px);
-			border: 1px solid rgba(59, 130, 246, 0.12);
-			transition: all 0.2s ease;
-			text-align: center;
-		}
-		
-		.xp-stats:hover {
-			background: rgba(59, 130, 246, 0.10);
-			border-color: rgba(59, 130, 246, 0.25);
-		}
-		
-		/* ============================================
-		   CURRENT XP TEXT - Blue Light
-		============================================ */
-		.xp-current {
-			font-size: 11px;
-			font-weight: 600;
-			color: #60A5FA;
-			letter-spacing: 0.2px;
-		}
-		
-		/* ============================================
-		   XP NEXT TEXT
-		============================================ */
-		.xp-next {
-			font-size: 10px;
-			color: #94A3B8;
-			display: block;
-			margin-top: 4px;
-			letter-spacing: 0.2px;
-		}
-		
-		/* ============================================
-		   ANIMATIONS
-		============================================ */
-		@keyframes xpSlideIn {
-			0% {
-				transform: translateX(100%) translateY(20px);
-				opacity: 0;
-			}
-			60% {
-				transform: translateX(-8px) translateY(0);
-				opacity: 1;
-			}
-			100% {
-				transform: translateX(0) translateY(0);
-				opacity: 1;
-			}
-		}
-		
-		@keyframes xpSlideOut {
-			0% {
-				transform: translateX(0);
-				opacity: 1;
-			}
-			100% {
-				transform: translateX(100%);
-				opacity: 0;
-				visibility: hidden;
-			}
-		}
-		
-		@keyframes xpGlowPulse {
-			0%, 100% {
-				box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
-			}
-			50% {
-				box-shadow: 0 4px 15px rgba(59, 130, 246, 0.7);
-			}
-		}
-		
-		@keyframes xpShimmer {
-			0% {
-				transform: translateX(-100%) rotate(25deg);
-			}
-			20%, 100% {
-				transform: translateX(100%) rotate(25deg);
-			}
-		}
-		
-		@keyframes xpProgressShimmer {
-			0% {
-				background-position: 0% 50%;
-			}
-			100% {
-				background-position: 200% 50%;
-			}
-		}
-		
-		/* ============================================
-		   LEVEL UP SPECIAL EFFECT - Blue Glow
-		============================================ */
-		.xp-popup.level-up .xp-popup-inner {
-			background: linear-gradient(135deg, 
-				rgba(59, 130, 246, 0.25) 0%,
-				rgba(99, 102, 241, 0.15) 100%);
-			border: 1px solid rgba(59, 130, 246, 0.5);
-			animation: xpLevelUpPulse 0.5s ease;
-		}
-		
-		@keyframes xpLevelUpPulse {
-			0%, 100% {
-				transform: scale(1);
-				box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6);
-			}
-			50% {
-				transform: scale(1.02);
-				box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
-			}
-		}
-		
-		/* ============================================
-		   RESPONSIVE DESIGN
-		============================================ */
-		@media (max-width: 480px) {
-			.xp-popup {
-				bottom: 16px;
-				right: 16px;
-				max-width: 340px;
-				width: calc(100% - 32px);
-			}
-			
-			.xp-popup-inner {
-				padding: 12px;
-				gap: 12px;
-			}
-			
-			.xp-cover {
-				width: 55px;
-				height: 78px;
-			}
-			
-			.xp-title {
-				font-size: 13px;
-			}
-			
-			.xp-amount {
-				font-size: 10px;
-				padding: 4px 10px;
-			}
-			
-			.xp-stats {
-				padding: 6px 8px;
-			}
-			
-			.xp-current {
-				font-size: 10px;
-			}
-		}
-		
-		/* ============================================
-		   LIGHT THEME COMPATIBILITY
-		============================================ */
-		[data-theme="light"] .xp-popup-inner {
-			background: linear-gradient(135deg, 
-				rgba(255, 255, 255, 0.98) 0%,
-				rgba(248, 250, 252, 0.98) 100%);
-			border: 1px solid rgba(59, 130, 246, 0.25);
-			box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.08);
-		}
-		
-		[data-theme="light"] .xp-title {
-			color: #0F172A;
-		}
-		
-		[data-theme="light"] .xp-meta {
-			color: #3B82F6;
-		}
-		
-		[data-theme="light"] .xp-stats {
-			background: rgba(59, 130, 246, 0.04);
-			border-color: rgba(59, 130, 246, 0.08);
-		}
-		
-		[data-theme="light"] .xp-stats:hover {
-			background: rgba(59, 130, 246, 0.06);
-			border-color: rgba(59, 130, 246, 0.15);
-		}
-		
-		[data-theme="light"] .xp-current {
-			color: #2563EB;
-		}
-		
-		[data-theme="light"] .xp-amount {
-			background: linear-gradient(135deg, #2563EB, #4F46E5);
-			box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-		}
-		
-		[data-theme="light"] .xp-bar {
-			background: rgba(0, 0, 0, 0.06);
-		}
-		
-		[data-theme="light"] .xp-popup.level-up .xp-popup-inner {
-			background: linear-gradient(135deg, 
-				rgba(59, 130, 246, 0.12) 0%,
-				rgba(99, 102, 241, 0.08) 100%);
-			border: 1px solid rgba(59, 130, 246, 0.35);
-		}
-		
-		[data-theme="light"] .xp-cover::after {
-			background: linear-gradient(135deg, 
-				rgba(59, 130, 246, 0.08) 0%,
-				transparent 50%);
-		}
-		
-		/* ============================================
-		   TOAST CONTAINER STYLES
-		============================================ */
-		#toastContainer {
-			position: fixed;
-			bottom: 20px;
-			right: 20px;
-			z-index: 99999;
-			display: flex;
-			flex-direction: column;
-			gap: 12px;
-			pointer-events: none;
-		}
-		
-		#toastContainer > * {
-			pointer-events: auto;
-		}
-		
-		/* ============================================
-		   ACCESSIBILITY - Reduced Motion
-		============================================ */
-		@media (prefers-reduced-motion: reduce) {
-			.xp-popup,
-			.xp-popup.exit,
-			.xp-popup-inner,
-			.xp-fill,
-			.xp-amount,
-			.xp-amount::after {
-				animation: none !important;
-				transition: none !important;
-			}
-			
-			.xp-popup {
-				opacity: 1;
-				transform: none;
-			}
-		}
-	`;
-	document.head.appendChild(style);
-	console.log('✅ Premium popup styles added (Blue Theme)');
-}
+// ─── CSS for popup is now in level-system.css ───
+// No dynamic injection needed.
 
-// FIXED Popup queue functions
 function showXpPopup(data) {
 	try { window.__lastXpAward = { xp: data.xp || 0, ts: Date.now(), animeId: data.animeId || '' }; } catch (e) { }
-	
+
 	ensureToastContainer();
-	addPopupStyles();
-	
+
 	xpPopupQueue.push(data);
 	try { window.__justAwardedXp = true; setTimeout(() => { try { window.__justAwardedXp = false; } catch (e) { } }, 4500); } catch (e) { }
 	if (!showingXpPopup) processXpQueue();
@@ -665,18 +215,17 @@ function processXpQueue() {
 	popup.className = 'xp-popup';
 
 	const currXP = d.profile.totalExp || 0;
-	
-	// Calculate level progression
+
 	let currentLevelObj = LEVELS[0];
 	let nextLevelObj = LEVELS[1];
-	
+
 	for (let i = 0; i < LEVELS.length; i++) {
 		if (currXP >= LEVELS[i].xpRequired) {
 			currentLevelObj = LEVELS[i];
 			nextLevelObj = LEVELS[i + 1] || LEVELS[i];
 		}
 	}
-	
+
 	const xpForNextLevel = nextLevelObj.xpRequired;
 	const xpNeededForNext = Math.max(0, xpForNextLevel - currXP);
 	const xpInCurrentLevel = currXP - currentLevelObj.xpRequired;
@@ -715,7 +264,6 @@ function processXpQueue() {
 	}, 4200);
 }
 
-// Update all UI elements showing level/XP
 function updateAllLevelUI() {
 	const profile = getUserProfile();
 
@@ -797,9 +345,7 @@ function canGainNow() {
 	return true;
 }
 
-// ============================================
-// XP QUEUE SYSTEM - No XP Lost Forever!
-// ============================================
+// ─── XP QUEUE SYSTEM ───────────────────────────────────
 
 const XP_QUEUE_KEY = 'xpPendingQueue';
 
@@ -914,79 +460,63 @@ function showQueueStatus() {
 	console.log(`📦 Queued XP: ${queue.length} items, ${totalQueuedXP} total XP`);
 }
 
-// ============================================
-// CLEAN UP QUEUE AND HISTORY WHEN ANIME IS DELETED
-// ============================================
+// ─── CLEAN UP QUEUE AND HISTORY WHEN ANIME IS DELETED ──
 
 function removeAnimeFromQueue(animeId) {
-    const queue = getPendingXPQueue();
-    const originalLength = queue.length;
-    
-    const filteredQueue = queue.filter(item => item.animeId != animeId);
-    
-    if (filteredQueue.length !== originalLength) {
-        savePendingXPQueue(filteredQueue);
-        console.log(`🗑️ Removed ${originalLength - filteredQueue.length} queued item(s) for anime ID: ${animeId}`);
-        
-        if (typeof showToast === 'function') {
-            showToast(`🗑️ Removed ${originalLength - filteredQueue.length} queued XP item(s) for deleted anime`, 'info');
-        }
-        
-        if (typeof updateQueueStatusUI === 'function') {
-            updateQueueStatusUI();
-        }
-    }
-    
-    return filteredQueue.length;
+	const queue = getPendingXPQueue();
+	const originalLength = queue.length;
+	const filteredQueue = queue.filter(item => item.animeId != animeId);
+	if (filteredQueue.length !== originalLength) {
+		savePendingXPQueue(filteredQueue);
+		console.log(`🗑️ Removed ${originalLength - filteredQueue.length} queued item(s) for anime ID: ${animeId}`);
+		if (typeof showToast === 'function') {
+			showToast(`🗑️ Removed ${originalLength - filteredQueue.length} queued XP item(s) for deleted anime`, 'info');
+		}
+		if (typeof updateQueueStatusUI === 'function') {
+			updateQueueStatusUI();
+		}
+	}
+	return filteredQueue.length;
 }
 
 function removeAnimeFromCompletedHistory(animeId) {
-    const history = getCompletedAnimeHistory();
-    
-    if (history[animeId]) {
-        const xpEarned = history[animeId].xpEarned || 0;
-        
-        const today = new Date().toDateString();
-        const dailyXPKey = `dailyXP_${today}`;
-        const animeList = safeGet(ANIME_DATA_KEY) || window.animeData || [];
-        let todayXPRecalc = 0;
-        
-        animeList.forEach(anime => {
-            if (anime.userStatus === 'Completed' && anime.finishDate && anime.id != animeId) {
-                const completedDate = new Date(anime.finishDate).toDateString();
-                if (completedDate === today) {
-                    const xp = calculateExpFromParts({
-                        episodes: anime.episodes || 0,
-                        progress: anime.progress || 0,
-                        duration: anime.duration || 20,
-                        type: anime.type,
-                        score: anime.score || 0,
-                        hasScore: !!anime.score
-                    }) + 10;
-                    todayXPRecalc += xp;
-                }
-            }
-        });
-        
-        localStorage.setItem(dailyXPKey, todayXPRecalc);
-        console.log(`🗑️ Recalculated today's XP: ${todayXPRecalc}`);
-        
-        delete history[animeId];
-        saveCompletedAnimeHistory(history);
-        console.log(`🗑️ Removed anime from completed history: ${animeId} (${xpEarned} XP)`);
-        
-        if (typeof updateQueueStatusUI === 'function') {
-            updateQueueStatusUI();
-        }
-        
-        return true;
-    }
-    return false;
+	const history = getCompletedAnimeHistory();
+	if (history[animeId]) {
+		const xpEarned = history[animeId].xpEarned || 0;
+		const today = new Date().toDateString();
+		const dailyXPKey = `dailyXP_${today}`;
+		const animeList = safeGet(ANIME_DATA_KEY) || window.animeData || [];
+		let todayXPRecalc = 0;
+		animeList.forEach(anime => {
+			if (anime.userStatus === 'Completed' && anime.finishDate && anime.id != animeId) {
+				const completedDate = new Date(anime.finishDate).toDateString();
+				if (completedDate === today) {
+					const xp = calculateExpFromParts({
+						episodes: anime.episodes || 0,
+						progress: anime.progress || 0,
+						duration: anime.duration || 20,
+						type: anime.type,
+						score: anime.score || 0,
+						hasScore: !!anime.score
+					}) + 10;
+					todayXPRecalc += xp;
+				}
+			}
+		});
+		localStorage.setItem(dailyXPKey, todayXPRecalc);
+		console.log(`🗑️ Recalculated today's XP: ${todayXPRecalc}`);
+		delete history[animeId];
+		saveCompletedAnimeHistory(history);
+		console.log(`🗑️ Removed anime from completed history: ${animeId} (${xpEarned} XP)`);
+		if (typeof updateQueueStatusUI === 'function') {
+			updateQueueStatusUI();
+		}
+		return true;
+	}
+	return false;
 }
 
-// ============================================
-// ANTI-ABUSE & SPAM PROTECTION SYSTEM
-// ============================================
+// ─── ANTI-ABUSE & SPAM PROTECTION ────────────────────
 
 const COMPLETED_ANIME_KEY = 'completedAnimeHistory';
 
@@ -1021,115 +551,22 @@ function getOriginalCompletedXP(animeId) {
 	return history[animeId]?.xpEarned || 0;
 }
 
+// ─── UPDATED: Suspicious episode check ──────────────
 function isEpisodeCountSuspicious(animeId, newEpisodeCount) {
 	const history = getCompletedAnimeHistory();
 	const oldRecord = history[animeId];
-
 	if (!oldRecord) return false;
 
 	const oldEpisodes = oldRecord.episodeCount;
 	const increase = newEpisodeCount - oldEpisodes;
 
-	return increase > 50;
+	if (oldEpisodes === 0 || newEpisodeCount === 0) return false;
+	if (newEpisodeCount > 500) return false; // long-running shows
+
+	return increase > 200;
 }
 
-// ============================================
-// HANDLE DIRECTLY COMPLETED ANIME (NO STATUS CHANGE)
-// ============================================
-
-function checkForDirectlyCompletedAnime(animeList) {
-    if (!animeList || animeList.length === 0) return false;
-    
-    const history = getCompletedAnimeHistory();
-    let newCompletedFound = false;
-    
-    animeList.forEach(anime => {
-        if (anime.userStatus !== 'Completed') return;
-        if (history[anime.id]) {
-            console.log(`⏭️ Skipping ${anime.title} - already in history`);
-            return;
-        }
-        
-        console.log(`🎯 Directly completed anime detected: ${anime.title}`);
-        
-        const earned = calculateExpFromParts({
-            episodes: anime.episodes || 0,
-            progress: anime.progress || anime.episodes || 0,
-            duration: anime.duration || 20,
-            type: anime.type,
-            score: anime.score || 0,
-            hasScore: !!anime.score
-        }) + 10;
-        
-        markAnimeAsCompleted(anime.id, anime.title, earned);
-        
-        const profile = getUserProfile();
-        const today = new Date().toDateString();
-        const dailyXPKey = `dailyXP_${today}`;
-        let todayXP = parseInt(localStorage.getItem(dailyXPKey) || '0');
-        
-        if (todayXP + earned <= MAX_DAILY_XP) {
-            todayXP += earned;
-            localStorage.setItem(dailyXPKey, todayXP);
-            profile.totalExp += earned;
-            saveUserProfile(profile);
-            
-            console.log(`✅ Showing popup for direct completion: +${earned} XP`);
-            showXpPopup({
-                animeId: anime.id,
-                xp: earned,
-                title: anime.title,
-                cover: anime.cover || '',
-                prevLevel: profile.level,
-                newLevel: profile.level,
-                profile: profile
-            });
-            newCompletedFound = true;
-            
-        } else if (todayXP < MAX_DAILY_XP) {
-            const remainingToday = MAX_DAILY_XP - todayXP;
-            const excessXP = earned - remainingToday;
-            
-            todayXP += remainingToday;
-            localStorage.setItem(dailyXPKey, todayXP);
-            profile.totalExp += remainingToday;
-            saveUserProfile(profile);
-            
-            showXpPopup({
-                animeId: anime.id,
-                xp: remainingToday,
-                title: anime.title,
-                cover: anime.cover || '',
-                prevLevel: profile.level,
-                newLevel: profile.level,
-                profile: profile
-            });
-            
-            addToPendingQueue(anime, excessXP);
-            console.log(`📦 Direct completion: ${remainingToday} XP added, ${excessXP} XP queued`);
-            newCompletedFound = true;
-            
-        } else {
-            addToPendingQueue(anime, earned);
-            console.log(`📦 Direct completion: ${earned} XP queued (daily limit reached)`);
-            
-            if (typeof showToast === 'function') {
-                showToast(`📦 ${earned} XP queued for tomorrow (daily limit reached)`, 'info');
-            }
-        }
-    });
-    
-    if (newCompletedFound) {
-        dispatchXpUpdated();
-        updateAllLevelUI();
-    }
-    
-    return newCompletedFound;
-}
-
-// ============================================
-// ENHANCED processAnimeDelta WITH ANTI-ABUSE AND POPUP TRIGGER
-// ============================================
+// ─── processAnimeDelta ──────────────────────────────
 
 function processAnimeDelta(oldA, newA) {
 	if (!newA || typeof newA !== 'object') return newA;
@@ -1158,11 +595,9 @@ function processAnimeDelta(oldA, newA) {
 
 	if (wasCompleted && oldStatus !== 'Completed' && newStatus === 'Completed') {
 		console.warn(`⚠️ Anti-abuse: ${newA.title} was already completed before! No XP awarded.`);
-
 		if (typeof showToast === 'function') {
 			showToast(`⚠️ "${newA.title}" was already completed! No XP awarded.`, 'warning');
 		}
-
 		newA.userStatus = newStatus;
 		return newA;
 	}
@@ -1170,9 +605,8 @@ function processAnimeDelta(oldA, newA) {
 	if (wasCompleted && isEpisodeCountSuspicious(newA.id, newA.episodes || 0)) {
 		console.warn(`⚠️ Anti-abuse: Suspicious episode increase detected for ${newA.title}`);
 		if (typeof showToast === 'function') {
-			showToast(`⚠️ Suspicious activity detected! Episode increase too large.`, 'error');
+			showToast(`⚠️ Episode increase is large (${newA.episodes} episodes). XP will still be awarded.`, 'warning');
 		}
-		return newA;
 	}
 
 	let earned = 0;
@@ -1189,7 +623,7 @@ function processAnimeDelta(oldA, newA) {
 		newA.earnedEpisodesExp = Math.max(newA.progress || 0, newA.earnedEpisodesExp || 0);
 
 		markAnimeAsCompleted(newA.id, newA.title, earned);
-		
+
 		console.log(`🎉 ANIME COMPLETED: ${newA.title} - +${earned} XP earned!`);
 	}
 
@@ -1209,16 +643,13 @@ function processAnimeDelta(oldA, newA) {
 			const excessXP = earned - remainingToday;
 
 			console.log(`📦 Daily limit reached! Adding ${remainingToday} XP now, queuing ${excessXP} XP for later.`);
-
 			if (typeof showToast === 'function') {
 				showToast(`📦 Daily limit reached! +${remainingToday} XP added now. ${excessXP} XP queued for tomorrow.`, 'info');
 			}
 
 			todayXP += remainingToday;
 			localStorage.setItem(dailyXPKey, todayXP);
-
 			addToPendingQueue(newA, excessXP);
-
 			profile.totalExp += remainingToday;
 			saveUserProfile(profile);
 
@@ -1264,9 +695,7 @@ function processAnimeDelta(oldA, newA) {
 	return newA;
 }
 
-// ============================================
-// ADMIN/DEBUG FUNCTIONS
-// ============================================
+// ─── ADMIN/DEBUG ──────────────────────────────────────
 
 window.resetAbuseRecords = function () {
 	if (confirm('⚠️ This will reset all anti-abuse records. Continue?')) {
@@ -1284,9 +713,7 @@ window.resetAbuseRecords = function () {
 	}
 };
 
-// ============================================
-// DAILY RESET CHECK
-// ============================================
+// ─── DAILY RESET CHECK ──────────────────────────────
 
 function checkDailyReset() {
 	const lastResetDate = localStorage.getItem('lastResetDate');
@@ -1409,63 +836,59 @@ document.addEventListener('DOMContentLoaded', () => {
 	setInterval(pollForChanges, 900);
 });
 
-// ============================================
-// SYNC LEVEL DATA TO CLOUD
-// ============================================
+// ─── SYNC LEVEL DATA TO CLOUD ────────────────────────
 
 function syncLevelToCloud() {
-    const profile = getUserProfile();
-    const animeData = safeGet(ANIME_DATA_KEY) || window.animeData || [];
-    
-    let totalMinutes = 0;
-    animeData.forEach(anime => {
-        if (anime.type === 'Movie') {
-            totalMinutes += anime.duration || 120;
-        } else {
-            const eps = anime.progress || anime.episodes || 0;
-            const epDur = anime.duration || 20;
-            totalMinutes += eps * epDur;
-        }
-    });
-    const totalHours = Math.round(totalMinutes / 60);
-    
-    const levelData = {
-        totalXP: profile.totalExp || 0,
-        level: profile.level || 1,
-        title: profile.title || 'Newbie',
-        totalAnime: animeData.filter(a => a.userStatus === 'Completed').length,
-        totalHours: totalHours
-    };
-    
-    localStorage.setItem('userLevel', levelData.level.toString());
-    localStorage.setItem('userLevelTitle', levelData.title);
-    localStorage.setItem('userXP', levelData.totalXP.toString());
-    localStorage.setItem('userTotalAnime', levelData.totalAnime.toString());
-    localStorage.setItem('userTotalHours', levelData.totalHours.toString());
-    
-    if (window.dualStorage && window.dualStorage.isLoggedIn && window.dualStorage.isLoggedIn()) {
-        console.log(`📤 Syncing level to cloud: Level ${levelData.level} (${levelData.totalXP} XP)`);
-        setTimeout(() => {
-            window.dualStorage.syncToCloud();
-        }, 1000);
-    }
+	const profile = getUserProfile();
+	const animeData = safeGet(ANIME_DATA_KEY) || window.animeData || [];
+
+	let totalMinutes = 0;
+	animeData.forEach(anime => {
+		if (anime.type === 'Movie') {
+			totalMinutes += anime.duration || 120;
+		} else {
+			const eps = anime.progress || anime.episodes || 0;
+			const epDur = anime.duration || 20;
+			totalMinutes += eps * epDur;
+		}
+	});
+	const totalHours = Math.round(totalMinutes / 60);
+
+	const levelData = {
+		totalXP: profile.totalExp || 0,
+		level: profile.level || 1,
+		title: profile.title || 'Newbie',
+		totalAnime: animeData.filter(a => a.userStatus === 'Completed').length,
+		totalHours: totalHours
+	};
+
+	localStorage.setItem('userLevel', levelData.level.toString());
+	localStorage.setItem('userLevelTitle', levelData.title);
+	localStorage.setItem('userXP', levelData.totalXP.toString());
+	localStorage.setItem('userTotalAnime', levelData.totalAnime.toString());
+	localStorage.setItem('userTotalHours', levelData.totalHours.toString());
+
+	if (window.dualStorage && window.dualStorage.isLoggedIn && window.dualStorage.isLoggedIn()) {
+		console.log(`📤 Syncing level to cloud: Level ${levelData.level} (${levelData.totalXP} XP)`);
+		setTimeout(() => {
+			window.dualStorage.syncToCloud();
+		}, 1000);
+	}
 }
 
 const originalSaveUserProfile = saveUserProfile;
-saveUserProfile = function(profile) {
-    originalSaveUserProfile(profile);
-    syncLevelToCloud();
+saveUserProfile = function (profile) {
+	originalSaveUserProfile(profile);
+	syncLevelToCloud();
 };
 
 window.addEventListener('xpUpdated', () => {
-    syncLevelToCloud();
+	syncLevelToCloud();
 });
 
 window.syncLevelToCloud = syncLevelToCloud;
 
-// ============================================
-// EXPOSE PUBLIC API
-// ============================================
+// ─── EXPOSE PUBLIC API ──────────────────────────────
 
 window.AniPulseLevelSystem = {
 	LEVELS,
@@ -1488,8 +911,6 @@ window.AniPulseLevelSystem = {
 	checkForDirectlyCompletedAnime
 };
 
-// Initialize popup styles and container on load
-ensureToastContainer();
-addPopupStyles();
+// ─── FINAL INIT ──────────────────────────────────────
 
-console.log('✅ Level System v1.2.0 loaded with Direct Completion + Status Change support!');
+ensureToastContainer();
