@@ -50,7 +50,8 @@
             window.setLocalDirty();
         }
 
-        window.dispatchEvent(
+        // ---- FIX: dispatch on document so dual-storage can catch ----
+        document.dispatchEvent(
             new CustomEvent('animeUpdate', {
                 detail: { data: animeData }
             })

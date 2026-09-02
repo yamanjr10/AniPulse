@@ -107,7 +107,10 @@ class DualStorageManager {
 
             const result = await response.json();
             if (result.success) {
+                // Clear both dirty flags
                 this.clearDirty();
+                if (typeof window.clearLocalDirty === 'function') window.clearLocalDirty();
+
                 this.lastSyncTime = new Date().toISOString();
                 localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
                 this.showSyncStatus('✅ Synced successfully', 'success');
@@ -245,7 +248,9 @@ class DualStorageManager {
                 localStorage.setItem('lastActive', data.streakData.lastActive);
             }
 
+            // Clear both dirty flags after a successful cloud load
             this.clearDirty();
+            if (typeof window.clearLocalDirty === 'function') window.clearLocalDirty();
 
             this.lastSyncTime = new Date().toISOString();
             localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
@@ -258,14 +263,9 @@ class DualStorageManager {
                 setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
             }
 
-            // ---- Notify main.js that cloud data is ready ----
             window._cloudLoaded = true;
             window._needsCloudLoad = false;
-
-            // Dispatch event
             window.dispatchEvent(new CustomEvent('cloudDataLoaded'));
-
-            // Also call the callback directly (race condition safety)
             if (typeof window._onCloudReady === 'function') {
                 window._onCloudReady();
             }
@@ -278,13 +278,15 @@ class DualStorageManager {
         }
     }
 
-    handleOnline() {
+    // 🔧 FIX: Check both dirty flags and handle appropriately
+    async handleOnline() {
         console.log('🟢 Online');
         if (this.isLoggedIn()) {
-            if (this.isDirty()) {
-                this.syncToCloud();
+            const isDirty = this.isDirty() || (typeof window.isLocalDirty === 'function' && window.isLocalDirty());
+            if (isDirty) {
+                await this.syncToCloud();
             } else {
-                this.loadFromCloud();
+                await this.loadFromCloud();
             }
         }
     }
@@ -293,6 +295,8 @@ class DualStorageManager {
         console.log('🔴 Offline');
         this.showSyncStatus('Offline – changes will sync when online', 'warning');
     }
+
+    // ─── HELPERS ──────────────────────────────────────
 
     calculateTotalHours() {
         const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
@@ -360,6 +364,7 @@ class DualStorageManager {
         console.log(`[${type.toUpperCase()}] ${message}`);
     }
 
+    // 🔧 FIX: Use handleOnline() instead of loadFromCloud() directly
     async checkApiReady() {
         let attempts = 0;
         const maxAttempts = 30;
@@ -370,7 +375,7 @@ class DualStorageManager {
         if (window.api) {
             console.log('✅ API ready');
             if (this.isLoggedIn() && navigator.onLine) {
-                await this.loadFromCloud();
+                await this.handleOnline();
             }
         } else {
             console.warn('⚠️ API not available after 5 seconds');

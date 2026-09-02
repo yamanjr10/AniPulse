@@ -24,7 +24,6 @@
     }
 
     function setupBeforeUnloadSync() {
-        // Keep this as is – it's a fallback
         window.addEventListener('beforeunload', function () {
             if (window.dualStorage && localStorage.getItem('authToken')) {
                 const data = {
@@ -176,7 +175,6 @@
         dayPromptModal.appendChild(content);
         document.body.appendChild(dayPromptModal);
 
-        // Event listeners
         const input = dayPromptModal.querySelector('#dayPromptInput');
         const confirmBtn = dayPromptModal.querySelector('#dayPromptConfirm');
         const cancelBtn = dayPromptModal.querySelector('#dayPromptCancel');
@@ -216,7 +214,6 @@
             if (e.key === 'Escape') cancelBtn.click();
         });
 
-        // Focus input when opened
         const observer = new MutationObserver(() => {
             if (dayPromptModal.style.display === 'flex') {
                 input.focus();
@@ -600,8 +597,8 @@
         window.setLocalDirty();
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { }
 
-        // ---- FIX: trigger sync via animeUpdate event ----
-        window.dispatchEvent(new CustomEvent('animeUpdate'));
+        // ---- FIX: trigger sync via animeUpdate event on document ----
+        document.dispatchEvent(new CustomEvent('animeUpdate'));
 
         window.closeModal(document.getElementById('addAnimeModal'));
         resetEditingState();
@@ -710,8 +707,8 @@
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
-            // ---- FIX: trigger sync via animeUpdate event ----
-            window.dispatchEvent(new CustomEvent('animeUpdate'));
+            // ---- FIX: trigger sync via animeUpdate event on document ----
+            document.dispatchEvent(new CustomEvent('animeUpdate'));
 
         } else {
             // Adding new – use next available ID
@@ -746,8 +743,8 @@
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
-            // ---- FIX: trigger sync via animeUpdate event ----
-            window.dispatchEvent(new CustomEvent('animeUpdate'));
+            // ---- FIX: trigger sync via animeUpdate event on document ----
+            document.dispatchEvent(new CustomEvent('animeUpdate'));
         }
 
         window.closeModal(document.getElementById('addAnimeModal'));
