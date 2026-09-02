@@ -1,5 +1,5 @@
 // ============================================
-// 12-SLIDE RECAP SYSTEM
+// 12-SLIDE RECAP SYSTEM (Fixed: uses actualFinishDate)
 // ============================================
 
 (function () {
@@ -13,21 +13,37 @@
     let recapSlides = [];
     let currentSlide = 0;
 
-    // --- Date helpers ---
+    // ─── Date helpers ──────────────────────────────────
     function getCompletionTime(anime) {
-        if (anime.finishDate) {
+        // 1. Prefer actualFinishDate (YYYY-MM-DD) – the exact day the user completed it
+        if (anime.actualFinishDate) {
             const regex = /^\d{4}-\d{2}-\d{2}$/;
-            if (regex.test(anime.finishDate)) {
-                const [year, month, day] = anime.finishDate.split('-').map(Number);
+            if (regex.test(anime.actualFinishDate)) {
+                const [year, month, day] = anime.actualFinishDate.split('-').map(Number);
                 return new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999)).getTime();
             }
         }
-        if (anime.completedTimestamp) return anime.completedTimestamp;
-        if (anime.updatedAt) {
-            const date = new Date(anime.updatedAt);
-            date.setHours(23, 59, 59, 999);
-            return date.getTime();
+
+        // 2. If no actualFinishDate, use finishDate (YYYY-MM or YYYY-MM-DD)
+        if (anime.finishDate) {
+            const parts = anime.finishDate.split('-');
+            if (parts.length >= 2) {
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1;
+                const day = parts.length === 3 ? parseInt(parts[2]) : 1;
+                if (!isNaN(year) && !isNaN(month) && month >= 0 && month <= 11) {
+                    return new Date(Date.UTC(year, month, day, 23, 59, 59, 999)).getTime();
+                }
+            }
         }
+
+        // 3. Fallback to completedTimestamp (old data)
+        if (anime.completedTimestamp) {
+            const ts = parseInt(anime.completedTimestamp);
+            if (!isNaN(ts)) return ts;
+        }
+
+        // Do NOT use updatedAt or createdAt – they change on edits.
         return null;
     }
 
@@ -53,7 +69,7 @@
         return new Date().getFullYear() - 1;
     }
 
-    // --- Build recap data ---
+    // ─── Build recap data ──────────────────────────────
     function buildComprehensiveRecap(list, type, periodInfo = {}) {
         const isYearly = type === 'Yearly';
         const monthName = !isYearly && typeof periodInfo.month === 'number' ? MONTH_NAMES[periodInfo.month] : null;
@@ -150,7 +166,7 @@
         return buildComprehensiveRecap(completed, 'Yearly', { year });
     }
 
-    // --- Slides generation ---
+    // ─── Slides generation ──────────────────────────────
     function generateTwelveSlides(data, type, periodInfo) {
         const periodText = periodInfo.month ? `${data.monthName} ${data.year}` : `${data.year}`;
         const isYearly = type === 'Yearly';
@@ -173,29 +189,17 @@
         }
 
         return [
-            // Slide 1
             `<div class="slide-icon"><i class="fas fa-calendar-alt"></i></div><h1>${isYearly ? data.year : `${data.monthName} ${data.year}`}</h1><p class="subtitle">${isYearly ? `${data.year} Anime Recap` : `${data.monthName} Anime Recap`}</p><p class="hint">Let's look back at your journey</p><div class="slide-counter">1/12</div>`,
-            // Slide 2
             `<div class="slide-icon"><i class="fas fa-tv"></i></div><h1>${data.totalAnime}</h1><p class="subtitle">Anime Completed</p><p class="hint">${isYearly ? 'Over 12 months' : 'In one month'}</p><div class="stat-badge"><span><i class="fas fa-film"></i> ${data.totalEpisodes} episodes</span></div><div class="slide-counter">2/12</div>`,
-            // Slide 3
             `<div class="slide-icon"><i class="fas fa-clock"></i></div><h1>${data.totalHours}</h1><p class="subtitle">Hours Watched</p><p class="hint">That's ${Math.floor(data.totalHours / 24)} days!</p><div class="stat-badge"><span><i class="fas fa-calendar-day"></i> ${data.avgEpisodesPerDay} episodes/day</span></div><div class="slide-counter">3/12</div>`,
-            // Slide 4
             `<div class="slide-icon"><i class="fas fa-star"></i></div><h1>${data.avgScore}</h1><p class="subtitle">Average Score</p><p class="hint">${data.avgScore >= 8 ? 'Great taste!' : data.avgScore >= 7 ? 'Solid picks!' : "You're critical!"}</p><div class="rating-meter"><div class="meter-fill" style="width: ${(data.avgScore / 10) * 100}%"></div></div><div class="slide-counter">4/12</div>`,
-            // Slide 5
             `<div class="slide-icon"><i class="fas fa-tags"></i></div><h1>${data.topGenre}</h1><p class="subtitle">Favorite Genre</p><p class="hint">Your most watched category</p><div class="genre-list"><span class="genre-badge primary">${data.topGenre}</span>${data.secondGenre !== '—' ? `<span class="genre-badge secondary">${data.secondGenre}</span>` : ''}${data.thirdGenre !== '—' ? `<span class="genre-badge tertiary">${data.thirdGenre}</span>` : ''}</div><div class="slide-counter">5/12</div>`,
-            // Slide 6
             `<div class="slide-icon"><i class="fas fa-crown"></i></div><h1>${data.topAnime?.title || 'None'}</h1><p class="subtitle">Top Rated Anime</p>${data.topAnime ? `<p class="score"><i class="fas fa-star"></i> ${data.topAnime.score}</p><p class="hint">Your highest rated</p>` : '<p class="hint">Rate your anime!</p>'}<div class="slide-counter">6/12</div>`,
-            // Slide 7
             `<div class="slide-icon"><i class="fas fa-chart-line"></i></div><h1>${data.streakDays}</h1><p class="subtitle">Active Watching Days</p><p class="hint">${isYearly ? 'Out of 365 days' : 'Out of 30 days on average'}</p><div class="streak-bar"><div class="streak-fill" style="width: ${isYearly ? (data.streakDays / 365) * 100 : (data.streakDays / 30) * 100}%"></div></div>${isYearly && data.completionMonth ? `<p class="hint">Busiest month: ${data.completionMonth}</p>` : ''}<div class="slide-counter">7/12</div>`,
-            // Slide 8
             `<div class="slide-icon"><i class="fas fa-running"></i></div><h1>${data.avgDuration}</h1><p class="subtitle">Average Episode Length</p><p class="hint">${data.avgDuration >= 20 ? 'Standard TV format' : 'Shorts & movies'}</p><div class="stat-badge"><span><i class="fas fa-hourglass-half"></i> ${data.totalEpisodes} total episodes</span></div><div class="slide-counter">8/12</div>`,
-            // Slide 9
             `<div class="slide-icon"><i class="fas fa-medal"></i></div><h1>${data.secondAnime?.title || 'None'}</h1><p class="subtitle">Second Highest Rated</p>${data.secondAnime ? `<p class="score"><i class="fas fa-star"></i> ${data.secondAnime.score}</p>` : '<p class="hint">Need more ratings</p>'}<div class="slide-counter">9/12</div>`,
-            // Slide 10
             `<div class="slide-icon"><i class="fas fa-calendar-check"></i></div><h1>${Math.round((data.streakDays / (isYearly ? 365 : 30)) * 100)}%</h1><p class="subtitle">Consistency Rate</p><p class="hint">Days with anime watching</p><div class="slide-counter">10/12</div>`,
-            // Slide 11
             `<div class="slide-icon"><i class="fas fa-award"></i></div><h1>${data.thirdAnime?.title || 'None'}</h1><p class="subtitle">Third Highest Rated</p>${data.thirdAnime ? `<p class="score"><i class="fas fa-star"></i> ${data.thirdAnime.score}</p><p class="hint">Completing the podium!</p>` : '<p class="hint">Keep watching and rating</p>'}<div class="slide-counter">11/12</div>`,
-            // Slide 12
             `<div class="slide-icon"><i class="fas fa-flag-checkered"></i></div><h1>Recap Complete!</h1><p class="subtitle">${periodText}</p><div class="recap-summary"><div class="summary-item"><i class="fas fa-tv"></i><span>${data.totalAnime} anime</span></div><div class="summary-item"><i class="fas fa-clock"></i><span>${data.totalHours} hours</span></div><div class="summary-item"><i class="fas fa-star"></i><span>${data.avgScore} avg score</span></div><div class="summary-item"><i class="fas fa-tags"></i><span>${data.topGenre}</span></div></div><p class="hint">See you ${isYearly ? 'next year' : 'next month'} for another recap!</p><div class="slide-counter">12/12</div>`
         ];
     }
@@ -266,7 +270,7 @@
         }
     }
 
-    // --- Auto popups ---
+    // ─── Auto popups ──────────────────────────────────
     function setupAutoPopups() {
         const now = new Date();
 
@@ -280,7 +284,6 @@
                     if (typeof showToast === 'function') {
                         showToast(`Your ${yearlyYear} Yearly Recap is ready!`, 'success');
                     }
-                    // Show a small notification with action
                     const toast = document.querySelector('.toast-container');
                     if (toast) {
                         const msg = document.createElement('div');
@@ -326,7 +329,7 @@
         }
     }
 
-    // --- Expose ---
+    // ─── Expose ──────────────────────────────────────
     window.isRecapWindowOpen = isRecapWindowOpen;
     window.getPreviousMonthForRecap = getPreviousMonthForRecap;
     window.getPreviousYearForRecap = getPreviousYearForRecap;
@@ -335,7 +338,7 @@
     window.openRecap = openRecap;
     window.openRecapManually = openRecapManually;
 
-    // --- Init ---
+    // ─── Init ─────────────────────────────────────────
     function initRecapSystem() {
         // Modal controls
         document.getElementById('next-slide')?.addEventListener('click', () => {

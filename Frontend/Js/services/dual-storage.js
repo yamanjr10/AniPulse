@@ -116,12 +116,8 @@ class DualStorageManager {
                 this.showSyncStatus('✅ Synced successfully', 'success');
                 console.log(`✅ Uploaded ${payload.animeData?.length || 0} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
 
-                // ---- Clear the load-all cache so subsequent GET gets fresh data ----
-                if (window.rateLimiter && window.rateLimiter.cache) {
-                    const loadAllUrl = `${window.API_BASE_URL}/api/sync/load-all`;
-                    window.rateLimiter.cache.delete(loadAllUrl);
-                    console.log('🗑️ Cleared load-all cache after sync');
-                }
+                // Clear the load-all cache (force fresh fetch next time)
+                this.clearLoadCache();
 
                 return true;
             } else {
@@ -173,6 +169,20 @@ class DualStorageManager {
         };
     }
 
+    // ─── Cache clearing ──────────────────────────────
+
+    clearLoadCache() {
+        try {
+            if (window.rateLimiter && window.rateLimiter.cache) {
+                const loadAllUrl = `${window.API_BASE_URL}/api/sync/load-all`;
+                window.rateLimiter.cache.delete(loadAllUrl);
+                console.log('🗑️ Cleared load-all cache');
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    // ─── LOAD FROM CLOUD (with cache busting) ────────
+
     async loadFromCloud() {
         const token = this.getToken();
         if (!token) {
@@ -185,7 +195,9 @@ class DualStorageManager {
         }
 
         try {
-            const response = await fetch(`${window.API_BASE_URL}/api/sync/load-all`, {
+            // Add timestamp to bust all caches (browser, CDN, rateLimiter)
+            const url = `${window.API_BASE_URL}/api/sync/load-all?_t=${Date.now()}`;
+            const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -195,6 +207,7 @@ class DualStorageManager {
             const { data, lastModified } = result;
             this.backupLocalData();
 
+            // ---- Replace all local data with cloud data ----
             if (data.animeData) {
                 localStorage.setItem('animeData', JSON.stringify(data.animeData));
                 window.animeData = data.animeData;
@@ -256,7 +269,7 @@ class DualStorageManager {
                 localStorage.setItem('lastActive', data.streakData.lastActive);
             }
 
-            // Clear both dirty flags after a successful cloud load
+            // Clear dirty flags after successful load
             this.clearDirty();
             if (typeof window.clearLocalDirty === 'function') window.clearLocalDirty();
 
@@ -269,13 +282,6 @@ class DualStorageManager {
             if (typeof updateAllComponents === 'function') updateAllComponents();
             if (window.AniPulseLevelSystem && typeof window.AniPulseLevelSystem.updateAllLevelUI === 'function') {
                 setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
-            }
-
-            // ---- Clear the load-all cache after a fresh load ----
-            if (window.rateLimiter && window.rateLimiter.cache) {
-                const loadAllUrl = `${window.API_BASE_URL}/api/sync/load-all`;
-                window.rateLimiter.cache.delete(loadAllUrl);
-                console.log('🗑️ Cleared load-all cache after cloud load');
             }
 
             window._cloudLoaded = true;
@@ -293,13 +299,16 @@ class DualStorageManager {
         }
     }
 
-    // 🔧 FIX: Check both dirty flags and handle appropriately
+    // ─── Online handler ──────────────────────────────
+
     async handleOnline() {
         console.log('🟢 Online');
         if (this.isLoggedIn()) {
             const isDirty = this.isDirty() || (typeof window.isLocalDirty === 'function' && window.isLocalDirty());
             if (isDirty) {
                 await this.syncToCloud();
+                // After sync, we could load cloud to get other changes, but that might overwrite ours.
+                // We'll only load if we are not dirty anymore.
             } else {
                 await this.loadFromCloud();
             }
@@ -376,15 +385,13 @@ class DualStorageManager {
                 }
             }, 3000);
         }
-        // Also show toast if available
         if (typeof showToast === 'function') {
-            const toastMessage = message.replace(/<[^>]*>/g, ''); // strip HTML
+            const toastMessage = message.replace(/<[^>]*>/g, '');
             showToast(toastMessage, type);
         }
         console.log(`[${type.toUpperCase()}] ${message}`);
     }
 
-    // 🔧 FIX: Use handleOnline() instead of loadFromCloud() directly
     async checkApiReady() {
         let attempts = 0;
         const maxAttempts = 30;

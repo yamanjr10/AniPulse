@@ -153,6 +153,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         });
     }
+
+    // Remove the explicit cloud load call – dualStorage handles it
 });
 
 // ─── Auto-reload (development only) ──────────────

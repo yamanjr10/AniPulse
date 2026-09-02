@@ -1,4 +1,4 @@
-// Advanced RPG Level System
+// Advanced RPG Level System 
 
 const LEVELS = [
 	// Levels 1-21: Common titles
@@ -57,7 +57,7 @@ const LEVELS = [
 	{ level: 47, title: "Genesis", xpRequired: 578000 },
 	{ level: 48, title: "Apoc", xpRequired: 612000 },
 	{ level: 49, title: "Nirvana", xpRequired: 647000 },
-	{ level: 50, title: "Max", xpRequired: 683000 }
+	{ level: 50, title: "Enlight", xpRequired: 683000 }
 ];
 
 const USER_PROFILE_KEY = 'userProfile';
@@ -182,13 +182,11 @@ function ensureToastContainer() {
 }
 
 // ─── CSS for popup is now in level-system.css ───
-// No dynamic injection needed.
+function addPopupStyles() { /* no-op */ }
 
 function showXpPopup(data) {
 	try { window.__lastXpAward = { xp: data.xp || 0, ts: Date.now(), animeId: data.animeId || '' }; } catch (e) { }
-
 	ensureToastContainer();
-
 	xpPopupQueue.push(data);
 	try { window.__justAwardedXp = true; setTimeout(() => { try { window.__justAwardedXp = false; } catch (e) { } }, 4500); } catch (e) { }
 	if (!showingXpPopup) processXpQueue();
@@ -393,33 +391,26 @@ function processPendingXPQueue() {
 			remainingCapacity -= pending.xp;
 			profile.totalExp += pending.xp;
 			processedCount++;
-
 			if (typeof showToast === 'function') {
 				showToast(`📦 Queued XP added: +${pending.xp} XP for "${pending.animeTitle}"`, 'success');
 			}
-
 			console.log(`✅ Processed queued XP: +${pending.xp} for "${pending.animeTitle}"`);
 		} else if (remainingCapacity > 0 && pending.xp > remainingCapacity) {
 			const partialXP = remainingCapacity;
 			const leftoverXP = pending.xp - remainingCapacity;
-
 			todayXP += partialXP;
 			profile.totalExp += partialXP;
 			remainingCapacity = 0;
-
 			pending.xp = leftoverXP;
 			pending.retryCount++;
 			stillPending.push(pending);
-
 			console.log(`⚠️ Partial processing: +${partialXP}/${pending.xp} XP for "${pending.animeTitle}". ${leftoverXP} XP remains queued.`);
-
 			if (typeof showToast === 'function') {
 				showToast(`📦 Partial XP added: +${partialXP}/${pending.xp} XP for "${pending.animeTitle}". ${leftoverXP} XP will be added tomorrow.`, 'info');
 			}
 		} else {
 			stillPending.push(pending);
 		}
-
 		if (remainingCapacity <= 0) break;
 	}
 
@@ -450,13 +441,10 @@ function showQueueStatus() {
 		}
 		return;
 	}
-
 	const totalQueuedXP = queue.reduce((sum, p) => sum + p.xp, 0);
-
 	if (typeof showToast === 'function') {
 		showToast(`📦 ${queue.length} item(s) queued (${totalQueuedXP} XP total). Will be added when daily limit resets.`, 'info');
 	}
-
 	console.log(`📦 Queued XP: ${queue.length} items, ${totalQueuedXP} total XP`);
 }
 
@@ -695,6 +683,97 @@ function processAnimeDelta(oldA, newA) {
 	return newA;
 }
 
+// ─── DIRECTLY COMPLETED ANIME DETECTION ─────────────
+
+function checkForDirectlyCompletedAnime(animeList) {
+	if (!animeList || animeList.length === 0) return false;
+
+	const history = getCompletedAnimeHistory();
+	let newCompletedFound = false;
+
+	animeList.forEach(anime => {
+		if (anime.userStatus !== 'Completed') return;
+		if (history[anime.id]) {
+			console.log(`⏭️ Skipping ${anime.title} - already in history`);
+			return;
+		}
+
+		console.log(`🎯 Directly completed anime detected: ${anime.title}`);
+
+		const earned = calculateExpFromParts({
+			episodes: anime.episodes || 0,
+			progress: anime.progress || anime.episodes || 0,
+			duration: anime.duration || 20,
+			type: anime.type,
+			score: anime.score || 0,
+			hasScore: !!anime.score
+		}) + 10;
+
+		markAnimeAsCompleted(anime.id, anime.title, earned);
+
+		const profile = getUserProfile();
+		const today = new Date().toDateString();
+		const dailyXPKey = `dailyXP_${today}`;
+		let todayXP = parseInt(localStorage.getItem(dailyXPKey) || '0');
+
+		if (todayXP + earned <= MAX_DAILY_XP) {
+			todayXP += earned;
+			localStorage.setItem(dailyXPKey, todayXP);
+			profile.totalExp += earned;
+			saveUserProfile(profile);
+
+			console.log(`✅ Showing popup for direct completion: +${earned} XP`);
+			showXpPopup({
+				animeId: anime.id,
+				xp: earned,
+				title: anime.title,
+				cover: anime.cover || '',
+				prevLevel: profile.level,
+				newLevel: profile.level,
+				profile: profile
+			});
+			newCompletedFound = true;
+
+		} else if (todayXP < MAX_DAILY_XP) {
+			const remainingToday = MAX_DAILY_XP - todayXP;
+			const excessXP = earned - remainingToday;
+
+			todayXP += remainingToday;
+			localStorage.setItem(dailyXPKey, todayXP);
+			profile.totalExp += remainingToday;
+			saveUserProfile(profile);
+
+			showXpPopup({
+				animeId: anime.id,
+				xp: remainingToday,
+				title: anime.title,
+				cover: anime.cover || '',
+				prevLevel: profile.level,
+				newLevel: profile.level,
+				profile: profile
+			});
+
+			addToPendingQueue(anime, excessXP);
+			console.log(`📦 Direct completion: ${remainingToday} XP added, ${excessXP} XP queued`);
+			newCompletedFound = true;
+
+		} else {
+			addToPendingQueue(anime, earned);
+			console.log(`📦 Direct completion: ${earned} XP queued (daily limit reached)`);
+			if (typeof showToast === 'function') {
+				showToast(`📦 ${earned} XP queued for tomorrow (daily limit reached)`, 'info');
+			}
+		}
+	});
+
+	if (newCompletedFound) {
+		dispatchXpUpdated();
+		updateAllLevelUI();
+	}
+
+	return newCompletedFound;
+}
+
 // ─── ADMIN/DEBUG ──────────────────────────────────────
 
 window.resetAbuseRecords = function () {
@@ -910,6 +989,10 @@ window.AniPulseLevelSystem = {
 	showQueueStatus,
 	checkForDirectlyCompletedAnime
 };
+
+// ─── MAKE GLOBAL FOR POLLING ─────────────────────────
+
+window.checkForDirectlyCompletedAnime = checkForDirectlyCompletedAnime;
 
 // ─── FINAL INIT ──────────────────────────────────────
 
