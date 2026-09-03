@@ -46,7 +46,7 @@
                         `${window.API_BASE_URL}/api/sync/sync-all`,
                         new Blob([JSON.stringify(data)], { type: 'application/json' })
                     );
-                    console.log('📤 Beforeunload beacon sent');
+                    console.log('Beforeunload beacon sent');
                 } catch (e) { }
             }
         });
@@ -71,7 +71,7 @@
         document.body.style.width = '100%';
         document.body.style.height = '100%';
         document.body.style.top = `-${scrollY}px`;
-        console.log('✅ Modal opened');
+        console.log('Modal opened');
     };
 
     window.closeModal = function (modalElement) {
@@ -95,7 +95,7 @@
             window.scrollTo({ top: scrollY, behavior: 'auto' });
         }
         delete modalScrollPositions[modalId];
-        console.log('✅ Modal closed');
+        console.log('Modal closed');
     };
 
     // ============================================================
@@ -111,7 +111,7 @@
     }
 
     // ============================================================
-    // CUSTOM DAY PROMPT MODAL (styled, replaces window.prompt)
+    // CUSTOM DAY PROMPT MODAL 
     // ============================================================
 
     let dayPromptResolve = null;
@@ -248,7 +248,7 @@
     }
 
     // ============================================================
-    // CUSTOM CONFIRM MODAL (styled, replaces window.confirm)
+    // CUSTOM CONFIRM MODAL
     // ============================================================
 
     let confirmResolve = null;
@@ -484,13 +484,13 @@
     // ============================================================
 
     window.editAnime = function (id) {
-        console.log('✏️ Editing anime with ID:', id);
+        console.log('Editing anime with ID:', id);
         const anime = window.animeData.find(a => a.id == id);
         if (!anime) {
             if (typeof showToast === 'function') showToast('Anime not found', 'error');
             return;
         }
-        console.log('📝 Found anime:', anime.title);
+        console.log('Found anime:', anime.title);
 
         window.isEditing = true;
         window.currentEditId = id;
@@ -570,7 +570,7 @@
         if (addModal) {
             window.openModal(addModal);
         } else {
-            console.error('❌ Add anime modal not found!');
+            console.error('Add anime modal not found');
         }
     };
 
@@ -597,15 +597,14 @@
         window.setLocalDirty();
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { }
 
-        // ---- IMMEDIATE SYNC (no debounce) ----
         document.dispatchEvent(new CustomEvent('animeUpdate'));
         if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.syncToCloud === 'function') {
             window.dualStorage.markDirty();
             window.dualStorage.syncToCloud().then(success => {
                 if (success) {
-                    console.log('✅ Delete synced to cloud immediately');
+                    console.log('Delete synced to cloud immediately');
                 } else {
-                    console.warn('⚠️ Delete sync failed – will retry later');
+                    console.warn('Delete sync failed, will retry later');
                 }
             });
         }
@@ -654,7 +653,6 @@
         let logAction = 'added';
         let toastMessage = `"${title}" added successfully!`;
 
-        // ── Helper to set dates ──
         async function setCompletionDates(year, month) {
             let y = parseInt(year);
             let m = parseInt(month);
@@ -682,10 +680,8 @@
             const wasCompleted = existing.userStatus === 'Completed';
             const isNowCompleted = status === 'Completed';
 
-            // ---- Log before update ----
-            console.log(`📝 Before edit: progress=${existing.progress}, status=${existing.userStatus}`);
+            console.log(`Before edit: progress=${existing.progress}, status=${existing.userStatus}`);
 
-            // Update fields
             existing.title = title;
             existing.type = type;
             existing.episodes = episodes;
@@ -697,9 +693,8 @@
             existing.genres = genres;
             existing.updatedAt = nowTimestamp;
 
-            console.log(`📝 After edit: progress=${existing.progress}, status=${existing.userStatus}`);
+            console.log(`After edit: progress=${existing.progress}, status=${existing.userStatus}`);
 
-            // ── Set dates ──
             if (isNowCompleted) {
                 let y = parseInt(year);
                 let m = parseInt(month);
@@ -729,10 +724,9 @@
                 existing.actualFinishDate = null;
             }
 
-            // Determine action
             if (isNowCompleted && !wasCompleted) {
                 logAction = 'completed';
-                toastMessage = `"${title}" marked as completed! 🎉`;
+                toastMessage = `"${title}" marked as completed!`;
             } else if (existing.title !== title) {
                 logAction = 'edited';
                 toastMessage = `"${title}" renamed successfully!`;
@@ -743,38 +737,35 @@
 
             if (typeof window.saveData === 'function') window.saveData();
 
-            // ---- Verify saved data ----
             const verifyData = JSON.parse(localStorage.getItem('animeData') || '[]');
             const verifyAnime = verifyData.find(a => a.id === existing.id);
             if (verifyAnime) {
-                console.log(`📝 After save (localStorage): progress=${verifyAnime.progress}, status=${verifyAnime.userStatus}`);
+                console.log(`After save (localStorage): progress=${verifyAnime.progress}, status=${verifyAnime.userStatus}`);
             }
 
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
-            // ---- IMMEDIATE SYNC (no debounce) ----
             document.dispatchEvent(new CustomEvent('animeUpdate'));
             if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.syncToCloud === 'function') {
                 window.dualStorage.markDirty();
                 const syncResult = await window.dualStorage.syncToCloud();
                 if (syncResult) {
-                    console.log(`✅ Edit synced to cloud immediately (${window.animeData.length} anime)`);
+                    console.log(`Edit synced to cloud immediately (${window.animeData.length} anime)`);
                 } else {
-                    console.warn('⚠️ Edit sync failed – will retry later');
+                    console.warn('Edit sync failed, will retry later');
                 }
             }
 
         } else {
-            // ── Adding new anime ──
             if (status === 'Completed') {
                 logAction = 'completed';
-                toastMessage = `"${title}" added and marked as completed! 🎉`;
+                toastMessage = `"${title}" added and marked as completed!`;
                 const success = await setCompletionDates(year, month);
                 if (!success) return;
             } else if (status === 'Watching') {
                 logAction = 'watching';
-                toastMessage = `"${title}" added to your watching list! 📺`;
+                toastMessage = `"${title}" added to your watching list!`;
             }
 
             const newAnime = {
@@ -798,15 +789,14 @@
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
-            // ---- IMMEDIATE SYNC (no debounce) ----
             document.dispatchEvent(new CustomEvent('animeUpdate'));
             if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.syncToCloud === 'function') {
                 window.dualStorage.markDirty();
                 const syncResult = await window.dualStorage.syncToCloud();
                 if (syncResult) {
-                    console.log(`✅ Add synced to cloud immediately (${window.animeData.length} anime)`);
+                    console.log(`Add synced to cloud immediately (${window.animeData.length} anime)`);
                 } else {
-                    console.warn('⚠️ Add sync failed – will retry later');
+                    console.warn('Add sync failed, will retry later');
                 }
             }
         }
@@ -874,7 +864,7 @@
             }
             const animeId = row.getAttribute('data-id');
             if (animeId && typeof window.editAnime === 'function') {
-                console.log('🖱️ Row clicked, ID:', animeId);
+                console.log('Row clicked, ID:', animeId);
                 window.editAnime(animeId);
             }
         };
@@ -1008,7 +998,7 @@
     });
 
     function initModalSystem() {
-        console.log('🚀 Initializing modal system...');
+        console.log('Initializing modal system...');
         setupModalHandlers();
         setupAddAnimeButton();
         setupFloatingButton();
@@ -1021,13 +1011,13 @@
         } else {
             setTimeout(attachTableClickHandler, 300);
         }
-        console.log('✅ Modal system initialized');
+        console.log('Modal system initialized');
     }
 
     window.initModalSystem = initModalSystem;
 
     window.selectAnimeFromSearch = function (anime) {
-        console.log('🎯 Selecting anime:', anime.title);
+        console.log('Selecting anime:', anime.title);
         const titleInput = document.getElementById('animeTitle');
         const typeSelect = document.getElementById('animeType');
         const episodesInput = document.getElementById('animeEpisodes');
@@ -1091,8 +1081,8 @@
         }
         if (typeof showToast === 'function') {
             const genreCount = Array.isArray(anime.genres) ? anime.genres.length : 0;
-            showToast(`✓ Selected: ${anime.title} (${genreCount} genres)`, 'success');
+            showToast(`Selected: ${anime.title} (${genreCount} genres)`, 'success');
         }
-        console.log('✅ Anime selected successfully');
+        console.log('Anime selected successfully');
     };
 })();

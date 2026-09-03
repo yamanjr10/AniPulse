@@ -91,12 +91,16 @@ class DualStorageManager {
             const payload = this.buildSyncPayload();
             const token = this.getToken();
 
-            // ---- Log the payload's ID 488 before sending ----
-            const anime488 = payload.animeData.find(a => a.id === 488);
-            if (anime488) {
-                console.log(`📤 PAYLOAD: ID 488 progress=${anime488.progress}, status=${anime488.userStatus}`);
-            } else {
-                console.warn('⚠️ ID 488 not found in payload!');
+            // ---- Log summary of payload ----
+            const total = payload.animeData?.length || 0;
+            console.log(`📤 Syncing ${total} anime to cloud`);
+            if (total > 0) {
+                const sample = payload.animeData.slice(0, 3);
+                console.log('   Sample (first 3):');
+                sample.forEach((a, i) => {
+                    console.log(`     ${i + 1}. ID:${a.id} | "${a.title}" | ${a.userStatus} | progress:${a.progress || 0}`);
+                });
+                if (total > 3) console.log(`   ... and ${total - 3} more`);
             }
 
             const response = await fetch(`${window.API_BASE_URL}/api/sync/sync-all`, {
@@ -121,7 +125,7 @@ class DualStorageManager {
                 this.lastSyncTime = new Date().toISOString();
                 localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
                 this.showSyncStatus('✅ Synced successfully', 'success');
-                console.log(`✅ Uploaded ${payload.animeData?.length || 0} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
+                console.log(`✅ Uploaded ${total} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
 
                 this.clearLoadCache();
                 return true;
@@ -138,15 +142,7 @@ class DualStorageManager {
     }
 
     buildSyncPayload() {
-        // ---- Read from window.animeData (in‑memory) ----
         const animeData = window.animeData || JSON.parse(localStorage.getItem('animeData') || '[]');
-
-        // ---- Log the current state of ID 488 ----
-        const anime488 = animeData.find(a => a.id === 488);
-        if (anime488) {
-            console.log(`🔍 buildSyncPayload: ID 488 progress=${anime488.progress}, status=${anime488.userStatus}`);
-        }
-
         const activityLog = JSON.parse(localStorage.getItem('activityLog') || '[]');
         const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
         const unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements') || '[]');
@@ -213,7 +209,10 @@ class DualStorageManager {
             const url = `${window.API_BASE_URL}/api/sync/load-all?_t=${Date.now()}`;
             const response = await fetch(url, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
                 }
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
