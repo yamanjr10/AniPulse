@@ -18,26 +18,14 @@ router.post('/sync-all', verifyToken, async (req, res) => {
   const userId = req.userId;
   try {
     console.log(`🔄 Syncing all data for user: ${userId}`);
-
-    // ---- Log payload contents ----
     console.log(`📦 Received animeData length: ${animeData?.length || 0}`);
-    if (animeData && Array.isArray(animeData)) {
-      // Log first 5 anime IDs
-      const firstIds = animeData.slice(0, 5).map(a => a.id);
-      console.log(`First 5 anime IDs: ${firstIds.join(', ')}`);
 
-      // Specifically look for the anime we care about (ID 488)
-      const edited = animeData.find(a => a.id === 488);
-      if (edited) {
-        console.log(`✅ Found anime ID 488 in payload:`);
-        console.log(`   title: "${edited.title}"`);
-        console.log(`   userStatus: "${edited.userStatus}"`);
-        console.log(`   progress: ${edited.progress}`);
-        console.log(`   actualFinishDate: ${edited.actualFinishDate || 'null'}`);
-        console.log(`   finishDate: ${edited.finishDate || 'null'}`);
-      } else {
-        console.warn(`⚠️ Anime ID 488 NOT FOUND in payload!`);
-      }
+    // ---- Log ALL anime details ----
+    if (animeData && Array.isArray(animeData)) {
+      console.log('📋 Full anime list payload:');
+      animeData.forEach((anime, index) => {
+        console.log(`  ${index + 1}. ID: ${anime.id} | Title: "${anime.title}" | Status: "${anime.userStatus}" | Progress: ${anime.progress || 0} | Score: ${anime.score || 'N/A'} | Finish: ${anime.finishDate || 'N/A'} | Actual: ${anime.actualFinishDate || 'N/A'}`);
+      });
     } else {
       console.warn('⚠️ animeData is missing or not an array');
     }
@@ -245,7 +233,7 @@ router.get('/load-all', verifyToken, async (req, res) => {
 });
 
 // ============================================
-// SYNC STATUS (optional – add streak info)
+// SYNC STATUS 
 // ============================================
 router.get('/status', verifyToken, async (req, res) => {
   const userId = req.userId;
