@@ -205,10 +205,8 @@ class DualStorageManager {
             const url = `${window.API_BASE_URL}/api/sync/load-all?_t=${Date.now()}`;
             const response = await fetch(url, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
+                    'Authorization': `Bearer ${token}`
+                    // No Cache-Control headers to avoid CORS issues
                 }
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
