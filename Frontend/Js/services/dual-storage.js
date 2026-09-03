@@ -91,6 +91,14 @@ class DualStorageManager {
             const payload = this.buildSyncPayload();
             const token = this.getToken();
 
+            // ---- Log the payload's ID 488 before sending ----
+            const anime488 = payload.animeData.find(a => a.id === 488);
+            if (anime488) {
+                console.log(`📤 PAYLOAD: ID 488 progress=${anime488.progress}, status=${anime488.userStatus}`);
+            } else {
+                console.warn('⚠️ ID 488 not found in payload!');
+            }
+
             const response = await fetch(`${window.API_BASE_URL}/api/sync/sync-all`, {
                 method: 'POST',
                 headers: {
@@ -130,7 +138,15 @@ class DualStorageManager {
     }
 
     buildSyncPayload() {
-        const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
+        // ---- Read from window.animeData (in‑memory) ----
+        const animeData = window.animeData || JSON.parse(localStorage.getItem('animeData') || '[]');
+
+        // ---- Log the current state of ID 488 ----
+        const anime488 = animeData.find(a => a.id === 488);
+        if (anime488) {
+            console.log(`🔍 buildSyncPayload: ID 488 progress=${anime488.progress}, status=${anime488.userStatus}`);
+        }
+
         const activityLog = JSON.parse(localStorage.getItem('activityLog') || '[]');
         const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
         const unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements') || '[]');
@@ -194,7 +210,6 @@ class DualStorageManager {
         }
 
         try {
-            // Use timestamp to bust cache – no custom headers (avoids CORS preflight)
             const url = `${window.API_BASE_URL}/api/sync/load-all?_t=${Date.now()}`;
             const response = await fetch(url, {
                 headers: {

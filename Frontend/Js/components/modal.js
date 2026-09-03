@@ -601,7 +601,6 @@
         document.dispatchEvent(new CustomEvent('animeUpdate'));
         if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.syncToCloud === 'function') {
             window.dualStorage.markDirty();
-            // Sync immediately
             window.dualStorage.syncToCloud().then(success => {
                 if (success) {
                     console.log('✅ Delete synced to cloud immediately');
@@ -683,6 +682,9 @@
             const wasCompleted = existing.userStatus === 'Completed';
             const isNowCompleted = status === 'Completed';
 
+            // ---- Log before update ----
+            console.log(`📝 Before edit: progress=${existing.progress}, status=${existing.userStatus}`);
+
             // Update fields
             existing.title = title;
             existing.type = type;
@@ -695,13 +697,14 @@
             existing.genres = genres;
             existing.updatedAt = nowTimestamp;
 
+            console.log(`📝 After edit: progress=${existing.progress}, status=${existing.userStatus}`);
+
             // ── Set dates ──
             if (isNowCompleted) {
                 let y = parseInt(year);
                 let m = parseInt(month);
                 if (!isNaN(y) && !isNaN(m) && m >= 1 && m <= 12) {
                     finishDate = `${year}-${String(m).padStart(2, '0')}`;
-                    // Reuse existing day if possible, else prompt
                     if (existing.actualFinishDate) {
                         const parts = existing.actualFinishDate.split('-');
                         let day = parseInt(parts[2]) || 1;
@@ -739,6 +742,14 @@
             }
 
             if (typeof window.saveData === 'function') window.saveData();
+
+            // ---- Verify saved data ----
+            const verifyData = JSON.parse(localStorage.getItem('animeData') || '[]');
+            const verifyAnime = verifyData.find(a => a.id === existing.id);
+            if (verifyAnime) {
+                console.log(`📝 After save (localStorage): progress=${verifyAnime.progress}, status=${verifyAnime.userStatus}`);
+            }
+
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
@@ -746,7 +757,6 @@
             document.dispatchEvent(new CustomEvent('animeUpdate'));
             if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.syncToCloud === 'function') {
                 window.dualStorage.markDirty();
-                // Sync immediately
                 const syncResult = await window.dualStorage.syncToCloud();
                 if (syncResult) {
                     console.log(`✅ Edit synced to cloud immediately (${window.animeData.length} anime)`);
