@@ -2200,12 +2200,24 @@
         </div>
     </div>
 
-    <!-- Floating Add Anime Button -->
-    <div class="floating-add-anime" id="floatingAddAnimeBtn" role="button" aria-label="Add Anime">
-        <i class="fas fa-plus"></i>
-        <span class="floating-add-tooltip">
-            <i class="fas fa-plus-circle"></i> Add Anime
-        </span>
+    <!-- Backdrop -->
+    <div id="fab-backdrop" class="fab-backdrop"></div>
+    
+    <!-- FAB Container -->
+    <div id="fab-container">
+        <div id="fab-menu" class="fab-menu hidden">
+            <button class="fab-item" data-action="add-anime">
+                <i class="fas fa-plus-circle"></i>
+                <span>Add Anime</span>
+            </button>
+            <button class="fab-item" data-action="chat-bot">
+                <i class="fas fa-robot"></i>
+                <span>Chat Bot</span>
+            </button>
+        </div>
+        <button id="fab-main" class="fab-main" aria-label="Open actions" title="Actions">
+            <i class="fa-solid fa-bars"></i>
+        </button>
     </div>
 
     <!-- ===== SCRIPTS ===== -->

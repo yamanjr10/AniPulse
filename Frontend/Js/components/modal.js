@@ -943,17 +943,164 @@
         }
     }
 
-    function setupFloatingButton() {
-        const floatBtn = document.getElementById('floatingAddAnimeBtn');
-        if (!floatBtn) return;
-        const newFloatBtn = floatBtn.cloneNode(true);
-        floatBtn.parentNode?.replaceChild(newFloatBtn, floatBtn);
-        newFloatBtn.addEventListener('click', function (e) {
-            e.preventDefault();
+    // ============================================================
+    // FLOATING ACTION BUTTON (FAB) – Fixed
+    // ============================================================
+
+    function initFabMenu() {
+        const mainBtn = document.getElementById('fab-main');
+        const menu = document.getElementById('fab-menu');
+        const backdrop = document.getElementById('fab-backdrop');
+
+        if (!mainBtn || !menu || !backdrop) {
+            console.warn('FAB elements missing – skipping initialization.');
+            return;
+        }
+
+        let isOpen = false;
+        let isAnimating = false;
+        let originalOverflow = '';
+
+        function openMenu() {
+            if (isAnimating) return;
+            isAnimating = true;
+            isOpen = true;
+            mainBtn.classList.add('open');
+            // Change icon to cross
+            const icon = mainBtn.querySelector('i');
+            if (icon) icon.className = 'fas fa-times';
+            menu.classList.remove('hidden');
+            // Force reflow for animation
+            void menu.offsetWidth;
+            menu.classList.add('open');
+            backdrop.classList.add('active');
+            mainBtn.setAttribute('aria-expanded', 'true');
+            // Prevent scroll
+            originalOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                isAnimating = false;
+            }, 400);
+        }
+
+        function closeMenu() {
+            if (isAnimating) return;
+            isAnimating = true;
+            isOpen = false;
+            mainBtn.classList.remove('open');
+            // Restore icon to bars
+            const icon = mainBtn.querySelector('i');
+            if (icon) icon.className = 'fas fa-bars';
+            menu.classList.remove('open');
+            backdrop.classList.remove('active');
+            mainBtn.setAttribute('aria-expanded', 'false');
+            // Restore scroll
+            document.body.style.overflow = originalOverflow || '';
+            setTimeout(() => {
+                if (!isOpen) menu.classList.add('hidden');
+                isAnimating = false;
+            }, 350);
+        }
+
+        function toggleMenu() {
+            if (isOpen) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        }
+
+        // ─── Main button click ──────────────────────
+        mainBtn.addEventListener('click', function (e) {
             e.stopPropagation();
-            window.openAddAnimeModal();
+            toggleMenu();
         });
+
+        // ─── Menu item click ────────────────────────
+        menu.addEventListener('click', function (e) {
+            const item = e.target.closest('.fab-item');
+            if (!item) return;
+            const action = item.dataset.action;
+
+            // Close menu immediately
+            closeMenu();
+
+            // Dispatch action after a tiny delay
+            setTimeout(() => {
+                switch (action) {
+                    case 'add-anime':
+                        if (typeof window.openAddAnimeModal === 'function') {
+                            window.openAddAnimeModal();
+                        } else if (typeof showToast === 'function') {
+                            showToast('Add Anime feature not available', 'error');
+                        } else {
+                            alert('Add Anime');
+                        }
+                        break;
+
+                    case 'chat-bot':
+                        if (typeof showToast === 'function') {
+                            showToast('Chat Bot coming soon!', 'info');
+                        } else {
+                            alert('Chat Bot coming soon!');
+                        }
+                        break;
+
+                    case 'search':
+                        const searchToggle = document.getElementById('searchToggle');
+                        if (searchToggle) {
+                            searchToggle.click();
+                        } else {
+                            window.location.href = '/dashboard.html?view=search';
+                        }
+                        break;
+
+                    case 'settings':
+                        const settingsMenuItem = document.querySelector('.menu-item[data-page="settings"]');
+                        if (settingsMenuItem) {
+                            settingsMenuItem.click();
+                        } else {
+                            window.location.href = '/dashboard.html?page=settings';
+                        }
+                        break;
+
+                    default:
+                        console.warn('Unknown FAB action:', action);
+                }
+            }, 150);
+        });
+
+        // ─── Backdrop click ──────────────────────────
+        backdrop.addEventListener('click', closeMenu);
+
+        // ─── Escape key ──────────────────────────────
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeMenu();
+                mainBtn.focus();
+            }
+        });
+
+        // ─── Outside click ───────────────────────────
+        document.addEventListener('click', function (e) {
+            const container = document.getElementById('fab-container');
+            if (container && !container.contains(e.target) && !backdrop.contains(e.target) && isOpen) {
+                closeMenu();
+            }
+        });
+
+        // ─── Initial state ───────────────────────────
+        menu.classList.add('hidden');
+        mainBtn.setAttribute('aria-expanded', 'false');
+        const icon = mainBtn.querySelector('i');
+        if (icon) icon.className = 'fas fa-bars';
+
+        console.log('FAB Premium Menu initialized');
     }
+
+    // ============================================================
+    // SETUP ADD ANIME BUTTON (regular)
+    // ============================================================
 
     function setupAddAnimeButton() {
         const btn = document.getElementById('addAnimeBtn');
@@ -968,6 +1115,10 @@
         });
     }
 
+    // ============================================================
+    // OPEN ADD ANIME MODAL (public)
+    // ============================================================
+
     window.openAddAnimeModal = function () {
         const addModal = document.getElementById('addAnimeModal');
         if (!addModal) {
@@ -981,11 +1132,19 @@
         }
     };
 
+    // ============================================================
+    // FORM SUBMIT
+    // ============================================================
+
     function setupFormSubmit() {
         const form = document.getElementById('addAnimeForm');
         if (!form) return;
         form.addEventListener('submit', window.handleAddAnime);
     }
+
+    // ============================================================
+    // KEYBOARD ESCAPE
+    // ============================================================
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
@@ -997,11 +1156,15 @@
         }
     });
 
+    // ============================================================
+    // INIT
+    // ============================================================
+
     function initModalSystem() {
         console.log('Initializing modal system...');
         setupModalHandlers();
         setupAddAnimeButton();
-        setupFloatingButton();
+        initFabMenu();
         setupFormSubmit();
         setupBeforeUnloadSync();
         if (document.readyState === 'loading') {
@@ -1015,6 +1178,10 @@
     }
 
     window.initModalSystem = initModalSystem;
+
+    // ============================================================
+    // SELECT ANIME FROM SEARCH
+    // ============================================================
 
     window.selectAnimeFromSearch = function (anime) {
         console.log('Selecting anime:', anime.title);
@@ -1085,4 +1252,5 @@
         }
         console.log('Anime selected successfully');
     };
+
 })();

@@ -1934,3 +1934,373 @@ body {
         animation: none !important;
     }
 }
+
+/* ============================================
+   FAB CONTAINER
+   ============================================ */
+#fab-container {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0px;
+}
+
+/* ============================================
+   FAB BACKDROP
+   ============================================ */
+.fab-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+
+.fab-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ============================================
+   MAIN FAB BUTTON
+   ============================================ */
+.fab-main {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3B82F6, #6366F1);
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
+    font-size: 26px;
+    cursor: pointer;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.35s ease,
+        background 0.35s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.fab-main:hover {
+    transform: scale(1.06);
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.5);
+}
+
+.fab-main:active {
+    transform: scale(0.94);
+}
+
+.fab-main i {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-block;
+    font-size: 26px;
+}
+
+.fab-main.open i {
+    transform: rotate(135deg);
+}
+
+/* ============================================
+   FAB MENU
+   ============================================ */
+.fab-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 12px;
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    transform: translateY(20px) scale(0.92);
+    transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fab-menu.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.fab-menu.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   FAB MENU ITEMS – Glassmorphism
+   ============================================ */
+.fab-item {
+    background: rgba(26, 34, 52, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 12px 22px 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #F8FAFC;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+    white-space: nowrap;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-width: 160px;
+    justify-content: flex-start;
+    opacity: 0;
+    transform: translateX(30px);
+    transition-delay: 0s;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Glow border effect on hover */
+.fab-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(99, 102, 241, 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.fab-item:hover::before {
+    opacity: 1;
+}
+
+.fab-menu.open .fab-item {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Stagger delays */
+.fab-menu.open .fab-item:nth-child(1) {
+    transition-delay: 0.04s;
+}
+
+.fab-menu.open .fab-item:nth-child(2) {
+    transition-delay: 0.09s;
+}
+
+.fab-menu.open .fab-item:nth-child(3) {
+    transition-delay: 0.14s;
+}
+
+.fab-menu.open .fab-item:nth-child(4) {
+    transition-delay: 0.19s;
+}
+
+.fab-item i {
+    font-size: 1.15rem;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+}
+
+.fab-item span {
+    transition: color 0.25s ease;
+}
+
+.fab-item:hover {
+    transform: translateX(-6px) scale(1.03);
+    background: rgba(37, 50, 74, 0.9);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.fab-item:hover i {
+    transform: scale(1.15);
+}
+
+.fab-item:active {
+    transform: scale(0.96) translateX(-3px);
+}
+
+/* ─── Item-specific icon colors ────────────── */
+.fab-item[data-action="add-anime"] i {
+    color: #34D399;
+}
+
+.fab-item[data-action="add-anime"]:hover i {
+    color: #6EE7B7;
+}
+
+.fab-item[data-action="chat-bot"] i {
+    color: #A78BFA;
+}
+
+.fab-item[data-action="chat-bot"]:hover i {
+    color: #C4B5FD;
+}
+
+.fab-item[data-action="search"] i {
+    color: #60A5FA;
+}
+
+.fab-item[data-action="search"]:hover i {
+    color: #93BBFC;
+}
+
+.fab-item[data-action="settings"] i {
+    color: #FBBF24;
+}
+
+.fab-item[data-action="settings"]:hover i {
+    color: #FCD34D;
+}
+
+.fab-item[data-action="logout"] i {
+    color: #F87171;
+}
+
+.fab-item[data-action="logout"]:hover i {
+    color: #FCA5A5;
+}
+
+/* ============================================
+   LIGHT THEME
+   ============================================ */
+[data-theme="light"] .fab-item {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: rgba(0, 0, 0, 0.06);
+    color: #0F172A;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .fab-item:hover {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(59, 130, 246, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .fab-item::before {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.08));
+}
+
+[data-theme="light"] .fab-backdrop {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .fab-main {
+    box-shadow: 0 6px 24px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="light"] .fab-main:hover {
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    #fab-container {
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .fab-main {
+        width: 54px;
+        height: 54px;
+        font-size: 22px;
+    }
+
+    .fab-main i {
+        font-size: 22px;
+    }
+
+    .fab-item {
+        padding: 10px 18px 10px 14px;
+        font-size: 0.82rem;
+        min-width: 130px;
+        gap: 12px;
+        border-radius: 12px;
+    }
+
+    .fab-item i {
+        font-size: 1rem;
+        width: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    #fab-container {
+        bottom: 16px;
+        right: 16px;
+    }
+
+    .fab-main {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+
+    .fab-main i {
+        font-size: 18px;
+    }
+
+    .fab-item {
+        padding: 8px 14px 8px 12px;
+        font-size: 0.75rem;
+        min-width: 110px;
+        gap: 10px;
+        border-radius: 10px;
+    }
+
+    .fab-item i {
+        font-size: 0.9rem;
+        width: 18px;
+    }
+
+    .fab-menu {
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+
+    .fab-main,
+    .fab-main i,
+    .fab-menu,
+    .fab-item,
+    .fab-backdrop {
+        transition: none !important;
+        transform: none !important;
+        animation: none !important;
+    }
+
+    .fab-menu.open .fab-item {
+        transition-delay: 0s !important;
+    }
+}
