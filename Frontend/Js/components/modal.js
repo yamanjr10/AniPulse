@@ -597,11 +597,18 @@
         window.setLocalDirty();
         try { window.dispatchEvent(new Event('xpUpdated')); } catch (e) { }
 
-        // ---- Trigger sync: event + direct call ----
+        // ---- IMMEDIATE SYNC (no debounce) ----
         document.dispatchEvent(new CustomEvent('animeUpdate'));
-        if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.scheduleSync === 'function') {
+        if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.syncToCloud === 'function') {
             window.dualStorage.markDirty();
-            window.dualStorage.scheduleSync();
+            // Sync immediately
+            window.dualStorage.syncToCloud().then(success => {
+                if (success) {
+                    console.log('✅ Delete synced to cloud immediately');
+                } else {
+                    console.warn('⚠️ Delete sync failed – will retry later');
+                }
+            });
         }
 
         window.closeModal(document.getElementById('addAnimeModal'));
@@ -735,11 +742,17 @@
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
-            // ---- Trigger sync: event + direct call ----
+            // ---- IMMEDIATE SYNC (no debounce) ----
             document.dispatchEvent(new CustomEvent('animeUpdate'));
-            if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.scheduleSync === 'function') {
+            if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.syncToCloud === 'function') {
                 window.dualStorage.markDirty();
-                window.dualStorage.scheduleSync();
+                // Sync immediately
+                const syncResult = await window.dualStorage.syncToCloud();
+                if (syncResult) {
+                    console.log(`✅ Edit synced to cloud immediately (${window.animeData.length} anime)`);
+                } else {
+                    console.warn('⚠️ Edit sync failed – will retry later');
+                }
             }
 
         } else {
@@ -775,11 +788,16 @@
             window.setLocalDirty();
             if (typeof window.logActivity === 'function') window.logActivity(logAction, title);
 
-            // ---- Trigger sync: event + direct call ----
+            // ---- IMMEDIATE SYNC (no debounce) ----
             document.dispatchEvent(new CustomEvent('animeUpdate'));
-            if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.scheduleSync === 'function') {
+            if (window.dualStorage && typeof window.dualStorage.markDirty === 'function' && typeof window.dualStorage.syncToCloud === 'function') {
                 window.dualStorage.markDirty();
-                window.dualStorage.scheduleSync();
+                const syncResult = await window.dualStorage.syncToCloud();
+                if (syncResult) {
+                    console.log(`✅ Add synced to cloud immediately (${window.animeData.length} anime)`);
+                } else {
+                    console.warn('⚠️ Add sync failed – will retry later');
+                }
             }
         }
 

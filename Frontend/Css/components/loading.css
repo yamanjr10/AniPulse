@@ -1,57 +1,5 @@
 /* ============================================
-   LOADER OVERLAY - Premium Blue Theme
-   ============================================ */
-
-/* ============================================
-   CSS VARIABLES  
-   ============================================ */
-:root {
-    --color-blue: #3B82F6;
-    --color-blue-dark: #2563EB;
-    --color-blue-light: #60A5FA;
-    --color-indigo: #6366F1;
-    --color-indigo-light: #818CF8;
-    --color-cyan: #06B6D4;
-    --color-cyan-light: #67E8F9;
-    --color-emerald: #10B981;
-    --color-emerald-light: #34D399;
-    --color-amber: #F59E0B;
-    --color-rose: #F43F5E;
-    --color-violet: #8B5CF6;
-    --color-violet-light: #A78BFA;
-
-    --bg-body: #0B1120;
-    --bg-glass: rgba(30, 41, 59, 0.7);
-    --bg-card: rgba(15, 23, 42, 0.6);
-
-    --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
-    --text-muted: #64748B;
-
-    --border: rgba(59, 130, 246, 0.12);
-    --border-hover: rgba(59, 130, 246, 0.3);
-
-    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.15);
-    --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-[data-theme="light"] {
-    --bg-body: #F8FAFC;
-    --bg-glass: rgba(255, 255, 255, 0.7);
-    --bg-card: rgba(255, 255, 255, 0.8);
-
-    --text-primary: #0F172A;
-    --text-secondary: #475569;
-    --text-muted: #94A3B8;
-
-    --border: rgba(59, 130, 246, 0.08);
-    --border-hover: rgba(59, 130, 246, 0.3);
-
-    --shadow-glow: 0 8px 32px rgba(59, 130, 246, 0.08);
-}
-
-/* ============================================
-   LOADER OVERLAY - Blue Gradient
+   LOADER (responsive)
    ============================================ */
 #app-loader {
     position: fixed;
@@ -69,10 +17,14 @@
     transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 
+#app-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
 [data-theme="light"] #app-loader {
     background: linear-gradient(135deg, #F8FAFC, #FFFFFF, #F8FAFC);
-    background-size: 300% 300%;
-    animation: gradientShift 6s ease-in-out infinite;
 }
 
 @keyframes gradientShift {
@@ -87,15 +39,6 @@
     }
 }
 
-#app-loader.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-/* ============================================
-   FLOATING GLOW ORBS - Blue/Cyan
-   ============================================ */
 .loader-orbs {
     position: absolute;
     inset: 0;
@@ -109,21 +52,19 @@
     filter: blur(80px);
     opacity: 0.3;
     animation: orbFloat 8s ease-in-out infinite;
-    transition: opacity 0.3s ease;
 }
 
 .loader-orb-1 {
-    width: 300px;
-    height: 300px;
+    width: clamp(140px, 20vw, 300px);
+    height: clamp(140px, 20vw, 300px);
     background: rgba(59, 130, 246, 0.15);
     top: -100px;
     right: -100px;
-    animation-delay: 0s;
 }
 
 .loader-orb-2 {
-    width: 250px;
-    height: 250px;
+    width: clamp(110px, 16vw, 250px);
+    height: clamp(110px, 16vw, 250px);
     background: rgba(99, 102, 241, 0.10);
     bottom: -80px;
     left: -80px;
@@ -131,28 +72,13 @@
 }
 
 .loader-orb-3 {
-    width: 200px;
-    height: 200px;
+    width: clamp(90px, 13vw, 200px);
+    height: clamp(90px, 13vw, 200px);
     background: rgba(6, 182, 212, 0.08);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     animation-delay: -5s;
-}
-
-[data-theme="light"] .loader-orb-1 {
-    background: rgba(59, 130, 246, 0.06);
-    opacity: 0.5;
-}
-
-[data-theme="light"] .loader-orb-2 {
-    background: rgba(99, 102, 241, 0.04);
-    opacity: 0.5;
-}
-
-[data-theme="light"] .loader-orb-3 {
-    background: rgba(6, 182, 212, 0.03);
-    opacity: 0.5;
 }
 
 @keyframes orbFloat {
@@ -171,30 +97,19 @@
     }
 }
 
-/* ============================================
-   LOADER CONTAINER - Premium Glass
-   ============================================ */
 .loader-container {
     text-align: center;
-    max-width: 440px;
+    max-width: clamp(280px, 40vw, 440px);
     width: 90%;
-    padding: 48px 36px 40px;
+    padding: clamp(28px, 4vw, 48px) clamp(16px, 2.5vw, 36px) clamp(24px, 3.5vw, 40px);
     background: rgba(15, 23, 42, 0.5);
     backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border-radius: 48px;
+    border-radius: clamp(24px, 4vw, 48px);
     border: 1px solid rgba(59, 130, 246, 0.15);
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
     position: relative;
     z-index: 1;
     animation: containerFloat 3s ease-in-out infinite;
-    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-[data-theme="light"] .loader-container {
-    background: rgba(255, 255, 255, 0.7);
-    border-color: rgba(59, 130, 246, 0.10);
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.06);
 }
 
 @keyframes containerFloat {
@@ -209,17 +124,12 @@
     }
 }
 
-/* Premium Border Glow - Blue */
 .loader-container::before {
     content: '';
     position: absolute;
     inset: -1.5px;
-    border-radius: 48px;
-    background: linear-gradient(135deg,
-            rgba(59, 130, 246, 0.3) 0%,
-            rgba(99, 102, 241, 0.12) 30%,
-            rgba(6, 182, 212, 0.08) 60%,
-            rgba(59, 130, 246, 0.2) 100%);
+    border-radius: clamp(24px, 4vw, 48px);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(99, 102, 241, 0.12) 30%, rgba(6, 182, 212, 0.08) 60%, rgba(59, 130, 246, 0.2) 100%);
     background-size: 300% 300%;
     animation: borderGlow 4s ease-in-out infinite;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -228,14 +138,6 @@
     mask-composite: exclude;
     pointer-events: none;
     z-index: -1;
-}
-
-[data-theme="light"] .loader-container::before {
-    background: linear-gradient(135deg,
-            rgba(59, 130, 246, 0.15) 0%,
-            rgba(99, 102, 241, 0.08) 30%,
-            rgba(6, 182, 212, 0.06) 60%,
-            rgba(59, 130, 246, 0.12) 100%);
 }
 
 @keyframes borderGlow {
@@ -250,34 +152,26 @@
     }
 }
 
-/* ============================================
-   LOADER LOGO - Always Animated
-   ============================================ */
 .loader-logo {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-    border-radius: 0;
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
+    position: relative;
+    overflow: hidden;
 }
 
 .loader-logo img {
-    height: 80px;
+    height: clamp(48px, 8vh, 80px);
     width: auto;
     object-fit: contain;
     display: block;
-    background: none;
-    padding: 0;
-    border-radius: 0;
-    filter: none;
     position: relative;
     z-index: 2;
-    animation: logoFloatPulse 2.8s ease-in-out infinite !important;
+    animation: logoFloatPulse 2.8s ease-in-out infinite;
 }
 
 @keyframes logoFloatPulse {
@@ -296,40 +190,17 @@
     }
 }
 
-/* ============================================
-   SHINE EFFECT - Blue/White
-   ============================================ */
 .loader-logo::before {
     position: absolute;
     top: -10%;
     left: -100%;
     width: 60%;
     height: 120%;
-    background: linear-gradient(105deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.4) 25%,
-            rgba(255, 255, 255, 0.8) 45%,
-            rgba(255, 255, 255, 0.9) 50%,
-            rgba(255, 255, 255, 0.8) 55%,
-            rgba(255, 255, 255, 0.4) 75%,
-            transparent 100%);
+    background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.4) 25%, rgba(255, 255, 255, 0.8) 45%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.8) 55%, rgba(255, 255, 255, 0.4) 75%, transparent 100%);
     transform: skewX(-20deg);
-    animation: shineMove 1.5s ease-in-out infinite !important;
-    animation-delay: 0s !important;
+    animation: shineMove 1.5s ease-in-out infinite;
     pointer-events: none;
     z-index: 3;
-    border-radius: 0;
-}
-
-[data-theme="light"] .loader-logo::before {
-    background: linear-gradient(105deg,
-            transparent 0%,
-            rgba(0, 0, 0, 0.08) 25%,
-            rgba(0, 0, 0, 0.15) 45%,
-            rgba(0, 0, 0, 0.2) 50%,
-            rgba(0, 0, 0, 0.15) 55%,
-            rgba(0, 0, 0, 0.08) 75%,
-            transparent 100%);
 }
 
 @keyframes shineMove {
@@ -358,27 +229,11 @@
     left: -150%;
     width: 40%;
     height: 120%;
-    background: linear-gradient(105deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.15) 30%,
-            rgba(255, 255, 255, 0.3) 50%,
-            rgba(255, 255, 255, 0.15) 70%,
-            transparent 100%);
+    background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.15) 30%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.15) 70%, transparent 100%);
     transform: skewX(-20deg);
-    animation: shineMove2 1.9s ease-in-out infinite !important;
-    animation-delay: 0.2s !important;
+    animation: shineMove2 1.9s ease-in-out infinite 0.2s;
     pointer-events: none;
     z-index: 3;
-    border-radius: 0;
-}
-
-[data-theme="light"] .loader-logo::after {
-    background: linear-gradient(105deg,
-            transparent 0%,
-            rgba(0, 0, 0, 0.04) 30%,
-            rgba(0, 0, 0, 0.08) 50%,
-            rgba(0, 0, 0, 0.04) 70%,
-            transparent 100%);
 }
 
 @keyframes shineMove2 {
@@ -401,9 +256,6 @@
     }
 }
 
-/* ============================================
-   PROGRESS BAR - Blue Gradient
-   ============================================ */
 .progress-wrapper {
     width: 100%;
     display: flex;
@@ -413,42 +265,22 @@
 
 .progress-bar {
     width: 100%;
-    height: 6px;
+    height: clamp(4px, 0.6vh, 6px);
     background: rgba(255, 255, 255, 0.06);
     border-radius: 50px;
     overflow: hidden;
     position: relative;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
-    transition: background 0.3s ease;
-}
-
-[data-theme="light"] .progress-bar {
-    background: rgba(0, 0, 0, 0.06);
 }
 
 #loader-progress {
     display: block;
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, var(--color-blue), var(--color-indigo), var(--color-blue-light), var(--color-indigo), var(--color-blue));
+    background: linear-gradient(90deg, var(--clr-primary), var(--clr-secondary), var(--clr-primary-light), var(--clr-secondary), var(--clr-primary));
     background-size: 200% 100%;
     border-radius: 50px;
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
     animation: progressGlow 2s ease-in-out infinite;
-}
-
-@keyframes progressGlow {
-
-    0%,
-    100% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
 }
 
 #loader-progress::after {
@@ -458,53 +290,14 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg,
-            transparent,
-            rgba(255, 255, 255, 0.15),
-            transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
     animation: progressShimmer 1.5s ease-in-out infinite;
     border-radius: 50px;
 }
 
-@keyframes progressShimmer {
-    0% {
-        transform: translateX(-100%);
-    }
-
-    100% {
-        transform: translateX(100%);
-    }
-}
-
-/* ============================================
-   HIDE PERCENTAGE TEXT
-   ============================================ */
-.progress-percent {
-    display: none;
-}
-
-/* ============================================
-   STATE VARIATIONS
-   ============================================ */
-#loader-progress.loading-25 {
-    width: 25%;
-}
-
-#loader-progress.loading-50 {
-    width: 50%;
-}
-
-#loader-progress.loading-75 {
-    width: 75%;
-}
-
-#loader-progress.loading-90 {
-    width: 90%;
-}
-
 #loader-progress.loading-100 {
     width: 100%;
-    background: linear-gradient(90deg, var(--color-emerald), var(--color-emerald-light), #6EE7B7);
+    background: linear-gradient(90deg, var(--clr-success), var(--clr-success-light), #6EE7B7);
     animation: none;
 }
 
@@ -512,48 +305,45 @@
     display: none;
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-@media (max-width: 768px) {
+@media (max-width:768px) {
     .loader-container {
-        padding: 36px 24px 32px;
+        padding: 28px 16px 24px;
         border-radius: 32px;
     }
 
     .loader-logo img {
-        height: 64px;
+        height: 56px;
     }
 
     .loader-orb-1 {
-        width: 200px;
-        height: 200px;
+        width: 160px;
+        height: 160px;
         top: -60px;
         right: -60px;
     }
 
     .loader-orb-2 {
-        width: 160px;
-        height: 160px;
-        bottom: -50px;
-        left: -50px;
+        width: 120px;
+        height: 120px;
+        bottom: -40px;
+        left: -40px;
     }
 
     .loader-orb-3 {
-        width: 130px;
-        height: 130px;
+        width: 100px;
+        height: 100px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width:480px) {
     .loader-container {
-        padding: 28px 16px 24px;
+        padding: 20px 12px 16px;
         border-radius: 24px;
         max-width: 95%;
     }
 
     .loader-logo img {
-        height: 52px;
+        height: 44px;
     }
 
     .progress-bar {
@@ -561,145 +351,21 @@
     }
 
     .loader-orb-1 {
-        width: 140px;
-        height: 140px;
-        top: -40px;
-        right: -40px;
+        width: 100px;
+        height: 100px;
+        top: -30px;
+        right: -30px;
     }
 
     .loader-orb-2 {
-        width: 110px;
-        height: 110px;
-        bottom: -30px;
-        left: -30px;
+        width: 80px;
+        height: 80px;
+        bottom: -20px;
+        left: -20px;
     }
 
     .loader-orb-3 {
-        width: 90px;
-        height: 90px;
-    }
-}
-
-/* ============================================
-   REDUCED MOTION - Keep shine alive
-   ============================================ */
-@media (prefers-reduced-motion: reduce) {
-    #app-loader {
-        animation: none !important;
-        background: #0B1120 !important;
-    }
-
-    [data-theme="light"] #app-loader {
-        background: #F8FAFC !important;
-        animation: none !important;
-    }
-
-    .loader-container {
-        animation: none !important;
-        transform: none !important;
-    }
-
-    .loader-container::before {
-        animation: none !important;
-    }
-
-    .loader-orb {
-        display: none !important;
-    }
-
-    #loader-progress {
-        animation: none !important;
-    }
-
-    #loader-progress::after {
-        display: none !important;
-    }
-
-    .loader-logo img {
-        animation: logoFloatPulseReduced 3s ease-in-out infinite !important;
-    }
-
-    @keyframes logoFloatPulseReduced {
-
-        0%,
-        100% {
-            transform: translateY(0px) scale(1);
-        }
-
-        50% {
-            transform: translateY(-6px) scale(1.02);
-        }
-    }
-
-    .loader-logo::before {
-        animation: shineMoveReduced 3s ease-in-out infinite !important;
-        animation-delay: 0s !important;
-    }
-
-    .loader-logo::after {
-        animation: shineMoveReduced2 3.5s ease-in-out infinite 0.3s !important;
-    }
-
-    @keyframes shineMoveReduced {
-        0% {
-            left: -100%;
-            opacity: 0;
-        }
-
-        10% {
-            opacity: 1;
-        }
-
-        90% {
-            opacity: 1;
-        }
-
-        100% {
-            left: 150%;
-            opacity: 0;
-        }
-    }
-
-    @keyframes shineMoveReduced2 {
-        0% {
-            left: -150%;
-            opacity: 0;
-        }
-
-        10% {
-            opacity: 1;
-        }
-
-        90% {
-            opacity: 1;
-        }
-
-        100% {
-            left: 160%;
-            opacity: 0;
-        }
-    }
-}
-
-/* ============================================
-   SKELETON LOADING
-   ============================================ */
-.skeleton {
-    background: linear-gradient(90deg,
-            var(--bg-tertiary, rgba(255, 255, 255, 0.04)) 0%,
-            var(--bg-hover, rgba(255, 255, 255, 0.08)) 50%,
-            var(--bg-tertiary, rgba(255, 255, 255, 0.04)) 100%);
-    background-size: 200% 100%;
-    animation: skeletonLoading 1.5s infinite;
-    border-radius: var(--radius-md, 12px);
-}
-
-@keyframes skeletonLoading {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
+        width: 70px;
+        height: 70px;
     }
 }
