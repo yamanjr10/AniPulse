@@ -9,21 +9,42 @@ router.use(express.json({ limit: '50mb' }));
 // SYNC ALL DATA (Upload to cloud)
 // ============================================
 router.post('/sync-all', verifyToken, async (req, res) => {
-  // Extract new fields
   const {
     animeData, activityLog, userProfile, unlockedAchievements,
     userXpHistory, animeContributions, appSettings, levelData,
-    dailyXP, xpPendingQueue, lastResetDate, streakData // <-- NEW
+    dailyXP, xpPendingQueue, lastResetDate, streakData
   } = req.body;
 
   const userId = req.userId;
   try {
     console.log(`🔄 Syncing all data for user: ${userId}`);
+
+    // ---- Log payload contents ----
+    console.log(`📦 Received animeData length: ${animeData?.length || 0}`);
+    if (animeData && Array.isArray(animeData)) {
+      // Log first 5 anime IDs
+      const firstIds = animeData.slice(0, 5).map(a => a.id);
+      console.log(`First 5 anime IDs: ${firstIds.join(', ')}`);
+
+      // Specifically look for the anime we care about (ID 488)
+      const edited = animeData.find(a => a.id === 488);
+      if (edited) {
+        console.log(`✅ Found anime ID 488 in payload:`);
+        console.log(`   title: "${edited.title}"`);
+        console.log(`   userStatus: "${edited.userStatus}"`);
+        console.log(`   progress: ${edited.progress}`);
+        console.log(`   actualFinishDate: ${edited.actualFinishDate || 'null'}`);
+        console.log(`   finishDate: ${edited.finishDate || 'null'}`);
+      } else {
+        console.warn(`⚠️ Anime ID 488 NOT FOUND in payload!`);
+      }
+    } else {
+      console.warn('⚠️ animeData is missing or not an array');
+    }
+
     const promises = [];
 
-    // ... (existing saves for anime, activity, profile, etc.) ...
-
-    // Save Anime List
+    // ---- Save Anime List ----
     if (animeData && Array.isArray(animeData)) {
       promises.push(
         db.collection(COLLECTIONS.ANIME_LISTS).doc(userId).set({
@@ -31,10 +52,12 @@ router.post('/sync-all', verifyToken, async (req, res) => {
           lastUpdated: new Date().toISOString(),
           count: animeData.length
         })
+          .then(() => console.log(`✅ ANIME_LISTS saved for user ${userId}`))
+          .catch(err => console.error(`❌ Failed to save ANIME_LISTS:`, err))
       );
     }
 
-    // Save Activity Log
+    // ---- Save Activity Log ----
     if (activityLog && Array.isArray(activityLog)) {
       promises.push(
         db.collection(COLLECTIONS.ACTIVITY_LOGS).doc(userId).set({
@@ -42,10 +65,12 @@ router.post('/sync-all', verifyToken, async (req, res) => {
           lastUpdated: new Date().toISOString(),
           count: activityLog.length
         })
+          .then(() => console.log(`✅ ACTIVITY_LOGS saved for user ${userId}`))
+          .catch(err => console.error(`❌ Failed to save ACTIVITY_LOGS:`, err))
       );
     }
 
-    // Save User Profile (without avatar)
+    // ---- Save User Profile (without avatar) ----
     if (userProfile) {
       const cleanProfile = { ...userProfile };
       delete cleanProfile.avatar;
@@ -54,10 +79,12 @@ router.post('/sync-all', verifyToken, async (req, res) => {
           ...cleanProfile,
           lastSynced: new Date().toISOString()
         }, { merge: true })
+          .then(() => console.log(`✅ USER_PROFILES saved for user ${userId}`))
+          .catch(err => console.error(`❌ Failed to save USER_PROFILES:`, err))
       );
     }
 
-    // Save Achievements
+    // ---- Save Achievements ----
     if (unlockedAchievements && Array.isArray(unlockedAchievements)) {
       promises.push(
         db.collection(COLLECTIONS.ACHIEVEMENTS).doc(userId).set({
@@ -65,46 +92,53 @@ router.post('/sync-all', verifyToken, async (req, res) => {
           lastUpdated: new Date().toISOString(),
           count: unlockedAchievements.length
         })
+          .then(() => console.log(`✅ ACHIEVEMENTS saved for user ${userId}`))
+          .catch(err => console.error(`❌ Failed to save ACHIEVEMENTS:`, err))
       );
     }
 
-    // Save XP History
+    // ---- Save XP History ----
     if (userXpHistory && Array.isArray(userXpHistory)) {
       promises.push(
         db.collection(COLLECTIONS.XP_HISTORY).doc(userId).set({
           history: userXpHistory,
           lastUpdated: new Date().toISOString()
         })
+          .then(() => console.log(`✅ XP_HISTORY saved for user ${userId}`))
+          .catch(err => console.error(`❌ Failed to save XP_HISTORY:`, err))
       );
     }
 
-    // Save Contributions (Heatmap)
+    // ---- Save Contributions (Heatmap) ----
     if (animeContributions) {
       promises.push(
         db.collection(COLLECTIONS.CONTRIBUTIONS).doc(userId).set({
           contributions: animeContributions,
           lastUpdated: new Date().toISOString()
         })
+          .then(() => console.log(`✅ CONTRIBUTIONS saved for user ${userId}`))
+          .catch(err => console.error(`❌ Failed to save CONTRIBUTIONS:`, err))
       );
     }
 
-    // Save Settings
+    // ---- Save Settings ----
     if (appSettings) {
       promises.push(
         db.collection(COLLECTIONS.SETTINGS).doc(userId).set({
           settings: appSettings,
           lastUpdated: new Date().toISOString()
         })
+          .then(() => console.log(`✅ SETTINGS saved for user ${userId}`))
+          .catch(err => console.error(`❌ Failed to save SETTINGS:`, err))
       );
     }
 
-    // Save Level Data & also store daily XP, queue, reset date, streak in USERS doc
+    // ---- Save Level Data & additional fields ----
     if (levelData) {
       const { getLevelFromXP, getTitleForLevel } = require('../utils/levelSystem');
       const level = levelData.level || getLevelFromXP(levelData.totalXP || 0);
       const title = levelData.title || getTitleForLevel(level);
 
-      // Build the update object for USERS
       const userUpdate = {
         totalXP: levelData.totalXP || 0,
         level,
@@ -116,16 +150,9 @@ router.post('/sync-all', verifyToken, async (req, res) => {
         lastUpdated: new Date().toISOString()
       };
 
-      // Add new fields if they exist
-      if (dailyXP) {
-        userUpdate.dailyXP = dailyXP; // { date: string, xp: number }
-      }
-      if (xpPendingQueue) {
-        userUpdate.xpPendingQueue = xpPendingQueue;
-      }
-      if (lastResetDate) {
-        userUpdate.lastResetDate = lastResetDate;
-      }
+      if (dailyXP) userUpdate.dailyXP = dailyXP;
+      if (xpPendingQueue) userUpdate.xpPendingQueue = xpPendingQueue;
+      if (lastResetDate) userUpdate.lastResetDate = lastResetDate;
       if (streakData) {
         userUpdate.streak = streakData.streak || 0;
         userUpdate.lastActive = streakData.lastActive || null;
@@ -133,14 +160,17 @@ router.post('/sync-all', verifyToken, async (req, res) => {
 
       promises.push(
         db.collection(COLLECTIONS.USERS).doc(userId).set(userUpdate, { merge: true })
+          .then(() => console.log(`✅ USERS updated for user ${userId}`))
+          .catch(err => console.error(`❌ Failed to update USERS:`, err))
       );
     }
 
+    // ---- Wait for all promises ----
     await Promise.all(promises);
     console.log(`✅ All data synced for user: ${userId}`);
     res.json({ success: true, message: 'All data synced to cloud successfully', timestamp: new Date().toISOString() });
   } catch (error) {
-    console.error('Sync error:', error);
+    console.error('❌ Sync error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -151,6 +181,7 @@ router.post('/sync-all', verifyToken, async (req, res) => {
 router.get('/load-all', verifyToken, async (req, res) => {
   const userId = req.userId;
   try {
+    console.log(`📥 Loading all data for user: ${userId}`);
     const data = {};
     let lastModified = null;
 
@@ -158,6 +189,7 @@ router.get('/load-all', verifyToken, async (req, res) => {
     if (animeDoc.exists) {
       data.animeData = animeDoc.data().animeList || [];
       lastModified = animeDoc.data().lastUpdated || null;
+      console.log(`📦 Loaded ${data.animeData.length} anime from cloud`);
     } else {
       data.animeData = [];
     }
@@ -191,7 +223,6 @@ router.get('/load-all', verifyToken, async (req, res) => {
         totalHours: userData.totalHours || 0
       };
 
-      // NEW: extract daily XP, queue, reset date, streak
       if (userData.dailyXP) data.dailyXP = userData.dailyXP;
       if (userData.xpPendingQueue) data.xpPendingQueue = userData.xpPendingQueue;
       if (userData.lastResetDate) data.lastResetDate = userData.lastResetDate;
@@ -205,9 +236,10 @@ router.get('/load-all', verifyToken, async (req, res) => {
       data.levelData = { totalXP: 0, level: 1, title: 'Newbie', totalAnime: 0, totalHours: 0 };
     }
 
+    console.log(`✅ Load complete for user ${userId}`);
     res.json({ success: true, data, lastModified });
   } catch (error) {
-    console.error('Load error:', error);
+    console.error('❌ Load error:', error);
     res.status(500).json({ error: error.message });
   }
 });
