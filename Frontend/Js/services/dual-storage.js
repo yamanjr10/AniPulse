@@ -31,7 +31,7 @@ class DualStorageManager {
             this.scheduleSync();
         });
 
-        console.log('✅ Unified Sync Manager initialized (Cloud = Source of Truth)');
+        console.log('Unified Sync Manager initialized (Cloud = Source of Truth)');
     }
 
     getToken() {
@@ -53,12 +53,12 @@ class DualStorageManager {
 
     markDirty() {
         localStorage.setItem(this._dirtyKey, 'true');
-        console.log('🟡 Local data marked as dirty');
+        console.log('Local data marked as dirty');
     }
 
     clearDirty() {
         localStorage.removeItem(this._dirtyKey);
-        console.log('🟢 Dirty flag cleared');
+        console.log('Dirty flag cleared');
     }
 
     scheduleSync() {
@@ -70,17 +70,17 @@ class DualStorageManager {
 
     async syncToCloud() {
         if (!this.isLoggedIn()) {
-            console.warn('⚠️ Not logged in, skipping sync');
+            console.warn('Not logged in, skipping sync');
             return false;
         }
         if (!navigator.onLine) {
-            console.log('📴 Offline – changes will sync when online');
+            console.log('Offline – changes will sync when online');
             this.showSyncStatus('Offline – changes saved locally', 'warning');
             return false;
         }
         if (this.isSyncing) return false;
         if (!this.isDirty()) {
-            console.log('ℹ️ No local changes to upload');
+            console.log('No local changes to upload');
             return false;
         }
 
@@ -91,9 +91,8 @@ class DualStorageManager {
             const payload = this.buildSyncPayload();
             const token = this.getToken();
 
-            // ---- Log summary of payload ----
             const total = payload.animeData?.length || 0;
-            console.log(`📤 Syncing ${total} anime to cloud`);
+            console.log(`Uploading ${total} anime to cloud`);
             if (total > 0) {
                 const sample = payload.animeData.slice(0, 3);
                 console.log('   Sample (first 3):');
@@ -124,8 +123,8 @@ class DualStorageManager {
 
                 this.lastSyncTime = new Date().toISOString();
                 localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
-                this.showSyncStatus('✅ Synced successfully', 'success');
-                console.log(`✅ Uploaded ${total} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
+                this.showSyncStatus('Synced successfully', 'success');
+                console.log(`Uploaded ${total} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
 
                 this.clearLoadCache();
                 return true;
@@ -133,8 +132,8 @@ class DualStorageManager {
                 throw new Error(result.error || 'Sync failed');
             }
         } catch (error) {
-            console.error('❌ Sync failed:', error);
-            this.showSyncStatus('⚠️ Sync failed – will retry', 'error');
+            console.error('Sync failed:', error);
+            this.showSyncStatus('Sync failed – will retry', 'error');
             return false;
         } finally {
             this.isSyncing = false;
@@ -189,7 +188,7 @@ class DualStorageManager {
                         deleted++;
                     }
                 }
-                console.log(`🗑️ Cleared ${deleted} load-all cache entries`);
+                console.log(`Cleared ${deleted} load-all cache entries`);
             }
         } catch (e) { /* ignore */ }
     }
@@ -206,13 +205,11 @@ class DualStorageManager {
         }
 
         try {
+            // Timestamp busts browser cache; no custom headers (avoid CORS preflight)
             const url = `${window.API_BASE_URL}/api/sync/load-all?_t=${Date.now()}`;
             const response = await fetch(url, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -289,7 +286,7 @@ class DualStorageManager {
             this.lastSyncTime = new Date().toISOString();
             localStorage.setItem('lastCloudSyncTime', this.lastSyncTime);
 
-            this.showSyncStatus(`✅ Loaded ${data.animeData?.length || 0} anime from cloud`, 'success');
+            this.showSyncStatus(`Loaded ${data.animeData?.length || 0} anime from cloud`, 'success');
 
             if (typeof updateQueueStatusUI === 'function') setTimeout(updateQueueStatusUI, 300);
             if (typeof updateAllComponents === 'function') updateAllComponents();
@@ -308,14 +305,14 @@ class DualStorageManager {
 
             return { success: true, data };
         } catch (error) {
-            console.error('❌ Load from cloud failed:', error);
-            this.showSyncStatus('⚠️ Failed to load cloud data – using local cache', 'error');
+            console.error('Load from cloud failed:', error);
+            this.showSyncStatus('Failed to load cloud data – using local cache', 'error');
             return { success: false, error: error.message };
         }
     }
 
     async handleOnline() {
-        console.log('🟢 Online');
+        console.log('Online');
         if (this.isLoggedIn()) {
             const isDirty = this.isDirty() || (typeof window.isLocalDirty === 'function' && window.isLocalDirty());
             if (isDirty) {
@@ -327,7 +324,7 @@ class DualStorageManager {
     }
 
     handleOffline() {
-        console.log('🔴 Offline');
+        console.log('Offline');
         this.showSyncStatus('Offline – changes will sync when online', 'warning');
     }
 
@@ -409,12 +406,12 @@ class DualStorageManager {
             attempts++;
         }
         if (window.api) {
-            console.log('✅ API ready');
+            console.log('API ready');
             if (this.isLoggedIn() && navigator.onLine) {
                 await this.handleOnline();
             }
         } else {
-            console.warn('⚠️ API not available after 5 seconds');
+            console.warn('API not available after 5 seconds');
         }
     }
 }
@@ -423,12 +420,12 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             window.dualStorage = new DualStorageManager();
-            console.log('✅ Dual Storage Manager (unified) ready');
+            console.log('Dual Storage Manager (unified) ready');
         }, 1000);
     });
 } else {
     setTimeout(() => {
         window.dualStorage = new DualStorageManager();
-        console.log('✅ Dual Storage Manager (unified) ready');
+        console.log('Dual Storage Manager (unified) ready');
     }, 1000);
 }
