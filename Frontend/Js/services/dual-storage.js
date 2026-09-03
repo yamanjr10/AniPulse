@@ -5,6 +5,7 @@
 class DualStorageManager {
     constructor() {
         this.isSyncing = false;
+        this.isLoading = false;
         this.lastSyncTime = localStorage.getItem('lastCloudSyncTime');
         this._syncDebounceTimeout = null;
         this._dirtyKey = 'syncDirty';
@@ -89,6 +90,9 @@ class DualStorageManager {
 
         try {
             const payload = this.buildSyncPayload();
+            // Log a sample to verify payload
+            const sample = payload.animeData.slice(0, 3).map(a => ({ id: a.id, title: a.title, status: a.userStatus }));
+            console.log('📤 Uploading sample:', sample);
             const token = this.getToken();
 
             const response = await fetch(`${window.API_BASE_URL}/api/sync/sync-all`, {
@@ -107,7 +111,6 @@ class DualStorageManager {
 
             const result = await response.json();
             if (result.success) {
-                // Clear both dirty flags
                 this.clearDirty();
                 if (typeof window.clearLocalDirty === 'function') window.clearLocalDirty();
 
@@ -116,7 +119,6 @@ class DualStorageManager {
                 this.showSyncStatus('✅ Synced successfully', 'success');
                 console.log(`✅ Uploaded ${payload.animeData?.length || 0} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
 
-                // Clear the load-all cache (force fresh fetch next time)
                 this.clearLoadCache();
 
                 return true;
@@ -169,8 +171,6 @@ class DualStorageManager {
         };
     }
 
-    // ─── Cache clearing ──────────────────────────────
-
     clearLoadCache() {
         try {
             if (window.rateLimiter && window.rateLimiter.cache) {
@@ -181,9 +181,21 @@ class DualStorageManager {
         } catch (e) { /* ignore */ }
     }
 
-    // ─── LOAD FROM CLOUD (with cache busting) ────────
+    // ─── LOAD FROM CLOUD (with cache busting and load guard) ────────
 
-    async loadFromCloud() {
+    async loadFromCloud(force = false) {
+        // Prevent multiple simultaneous loads
+        if (this.isLoading) {
+            console.log('⏳ Load already in progress, skipping');
+            return { success: false, error: 'Already loading' };
+        }
+
+        // If already loaded and not forced, skip
+        if (window._cloudLoaded && !force) {
+            console.log('☁️ Cloud data already loaded, skipping');
+            return { success: true, message: 'Already loaded' };
+        }
+
         const token = this.getToken();
         if (!token) {
             this.showSyncStatus('Please login first', 'warning');
@@ -194,9 +206,11 @@ class DualStorageManager {
             return { success: false, error: 'Offline' };
         }
 
+        this.isLoading = true;
+
         try {
-            // Add timestamp to bust all caches (browser, CDN, rateLimiter)
             const url = `${window.API_BASE_URL}/api/sync/load-all?_t=${Date.now()}`;
+            console.log('📥 Fetching cloud data from:', url);
             const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -205,9 +219,12 @@ class DualStorageManager {
             if (!result.success) throw new Error(result.error || 'Failed to load');
 
             const { data, lastModified } = result;
+            // Log sample
+            const sample = data.animeData ? data.animeData.slice(0, 3).map(a => ({ id: a.id, title: a.title, status: a.userStatus })) : [];
+            console.log('📥 Cloud sample:', sample);
+
             this.backupLocalData();
 
-            // ---- Replace all local data with cloud data ----
             if (data.animeData) {
                 localStorage.setItem('animeData', JSON.stringify(data.animeData));
                 window.animeData = data.animeData;
@@ -296,6 +313,8 @@ class DualStorageManager {
             console.error('❌ Load from cloud failed:', error);
             this.showSyncStatus('⚠️ Failed to load cloud data – using local cache', 'error');
             return { success: false, error: error.message };
+        } finally {
+            this.isLoading = false;
         }
     }
 
@@ -307,10 +326,13 @@ class DualStorageManager {
             const isDirty = this.isDirty() || (typeof window.isLocalDirty === 'function' && window.isLocalDirty());
             if (isDirty) {
                 await this.syncToCloud();
-                // After sync, we could load cloud to get other changes, but that might overwrite ours.
-                // We'll only load if we are not dirty anymore.
             } else {
-                await this.loadFromCloud();
+                // Only load if not already loaded
+                if (!window._cloudLoaded) {
+                    await this.loadFromCloud();
+                } else {
+                    console.log('☁️ Cloud already loaded, skipping load');
+                }
             }
         }
     }
