@@ -107,7 +107,6 @@ class DualStorageManager {
 
             const result = await response.json();
             if (result.success) {
-                // Clear both dirty flags
                 this.clearDirty();
                 if (typeof window.clearLocalDirty === 'function') window.clearLocalDirty();
 
@@ -116,9 +115,7 @@ class DualStorageManager {
                 this.showSyncStatus('✅ Synced successfully', 'success');
                 console.log(`✅ Uploaded ${payload.animeData?.length || 0} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
 
-                // Clear the load-all cache (all entries)
                 this.clearLoadCache();
-
                 return true;
             } else {
                 throw new Error(result.error || 'Sync failed');
@@ -169,8 +166,6 @@ class DualStorageManager {
         };
     }
 
-    // ─── Cache clearing ──────────────────────────────
-
     clearLoadCache() {
         try {
             if (window.rateLimiter && window.rateLimiter.cache) {
@@ -187,8 +182,6 @@ class DualStorageManager {
         } catch (e) { /* ignore */ }
     }
 
-    // ─── LOAD FROM CLOUD (with cache busting) ────────
-
     async loadFromCloud() {
         const token = this.getToken();
         if (!token) {
@@ -201,12 +194,11 @@ class DualStorageManager {
         }
 
         try {
-            // Add timestamp to bust browser/CDN cache
+            // Use timestamp to bust cache – no custom headers (avoids CORS preflight)
             const url = `${window.API_BASE_URL}/api/sync/load-all?_t=${Date.now()}`;
             const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`
-                    // No Cache-Control headers to avoid CORS issues
                 }
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -216,7 +208,6 @@ class DualStorageManager {
             const { data, lastModified } = result;
             this.backupLocalData();
 
-            // ---- Replace all local data with cloud data ----
             if (data.animeData) {
                 localStorage.setItem('animeData', JSON.stringify(data.animeData));
                 window.animeData = data.animeData;
@@ -278,7 +269,6 @@ class DualStorageManager {
                 localStorage.setItem('lastActive', data.streakData.lastActive);
             }
 
-            // Clear dirty flags after successful load
             this.clearDirty();
             if (typeof window.clearLocalDirty === 'function') window.clearLocalDirty();
 
@@ -293,7 +283,6 @@ class DualStorageManager {
                 setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
             }
 
-            // Clear the load-all cache after successful load (to be safe)
             this.clearLoadCache();
 
             window._cloudLoaded = true;
@@ -311,8 +300,6 @@ class DualStorageManager {
         }
     }
 
-    // ─── Online handler ──────────────────────────────
-
     async handleOnline() {
         console.log('🟢 Online');
         if (this.isLoggedIn()) {
@@ -329,8 +316,6 @@ class DualStorageManager {
         console.log('🔴 Offline');
         this.showSyncStatus('Offline – changes will sync when online', 'warning');
     }
-
-    // ─── HELPERS ──────────────────────────────────────
 
     calculateTotalHours() {
         const animeData = JSON.parse(localStorage.getItem('animeData') || '[]');
