@@ -5,7 +5,6 @@
 class DualStorageManager {
     constructor() {
         this.isSyncing = false;
-        this.isLoading = false;
         this.lastSyncTime = localStorage.getItem('lastCloudSyncTime');
         this._syncDebounceTimeout = null;
         this._dirtyKey = 'syncDirty';
@@ -90,9 +89,6 @@ class DualStorageManager {
 
         try {
             const payload = this.buildSyncPayload();
-            // Log a sample to verify payload
-            const sample = payload.animeData.slice(0, 3).map(a => ({ id: a.id, title: a.title, status: a.userStatus }));
-            console.log('📤 Uploading sample:', sample);
             const token = this.getToken();
 
             const response = await fetch(`${window.API_BASE_URL}/api/sync/sync-all`, {
@@ -111,6 +107,7 @@ class DualStorageManager {
 
             const result = await response.json();
             if (result.success) {
+                // Clear both dirty flags
                 this.clearDirty();
                 if (typeof window.clearLocalDirty === 'function') window.clearLocalDirty();
 
@@ -119,6 +116,7 @@ class DualStorageManager {
                 this.showSyncStatus('✅ Synced successfully', 'success');
                 console.log(`✅ Uploaded ${payload.animeData?.length || 0} anime, ${payload.xpPendingQueue?.length || 0} queued XP`);
 
+                // Clear the load-all cache (all entries)
                 this.clearLoadCache();
 
                 return true;
@@ -171,31 +169,27 @@ class DualStorageManager {
         };
     }
 
+    // ─── Cache clearing ──────────────────────────────
+
     clearLoadCache() {
         try {
             if (window.rateLimiter && window.rateLimiter.cache) {
-                const loadAllUrl = `${window.API_BASE_URL}/api/sync/load-all`;
-                window.rateLimiter.cache.delete(loadAllUrl);
-                console.log('🗑️ Cleared load-all cache');
+                const baseUrl = `${window.API_BASE_URL}/api/sync/load-all`;
+                let deleted = 0;
+                for (const key of window.rateLimiter.cache.keys()) {
+                    if (key.startsWith(baseUrl)) {
+                        window.rateLimiter.cache.delete(key);
+                        deleted++;
+                    }
+                }
+                console.log(`🗑️ Cleared ${deleted} load-all cache entries`);
             }
         } catch (e) { /* ignore */ }
     }
 
-    // ─── LOAD FROM CLOUD (with cache busting and load guard) ────────
+    // ─── LOAD FROM CLOUD (with cache busting) ────────
 
-    async loadFromCloud(force = false) {
-        // Prevent multiple simultaneous loads
-        if (this.isLoading) {
-            console.log('⏳ Load already in progress, skipping');
-            return { success: false, error: 'Already loading' };
-        }
-
-        // If already loaded and not forced, skip
-        if (window._cloudLoaded && !force) {
-            console.log('☁️ Cloud data already loaded, skipping');
-            return { success: true, message: 'Already loaded' };
-        }
-
+    async loadFromCloud() {
         const token = this.getToken();
         if (!token) {
             this.showSyncStatus('Please login first', 'warning');
@@ -206,25 +200,25 @@ class DualStorageManager {
             return { success: false, error: 'Offline' };
         }
 
-        this.isLoading = true;
-
         try {
+            // Add timestamp to bust browser/CDN cache
             const url = `${window.API_BASE_URL}/api/sync/load-all?_t=${Date.now()}`;
-            console.log('📥 Fetching cloud data from:', url);
             const response = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const result = await response.json();
             if (!result.success) throw new Error(result.error || 'Failed to load');
 
             const { data, lastModified } = result;
-            // Log sample
-            const sample = data.animeData ? data.animeData.slice(0, 3).map(a => ({ id: a.id, title: a.title, status: a.userStatus })) : [];
-            console.log('📥 Cloud sample:', sample);
-
             this.backupLocalData();
 
+            // ---- Replace all local data with cloud data ----
             if (data.animeData) {
                 localStorage.setItem('animeData', JSON.stringify(data.animeData));
                 window.animeData = data.animeData;
@@ -301,6 +295,9 @@ class DualStorageManager {
                 setTimeout(() => window.AniPulseLevelSystem.updateAllLevelUI(), 500);
             }
 
+            // Clear the load-all cache after successful load (to be safe)
+            this.clearLoadCache();
+
             window._cloudLoaded = true;
             window._needsCloudLoad = false;
             window.dispatchEvent(new CustomEvent('cloudDataLoaded'));
@@ -313,8 +310,6 @@ class DualStorageManager {
             console.error('❌ Load from cloud failed:', error);
             this.showSyncStatus('⚠️ Failed to load cloud data – using local cache', 'error');
             return { success: false, error: error.message };
-        } finally {
-            this.isLoading = false;
         }
     }
 
@@ -327,12 +322,7 @@ class DualStorageManager {
             if (isDirty) {
                 await this.syncToCloud();
             } else {
-                // Only load if not already loaded
-                if (!window._cloudLoaded) {
-                    await this.loadFromCloud();
-                } else {
-                    console.log('☁️ Cloud already loaded, skipping load');
-                }
+                await this.loadFromCloud();
             }
         }
     }
