@@ -94,8 +94,8 @@ class DualStorageManager {
             const total = payload.animeData?.length || 0;
             console.log(`Uploading ${total} anime to cloud`);
             if (total > 0) {
-                const sample = payload.animeData.slice(0, 3);
-                console.log('   Sample (first 3):');
+                const sample = payload.animeData.slice(-3);
+                console.log('   Animes (last 3):');
                 sample.forEach((a, i) => {
                     console.log(`     ${i + 1}. ID:${a.id} | "${a.title}" | ${a.userStatus} | progress:${a.progress || 0}`);
                 });
