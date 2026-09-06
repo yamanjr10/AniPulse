@@ -15,6 +15,7 @@ const rankingRoutes = require('./routes/ranking');
 const friendsRoutes = require('./routes/friends');
 const userRoutes = require('./routes/user');
 const uploadRoutes = require('./routes/upload');
+const chatRoutes = require('./routes/chat');
 
 const app = express();
 
@@ -121,7 +122,7 @@ app.use('/api/ranking', rankingRoutes);
 app.use('/api/friends', friendsRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/upload', uploadRoutes);
-
+app.use('/api/chat', chatRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({
@@ -154,25 +155,6 @@ app.use((req, res) => {
             return res.status(404).sendFile(filePath);
         }
     }
-    res.status(404).send(`
-        <!DOCTYPE html>
-        <html>
-        <head><title>404 - Page Not Found</title>
-        <style>
-            *{margin:0;padding:0;box-sizing:border-box}
-            body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0B1120,#1A1F2E);min-height:100vh;display:flex;align-items:center;justify-content:center;color:white}
-            .error-container{text-align:center;padding:40px}
-            h1{font-size:120px;font-weight:800;background:linear-gradient(135deg,#6366F1,#8B5CF6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px}
-            p{font-size:18px;color:#94A3B8;margin-bottom:30px}
-            a{display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;text-decoration:none;border-radius:40px;font-weight:600;transition:transform .2s ease}
-            a:hover{transform:translateY(-2px)}
-        </style>
-        </head>
-        <body>
-            <div class="error-container"><h1>404</h1><p>Oops! The page you're looking for doesn't exist.</p><a href="/">← Back to Home</a></div>
-        </body>
-        </html>
-    `);
 });
 
 // Error handling

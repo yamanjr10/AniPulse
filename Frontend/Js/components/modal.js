@@ -1039,13 +1039,15 @@
                         break;
 
                     case 'chat-bot':
-                        if (typeof showToast === 'function') {
-                            showToast('Chat Bot coming soon!', 'info');
+                        if (typeof window.openChatBot === 'function') {
+                            window.openChatBot();
                         } else {
-                            alert('Chat Bot coming soon!');
+                            if (typeof showToast === 'function') {
+                                showToast('Chat Bot is loading...', 'info');
+                            }
                         }
                         break;
-
+                        
                     case 'search':
                         const searchToggle = document.getElementById('searchToggle');
                         if (searchToggle) {
