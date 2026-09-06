@@ -63,7 +63,7 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
 // ============================================
-// RATE LIMITING – adjusted for production
+// RATE LIMITING
 // ============================================
 
 // Global limit: 200 requests per 15 minutes
@@ -72,6 +72,10 @@ const limiter = rateLimit({
     max: 200,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => {
+        const exemptPaths = ['/api/firebase-config', '/api/sync/status', '/api/health'];
+        return exemptPaths.includes(req.path);
+    }
 });
 app.use('/api/', limiter);
 
@@ -82,18 +86,6 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
-
-// Exempt critical endpoints from rate limiting
-const exemptLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 500, // high enough
-    skip: (req) => {
-        return req.path === '/api/firebase-config' ||
-            req.path === '/api/sync/status' ||
-            req.path === '/api/health';
-    }
-});
-app.use('/api/', exemptLimiter); // override for exempt paths
 
 // ============================================
 // FIREBASE CLIENT CONFIG ENDPOINT
@@ -123,6 +115,7 @@ app.use('/api/friends', friendsRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/chat', chatRoutes);
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({
@@ -155,6 +148,25 @@ app.use((req, res) => {
             return res.status(404).sendFile(filePath);
         }
     }
+    res.status(404).send(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>404 - Page Not Found</title>
+        <style>
+            *{margin:0;padding:0;box-sizing:border-box}
+            body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0B1120,#1A1F2E);min-height:100vh;display:flex;align-items:center;justify-content:center;color:white}
+            .error-container{text-align:center;padding:40px}
+            h1{font-size:120px;font-weight:800;background:linear-gradient(135deg,#6366F1,#8B5CF6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px}
+            p{font-size:18px;color:#94A3B8;margin-bottom:30px}
+            a{display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;text-decoration:none;border-radius:40px;font-weight:600;transition:transform .2s ease}
+            a:hover{transform:translateY(-2px)}
+        </style>
+        </head>
+        <body>
+            <div class="error-container"><h1>404</h1><p>Oops! The page you're looking for doesn't exist.</p><a href="/">← Back to Home</a></div>
+        </body>
+        </html>
+    `);
 });
 
 // Error handling

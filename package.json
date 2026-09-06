@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "express-rate-limit": "^8.6.2"
+    "@google-cloud/storage": "^8.0.1",
+    "express-rate-limit": "^8.6.2",
+    "multer": "^2.3.0"
   }
 }

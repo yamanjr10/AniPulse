@@ -1,8 +1,11 @@
-// routes/upload.js – Avatar stored as base64 in Firestore
+// routes/upload.js – Avatar stored as base64 in Firestore (with size limit)
 const express = require('express');
 const { db, COLLECTIONS } = require('../services/firebase');
 const { verifyToken } = require('../middleware/auth');
 const router = express.Router();
+
+// Max avatar size: 200KB (we already compress on frontend)
+const MAX_AVATAR_SIZE_BYTES = 200 * 1024;
 
 // ──────────────────────────────────────────────
 // UPLOAD AVATAR (Base64 → Firestore)
@@ -14,11 +17,18 @@ router.post('/avatar', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'No avatar data provided' });
     }
 
-    // Optional: validate size (max 500KB after compression)
-    const sizeInKB = Math.round(avatar.length / 1024);
-    if (sizeInKB > 500) {
+    // Validate: must be a valid base64 image data URL
+    if (!avatar.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'Invalid avatar format. Must be a base64 image data URL.' });
+    }
+
+    // Calculate size in bytes
+    const sizeInBytes = Buffer.byteLength(avatar, 'utf8');
+    const sizeInKB = Math.round(sizeInBytes / 1024);
+
+    if (sizeInBytes > MAX_AVATAR_SIZE_BYTES) {
       return res.status(400).json({
-        error: `Avatar too large: ${sizeInKB}KB. Max 500KB.`
+        error: `Avatar too large: ${sizeInKB}KB. Max ${MAX_AVATAR_SIZE_BYTES / 1024}KB. Please compress further.`
       });
     }
 
@@ -46,7 +56,7 @@ router.post('/avatar', verifyToken, async (req, res) => {
 
   } catch (error) {
     console.error('Avatar save error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -68,7 +78,7 @@ router.get('/avatar/:userId', async (req, res) => {
     });
   } catch (error) {
     console.error('Get avatar error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -94,7 +104,7 @@ router.delete('/avatar', verifyToken, async (req, res) => {
     res.json({ success: true, avatarUrl: defaultAvatar });
   } catch (error) {
     console.error('Delete avatar error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
